@@ -1,5 +1,6 @@
 import {
   applyActionCode,
+  confirmPasswordReset,
   createUserWithEmailAndPassword,
   deleteUser,
   EmailAuthProvider,
@@ -11,6 +12,7 @@ import {
   updatePassword,
   updateProfile,
   verifyBeforeUpdateEmail,
+  verifyPasswordResetCode,
   type User,
   type UserCredential,
 } from "firebase/auth";
@@ -125,6 +127,22 @@ export const userDelete = async (password: string): Promise<void> => {
 export const verifyEmail = async (oobCode: string) => {
   try {
     await applyActionCode(auth, oobCode);
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const isPasswordResetCode = async (oobCode: string) => {
+  try {
+    await verifyPasswordResetCode(auth, oobCode);
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const resetPassword = async (oobCode: string, newPassword: string) => {
+  try {
+    await confirmPasswordReset(auth, oobCode, newPassword);
   } catch (err) {
     throw err;
   }

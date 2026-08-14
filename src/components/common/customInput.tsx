@@ -7,7 +7,7 @@ import {
 } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 
-type customInputType<T extends FieldValues> = {
+export type CustomInputProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
   fieldName: string;
@@ -30,7 +30,7 @@ export function CustomInput<T extends FieldValues>({
   inptType = "text",
   placeholder,
   className,
-}: customInputType<T>) {
+}: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
   const isGenderField = name === "gender";
@@ -40,7 +40,7 @@ export function CustomInput<T extends FieldValues>({
     <div className="flex flex-col items-start p-0 gap-2 w-full max-w-96.5 min-h-17.25 self-stretch flex-none">
       <label
         htmlFor={fieldName as string}
-        className=" h-4.25 font-sans font-normal text-[14px] leading-4.25 text-[#2D2D2D] flex-none"
+        className=" h-4.25 font-normal text-[14px] leading-4.25 text-[#2D2D2D] flex-none"
       >
         {labelText}
       </label>

@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/auth-action",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/__auth/action",
+        "destination": "C:\\Users\\midya\\EaziQuote\\public\\auth-handler\\index.html"
+      }
+    ],
+    "cleanUrls": true
+  }
+}

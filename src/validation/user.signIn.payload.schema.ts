@@ -22,9 +22,13 @@ export const valdiatePassword = (password: string) => {
   return true;
 };
 
+export const emailSchema = yup.object({
+  email: yup.string().required(emptyMsg("Email")).email(invalidMsg("Email")),
+});
+
 export const userSignInSchema: yup.ObjectSchema<UserSignInPayload> = yup.object(
   {
-    email: yup.string().required(emptyMsg("Email")).email(invalidMsg("Email")),
+    email: emailSchema.fields.email as yup.StringSchema<string>,
 
     password: yup
       .string()

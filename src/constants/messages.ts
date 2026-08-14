@@ -5,3 +5,5 @@ export const maxLengthMsg = (fieldName: string, maxLength: number) =>
 export const notSelectedMsg = (fieldName: string) => `Select ${fieldName}`;
 export const invalidMsg = (fieldName: string) => `Enter a valid ${fieldName}`;
 export const emptyMsg = (fieldName: string) => `Please enter ${fieldName}`;
+export const ExccedFileSizeLimit = (fieldName: string, size: number) =>
+  `${fieldName} should be less than ${size}Mb`;

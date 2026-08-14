@@ -30,6 +30,26 @@
   }
 }
 
+@utility email-success-card {
+  @apply flex flex-col items-start p-8 gap-8 isolate bg-white rounded-xl shadow-[0px_3px_12px_rgba(47,43,61,0.14)];
+  width: 450px;
+  height: 306px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Inner Stack Box (Frame 2147225699) */
+@utility success-inner-stack {
+  @apply flex flex-col items-center p-0 gap-8 w-full h-60.5 self-stretch flex-none relative;
+}
+
+/* Text Container Group (Frame 2147225592) */
+@utility success-text-group {
+  @apply flex flex-col items-center p-0 gap-2 w-full h-13.5 self-stretch flex-none;
+}
+
 /* :root {
   --text: #6b6375;
   --text-h: #08060d;

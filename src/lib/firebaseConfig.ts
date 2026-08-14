@@ -18,8 +18,8 @@ const firebaseConfig = {
 };
 
 export const actionCodeSettings: ActionCodeSettings = {
-  url: "http://localhost:5173/signin",
-  handleCodeInApp: true,
+  url: "http://localhost:5173/email-verified",
+  handleCodeInApp: false,
 };
 
 // Initialize Firebase

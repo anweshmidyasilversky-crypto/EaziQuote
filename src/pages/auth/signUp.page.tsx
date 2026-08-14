@@ -1,33 +1,45 @@
 import { useForm } from "react-hook-form";
+import { type UserSignupPayload } from "../../types/user.signup.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { type UserSignInPayload } from "../types/user.signIn.payload.type";
-import { CustomInput } from "../components/common/customInput";
+import { UserSignupPayloadSchema } from "../../validation/user.signup.payload.schema";
 import { useRef, useState } from "react";
-import { userSignInSchema } from "../validation/user.signIn.payload.schema";
-import { signIn } from "../lib/firebaseAuth";
-import { showFirebaseError } from "../lib/firebase.errors";
+import { CustomInput } from "../../components/common/customInput";
+import { Spinner } from "../../components/ui/spinner";
 import { toast } from "react-toastify";
-import { Spinner } from "../components/ui/spinner";
 import { useNavigate } from "react-router";
+import {
+  saveUserToDb,
+  sendVerificationLink,
+  signUp,
+} from "../../lib/firebaseAuth";
+import { showFirebaseError } from "../../lib/firebase.errors";
 
-export function SignInPage() {
-  const rememberMe = useRef(0);
+export function SignupPage() {
   const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const tcAccept = useRef(0);
   const navigate = useNavigate();
-  const { control, handleSubmit } = useForm<UserSignInPayload>({
+
+  const { control, handleSubmit } = useForm<UserSignupPayload>({
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
-    resolver: yupResolver(userSignInSchema),
+    resolver: yupResolver(UserSignupPayloadSchema),
   });
 
-  const onsubmit = async (data: UserSignInPayload) => {
+  const onsubmit = async (data: UserSignupPayload) => {
+    if (!tcAccept.current) {
+      toast("Please accept T&C to continue", { type: "error" });
+      return;
+    }
     toggleIsSubmitting(true);
     try {
-      const user = await signIn(data.email, data.password);
-      console.dir(user);
-      toast("Sign in success", { type: "success" });
+      const userCredential = await signUp(data);
+      await saveUserToDb(userCredential.user.uid, data);
+      await sendVerificationLink();
+      toast(`Signup Success, Sent verification mail`, { type: "success" });
+      navigate("/");
     } catch (err) {
       showFirebaseError(err);
     } finally {
@@ -42,11 +54,11 @@ export function SignInPage() {
           <div className="flex flex-col items-center p-0 gap-2 w-full max-w-96.5 h-13.5 self-stretch flex-none">
             <span className="flex max-h-7.25 justify-center font-semibold text-2xl leading-[100%]">
               {" "}
-              Welcome Back 👋{" "}
+              Let’s Get Started 🚀{" "}
             </span>
             <span className="flex justify-center max-h-4.25 text-wrap font-normal text-[14px] leading-none tracking-normal text-[#89909D]">
               {" "}
-              Log in to manage your quotes and invoices with ease.{" "}
+              Sign up and simplify your quoting and invoicing process.{" "}
             </span>
           </div>
 
@@ -71,40 +83,43 @@ export function SignInPage() {
                 placeholder="Enter your password"
               />
 
+              <CustomInput
+                control={control}
+                name="confirmPassword"
+                fieldName="Confirm Password"
+                inptType="password"
+                placeholder="Re-enter password"
+              />
+
               {/* Remember me and forgot password */}
               <div className="flex flex-row items-center p-0 gap-2 w-full max-w-96.5 h-5 self-stretch flex-none">
-                <div className="flex flex-row items-center p-0 gap-2 w-full max-w-63.5 h-5 flex-none grow">
+                <div className="flex flex-row items-center p-0 gap-2 w-full h-5 flex-none grow">
                   <input
                     type="checkbox"
-                    id="rememberMe"
-                    value={rememberMe.current}
+                    id="tNc"
+                    value={tcAccept.current}
                     className="h-5 w-5"
-                    onClick={() => (rememberMe.current ^= 1)}
+                    onClick={() => (tcAccept.current ^= 1)}
                   />
-                  <label htmlFor="rememberMe">Remember me</label>
+                  <label htmlFor="tNc">
+                    I agree to the Terms & Conditions and Privacy Policy
+                  </label>
                 </div>
-
-                <a
-                  href="#"
-                  className=" h-4.75 font-normal text-[16px] leading-4.75 text-brand-dark flex-none hover:underline"
-                >
-                  Forgot Password?
-                </a>
               </div>
               <button
                 disabled={isSubmitting}
                 type="submit"
                 className="btn-auth"
               >
-                {isSubmitting ? <Spinner /> : "Sign in"}
+                {isSubmitting ? <Spinner /> : "Sign Up"}
               </button>
               <p className="h-4.75 font-sans font-normal text-[16px] leading-4.75 text-[#89909D] flex-none">
-                Don’t have an account?{" "}
+                Already have an account?
                 <a
-                  onClick={() => navigate("/signup")}
+                  onClick={() => navigate("/")}
                   className="text-brand-dark font-medium hover:underline"
                 >
-                  Create Account
+                  Sign In
                 </a>
               </p>
             </form>

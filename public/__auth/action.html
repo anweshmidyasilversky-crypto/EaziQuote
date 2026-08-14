@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Processing...</title>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get("mode");
+
+      if (mode === "resetPassword") {
+        // Redirect ONLY password resets to your custom UI
+        window.location.href = `https://participated-stop-ethnic-segments.trycloudflare.com/password-reset/${window.location.search}`;
+      } else {
+        // Fallback: Let the default Firebase Auth handler handle verification, recovery, etc.
+        window.location.href = `https://sample-ef835.firebaseapp.com/__/auth/action${window.location.search}`;
+      }
+    </script>
+  </head>
+  <body>
+    <p>Processing security action...</p>
+  </body>
+</html>

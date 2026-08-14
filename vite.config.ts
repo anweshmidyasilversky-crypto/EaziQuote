@@ -11,4 +11,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: true,
+    allowedHosts: [
+      "nine-falcons-report.loca.lt",
+      "dirty-lizards-feel.loca.lt",
+      "participated-stop-ethnic-segments.trycloudflare.com",
+    ],
+  },
 });
