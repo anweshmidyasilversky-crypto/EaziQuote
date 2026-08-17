@@ -26,7 +26,7 @@ export function SignInPage() {
     toggleIsSubmitting(true);
     try {
       const userCredential = await signIn(data.email, data.password);
-      // console.dir(user);
+      navigate("create-user");
       if (!userCredential.user.emailVerified) {
         navigate("/email-verification");
       } else {

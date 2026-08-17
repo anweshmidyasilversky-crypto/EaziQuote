@@ -5,7 +5,13 @@ import {
   type FieldValues,
   type Path,
 } from "react-hook-form";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, type LucideIcon } from "lucide-react";
+import { Switch } from "../ui/switch";
+
+export type SelectOptions = {
+  value: string;
+  label: string;
+}[];
 
 export type CustomInputProps<T extends FieldValues> = {
   control: Control<T>;
@@ -14,11 +20,17 @@ export type CustomInputProps<T extends FieldValues> = {
   inptType?: string;
   placeholder?: string;
   className?: string;
+  selectOptions?: SelectOptions;
+  FieldBadgeIcon?: LucideIcon;
+  fieldBadgeAction?: () => void;
+  withLabel?: boolean;
+  disabled?: boolean;
 };
 
 function formatLabel(fieldName: string) {
   return fieldName
-    .replace(/([A-Z])/g, " $1")
+    .replace(/(?<![A-Z])([A-Z][a-z])/g, " $1")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
     .replace(/^./, (char) => char.toUpperCase())
     .trim();
 }
@@ -30,20 +42,42 @@ export function CustomInput<T extends FieldValues>({
   inptType = "text",
   placeholder,
   className,
+  selectOptions,
+  FieldBadgeIcon,
+  fieldBadgeAction,
+  withLabel = true,
+  disabled = false,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
-  const isGenderField = name === "gender";
   const labelText = formatLabel(fieldName);
+
+  const fieldStyle = `flex flex-row items-center p-3 gap-3 w-full max-w-96.5 h-11 bg-white border border-[#CED1DA] rounded-[7px] self-stretch flex-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60`;
+  const errorStateStyle =
+    "border-rose-300 bg-rose-50 focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
+  const validStateStyle =
+    "border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
 
   return (
     <div className="flex flex-col items-start p-0 gap-2 w-full max-w-96.5 min-h-17.25 self-stretch flex-none">
-      <label
-        htmlFor={fieldName as string}
-        className=" h-4.25 font-normal text-[14px] leading-4.25 text-[#2D2D2D] flex-none"
-      >
-        {labelText}
-      </label>
+      {withLabel && (
+        <label
+          htmlFor={fieldName as string}
+          className=" h-4.25 font-normal text-[14px] leading-4.25 text-[#2D2D2D] flex justify-center gap-1.5 items-center"
+        >
+          {labelText}{" "}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log("clicked");
+              fieldBadgeAction?.();
+            }}
+          >
+            {FieldBadgeIcon && <FieldBadgeIcon className="h-3.5 w-3.5" />}
+          </button>
+        </label>
+      )}
       <Controller
         name={name}
         control={control}
@@ -51,27 +85,33 @@ export function CustomInput<T extends FieldValues>({
           const fieldValue = value ?? "";
 
           return (
-            <div className="space-y-2">
-              {isGenderField ? (
+            <div className="w-full space-y-2">
+              {inptType === "select" && (
                 <select
+                  disabled={disabled}
                   id={fieldName}
                   name={fieldName}
                   value={fieldValue}
                   onChange={(event) => onChange(event.target.value)}
                   className={
                     className ??
-                    `flex flex-row items-center p-3 gap-3 w-full max-w-96.5 h-11 bg-white border border-[#CED1DA] rounded-xs self-stretch flex-none transition-all duration-200 ${
-                      error
-                        ? "border-rose-300 bg-rose-50 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
-                        : "border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                    }`
+                    `${fieldStyle} select-input-style ${error ? errorStateStyle : validStateStyle}  `
                   }
                 >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  {selectOptions?.map((selectOption) => {
+                    return (
+                      <option
+                        value={selectOption.value}
+                        key={selectOption.value}
+                      >
+                        {" "}
+                        {selectOption.label}{" "}
+                      </option>
+                    );
+                  })}
                 </select>
-              ) : (
+              )}{" "}
+              {["password", "text"].includes(inptType) && (
                 <div className="relative">
                   <input
                     type={
@@ -81,6 +121,7 @@ export function CustomInput<T extends FieldValues>({
                           : "password"
                         : inptType
                     }
+                    disabled={disabled}
                     id={fieldName}
                     name={fieldName}
                     placeholder={placeholder ?? "......"}
@@ -88,10 +129,8 @@ export function CustomInput<T extends FieldValues>({
                     onChange={onChange}
                     className={
                       className ??
-                      `flex flex-row items-center p-3 gap-3 w-50 md:w-96.5 h-11 bg-white border border-[#CED1DA] rounded-[7px] self-stretch flex-none transition-all duration-200 ${
-                        error
-                          ? "border-rose-300 bg-rose-50 focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
-                          : "border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      `${fieldStyle} ${
+                        error ? errorStateStyle : validStateStyle
                       }`
                     }
                   />
@@ -110,7 +149,33 @@ export function CustomInput<T extends FieldValues>({
                   ) : null}
                 </div>
               )}
-
+              {inptType === "color" && (
+                <div className="color-input-wrapper">
+                  <input
+                    type="color"
+                    disabled={disabled}
+                    id={fieldName}
+                    name={fieldName}
+                    value={fieldValue}
+                    onChange={onChange}
+                    className={
+                      className ??
+                      `rounded-color-input ${
+                        error ? errorStateStyle : validStateStyle
+                      }`
+                    }
+                  />
+                </div>
+              )}
+              {inptType === "switch" && (
+                <Switch
+                  disabled={disabled}
+                  id={fieldName}
+                  checked={Boolean(value)}
+                  onCheckedChange={onChange}
+                  className={className}
+                />
+              )}
               {error && (
                 <p className="text-sm text-rose-600">{error.message}</p>
               )}

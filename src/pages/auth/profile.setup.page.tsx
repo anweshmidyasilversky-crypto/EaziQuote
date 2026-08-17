@@ -14,6 +14,9 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { ImageInput } from "../../components/auth/imageInput";
 import { assets } from "../../assets/icons";
+import { useAppDispatch } from "../../redux/store";
+import { updateUser } from "../../redux/slices/user.slice";
+import { useNavigate } from "react-router";
 
 export function ProfileSetupPage() {
   const { control, handleSubmit } = useForm<UserProfilePayload>({
@@ -24,17 +27,21 @@ export function ProfileSetupPage() {
     resolver: yupResolver(userProfileSchema),
   });
   const [imgFile, setImgFile] = useState<File | undefined>(undefined);
+  const navigate = useNavigate();
+  const dispath = useAppDispatch();
   const submitHandler = (data: UserProfilePayload) => {
     if (!imgFile) {
       toast("Please select a profile image", { type: "error" });
     } else {
-      Object.assign(data, { img: imgFile });
+      const newUser = Object.assign(data, { img: imgFile });
+      dispath(updateUser(newUser));
+      navigate("/business-profile");
     }
   };
   return (
-    <div className="relative flex justify-center z-10 -mt-13">
-      <div className="flex justify-center p-8 g-8 ">
-        <Card className="max-w-112.5 ring-0 outline-none bg-white rounded-xl shadow-[0px_3px_12px_rgba(47,43,61,0.14)]">
+    <div className="w-full relative flex justify-center z-10 -mt-13">
+      <div className="w-full flex justify-center p-8 g-8 ">
+        <Card className="w-full max-w-112.5 ring-0 outline-none bg-white rounded-xl shadow-[0px_3px_12px_rgba(47,43,61,0.14)]">
           <CardHeader className="flex justify-center">
             <div className="flex flex-col gap-8">
               <CardTitle className="w-auto font-semibold text-2xl">
@@ -44,13 +51,14 @@ export function ProfileSetupPage() {
                 imgFile={imgFile}
                 setImgFile={setImgFile}
                 alt={assets.userIcon}
+                alignAltImg="end"
               />
             </div>
           </CardHeader>
 
-          <CardContent className="mt-5">
+          <CardContent className="w-full mt-5">
             <form
-              className="flex flex-col gap-5"
+              className="w-full flex flex-col gap-5"
               onSubmit={handleSubmit(submitHandler)}
             >
               <CustomInput

@@ -5,6 +5,15 @@ const initialState: UserType = {
   name: "",
   email: "",
   phoneNumber: "",
+  businessName: "",
+  businessPhoneNo: "",
+  vatRegistered: false,
+  trade: "",
+  formFilledUpto: 0,
+  street: "",
+  city: "",
+  postCode: "",
+  country: "",
 };
 
 export const userSlice = createSlice({

@@ -4,3 +4,7 @@ export const PASSWORD = { minLength: 8, maxLength: 100 };
 export const FULL_NAME = { minLength: 1 };
 export const IMAGE = { maxSize: 20 };
 export const BUSINESS_NAME = { minLength: 1 };
+export const STREET = { minLength: 2 };
+export const CITY = { minLength: 2 };
+export const POSTCODE = { minLength: 3, maxLength: 10 };
+export const COUNTRY = { minLength: 4, maxLength: 60 };

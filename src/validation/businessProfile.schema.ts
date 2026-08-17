@@ -54,10 +54,10 @@ export const BusinessProfilePayloadSchema: yup.ObjectSchema<BusinessProfilePaylo
         then: (schema) =>
           schema.test(async (value, context) => {
             const res = isValidVat(value);
-            if (res) {
+            if (typeof res !== "string") {
               return true;
             }
-            return context.createError(res);
+            return context.createError({ message: res });
           }),
         otherwise: (schema) => schema.notRequired(),
       }),

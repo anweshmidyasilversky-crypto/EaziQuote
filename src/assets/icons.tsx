@@ -4,6 +4,7 @@ import unverifiedEmail from "./icons/emailUnverified.png";
 import verifiedEmail from "./icons/emailVerified.png";
 import userIcon from "./icons/userIcon.png";
 import cameraIcon from "./icons/cameraIcon.png";
+import previewBrandlogo from "./icons/previewLogo.png";
 
 export const assets = {
   loginHeader,
@@ -12,4 +13,5 @@ export const assets = {
   verifiedEmail,
   userIcon,
   cameraIcon,
+  previewBrandlogo,
 };

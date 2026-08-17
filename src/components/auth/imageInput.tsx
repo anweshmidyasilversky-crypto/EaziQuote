@@ -7,9 +7,19 @@ export type ImageInputProps = {
   imgFile: File | undefined;
   setImgFile: (value: React.SetStateAction<File | undefined>) => void;
   alt: string;
+  altClass?: string;
+  altText?: string;
+  alignAltImg?: "center" | "end";
 };
 
-export function ImageInput({ imgFile, setImgFile, alt }: ImageInputProps) {
+export function ImageInput({
+  imgFile,
+  setImgFile,
+  alt,
+  altClass,
+  altText,
+  alignAltImg,
+}: ImageInputProps) {
   return (
     <div className="flex justify-center">
       <label
@@ -38,11 +48,13 @@ export function ImageInput({ imgFile, setImgFile, alt }: ImageInputProps) {
         <div className="flex justify-center">
           <div className="flex justify-center">
             <div className="relative h-25 w-25">
-              <div className="h-full w-full border-none shadow-none ring-0 ring-offset-0 bg-[#DFE3E8] overflow-hidden rounded-full flex items-end justify-center">
+              <div
+                className={`h-full w-full border-none shadow-none ring-0 ring-offset-0 bg-[#DFE3E8] overflow-hidden rounded-full flex items-${alignAltImg ?? "end"} justify-center`}
+              >
                 <img
                   src={imgFile ? URL.createObjectURL(imgFile) : alt}
-                  className={`${imgFile ? "object-cover object-center h-full w-full" : "object-contain h-21 w-21 object-bottom"}  border-none outline-none`}
-                  alt="User Placeholder"
+                  className={`${imgFile ? "object-cover object-center h-full w-full" : (altClass ?? "object-contain h-21 w-21 object-bottom")}  border-none outline-none`}
+                  alt={altText ?? "User Placeholder"}
                 />
               </div>
 

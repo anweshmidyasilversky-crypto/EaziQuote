@@ -8,6 +8,7 @@ import { PasswordResetPage } from "../pages/auth/reset.password";
 import { ForgotPasswordPage } from "../pages/auth/forgotPassword.page";
 import { ProfileSetupPage } from "../pages/auth/profile.setup.page";
 import { BusinessProfileForm } from "../pages/auth/BusinessProfileForm";
+import { BusinessAddressForm } from "../pages/auth/BusinessAddressForm";
 
 export const routes: RouteObject[] = [
   {
@@ -31,10 +32,6 @@ export const routes: RouteObject[] = [
         Component: EmailVerified,
       },
       {
-        path: "password-reset",
-        Component: PasswordResetPage,
-      },
-      {
         path: "forgot-password",
         Component: ForgotPasswordPage,
       },
@@ -45,6 +42,10 @@ export const routes: RouteObject[] = [
       {
         path: "business-profile",
         Component: BusinessProfileForm,
+      },
+      {
+        path: "business-address",
+        Component: BusinessAddressForm,
       },
     ],
   },
