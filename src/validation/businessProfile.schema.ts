@@ -1,9 +1,16 @@
 import * as yup from "yup";
 import type { BusinessProfilePayload } from "../types/businessProfile.payload.type";
 import { HEX_COLOR, VAT_REGEX } from "../constants/regex";
-import { emptyMsg, minLengthMsg, notSelectedMsg } from "../constants/messages";
-import { BUSINESS_NAME } from "../constants/limits";
+import {
+  emptyMsg,
+  ExccedFileSizeLimit,
+  InvalidType,
+  minLengthMsg,
+  notSelectedMsg,
+} from "../constants/messages";
+import { BRAND_LOGO, BUSINESS_NAME } from "../constants/limits";
 import { userProfileSchema } from "./userProfile.payload.schema";
+import { ALLOWED_IMAGE_TYPES } from "../constants/types";
 
 export const isColorHex = (colorCode: string) => {
   const isHex = HEX_COLOR.test(colorCode);
@@ -22,6 +29,22 @@ export const isValidVat = (vatNumber: string) => {
 
 export const BusinessProfilePayloadSchema: yup.ObjectSchema<BusinessProfilePayload> =
   yup.object({
+    brandLogo: yup
+      .mixed<File>()
+      .required(notSelectedMsg("Brand Logo"))
+      .test((value, ctx) => {
+        if (value.size / (1024 * 1024) > BRAND_LOGO.maxSize) {
+          return ctx.createError({
+            message: ExccedFileSizeLimit("Brand Logo", BRAND_LOGO.maxSize),
+          });
+        }
+
+        if (!ALLOWED_IMAGE_TYPES.includes(value.type)) {
+          return ctx.createError({ message: InvalidType(ALLOWED_IMAGE_TYPES) });
+        }
+
+        return true;
+      }),
     brandColor: yup
       .string()
       .required(emptyMsg("Brand Color"))

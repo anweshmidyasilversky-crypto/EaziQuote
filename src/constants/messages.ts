@@ -7,3 +7,5 @@ export const invalidMsg = (fieldName: string) => `Enter a valid ${fieldName}`;
 export const emptyMsg = (fieldName: string) => `Please enter ${fieldName}`;
 export const ExccedFileSizeLimit = (fieldName: string, size: number) =>
   `${fieldName} should be less than ${size}Mb`;
+export const InvalidType = (validTypes: string[]) =>
+  `Only the following types are allowed: ${validTypes}`;

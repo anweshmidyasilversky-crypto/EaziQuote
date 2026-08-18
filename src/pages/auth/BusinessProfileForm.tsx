@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { ImageInput } from "../../components/auth/imageInput";
 import { assets } from "../../assets/icons";
 import { useForm, useWatch } from "react-hook-form";
 import { type BusinessProfilePayload } from "../../types/businessProfile.payload.type";
@@ -30,7 +29,6 @@ import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 
 export function BusinessProfileForm() {
-  const [logo, setLogo] = useState<File | undefined>(undefined);
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const { control, handleSubmit } = useForm<BusinessProfilePayload>({
@@ -46,18 +44,14 @@ export function BusinessProfileForm() {
   });
 
   const submitHandler = async (data: BusinessProfilePayload) => {
-    if (!logo) {
-      toast.error("Please upload brand logo");
-    } else {
-      const businessProfile: Partial<UserType> = {
-        ...data,
-        isBusinessProfileCreated: true,
-        businessLogoUrl: URL.createObjectURL(logo),
-      };
-      dispath(updateUser(businessProfile));
-      toast.success("Business profile complete");
-      navigate("/business-address");
-    }
+    const businessProfile: Partial<UserType> = {
+      ...data,
+      isBusinessProfileCreated: true,
+      businessLogoUrl: URL.createObjectURL(data.brandLogo),
+    };
+    dispath(updateUser(businessProfile));
+    toast.success("Business profile complete");
+    navigate("/business-address");
   };
 
   const [chosenColor, isVatRegistered] = useWatch({
@@ -80,19 +74,22 @@ export function BusinessProfileForm() {
   return (
     <>
       <div className="auth-card-offset">
-        <Card className="auth-card">
+        <Card className="auth-card ring-0">
           <CardHeader className="w-full flex flex-col gap-8 items-center ">
             <CardTitle>Business Profile Setup</CardTitle>
 
-            <div className="flex flex-col gap-5">
-              <ImageInput
-                imgFile={logo}
-                setImgFile={setLogo}
-                alt={assets.cameraIcon}
-                altClass="object-center h-10 w-10"
-                altText="logo placeHolder"
-                alignAltImg="center"
+            <div className="flex flex-col gap-5 ">
+              <CustomInput
+                control={control}
+                name="brandLogo"
+                fieldName="Brand Logo"
+                withLabel={false}
+                inptType="image"
+                imgAlt={assets.cameraIcon}
+                imgAltCls="object-center h-10 w-10"
+                imgAltAlign="center"
               />
+
               <p className="text-[14px] font-normal text-center">
                 {" "}
                 Your logo will appear on quotes, invoices, and client

@@ -10,9 +10,7 @@ import { CustomInput } from "../../components/common/customInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { userProfileSchema } from "../../validation/userProfile.payload.schema";
 import type { UserProfilePayload } from "../../types/userProfile.payload.type";
-import { useState } from "react";
 import { toast } from "react-toastify";
-import { ImageInput } from "../../components/auth/imageInput";
 import { assets } from "../../assets/icons";
 import { useAppDispatch } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
@@ -27,22 +25,17 @@ export function ProfileSetupPage() {
     },
     resolver: yupResolver(userProfileSchema),
   });
-  const [imgFile, setImgFile] = useState<File | undefined>(undefined);
   const navigate = useNavigate();
   const dispath = useAppDispatch();
   const submitHandler = (data: UserProfilePayload) => {
-    if (!imgFile) {
-      toast.error("Please select a profile image");
-    } else {
-      const newUser: Partial<UserType> = {
-        ...data,
-        isUserProfileCreated: true,
-        profileImgUrl: URL.createObjectURL(imgFile),
-      };
-      dispath(updateUser(newUser));
-      toast.success("User profile is set up");
-      navigate("/business-profile");
-    }
+    const newUser: Partial<UserType> = {
+      ...data,
+      isUserProfileCreated: true,
+      profileImgUrl: URL.createObjectURL(data.profilePic),
+    };
+    dispath(updateUser(newUser));
+    toast.success("User profile is set up");
+    navigate("/business-profile");
   };
   return (
     <div className="auth-card-offset">
@@ -52,11 +45,14 @@ export function ProfileSetupPage() {
             Profile Setup
           </CardTitle>
           <div className="flex items-end">
-            <ImageInput
-              imgFile={imgFile}
-              setImgFile={setImgFile}
-              alt={assets.userIcon}
-              alignAltImg="end"
+            <CustomInput
+              inptType="image"
+              control={control}
+              name="profilePic"
+              fieldName="Profile pic"
+              withLabel={false}
+              imgAlt={assets.userIcon}
+              imgAltAlign="end"
             />
           </div>
         </CardHeader>

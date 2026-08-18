@@ -1,11 +1,8 @@
 import { PlusIcon } from "lucide-react";
-import { toast } from "react-toastify";
-import { ExccedFileSizeLimit } from "../../constants/messages";
-import { IMAGE } from "../../constants/limits";
 
 export type ImageInputProps = {
   imgFile: File | undefined;
-  setImgFile: (value: React.SetStateAction<File | undefined>) => void;
+  setImgFile: (...event: any[]) => void;
   alt: string;
   altClass?: string;
   altText?: string;
@@ -35,13 +32,7 @@ export function ImageInput({
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0] as File;
-            if (Math.floor(file.size / (1024 * 1024)) > IMAGE.maxSize) {
-              toast(ExccedFileSizeLimit("Profile picture", IMAGE.maxSize), {
-                type: "warning",
-              });
-            } else {
-              setImgFile(e.target.files?.[0] as File);
-            }
+            setImgFile(file);
           }}
           required={true}
         />

@@ -7,6 +7,8 @@ import {
 } from "react-hook-form";
 import { Eye, EyeOff, type LucideIcon } from "lucide-react";
 import { Switch } from "../ui/switch";
+import { ImageInput } from "../auth/imageInput";
+import { assets } from "../../assets/icons";
 
 export type SelectOptions = {
   value: string;
@@ -25,6 +27,9 @@ export type CustomInputProps<T extends FieldValues> = {
   fieldBadgeAction?: () => void;
   withLabel?: boolean;
   disabled?: boolean;
+  imgAlt?: string;
+  imgAltCls?: string;
+  imgAltAlign?: "center" | "end";
 };
 
 function formatLabel(fieldName: string) {
@@ -45,6 +50,9 @@ export function CustomInput<T extends FieldValues>({
   selectOptions,
   FieldBadgeIcon,
   fieldBadgeAction,
+  imgAlt,
+  imgAltCls,
+  imgAltAlign,
   withLabel = true,
   disabled = false,
 }: CustomInputProps<T>) {
@@ -176,8 +184,23 @@ export function CustomInput<T extends FieldValues>({
                   className={className}
                 />
               )}
+              {inptType === "image" && (
+                <ImageInput
+                  imgFile={value}
+                  setImgFile={onChange}
+                  alt={imgAlt ?? assets.cameraIcon}
+                  altClass={
+                    imgAltCls ?? "object-contain h-21 w-21 object-bottom"
+                  }
+                  alignAltImg={imgAltAlign}
+                />
+              )}
               {error && (
-                <p className="text-sm text-rose-600">{error.message}</p>
+                <p
+                  className={`text-sm text-rose-600 ${inptType === "image" ? "flex justify-center" : ""} `}
+                >
+                  {error.message}
+                </p>
               )}
             </div>
           );
