@@ -48,15 +48,15 @@ export function SignupPage() {
   };
 
   return (
-    <div className="relative flex justify-center z-10 -mt-8">
-      <div className="flex flex-col items-start p-8 gap-8 isolate relative w-112.5 min-h-112.75 mx-auto mt-0 bg-white rounded-xl shadow-[0px_3px_12px_rgba(47,43,61,0.14)]">
+    <div className="auth-card-offset">
+      <div className="auth-card">
         <div className="flex flex-col items-start p-0 gap-8 w-full max-w-96.5 min-h-96.75 self-stretch flex-none">
           <div className="flex flex-col items-center p-0 gap-2 w-full max-w-96.5 h-13.5 self-stretch flex-none">
             <span className="flex max-h-7.25 justify-center font-semibold text-2xl leading-[100%]">
               {" "}
               Let’s Get Started 🚀{" "}
             </span>
-            <span className="flex justify-center max-h-4.25 text-wrap font-normal text-[14px] leading-none tracking-normal text-[#89909D]">
+            <span className="flex justify-center max-h-4.25 text-wrap font-normal text-[13px] md:text-[14px] leading-none tracking-normal text-[#89909D]">
               {" "}
               Sign up and simplify your quoting and invoicing process.{" "}
             </span>
@@ -93,7 +93,7 @@ export function SignupPage() {
 
               {/* Remember me and forgot password */}
               <div className="flex flex-row items-center p-0 gap-2 w-full max-w-96.5 h-5 self-stretch flex-none">
-                <div className="flex flex-row items-center p-0 gap-2 w-full h-5 flex-none grow">
+                <div className="flex flex-row items-center p-0 gap-2 w-full h-1 md:h-5 flex-none grow">
                   <input
                     type="checkbox"
                     id="tNc"
@@ -101,7 +101,7 @@ export function SignupPage() {
                     className="h-5 w-5"
                     onClick={() => (tcAccept.current ^= 1)}
                   />
-                  <label htmlFor="tNc">
+                  <label htmlFor="tNc" className="text-xs md:text-[16px]">
                     I agree to the Terms & Conditions and Privacy Policy
                   </label>
                 </div>
@@ -113,7 +113,7 @@ export function SignupPage() {
               >
                 {isSubmitting ? <Spinner /> : "Sign Up"}
               </button>
-              <p className="h-4.75 font-sans font-normal text-[16px] leading-4.75 text-[#89909D] flex-none">
+              <p className="flex gap-1 items-center h-4.75 font-sans font-normal text-[16px] leading-4.75 text-[#89909D] flex-none">
                 Already have an account?
                 <a
                   onClick={() => navigate("/")}

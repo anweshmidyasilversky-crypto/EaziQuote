@@ -25,28 +25,30 @@ export function UnverifiedEmail() {
     }
   };
   return (
-    <div className="email-success-card">
-      <div className="success-inner-stack">
-        <img
-          src={assets.unverifiedEmail}
-          alt="Success Checkmark"
-          className="w-20 h-20 flex-none object-cover"
-        />
+    <div className="auth-card-offset">
+      <div className="auth-card">
+        <div className="success-inner-stack">
+          <img
+            src={assets.unverifiedEmail}
+            alt="Success Checkmark"
+            className="w-20 h-20 flex-none object-cover"
+          />
 
-        <div className="success-text-group">
-          <h1 className="h-7.25 font-sans font-semibold text-[24px] leading-7.25 text-[#2D2D2D] flex-none text-center">
-            "Email Unverified"
-          </h1>
-          <p className="h-4.25 font-sans font-normal text-[14px] leading-4.25 text-[#89909D] flex-none text-center">
-            "Please verify your email before login."
-          </p>
+          <div className="success-text-group">
+            <h1 className="h-7.25 font-sans font-semibold text-[24px] leading-7.25 text-[#2D2D2D] flex-none text-center">
+              "Email Unverified"
+            </h1>
+            <p className="h-4.25 font-sans font-normal text-[14px] leading-4.25 text-[#89909D] flex-none text-center">
+              "Please verify your email before login."
+            </p>
+          </div>
+
+          <button type="button" className="btn-auth" onClick={handleClick}>
+            <span className="h-4.75 font-sans font-medium text-[16px] leading-4.75 text-white flex-none text-center">
+              {isSendingLink ? <Spinner /> : "Send Verification Link"}
+            </span>
+          </button>
         </div>
-
-        <button type="button" className="btn-auth" onClick={handleClick}>
-          <span className="h-4.75 font-sans font-medium text-[16px] leading-4.75 text-white flex-none text-center">
-            {isSendingLink ? <Spinner /> : "Send Verification Link"}
-          </span>
-        </button>
       </div>
     </div>
   );

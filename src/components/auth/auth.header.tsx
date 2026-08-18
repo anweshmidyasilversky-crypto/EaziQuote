@@ -11,7 +11,7 @@ export function AuthHeader() {
           alt="Header Background"
         />
 
-        <div className="absolute flex justify-center items-center">
+        <div className="absolute flex justify-center items-center z-10 my-9">
           <img className="max-w-[10.34rem] h-8" src={assets.logo} alt="Logo" />
         </div>
       </div>

@@ -2,8 +2,12 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {
+  browserLocalPersistence,
   connectAuthEmulator,
   getAuth,
+  onAuthStateChanged,
+  setPersistence,
+  updateCurrentUser,
   type ActionCodeSettings,
 } from "firebase/auth";
 
@@ -26,6 +30,8 @@ export const actionCodeSettings: ActionCodeSettings = {
 export const firebaseApp = initializeApp(firebaseConfig);
 // export const analytics = getAnalytics(firebaseApp);
 export const auth = getAuth(firebaseApp);
+
+setPersistence(auth, browserLocalPersistence);
 
 // if (window.location.hostname === "localhost") {
 //   connectAuthEmulator(auth, "http://127.0.0.1:9099");

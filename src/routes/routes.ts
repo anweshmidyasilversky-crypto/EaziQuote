@@ -9,6 +9,9 @@ import { ForgotPasswordPage } from "../pages/auth/forgotPassword.page";
 import { ProfileSetupPage } from "../pages/auth/profile.setup.page";
 import { BusinessProfileForm } from "../pages/auth/BusinessProfileForm";
 import { BusinessAddressForm } from "../pages/auth/BusinessAddressForm";
+import { createElement } from "react";
+import { ProfileCreateGuard } from "../guards/profileCreateGuard";
+import { AuthGuard } from "../guards/authGuard";
 
 export const routes: RouteObject[] = [
   {
@@ -20,32 +23,43 @@ export const routes: RouteObject[] = [
         Component: SignInPage,
       },
       {
-        path: "signup",
+        path: "/signup",
         Component: SignupPage,
       },
       {
-        path: "email-verification",
-        Component: UnverifiedEmail,
-      },
-      {
-        path: "email-verified",
-        Component: EmailVerified,
-      },
-      {
-        path: "forgot-password",
+        path: "/forgot-password",
         Component: ForgotPasswordPage,
       },
       {
-        path: "profile-setup",
-        Component: ProfileSetupPage,
-      },
-      {
-        path: "business-profile",
-        Component: BusinessProfileForm,
-      },
-      {
-        path: "business-address",
-        Component: BusinessAddressForm,
+        element: createElement(AuthGuard),
+        children: [
+          {
+            path: "email-verification",
+            Component: UnverifiedEmail,
+          },
+          {
+            path: "email-verified",
+            Component: EmailVerified,
+          },
+
+          {
+            element: createElement(ProfileCreateGuard),
+            children: [
+              {
+                path: "/profile-setup",
+                Component: ProfileSetupPage,
+              },
+              {
+                path: "/business-profile",
+                Component: BusinessProfileForm,
+              },
+              {
+                path: "/business-address",
+                Component: BusinessAddressForm,
+              },
+            ],
+          },
+        ],
       },
     ],
   },

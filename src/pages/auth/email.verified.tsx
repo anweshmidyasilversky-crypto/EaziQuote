@@ -10,8 +10,8 @@ export function EmailVerified() {
     navigate("/email-verification");
   }
   return (
-    <div className="email-success-card">
-      <div className="success-inner-stack">
+    <div className="auth-card-offset">
+      <div className="auth-card flex items-center">
         <img
           src={assets.verifiedEmail}
           alt="Success Checkmark"

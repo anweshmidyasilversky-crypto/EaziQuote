@@ -23,9 +23,16 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 import { BrandColorPreview } from "../../components/auth/brandColor.preview";
+import type { UserType } from "../../types/user.type";
+import { useAppDispatch } from "../../redux/store";
+import { updateUser } from "../../redux/slices/user.slice";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 export function BusinessProfileForm() {
   const [logo, setLogo] = useState<File | undefined>(undefined);
+  const dispath = useAppDispatch();
+  const navigate = useNavigate();
   const { control, handleSubmit } = useForm<BusinessProfilePayload>({
     defaultValues: {
       brandColor: "#00AAFF",
@@ -39,7 +46,17 @@ export function BusinessProfileForm() {
   });
 
   const submitHandler = async (data: BusinessProfilePayload) => {
-    console.log(data);
+    if (!logo) {
+      toast.error("Please upload brand logo");
+    } else {
+      const businessProfile: Partial<UserType> = {
+        ...data,
+        isBusinessProfileCreated: true,
+      };
+      dispath(updateUser(businessProfile));
+      toast.success("Business profile complete");
+      navigate("/business-address");
+    }
   };
 
   const [chosenColor, isVatRegistered] = useWatch({
@@ -61,8 +78,8 @@ export function BusinessProfileForm() {
   const [isPopoverOpen, toggleIsPopoverOpen] = useState(false);
   return (
     <>
-      <div className="relative w-full flex justify-center -mt-4 z-10">
-        <Card className="w-full max-w-112.5 p-8 auth-card ring-0">
+      <div className="auth-card-offset">
+        <Card className="auth-card">
           <CardHeader className="w-full flex flex-col gap-8 items-center ">
             <CardTitle>Business Profile Setup</CardTitle>
 
@@ -110,8 +127,8 @@ export function BusinessProfileForm() {
             </Popover>
           </CardHeader>
 
-          <CardContent className="dashed-y-separators">
-            <div className="my-5 flex flex-col gap-5">
+          <CardContent className="w-full dashed-y-separators">
+            <div className="w-full my-5 flex flex-col gap-5">
               <CustomInput
                 control={control}
                 name="businessName"
@@ -138,7 +155,7 @@ export function BusinessProfileForm() {
             </div>
           </CardContent>
 
-          <CardFooter className="ring-0 border-none m-0 pt-0">
+          <CardFooter className="w-full ring-0 border-none m-0 pt-0">
             <div className="w-full flex flex-col gap-5">
               <div className="flex items-center gap-3 h-5.5">
                 <label

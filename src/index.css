@@ -19,7 +19,11 @@
 }
 
 @utility auth-card {
-  @apply w-full isolate relative mx-auto mt-0 bg-white rounded-xl shadow-[0px_3px_12px_rgba(47,43,61,0.14)] ring-0;
+  @apply flex flex-col ring-0 items-start p-8 gap-8 isolate relative w-full md:w-112.5 lg:w-112.5 h-full mx-auto mt-0 bg-white rounded-xl shadow-[0px_3px_12px_rgba(47,43,61,0.14)];
+}
+
+@utility auth-card-offset {
+  @apply relative w-full flex justify-center md:-mt-4 lg:-mt-8 z-10;
 }
 
 @utility btn-auth {

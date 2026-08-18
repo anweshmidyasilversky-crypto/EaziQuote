@@ -9,11 +9,13 @@ const initialState: UserType = {
   businessPhoneNo: "",
   vatRegistered: false,
   trade: "",
-  formFilledUpto: 0,
   street: "",
   city: "",
   postCode: "",
   country: "",
+  isUserProfileCreated: false,
+  isBusinessProfileCreated: false,
+  isBusinessAddressProvided: false,
 };
 
 export const userSlice = createSlice({

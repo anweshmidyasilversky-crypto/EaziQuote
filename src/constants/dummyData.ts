@@ -93,4 +93,4 @@ export const postalCodes: string[] = [
   "122001",
   "395003",
   "411001",
-];
+] as const;
