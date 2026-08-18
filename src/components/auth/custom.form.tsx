@@ -63,7 +63,11 @@ export function CustomForm<T extends FieldValues>({
                 ))}
 
                 {/** form submit button */}
-                <button type="submit" className="btn-auth">
+                <button
+                  type="submit"
+                  className="btn-auth"
+                  disabled={isSubmitting}
+                >
                   <span className="w-31.25 h-4.75 font-medium text-[16px] leading-4.75 text-white flex-none order-0 grow-0">
                     {isSubmitting ? <Spinner /> : buttonLabel}
                   </span>

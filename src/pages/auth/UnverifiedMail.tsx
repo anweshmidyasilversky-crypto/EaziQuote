@@ -1,6 +1,6 @@
 import { assets } from "../../assets/icons";
 import { auth } from "../../lib/firebaseConfig";
-import { SignInPage } from "./signIn.page";
+import { SignInPage } from "./SigninPage";
 import { toast } from "react-toastify";
 import { sendVerificationLink } from "../../lib/firebaseAuth";
 import { showFirebaseError } from "../../lib/firebase.errors";

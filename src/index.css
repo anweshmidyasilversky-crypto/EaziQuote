@@ -13,9 +13,26 @@
 @theme {
   --color-brand-dark: #082b60;
   --color-brand-hover: #061f45;
+  --color-placeholder-text: #89909d;
+  --color-inactive-btn: #89909d;
   --font-sans: "Inter Tight", sans-serif;
   --max-w-color-input: 24.75rem;
   --max-h-color-input: 10rem;
+  --color-sidebar: #ffffff;
+  --color-sidebar-border: #e4e6f4;
+  --background-image-sidebar-btn: linear-gradient(
+    270deg,
+    #082b60 0%,
+    #000000 100%
+  );
+}
+
+@utility fill-svg-white {
+  filter: drop-shadow(0px 0px 0px #ffffff);
+}
+
+@utility icon-white {
+  filter: brightness(0) saturate(100%) invert(1);
 }
 
 @utility auth-card {

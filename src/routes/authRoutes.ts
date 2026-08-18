@@ -1,19 +1,19 @@
 import type { RouteObject } from "react-router";
 import { AuthHeader } from "../components/auth/auth.header";
-import { SignInPage } from "../pages/auth/signIn.page";
-import { SignupPage } from "../pages/auth/signUp.page";
-import { UnverifiedEmail } from "../pages/auth/unverified.mail";
-import { EmailVerified } from "../pages/auth/email.verified";
-import { PasswordResetPage } from "../pages/auth/reset.password";
-import { ForgotPasswordPage } from "../pages/auth/forgotPassword.page";
-import { ProfileSetupPage } from "../pages/auth/profile.setup.page";
+import { SignInPage } from "../pages/auth/SigninPage";
+import { SignupPage } from "../pages/auth/SignupPage";
+import { UnverifiedEmail } from "../pages/auth/UnverifiedMail";
+import { EmailVerified } from "../pages/auth/EmailVerified";
+import { PasswordResetPage } from "../pages/auth/ResetPasswordPage";
+import { ForgotPasswordPage } from "../pages/auth/ForgotPasswordPage";
+import { ProfileSetupPage } from "../pages/auth/ProfileSetupPage";
 import { BusinessProfileForm } from "../pages/auth/BusinessProfileForm";
 import { BusinessAddressForm } from "../pages/auth/BusinessAddressForm";
 import { createElement } from "react";
 import { ProfileCreateGuard } from "../guards/profileCreateGuard";
 import { AuthGuard } from "../guards/authGuard";
 
-export const routes: RouteObject[] = [
+export const authRoutes: RouteObject[] = [
   {
     path: "/",
     Component: AuthHeader,
