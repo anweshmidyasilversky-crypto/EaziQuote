@@ -37,6 +37,7 @@ export function ProfileSetupPage() {
       const newUser: Partial<UserType> = {
         ...data,
         isUserProfileCreated: true,
+        profileImgUrl: URL.createObjectURL(imgFile),
       };
       dispath(updateUser(newUser));
       toast.success("User profile is set up");

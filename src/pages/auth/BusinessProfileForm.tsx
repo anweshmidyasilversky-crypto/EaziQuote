@@ -52,6 +52,7 @@ export function BusinessProfileForm() {
       const businessProfile: Partial<UserType> = {
         ...data,
         isBusinessProfileCreated: true,
+        businessLogoUrl: URL.createObjectURL(logo),
       };
       dispath(updateUser(businessProfile));
       toast.success("Business profile complete");
