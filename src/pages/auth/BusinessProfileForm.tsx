@@ -23,7 +23,7 @@ import {
 } from "../../components/ui/popover";
 import { BrandColorPreview } from "../../components/auth/brandColor.preview";
 import type { UserType } from "../../types/user.type";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
@@ -31,14 +31,16 @@ import { toast } from "react-toastify";
 export function BusinessProfileForm() {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
+  const user = useAppSelector((state) => state.user);
+
   const { control, handleSubmit } = useForm<BusinessProfilePayload>({
     defaultValues: {
       brandColor: "#00AAFF",
-      businessName: "",
-      businessPhoneNo: "",
-      trade: "",
-      vatRegistered: false,
-      vatNumber: "",
+      businessName: user.businessName ?? "",
+      businessPhoneNo: user.businessPhoneNo ?? "",
+      trade: user.trade ?? "",
+      vatRegistered: user.vatRegistered ?? false,
+      vatNumber: user.vatNumber ?? "",
     },
     resolver: yupResolver(BusinessProfilePayloadSchema),
   });
@@ -85,8 +87,12 @@ export function BusinessProfileForm() {
                 fieldName="Brand Logo"
                 withLabel={false}
                 inptType="image"
-                imgAlt={assets.cameraIcon}
-                imgAltCls="object-center h-10 w-10"
+                imgAlt={user.businessLogoUrl ?? assets.cameraIcon}
+                imgAltCls={
+                  user.businessLogoUrl
+                    ? "object-cover object-center h-full w-full"
+                    : "object-center h-10 w-10"
+                }
                 imgAltAlign="center"
               />
 

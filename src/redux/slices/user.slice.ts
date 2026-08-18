@@ -3,11 +3,11 @@ import { type UserType } from "../../types/user.type";
 
 const initialState: UserType = {
   name: "",
-  profileImgUrl: "",
+  profileImgUrl: undefined,
   email: "",
   phoneNumber: "",
   businessName: "",
-  businessLogoUrl: "",
+  businessLogoUrl: undefined,
   businessPhoneNo: "",
   vatRegistered: false,
   trade: "",

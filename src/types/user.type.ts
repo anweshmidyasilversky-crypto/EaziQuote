@@ -1,10 +1,10 @@
 export interface UserType {
   name: string;
-  profileImgUrl: string;
+  profileImgUrl: string | undefined;
   phoneNumber: string;
   email: string;
   businessName: string;
-  businessLogoUrl: string;
+  businessLogoUrl: string | undefined;
   businessPhoneNo: string;
   trade: string;
   vatRegistered: boolean;

@@ -23,7 +23,7 @@ import { type BusinessAddressPayload } from "../../types/businessAddress.payload
 import { yupResolver } from "@hookform/resolvers/yup";
 import { businessAddressSchema } from "../../validation/businessAddress.payload.schema";
 import { CustomInput } from "../../components/common/customInput";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import type { UserType } from "../../types/user.type";
@@ -33,14 +33,15 @@ export function BusinessAddressForm() {
   const [postCode, selectPostCode] = useState<string | null>(null);
   const dispath = useAppDispatch();
   const navigate = useNavigate();
+  const user = useAppSelector((state) => state.user);
 
   const { control, setValue, handleSubmit, clearErrors } =
     useForm<BusinessAddressPayload>({
       defaultValues: {
-        postCode: "",
-        street: "",
-        city: "",
-        country: "",
+        postCode: user.postCode ?? "",
+        street: user.street ?? "",
+        city: user.city ?? "",
+        country: user.country ?? "",
       },
       resolver: yupResolver(businessAddressSchema),
     });

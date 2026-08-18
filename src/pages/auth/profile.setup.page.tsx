@@ -12,21 +12,22 @@ import { userProfileSchema } from "../../validation/userProfile.payload.schema";
 import type { UserProfilePayload } from "../../types/userProfile.payload.type";
 import { toast } from "react-toastify";
 import { assets } from "../../assets/icons";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import type { UserType } from "../../types/user.type";
 
 export function ProfileSetupPage() {
+  const navigate = useNavigate();
+  const dispath = useAppDispatch();
+  const user = useAppSelector((state) => state.user);
   const { control, handleSubmit } = useForm<UserProfilePayload>({
     defaultValues: {
-      name: "",
-      phoneNo: "",
+      name: user.name ?? "",
+      phoneNo: user.phoneNumber ?? "",
     },
     resolver: yupResolver(userProfileSchema),
   });
-  const navigate = useNavigate();
-  const dispath = useAppDispatch();
   const submitHandler = (data: UserProfilePayload) => {
     const newUser: Partial<UserType> = {
       ...data,
@@ -51,8 +52,13 @@ export function ProfileSetupPage() {
               name="profilePic"
               fieldName="Profile pic"
               withLabel={false}
-              imgAlt={assets.userIcon}
+              imgAlt={user.profileImgUrl ?? assets.userIcon}
               imgAltAlign="end"
+              imgAltCls={
+                user.profileImgUrl
+                  ? "object-cover object-center h-full w-full"
+                  : undefined
+              }
             />
           </div>
         </CardHeader>
