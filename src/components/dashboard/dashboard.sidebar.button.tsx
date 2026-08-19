@@ -1,4 +1,4 @@
-export type DashboardButtonProps = {
+export type DashboardSidebarButtonProps = {
   leftIcon: string;
   buttonLabel: string;
   clickHandler: () => void;
@@ -7,21 +7,21 @@ export type DashboardButtonProps = {
   toggleActive: (val: React.SetStateAction<string>) => void;
 };
 
-export function DashboardButton({
+export function DashboardSidebarButton({
   leftIcon,
   buttonLabel,
   clickHandler,
   currActive,
   id,
   toggleActive,
-}: DashboardButtonProps) {
+}: DashboardSidebarButtonProps) {
   return (
     <button
       onClick={() => {
         toggleActive(id);
         clickHandler();
       }}
-      className={`rounded-[7px] w-30 md:w-51 h-10 flex py-2 px-3 gap-3 ${currActive === id ? "bg-sidebar-btn" : ""} flex items-center`}
+      className={`rounded-[7px] w-30 md:w-51 h-10 flex py-2 px-3 gap-3 ${currActive === id ? "bg-sidebar-btn " : ""} flex items-center`}
     >
       <img src={leftIcon} className="h-6 w-6" />
       <span

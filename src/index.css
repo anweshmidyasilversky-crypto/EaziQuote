@@ -20,6 +20,14 @@
   --max-h-color-input: 10rem;
   --color-sidebar: #ffffff;
   --color-sidebar-border: #e4e6f4;
+  --color-header-user-det: #f3f3f9;
+  --color-dashboard: #e8e8f2;
+  --color-kpi-card-bg: #ffffff;
+  --color-transparent-royal-blue: #466ff61a;
+  --color-transparent-ming-green: #389c7b1a;
+  --color-transparent-liquid-lava: #f973151a;
+  --color-american-blue: #082b60;
+  --color-separator: #e4e6f4;
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,
@@ -27,12 +35,14 @@
   );
 }
 
-@utility fill-svg-white {
-  filter: drop-shadow(0px 0px 0px #ffffff);
+@layer base {
+  body {
+    @apply font-sans;
+  }
 }
 
-@utility icon-white {
-  filter: brightness(0) saturate(100%) invert(1);
+@utility dashboard-card-theme {
+  @apply bg-white shadow-[0_1px_2px_rgba(56,65,74,0.14902)];
 }
 
 @utility auth-card {

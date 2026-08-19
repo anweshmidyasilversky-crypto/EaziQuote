@@ -18,6 +18,8 @@ const initialState: UserType = {
   isUserProfileCreated: false,
   isBusinessProfileCreated: false,
   isBusinessAddressProvided: false,
+  isSubscribed: false,
+  endDate: "11/20/2025",
 };
 
 export const userSlice = createSlice({

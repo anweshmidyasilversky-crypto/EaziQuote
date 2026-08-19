@@ -22,10 +22,14 @@ export function ProfileCreateGuard() {
 
   const nextStep = steps.find((step) => !step.completed);
 
+  console.log(nextStep);
+
   if (nextStep) {
     if (location.pathname !== nextStep.path) {
       return <Navigate to={nextStep.path} replace={true} />;
     }
+  } else {
+    return <Navigate to={"/dashboard"} replace={true} />;
   }
 
   return <Outlet />;

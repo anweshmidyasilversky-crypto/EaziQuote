@@ -15,5 +15,7 @@ export interface UserType {
   isUserProfileCreated: boolean;
   isBusinessProfileCreated: boolean;
   isBusinessAddressProvided: boolean;
+  isSubscribed: boolean;
+  endDate: string;
   vatNumber?: string;
 }

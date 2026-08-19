@@ -4,7 +4,6 @@ import { SignInPage } from "../pages/auth/SigninPage";
 import { SignupPage } from "../pages/auth/SignupPage";
 import { UnverifiedEmail } from "../pages/auth/UnverifiedMail";
 import { EmailVerified } from "../pages/auth/EmailVerified";
-import { PasswordResetPage } from "../pages/auth/ResetPasswordPage";
 import { ForgotPasswordPage } from "../pages/auth/ForgotPasswordPage";
 import { ProfileSetupPage } from "../pages/auth/ProfileSetupPage";
 import { BusinessProfileForm } from "../pages/auth/BusinessProfileForm";
@@ -12,6 +11,7 @@ import { BusinessAddressForm } from "../pages/auth/BusinessAddressForm";
 import { createElement } from "react";
 import { ProfileCreateGuard } from "../guards/profileCreateGuard";
 import { AuthGuard } from "../guards/authGuard";
+import { PublicOnlyGuard } from "../guards/publicOnlyGuard";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -19,16 +19,21 @@ export const authRoutes: RouteObject[] = [
     Component: AuthHeader,
     children: [
       {
-        index: true,
-        Component: SignInPage,
-      },
-      {
-        path: "/signup",
-        Component: SignupPage,
-      },
-      {
-        path: "/forgot-password",
-        Component: ForgotPasswordPage,
+        element: createElement(PublicOnlyGuard),
+        children: [
+          {
+            index: true,
+            Component: SignInPage,
+          },
+          {
+            path: "/signup",
+            Component: SignupPage,
+          },
+          {
+            path: "/forgot-password",
+            Component: ForgotPasswordPage,
+          },
+        ],
       },
       {
         element: createElement(AuthGuard),

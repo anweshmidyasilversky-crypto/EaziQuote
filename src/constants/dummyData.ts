@@ -5,6 +5,12 @@ export type AddressDetail = {
   country: string;
 };
 
+export interface NotificationItem {
+  id: number;
+  notification: string;
+  timestamp: string; // ISO 8601 string format
+}
+
 export const addressList: AddressDetail[] = [
   {
     street: "Ambawadi Road",
@@ -94,3 +100,27 @@ export const postalCodes: string[] = [
   "395003",
   "411001",
 ] as const;
+
+export const notifications: NotificationItem[] = [
+  {
+    id: 1,
+    notification: "Mike Wilson has accepted Quote #QT-2025-108.",
+    timestamp: "2026-08-19T10:01:00Z", // 5 hours ago
+  },
+  {
+    id: 2,
+    notification:
+      "Payment received for Invoice #INV-2025-045, $1,250 credited to your account.",
+    timestamp: "2026-08-18T23:01:00Z", // 16 hours ago
+  },
+  {
+    id: 3,
+    notification: "Quote #QT-2025-102 for Emma Davis has expired.",
+    timestamp: "2026-08-17T15:01:00Z", // 2 days ago
+  },
+  {
+    id: 4,
+    notification: "Invoice #INV-2025-033 for John Carter is overdue by 3 days.",
+    timestamp: "2026-08-16T15:01:00Z", // 3 days ago
+  },
+];

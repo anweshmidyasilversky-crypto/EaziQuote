@@ -8,13 +8,34 @@ import previewBrandlogo from "./icons/previewLogo.png";
 import sidebarLogo from "./icons/sidebarLogo.png";
 
 import dashboardHomeIcon from "./icons/dashboardHomeIcon.svg";
-
-import quotesIcon from "./icons/quotesIcon.svg";
+import quotesIcon from "./icons/quotesIcon.png";
 import invoiceIcon from "./icons/invoiceIcon.png";
 import clientIcon from "./icons/clientsIcon.png";
 import settingsIcon from "./icons/settingsIcon.png";
-import presentQuotesIcon from "./icons/presentQuotesIcon.png";
+import presetQuotesIcon from "./icons/presetQuotesIcon.png";
 import poundIcon from "./icons/poundIcon.png";
+
+import dashboardHomeActiveIcon from "./icons/dashboardHomeActive.png";
+import quotesActiveIcon from "./icons/quotesActive.png";
+import invoiceActiveIcon from "./icons/invoiceActive.png";
+import clientActiveIcon from "./icons/clientActive.png";
+import settingsActiveIcon from "./icons/settingsActive.png";
+import presetQuotesActiveIcon from "./icons/presetQuoteActive.png";
+import poundActiveIcon from "./icons/paymentsActive.png";
+
+import arrowRight from "./icons/arrowRight.png";
+
+import headphoneIcon from "./icons/headphoneIcon.png";
+import bellIcon from "./icons/bellIcon.png";
+
+import userImg from "./icons/userImg.png";
+import plusIcon from "./icons/plus.png";
+
+import clockColored from "./icons/clockColored.png";
+import invoiceColored from "./icons/invoiceColored.png";
+import poundColored from "./icons/poundColored.png";
+
+import arrowRightBlue from "./icons/arrowRightBlue.png";
 
 export const assets = {
   loginHeader,
@@ -30,6 +51,28 @@ export const assets = {
   invoiceIcon,
   clientIcon,
   settingsIcon,
-  presentQuotesIcon,
+  presetQuotesIcon,
   poundIcon,
+
+  dashboardHomeActiveIcon,
+  quotesActiveIcon,
+  invoiceActiveIcon,
+  clientActiveIcon,
+  settingsActiveIcon,
+  presetQuotesActiveIcon,
+  poundActiveIcon,
+
+  arrowRight,
+
+  headphoneIcon,
+  bellIcon,
+
+  userImg,
+  plusIcon,
+
+  clockColored,
+  invoiceColored,
+  poundColored,
+
+  arrowRightBlue,
 };
