@@ -28,6 +28,8 @@
   --color-transparent-liquid-lava: #f973151a;
   --color-american-blue: #082b60;
   --color-separator: #e4e6f4;
+  --color-black-text: #2d2d2d;
+  --color-table-head: #f5f6fb;
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,
@@ -38,6 +40,7 @@
 @layer base {
   body {
     @apply font-sans;
+    @apply text-black-text;
   }
 }
 

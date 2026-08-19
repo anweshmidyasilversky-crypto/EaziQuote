@@ -9,7 +9,7 @@ export type NotificationCardProps = {
 
 export function NotificationCard({ notifications }: NotificationCardProps) {
   return (
-    <div className="min-h-60 flex flex-col items-center rounded-[10px] py-4.5 dashboard-card-theme gap-4.5 grow">
+    <div className="min-h-60 w-full flex flex-col items-center rounded-[10px] py-4.5 dashboard-card-theme gap-4.5 grow">
       {/* notification card header */}
       <div className="w-full flex justify-between px-5 items-center">
         <span className="min-h-4.75 font-medium text-[16px]">
@@ -29,14 +29,14 @@ export function NotificationCard({ notifications }: NotificationCardProps) {
       <Separator className={"bg-separator w-full"} />
 
       {/* notification section */}
-      <div className="flex flex-col gap-6 px-5">
+      <div className="flex flex-col gap-6 w-full px-5">
         {notifications.map((notificationObj) => {
           return (
             <div
               key={notificationObj.id}
-              className="flex justify-between items-center gap-4"
+              className="w-full flex justify-between "
             >
-              <span className=" text-[14px]">
+              <span className=" text-[16px] text-black-text">
                 {" "}
                 {notificationObj.notification}{" "}
               </span>

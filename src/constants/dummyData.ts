@@ -11,6 +11,17 @@ export interface NotificationItem {
   timestamp: string; // ISO 8601 string format
 }
 
+export interface TransactionItem {
+  id: string; // Crucial for React map rendering keys
+  title: string;
+  quoteInvoice: string;
+  client: string;
+  amount: string;
+  status: "Sent" | "Paid" | "Overdue" | "Draft";
+  creationDate: string;
+  expiryDueDate: string;
+}
+
 export const addressList: AddressDetail[] = [
   {
     street: "Ambawadi Road",
@@ -122,5 +133,98 @@ export const notifications: NotificationItem[] = [
     id: 4,
     notification: "Invoice #INV-2025-033 for John Carter is overdue by 3 days.",
     timestamp: "2026-08-16T15:01:00Z", // 3 days ago
+  },
+];
+
+export const transactionItems: TransactionItem[] = [
+  {
+    id: "quote-102-v1",
+    title: "Residential Plumbing Works",
+    quoteInvoice: "QT-2025-102",
+    client: "Daniel Murphy",
+    amount: "£6,200.00",
+    status: "Draft",
+    creationDate: "15 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-103-v1",
+    title: "Retail Store Interior Fit-Out",
+    quoteInvoice: "QT-2025-103",
+    client: "Olivia Bennett",
+    amount: "£3,450.00",
+    status: "Sent",
+    creationDate: "02 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-104-v1",
+    title: "Electrical Wiring & Lighting",
+    quoteInvoice: "QT-2025-104",
+    client: "James Carter",
+    amount: "£5,175.00",
+    status: "Draft",
+    creationDate: "18 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-105-v1",
+    title: "Painting & Finishing Services",
+    quoteInvoice: "QT-2025-105",
+    client: "Sophia Turner",
+    amount: "£2,900.00",
+    status: "Draft",
+    creationDate: "18 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-101-v2",
+    title: "Office Interior Design",
+    quoteInvoice: "QT-2025-101",
+    client: "Emma Robinson",
+    amount: "£4,850.00",
+    status: "Sent",
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-102-v2",
+    title: "Residential Plumbing Works",
+    quoteInvoice: "QT-2025-102",
+    client: "Daniel Murphy",
+    amount: "£6,200.00",
+    status: "Draft",
+    creationDate: "15 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-103-v2",
+    title: "Retail Store Interior Fit-Out",
+    quoteInvoice: "QT-2025-103",
+    client: "Olivia Bennett",
+    amount: "£3,450.00",
+    status: "Sent",
+    creationDate: "02 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-104-v2",
+    title: "Electrical Wiring & Lighting",
+    quoteInvoice: "QT-2025-104",
+    client: "James Carter",
+    amount: "£5,175.00",
+    status: "Draft",
+    creationDate: "18 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "quote-105-v2",
+    title: "Painting & Finishing Services",
+    quoteInvoice: "QT-2025-105",
+    client: "Sophia Turner",
+    amount: "£2,900.00",
+    status: "Draft",
+    creationDate: "18 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
   },
 ];

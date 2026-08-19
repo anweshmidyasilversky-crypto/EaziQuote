@@ -83,7 +83,7 @@ export function DashboardLayout() {
         </div>
       </div>
 
-      <div className="flex flex-col w-full h-full">
+      <div className="flex flex-col w-full h-screen">
         <div className="w-full border-b-sidebar-border border-b-[0.5px] h-17.5 flex items-center px-6">
           {/* Header content spaced between */}
           <div className="w-full flex justify-between items-center">

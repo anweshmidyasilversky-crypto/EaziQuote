@@ -47,6 +47,7 @@ export function SignInPage() {
         navigate("/email-verification");
       } else {
         toast.success("Sign in success");
+        console.log("Going to profile setup");
         navigate("/profile-setup");
       }
     } catch (err) {

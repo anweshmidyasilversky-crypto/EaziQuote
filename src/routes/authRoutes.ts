@@ -11,7 +11,6 @@ import { BusinessAddressForm } from "../pages/auth/BusinessAddressForm";
 import { createElement } from "react";
 import { ProfileCreateGuard } from "../guards/profileCreateGuard";
 import { AuthGuard } from "../guards/authGuard";
-import { PublicOnlyGuard } from "../guards/publicOnlyGuard";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -19,25 +18,20 @@ export const authRoutes: RouteObject[] = [
     Component: AuthHeader,
     children: [
       {
-        element: createElement(PublicOnlyGuard),
+        element: createElement(AuthGuard),
         children: [
           {
             index: true,
             Component: SignInPage,
           },
           {
-            path: "/signup",
+            path: "signup",
             Component: SignupPage,
           },
           {
-            path: "/forgot-password",
+            path: "forgot-password",
             Component: ForgotPasswordPage,
           },
-        ],
-      },
-      {
-        element: createElement(AuthGuard),
-        children: [
           {
             path: "email-verification",
             Component: UnverifiedEmail,
@@ -51,15 +45,15 @@ export const authRoutes: RouteObject[] = [
             element: createElement(ProfileCreateGuard),
             children: [
               {
-                path: "/profile-setup",
+                path: "profile-setup",
                 Component: ProfileSetupPage,
               },
               {
-                path: "/business-profile",
+                path: "business-profile",
                 Component: BusinessProfileForm,
               },
               {
-                path: "/business-address",
+                path: "business-address",
                 Component: BusinessAddressForm,
               },
             ],

@@ -61,7 +61,7 @@ export function Index() {
           </div>
         </div>
 
-        <div className="flex gap-6">
+        <div className="grid grid-cols-2 gap-x-6">
           {/* kpi cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {kpiCardConfig.map((kpiConfig) => {
