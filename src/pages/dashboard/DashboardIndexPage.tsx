@@ -1,11 +1,70 @@
 import { assets } from "../../assets/icons";
+import { ClientNameBadge } from "../../components/common/ClientNameBadge";
+import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { CustomBtn } from "../../components/common/customBtn";
+import { CustomDataTable } from "../../components/common/CustomTable";
 import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
+import StatusBadge from "../../components/common/StatusBadge";
 import { NotificationCard } from "../../components/dashboard/notification.card";
-import { notifications } from "../../constants/dummyData";
+import {
+  notifications,
+  transactionItems,
+  type TransactionItem,
+} from "../../constants/dummyData";
 import { formatOrdinalDate } from "../../lib/utils";
 
-export function Index() {
+import { type TableFeatures, type ColumnDef } from "@tanstack/react-table";
+
+export function DashboardIndexPage() {
+  const columns: ColumnDef<TableFeatures, TransactionItem>[] = [
+    {
+      accessorKey: "title",
+      header: "TITLE",
+      enableSorting: false,
+    },
+    {
+      accessorKey: "quoteInvoice",
+      header: "QUOTE/INVOICE",
+      enableSorting: false,
+    },
+    {
+      accessorKey: "client",
+      header: "CLIENT",
+      enableSorting: false,
+      cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
+    },
+    {
+      accessorKey: "amount",
+      header: "AMOUNT",
+      enableSorting: false,
+    },
+    {
+      accessorKey: "status",
+      header: "STATUS",
+      enableSorting: false,
+      cell: (info) => {
+        const status = info.getValue<TransactionItem["status"]>();
+        return <StatusBadge status={status} />;
+      },
+    },
+    {
+      accessorKey: "creationDate",
+      header: "CREATION DATE",
+      enableSorting: false,
+    },
+    {
+      accessorKey: "expiryDueDate",
+      header: "EXPIRY/DUE DATE",
+      enableSorting: false,
+    },
+    {
+      id: "actions",
+      header: "ACTION",
+      enableSorting: false,
+      cell: () => <CustomActionGroup />,
+    },
+  ];
+
   const kpiCardConfig: KpiCardProps[] = [
     {
       title: "Outstanding Invoices",
@@ -34,7 +93,7 @@ export function Index() {
   ];
 
   return (
-    <div className="bg-dashboard h-full w-full">
+    <div className="h-full w-full">
       {/* Main container */}
       <div className="px-6 pt-6 flex pb-50.25 flex-col gap-6">
         {/* Heading */}
@@ -77,6 +136,17 @@ export function Index() {
             })}
           </div>
           <NotificationCard notifications={notifications} />
+        </div>
+
+        <div className="flex flex-col py-4.5 gap-4.5 bg-table dashboard-card-theme rounded-[10px]">
+          <span className="w-full flex min-h-4.75 font-medium text-[16px] px-5 items-center">
+            {" "}
+            Recent Activity{" "}
+          </span>
+          <CustomDataTable
+            columns={columns}
+            data={transactionItems.slice(0, 5)}
+          />
         </div>
       </div>
     </div>

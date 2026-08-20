@@ -37,6 +37,14 @@ import poundColored from "./icons/poundColored.png";
 
 import arrowRightBlue from "./icons/arrowRightBlue.png";
 
+import openEyeIcon from "./icons/openEyeIcon.png";
+import pencilIcon from "./icons/pencilIcon.png";
+import binIcon from "./icons/binIcon.png";
+
+import searchIcon from "./icons/searchIcon.png";
+import filterIcon from "./icons/filterIcon.png";
+import ascSortIcon from "./icons/aceSortIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -75,4 +83,12 @@ export const assets = {
   poundColored,
 
   arrowRightBlue,
+
+  openEyeIcon,
+  pencilIcon,
+  binIcon,
+
+  searchIcon,
+  filterIcon,
+  ascSortIcon,
 };

@@ -22,6 +22,123 @@ export interface TransactionItem {
   expiryDueDate: string;
 }
 
+export type ClientItem = {
+  client: string;
+  company: string;
+  phone: string;
+  email: string;
+};
+
+export interface ClientDataWithFilters extends ClientItem {
+  id: string;
+  initials: string;
+  createdAt: string; // Required for "Recently Added" filter
+  activityCount: number; // Required for "Most Active" filter
+}
+
+export const mockClientData: ClientDataWithFilters[] = [
+  {
+    id: "1",
+    client: "Emma Smith",
+    initials: "ER",
+    company: "Smith & Co Builders",
+    phone: "(+44) 456-789-2002",
+    email: "es@gmail.com",
+    createdAt: "2026-08-15T10:30:00Z",
+    activityCount: 24,
+  },
+  {
+    id: "2",
+    client: "Daniel Murphy",
+    initials: "DM",
+    company: "Murphy Industries",
+    phone: "(+44) 456-789-2002",
+    email: "dm@gmail.com",
+    createdAt: "2026-08-14T14:20:00Z",
+    activityCount: 42,
+  },
+  {
+    id: "3",
+    client: "Olivia Bennett",
+    initials: "OB",
+    company: "Bennett Pvt. Ltd.",
+    phone: "(+44) 456-789-2002",
+    email: "ob@gmail.com",
+    createdAt: "2026-08-12T09:15:00Z",
+    activityCount: 12,
+  },
+  {
+    id: "4",
+    client: "James Carter",
+    initials: "JC",
+    company: "Carter Groups",
+    phone: "(+44) 456-789-2002",
+    email: "jc@gmail.com",
+    createdAt: "2026-08-10T11:45:00Z",
+    activityCount: 18,
+  },
+  {
+    id: "5",
+    client: "Sophia Turner",
+    initials: "ST",
+    company: "Turner & Turner",
+    phone: "(+44) 456-789-2002",
+    email: "st@gmail.com",
+    createdAt: "2026-08-08T16:00:00Z",
+    activityCount: 35,
+  },
+  {
+    id: "6",
+    client: "Emma Smith",
+    initials: "ER",
+    company: "Smith & Co Builders",
+    phone: "(+44) 456-789-2002",
+    email: "es@gmail.com",
+    createdAt: "2026-08-05T08:00:00Z",
+    activityCount: 24,
+  },
+  {
+    id: "7",
+    client: "Daniel Murphy",
+    initials: "DM",
+    company: "Murphy Industries",
+    phone: "(+44) 456-789-2002",
+    email: "dm@gmail.com",
+    createdAt: "2026-08-03T12:10:00Z",
+    activityCount: 42,
+  },
+  {
+    id: "8",
+    client: "Olivia Bennett",
+    initials: "OB",
+    company: "Bennett Pvt. Ltd.",
+    phone: "(+44) 456-789-2002",
+    email: "ob@gmail.com",
+    createdAt: "2026-08-02T15:30:00Z",
+    activityCount: 12,
+  },
+  {
+    id: "9",
+    client: "James Carter",
+    initials: "JC",
+    company: "Carter Groups",
+    phone: "(+44) 456-789-2002",
+    email: "jc@gmail.com",
+    createdAt: "2026-07-28T17:25:00Z",
+    activityCount: 18,
+  },
+  {
+    id: "10",
+    client: "Sophia Turner",
+    initials: "ST",
+    company: "Turner & Turner",
+    phone: "(+44) 456-789-2002",
+    email: "st@gmail.com",
+    createdAt: "2026-07-25T13:40:00Z",
+    activityCount: 35,
+  },
+];
+
 export const addressList: AddressDetail[] = [
   {
     street: "Ambawadi Road",
@@ -173,7 +290,7 @@ export const transactionItems: TransactionItem[] = [
     quoteInvoice: "QT-2025-105",
     client: "Sophia Turner",
     amount: "£2,900.00",
-    status: "Draft",
+    status: "Paid",
     creationDate: "18 Sep 2025",
     expiryDueDate: "12 Sep 2025",
   },

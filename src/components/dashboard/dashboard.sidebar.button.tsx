@@ -1,7 +1,10 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router";
+
 export type DashboardSidebarButtonProps = {
   leftIcon: string;
   buttonLabel: string;
-  clickHandler: () => void;
+  clickHandler?: () => void;
   currActive: string;
   id: string;
   toggleActive: (val: React.SetStateAction<string>) => void;
@@ -15,11 +18,15 @@ export function DashboardSidebarButton({
   id,
   toggleActive,
 }: DashboardSidebarButtonProps) {
+  const location = useLocation();
+  useEffect(() => {
+    toggleActive(location.pathname.split("/")[1]);
+  }, [location]);
+
   return (
     <button
       onClick={() => {
-        toggleActive(id);
-        clickHandler();
+        clickHandler?.();
       }}
       className={`rounded-[7px] w-30 md:w-51 h-10 flex py-2 px-3 gap-3 ${currActive === id ? "bg-sidebar-btn " : ""} flex items-center`}
     >

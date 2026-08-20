@@ -26,10 +26,34 @@
   --color-transparent-royal-blue: #466ff61a;
   --color-transparent-ming-green: #389c7b1a;
   --color-transparent-liquid-lava: #f973151a;
+
+  --color-royal-blue: #466ff6;
+  --color-ming-green: #389c7b;
+  --color-liquid-lava: #f97315;
+
   --color-american-blue: #082b60;
   --color-separator: #e4e6f4;
   --color-black-text: #2d2d2d;
   --color-table-head: #f5f6fb;
+  --color-table: #ffffff;
+  --color-sent-badge: #ffc8141a;
+  --color-paid-badge: #3ab4891a;
+  --color-overdue-badge: #f053531a;
+  --color-draft-badge: #f973151a;
+
+  --color-sent-text: #f6bd01;
+  --color-paid-text: #389c7b;
+  --color-overdue-text: #f05353;
+  --color-draft-text: #f97315;
+
+  --color-light-violet: #8c27e61a;
+  --color-dark-violet: #8c27e6;
+  --color-light-blue: #299cdb1a;
+  --color-dark-blue: #299cdb;
+
+  --color-client-secondary: #0597ff;
+
+  --color-searchbox-border: #ced1da;
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,

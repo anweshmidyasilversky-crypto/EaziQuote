@@ -1,5 +1,5 @@
 import type { RouteObject } from "react-router";
-import { AuthHeader } from "../components/auth/auth.header";
+import { AuthLayout } from "../components/auth/AuthLayout";
 import { SignInPage } from "../pages/auth/SigninPage";
 import { SignupPage } from "../pages/auth/SignupPage";
 import { UnverifiedEmail } from "../pages/auth/UnverifiedMail";
@@ -11,50 +11,71 @@ import { BusinessAddressForm } from "../pages/auth/BusinessAddressForm";
 import { createElement } from "react";
 import { ProfileCreateGuard } from "../guards/profileCreateGuard";
 import { AuthGuard } from "../guards/authGuard";
+import { DashboardIndexPage } from "../pages/dashboard/DashboardIndexPage";
+import { ClientIndexPage } from "../pages/clients/ClientIndexPage";
+import { DashboardLayout } from "../components/dashboard/dashboardLayout";
 
 export const authRoutes: RouteObject[] = [
   {
     path: "/",
-    Component: AuthHeader,
     children: [
       {
         element: createElement(AuthGuard),
         children: [
           {
-            index: true,
-            Component: SignInPage,
-          },
-          {
-            path: "signup",
-            Component: SignupPage,
-          },
-          {
-            path: "forgot-password",
-            Component: ForgotPasswordPage,
-          },
-          {
-            path: "email-verification",
-            Component: UnverifiedEmail,
-          },
-          {
-            path: "email-verified",
-            Component: EmailVerified,
+            element: createElement(AuthLayout),
+            children: [
+              {
+                index: true,
+                Component: SignInPage,
+              },
+              {
+                path: "signup",
+                Component: SignupPage,
+              },
+              {
+                path: "forgot-password",
+                Component: ForgotPasswordPage,
+              },
+              {
+                path: "email-verification",
+                Component: UnverifiedEmail,
+              },
+              {
+                path: "email-verified",
+                Component: EmailVerified,
+              },
+
+              {
+                element: createElement(ProfileCreateGuard),
+                children: [
+                  {
+                    path: "profile-setup",
+                    Component: ProfileSetupPage,
+                  },
+                  {
+                    path: "business-profile",
+                    Component: BusinessProfileForm,
+                  },
+                  {
+                    path: "business-address",
+                    Component: BusinessAddressForm,
+                  },
+                ],
+              },
+            ],
           },
 
           {
-            element: createElement(ProfileCreateGuard),
+            element: createElement(DashboardLayout),
             children: [
               {
-                path: "profile-setup",
-                Component: ProfileSetupPage,
+                path: "dashboard",
+                Component: DashboardIndexPage,
               },
               {
-                path: "business-profile",
-                Component: BusinessProfileForm,
-              },
-              {
-                path: "business-address",
-                Component: BusinessAddressForm,
+                path: "clients",
+                Component: ClientIndexPage,
               },
             ],
           },

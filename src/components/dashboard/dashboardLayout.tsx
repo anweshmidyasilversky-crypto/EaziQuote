@@ -1,11 +1,12 @@
 import { assets } from "../../assets/icons";
-import { Outlet } from "react-router";
+import { Outlet, useNavigate } from "react-router";
 import { DashboardSidebarButton } from "./dashboard.sidebar.button";
 import { useState } from "react";
 import { useAppSelector } from "../../redux/store";
 import { CustomAvatar } from "../common/customAvatar";
 export function DashboardLayout() {
   const [activeBtn, toggleActiveBtn] = useState<string>("dashboard");
+  const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
   const endDate = new Date(user.endDate);
   const btnIcon = (btnId: string, activeIcon: string, inActiveIcon: string) =>
@@ -15,12 +16,14 @@ export function DashboardLayout() {
     label: string;
     activeBtn: string;
     inactiveBtn: string;
+    clickHandler?: () => void;
   }[] = [
     {
       id: "dashboard",
       label: "Dashboard",
       activeBtn: assets.dashboardHomeActiveIcon,
       inactiveBtn: assets.dashboardHomeIcon,
+      clickHandler: () => navigate("/dashboard"),
     },
     {
       id: "quotes",
@@ -39,6 +42,9 @@ export function DashboardLayout() {
       label: "Clients",
       activeBtn: assets.clientActiveIcon,
       inactiveBtn: assets.clientIcon,
+      clickHandler: () => {
+        navigate("/clients");
+      },
     },
     {
       id: "payments",
@@ -47,7 +53,7 @@ export function DashboardLayout() {
       inactiveBtn: assets.poundIcon,
     },
     {
-      id: "preset",
+      id: "preset-quotes",
       label: "Preset Quotes",
       activeBtn: assets.presetQuotesActiveIcon,
       inactiveBtn: assets.presetQuotesIcon,
@@ -75,7 +81,7 @@ export function DashboardLayout() {
                 toggleActive={toggleActiveBtn}
                 currActive={activeBtn}
                 leftIcon={btnIcon(btn.id, btn.activeBtn, btn.inactiveBtn)}
-                clickHandler={() => {}}
+                clickHandler={btn.clickHandler}
                 buttonLabel={btn.label}
               />
             );
@@ -83,7 +89,7 @@ export function DashboardLayout() {
         </div>
       </div>
 
-      <div className="flex flex-col w-full h-screen">
+      <div className="flex flex-col w-full h-ull overflow-y-auto">
         <div className="w-full border-b-sidebar-border border-b-[0.5px] h-17.5 flex items-center px-6">
           {/* Header content spaced between */}
           <div className="w-full flex justify-between items-center">
@@ -122,7 +128,9 @@ export function DashboardLayout() {
           </div>
         </div>
 
-        <Outlet />
+        <div className="bg-dashboard w-full h-full">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

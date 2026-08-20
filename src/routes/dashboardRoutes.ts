@@ -2,22 +2,7 @@ import { createElement } from "react";
 import type { RouteObject } from "react-router";
 import { DashboardLayout } from "../components/dashboard/dashboardLayout";
 import { AuthGuard } from "../guards/authGuard";
-import { Index } from "../pages/dashboard";
+import { DashboardIndexPage } from "../pages/dashboard/DashboardIndexPage";
+import { ClientIndexPage } from "../pages/clients/ClientIndexPage";
 
-export const dashboardRoutes: RouteObject[] = [
-  {
-    element: createElement(AuthGuard),
-    children: [
-      {
-        path: "/dashboard",
-        element: createElement(DashboardLayout),
-        children: [
-          {
-            index: true,
-            Component: Index,
-          },
-        ],
-      },
-    ],
-  },
-];
+export const dashboardRoutes: RouteObject[] = [{}];

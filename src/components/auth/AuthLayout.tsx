@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import { assets } from "../../assets/icons";
 
-export function AuthHeader() {
+export function AuthLayout() {
   return (
     <div className="w-full h-full">
       <div className="w-full max-h-[14.62rem] flex justify-center items-center relative overflow-hidden">
