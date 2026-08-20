@@ -1,10 +1,9 @@
 import { assets } from "../../assets/icons";
 import { CustomBtn } from "../../components/common/customBtn";
 import {
-  createSortedRowModel,
-  rowSortingFeature,
-  tableFeatures,
+  filterFn_includesString,
   type ColumnDef,
+  type ColumnFiltersState,
   type ColumnVisibilityState,
   type TableFeatures,
 } from "@tanstack/react-table";
@@ -24,6 +23,7 @@ export function ClientIndexPage() {
     {
       accessorKey: "client",
       header: "CLIENT",
+      filterFn: filterFn_includesString,
       cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
     },
     {
@@ -61,9 +61,15 @@ export function ClientIndexPage() {
 
   const [searchParam, setSearchParam] = useState("");
   const debouncedSearchParam = useDebounce({ value: searchParam });
-  const localFilter: Partial<Record<keyof ClientDataWithFilters, string>> = {
-    client: debouncedSearchParam,
-  };
+  // const localFilter: Partial<Record<keyof ClientDataWithFilters, string>> = {
+  //   client: debouncedSearchParam,
+  // };
+  const localFilter: ColumnFiltersState = [
+    {
+      id: "client",
+      value: debouncedSearchParam,
+    },
+  ];
 
   return (
     <div className="px-6 pt-6 flex flex-col gap-6 pb-40">

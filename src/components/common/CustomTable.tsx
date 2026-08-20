@@ -13,6 +13,7 @@ import {
   globalFilteringFeature,
   columnFilteringFeature,
   createFilteredRowModel,
+  type ColumnFiltersState,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
 
@@ -24,7 +25,7 @@ interface DataTableProps<TData extends RowData> {
   customFeatures?: TableFeatures;
   hiddenCols?: ColumnVisibilityState;
   globalFilterTerm?: string;
-  localFilters?: Partial<Record<keyof TData, string>>;
+  localFilters?: ColumnFiltersState;
 }
 
 export function CustomDataTable<TData extends RowData>({
@@ -59,6 +60,9 @@ export function CustomDataTable<TData extends RowData>({
       columnVisibility: hiddenCols,
       globalFilter: globalFilterTerm,
     },
+    state: {
+      columnFilters: localFilters,
+    },
   });
 
   return (
@@ -84,14 +88,15 @@ export function CustomDataTable<TData extends RowData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  if (
-                    localFilters &&
-                    Object.keys(localFilters || {}).includes(header.id)
-                  ) {
-                    header.column.setFilterValue(
-                      localFilters[header.id as keyof TData],
-                    );
-                  }
+                  // if (
+                  //   localFilters &&
+                  //   Object.keys(localFilters || {}).includes(header.id)
+                  // ) {
+                  //   console.log(`Found filter on ${header.id}`);
+                  //   header.column.setFilterValue(
+                  //     localFilters[header.id as keyof TData],
+                  //   );
+                  // }
                   return (
                     <th
                       key={header.id}
