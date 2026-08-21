@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { addressList, type AddressDetail } from "../constants/dummyData";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -73,4 +74,8 @@ export function getFormattedTimeDiff(
 
 export function getRandomIndex(length: number): number {
   return Math.floor(Math.random() * length);
+}
+
+export function getAddress(postCode: string): AddressDetail | undefined {
+  return addressList.find((address) => address.postCode === postCode);
 }

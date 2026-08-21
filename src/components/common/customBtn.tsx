@@ -1,8 +1,12 @@
+import { Spinner } from "../ui/spinner";
+
 export type CustomBtnProps = {
   buttonLabel: string;
   leftIcon?: string;
   onClick?: () => void;
   bgColor?: string;
+  withSpinner?: boolean;
+  isSubmitting?: boolean;
 };
 
 export function CustomBtn({
@@ -10,6 +14,8 @@ export function CustomBtn({
   leftIcon,
   onClick,
   bgColor,
+  withSpinner,
+  isSubmitting,
 }: CustomBtnProps) {
   return (
     <button
@@ -18,7 +24,8 @@ export function CustomBtn({
     >
       {leftIcon && <img src={leftIcon} className="h-4 w-4" />}
       <span className="flex flex-none mih-h-[17px] w-fit font-sans font-normal text-[14px] text-nowrap">
-        {buttonLabel}
+        {withSpinner === true && isSubmitting ? <Spinner /> : buttonLabel}
+        {withSpinner === false && buttonLabel}
       </span>
     </button>
   );

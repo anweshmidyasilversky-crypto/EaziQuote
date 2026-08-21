@@ -1,11 +1,11 @@
 import { assets } from "../../assets/icons";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
-import { CustomBtn } from "../../components/common/customBtn";
+import { CustomBtn } from "../../components/common/CustomBtn";
 import { CustomDataTable } from "../../components/common/CustomTable";
-import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
+import { KpiCard, type KpiCardProps } from "../../components/common/KpiCard";
 import StatusBadge from "../../components/common/StatusBadge";
-import { NotificationCard } from "../../components/dashboard/notification.card";
+import { NotificationCard } from "../../components/dashboard/Notification.card";
 import {
   notifications,
   transactionItems,

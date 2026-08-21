@@ -31,7 +31,6 @@ export type ClientItem = {
 
 export interface ClientDataWithFilters extends ClientItem {
   id: string;
-  initials: string;
   createdAt: string; // Required for "Recently Added" filter
   activityCount: number; // Required for "Most Active" filter
 }
@@ -40,7 +39,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "1",
     client: "Emma Smith",
-    initials: "ER",
     company: "Smith & Co Builders",
     phone: "(+44) 456-789-2002",
     email: "es@gmail.com",
@@ -50,7 +48,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "2",
     client: "Daniel Murphy",
-    initials: "DM",
     company: "Murphy Industries",
     phone: "(+44) 456-789-2002",
     email: "dm@gmail.com",
@@ -60,7 +57,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "3",
     client: "Olivia Bennett",
-    initials: "OB",
     company: "Bennett Pvt. Ltd.",
     phone: "(+44) 456-789-2002",
     email: "ob@gmail.com",
@@ -70,7 +66,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "4",
     client: "James Carter",
-    initials: "JC",
     company: "Carter Groups",
     phone: "(+44) 456-789-2002",
     email: "jc@gmail.com",
@@ -80,7 +75,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "5",
     client: "Sophia Turner",
-    initials: "ST",
     company: "Turner & Turner",
     phone: "(+44) 456-789-2002",
     email: "st@gmail.com",
@@ -90,7 +84,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "6",
     client: "Emma Smith",
-    initials: "ER",
     company: "Smith & Co Builders",
     phone: "(+44) 456-789-2002",
     email: "es@gmail.com",
@@ -100,7 +93,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "7",
     client: "Daniel Murphy",
-    initials: "DM",
     company: "Murphy Industries",
     phone: "(+44) 456-789-2002",
     email: "dm@gmail.com",
@@ -110,7 +102,6 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "8",
     client: "Olivia Bennett",
-    initials: "OB",
     company: "Bennett Pvt. Ltd.",
     phone: "(+44) 456-789-2002",
     email: "ob@gmail.com",
@@ -120,23 +111,21 @@ export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "9",
     client: "James Carter",
-    initials: "JC",
     company: "Carter Groups",
     phone: "(+44) 456-789-2002",
     email: "jc@gmail.com",
     createdAt: "2026-07-28T17:25:00Z",
     activityCount: 18,
   },
-  {
-    id: "10",
-    client: "Sophia Turner",
-    initials: "ST",
-    company: "Turner & Turner",
-    phone: "(+44) 456-789-2002",
-    email: "st@gmail.com",
-    createdAt: "2026-07-25T13:40:00Z",
-    activityCount: 35,
-  },
+  // {
+  //   id: "10",
+  //   client: "Sophia Turner",
+  //   company: "Turner & Turner",
+  //   phone: "(+44) 456-789-2002",
+  //   email: "st@gmail.com",
+  //   createdAt: "2026-07-25T13:40:00Z",
+  //   activityCount: 35,
+  // },
 ];
 
 export const addressList: AddressDetail[] = [

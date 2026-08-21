@@ -54,6 +54,10 @@
   --color-client-secondary: #0597ff;
 
   --color-searchbox-border: #ced1da;
+  --color-muted: #89909d;
+
+  --color-client-creation-secondary: #ced1da;
+  --color-pagination-btn: #e4e6f4;
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,
@@ -66,6 +70,22 @@
     @apply font-sans;
     @apply text-black-text;
   }
+}
+
+@utility pagination-btn {
+  @apply cursor-pointer
+    disabled:cursor-not-allowed
+    disabled:text-placeholder-text
+    text-brand-dark
+    font-normal
+    text-[14px]
+    py-2
+    px-3
+    border
+    border-pagination-btn
+    rounded
+    max-h-8
+    text-center;
 }
 
 @utility dashboard-card-theme {

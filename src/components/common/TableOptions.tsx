@@ -4,11 +4,12 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/input-group";
-import { CustomBtn } from "./customBtn";
+import { CustomBtn } from "./CustomBtn";
 
 export type TableOptionsProp = {
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  onClick?: () => void;
 };
 
 export function TableOptions({ searchTerm, setSearchTerm }: TableOptionsProp) {

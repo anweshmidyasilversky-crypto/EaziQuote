@@ -1,9 +1,9 @@
 import { useParams } from "react-router";
-import { CustomForm } from "../../components/auth/custom.form";
+import { CustomForm } from "../../components/auth/CustomForm";
 import type { ResetPassword } from "../../types/passwordResetUpdate.type";
 import { isPasswordResetCode, resetPassword } from "../../lib/firebaseAuth";
 import { showFirebaseError } from "../../lib/firebase.errors";
-import type { CustomInputProps } from "../../components/common/customInput";
+import type { CustomInputProps } from "../../components/common/CustomInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { resetPasswordSchema } from "../../validation/password.schema";
 

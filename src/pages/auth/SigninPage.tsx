@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type UserSignInPayload } from "../../types/user.signIn.payload.type";
-import { CustomInput } from "../../components/common/customInput";
+import { CustomInput } from "../../components/common/CustomInput";
 import { useEffect, useRef, useState } from "react";
 import { userSignInSchema } from "../../validation/user.signIn.payload.schema";
 import { signIn } from "../../lib/firebaseAuth";

@@ -22,12 +22,15 @@ import { useForm } from "react-hook-form";
 import { type BusinessAddressPayload } from "../../types/businessAddress.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { businessAddressSchema } from "../../validation/businessAddress.payload.schema";
-import { CustomInput } from "../../components/common/customInput";
+import { CustomInput } from "../../components/common/CustomInput";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import type { UserType } from "../../types/user.type";
 import { toast } from "react-toastify";
+import { PostCodeSelectComboBox } from "../../components/common/PostCodeSelectComboBox";
+import { get } from "firebase/database";
+import { getAddress } from "../../lib/utils";
 
 export function BusinessAddressForm() {
   const [postCode, selectPostCode] = useState<string | null>(null);
@@ -47,9 +50,7 @@ export function BusinessAddressForm() {
     });
 
   const getAddressFromPostalCode = (postCode: string) => {
-    const address = addressList.find(
-      (address) => address.postCode === postCode,
-    );
+    const address = getAddress(postCode);
 
     if (address) {
       Object.keys(address).map((key) => {
@@ -80,29 +81,12 @@ export function BusinessAddressForm() {
         </CardHeader>
 
         <CardContent className="w-full flex flex-col gap-5 justify-center">
-          <Combobox
-            items={postalCodes}
-            value={postCode}
-            onValueChange={(value) => {
-              selectPostCode(value);
-              getAddressFromPostalCode(value as string);
-            }}
-          >
-            <ComboboxInput placeholder="Search postcode" />
-            <ComboboxContent>
-              <ComboboxEmpty> No postcodes matched </ComboboxEmpty>
-              <ComboboxList className={"bg-white z-10"}>
-                {postalCodes.map((postalCode) => {
-                  return (
-                    <ComboboxItem key={postalCode} value={postalCode}>
-                      {" "}
-                      {postalCode}{" "}
-                    </ComboboxItem>
-                  );
-                })}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+          <PostCodeSelectComboBox
+            postalCodes={postalCodes}
+            postCode={postCode}
+            selectPostCode={selectPostCode}
+            addressSetter={getAddressFromPostalCode}
+          />
 
           <CustomInput
             control={control}

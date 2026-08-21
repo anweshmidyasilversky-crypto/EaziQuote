@@ -2,8 +2,8 @@ import { toast } from "react-toastify";
 import { showFirebaseError } from "../../lib/firebase.errors";
 import { passwordResetMail } from "../../lib/firebaseAuth";
 import { useNavigate } from "react-router";
-import { CustomForm } from "../../components/auth/custom.form";
-import type { CustomInputProps } from "../../components/common/customInput";
+import { CustomForm } from "../../components/auth/CustomForm";
+import type { CustomInputProps } from "../../components/common/CustomInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { emailSchema } from "../../validation/user.signIn.payload.schema";
 

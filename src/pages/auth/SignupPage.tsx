@@ -3,7 +3,7 @@ import { type UserSignupPayload } from "../../types/user.signup.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { UserSignupPayloadSchema } from "../../validation/user.signup.payload.schema";
 import { useRef, useState } from "react";
-import { CustomInput } from "../../components/common/customInput";
+import { CustomInput } from "../../components/common/CustomInput";
 import { Spinner } from "../../components/ui/spinner";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";

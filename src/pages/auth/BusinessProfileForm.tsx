@@ -14,14 +14,14 @@ import { BusinessProfilePayloadSchema } from "../../validation/businessProfile.s
 import {
   CustomInput,
   type SelectOptions,
-} from "../../components/common/customInput";
+} from "../../components/common/CustomInput";
 import { CircleAlertIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import { BrandColorPreview } from "../../components/auth/brandColor.preview";
+import { BrandColorPreview } from "../../components/auth/BrandColor.preview";
 import type { UserType } from "../../types/user.type";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
@@ -159,7 +159,7 @@ export function BusinessProfileForm() {
             </div>
           </CardContent>
 
-          <CardFooter className="w-full ring-0 border-none m-0 pt-0">
+          <CardFooter className="w-full ring-0 border-none m-0 pt-0 bg-transparent">
             <div className="w-full flex flex-col gap-5">
               <div className="flex items-center gap-3 h-5.5">
                 <label

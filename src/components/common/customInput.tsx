@@ -7,7 +7,7 @@ import {
 } from "react-hook-form";
 import { Eye, EyeOff, type LucideIcon } from "lucide-react";
 import { Switch } from "../ui/switch";
-import { ImageInput } from "../auth/imageInput";
+import { ImageInput } from "../auth/ImageInput";
 import { assets } from "../../assets/icons";
 
 export type SelectOptions = {
@@ -67,11 +67,11 @@ export function CustomInput<T extends FieldValues>({
     "border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
 
   return (
-    <div className="flex flex-col items-start p-0 gap-2 w-full max-w-96.5 min-h-17.25 self-stretch flex-none">
+    <div className="flex flex-col items-start p-0 gap-2 w-full min-h-17.25 self-stretch flex-none">
       {withLabel && (
         <label
           htmlFor={fieldName as string}
-          className=" h-4.25 font-normal text-[14px] leading-4.25 text-[#2D2D2D] flex justify-center gap-1.5 items-center"
+          className=" h-4.25 font-normal text-[14px] leading-4.25 text-black-text flex justify-center gap-1.5 items-center"
         >
           {labelText}{" "}
           <button
@@ -101,10 +101,7 @@ export function CustomInput<T extends FieldValues>({
                   name={fieldName}
                   value={fieldValue}
                   onChange={(event) => onChange(event.target.value)}
-                  className={
-                    className ??
-                    `${fieldStyle} select-input-style ${error ? errorStateStyle : validStateStyle}  `
-                  }
+                  className={`${className} ${fieldStyle} select-input-style ${error ? errorStateStyle : validStateStyle}  `}
                 >
                   {selectOptions?.map((selectOption) => {
                     return (
@@ -135,12 +132,9 @@ export function CustomInput<T extends FieldValues>({
                     placeholder={placeholder ?? "......"}
                     value={fieldValue}
                     onChange={onChange}
-                    className={
-                      className ??
-                      `${fieldStyle} ${
-                        error ? errorStateStyle : validStateStyle
-                      }`
-                    }
+                    className={` ${fieldStyle} ${
+                      error ? errorStateStyle : validStateStyle
+                    } ${className}`}
                   />
                   {isPasswordField ? (
                     <button
