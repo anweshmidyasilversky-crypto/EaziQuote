@@ -58,6 +58,10 @@
 
   --color-client-creation-secondary: #ced1da;
   --color-pagination-btn: #e4e6f4;
+
+  --color-filter-selection-header: #f5f6fb;
+
+  --color-filter-sheet-secondary: #ced4da;
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,
@@ -69,6 +73,9 @@
   body {
     @apply font-sans;
     @apply text-black-text;
+  }
+  input[type="radio"] {
+    @apply accent-brand-dark h-5 w-5;
   }
 }
 

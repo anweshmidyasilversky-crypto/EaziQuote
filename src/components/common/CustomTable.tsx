@@ -18,6 +18,7 @@ import {
   type PaginationState,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
+import { memo } from "react";
 
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<TableFeatures, TData>[];
@@ -29,12 +30,11 @@ interface DataTableProps<TData extends RowData> {
   globalFilterTerm?: string;
   localFilters?: ColumnFiltersState;
   showPaginated?: boolean;
-  totalRecords?: number;
   pagination?: PaginationState;
   setPagination?: React.Dispatch<React.SetStateAction<PaginationState>>;
 }
 
-export function CustomDataTable<TData extends RowData>({
+function CustomTable<TData extends RowData>({
   columns,
   data,
   title,
@@ -44,10 +44,10 @@ export function CustomDataTable<TData extends RowData>({
   globalFilterTerm,
   localFilters,
   showPaginated,
-  totalRecords,
   pagination,
   setPagination,
 }: DataTableProps<TData>) {
+  const totalRecords = data.length;
   let startItemNo: number | undefined;
   let endItemNo: number | undefined;
   if (pagination) {
@@ -220,3 +220,5 @@ export function CustomDataTable<TData extends RowData>({
     </div>
   );
 }
+
+export const CustomDataTable = memo(CustomTable) as typeof CustomTable;

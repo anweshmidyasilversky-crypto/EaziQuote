@@ -28,7 +28,7 @@ export function DashboardSidebarButton({
       onClick={() => {
         clickHandler?.();
       }}
-      className={`rounded-[7px] w-30 md:w-51 h-10 flex py-2 px-3 gap-3 ${currActive === id ? "bg-sidebar-btn " : ""} flex items-center`}
+      className={`rounded-[7px] cursor-pointer max-w-51 w-30 md:w-51 min-h-10 flex py-2 px-3 gap-3 ${currActive === id ? "bg-sidebar-btn " : ""} flex items-center`}
     >
       <img src={leftIcon} className="h-6 w-6" />
       <span

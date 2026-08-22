@@ -10,9 +10,14 @@ export type TableOptionsProp = {
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   onClick?: () => void;
+  toggleFilterSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export function TableOptions({ searchTerm, setSearchTerm }: TableOptionsProp) {
+export function TableOptions({
+  searchTerm,
+  setSearchTerm,
+  toggleFilterSheetOpen,
+}: TableOptionsProp) {
   return (
     <div className="flex justify-between min-h-9.5 px-5">
       <InputGroup className="flex gap-2.25 rounded-[7px] min-h-9.5 max-w-75 ring-0 border border-searchbox-border focus-within:ring-0 focus-within:border focus-within:border-searchbox-border has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot=input-group-control]:focus-visible]:border-searchbox-border">
@@ -34,6 +39,7 @@ export function TableOptions({ searchTerm, setSearchTerm }: TableOptionsProp) {
         leftIcon={assets.filterIcon}
         buttonLabel="Filters"
         bgColor="bg-client-secondary"
+        onClick={() => toggleFilterSheetOpen((curr) => !curr)}
       />
     </div>
   );

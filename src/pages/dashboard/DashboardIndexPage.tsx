@@ -13,7 +13,7 @@ import {
 } from "../../constants/dummyData";
 import { formatOrdinalDate } from "../../lib/utils";
 
-import { type TableFeatures, type ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 
 export function DashboardIndexPage() {
   const columns: ColumnDef<TableFeatures, TransactionItem>[] = [
@@ -95,7 +95,7 @@ export function DashboardIndexPage() {
   return (
     <div className="h-full w-full">
       {/* Main container */}
-      <div className="px-6 pt-6 flex pb-50.25 flex-col gap-6">
+      <div className="px-6 pt-6 flex pb-5 flex-col gap-6">
         {/* Heading */}
         <div className="flex w-full h-13.5 justify-between">
           {/* Date and greating */}

@@ -38,7 +38,7 @@ export function ClientCreationForm({
     country: "",
   };
 
-  const { control, setValue, clearErrors, handleSubmit } =
+  const { control, setValue, clearErrors, handleSubmit, reset } =
     useForm<ClientCreationPayload>({
       defaultValues: initialValue,
       resolver: yupResolver(clientCreationSchema),
@@ -67,8 +67,15 @@ export function ClientCreationForm({
       createdAt: new Date().toISOString(),
       activityCount: 0,
     };
-    setClientData((curr) => [...curr, newClient]);
+    setClientData((curr) =>
+      [...curr, newClient].toSorted(
+        (client1, client2) =>
+          new Date(client2.createdAt).getTime() -
+          new Date(client1.createdAt).getTime(),
+      ),
+    );
     toggleIsSubmitting(false);
+    reset(initialValue);
     formCloseAction?.((curr) => !curr);
   };
 

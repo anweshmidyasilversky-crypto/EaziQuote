@@ -16,8 +16,8 @@ export type SelectOptions = {
 }[];
 
 export type CustomInputProps<T extends FieldValues> = {
-  control: Control<T>;
-  name: Path<T>;
+  control?: Control<T>;
+  name?: Path<T>;
   fieldName: string;
   inptType?: string;
   placeholder?: string;
@@ -30,6 +30,7 @@ export type CustomInputProps<T extends FieldValues> = {
   imgAlt?: string;
   imgAltCls?: string;
   imgAltAlign?: "center" | "end";
+  orientation?: "verticle" | "horizontal";
 };
 
 function formatLabel(fieldName: string) {
@@ -55,6 +56,7 @@ export function CustomInput<T extends FieldValues>({
   imgAltAlign,
   withLabel = true,
   disabled = false,
+  orientation,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
@@ -67,7 +69,9 @@ export function CustomInput<T extends FieldValues>({
     "border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
 
   return (
-    <div className="flex flex-col items-start p-0 gap-2 w-full min-h-17.25 self-stretch flex-none">
+    <div
+      className={`flex ${["verticle", undefined].includes(orientation) ? "flex-col" : ""} items-start p-0 gap-2 w-full min-h-17.25 self-stretch flex-none`}
+    >
       {withLabel && (
         <label
           htmlFor={fieldName as string}
@@ -78,7 +82,6 @@ export function CustomInput<T extends FieldValues>({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log("clicked");
               fieldBadgeAction?.();
             }}
           >
@@ -87,7 +90,7 @@ export function CustomInput<T extends FieldValues>({
         </label>
       )}
       <Controller
-        name={name}
+        name={name as Path<T>}
         control={control}
         render={({ field: { onChange, value }, fieldState: { error } }) => {
           const fieldValue = value ?? "";

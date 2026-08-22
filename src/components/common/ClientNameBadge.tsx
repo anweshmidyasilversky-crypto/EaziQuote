@@ -9,7 +9,9 @@ export type ClientNameBadgeProps = {
 export function ClientNameBadge({ name }: ClientNameBadgeProps) {
   const randomColConfig = colorThemes[getRandomIndex(colorThemes.length)];
   const [firstName, lastName] = name.split(" ");
-  let initials = firstName[0].toUpperCase() + lastName?.at(0)?.toUpperCase();
+  let initials =
+    firstName[0].toUpperCase() +
+    (lastName ? lastName.at(0)?.toUpperCase() : "");
   return (
     <div className="flex items-center min-h-8 gap-2 w-fit">
       <CustomAvatar

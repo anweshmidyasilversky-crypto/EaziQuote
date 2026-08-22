@@ -67,7 +67,7 @@ export function DashboardLayout() {
   ];
   return (
     <div className="w-full h-full flex">
-      <div className="bg-sidebar md:w-63 max-w-63 h-screen border-r-sidebar-border border-r-[0.5px]">
+      <div className="bg-sidebar md:w-75 max-w-75 h-screen border-r-sidebar-border border-r-[0.5px]">
         <div className="flex justify-center items-center mb-10">
           <img src={assets.sidebarLogo} className="h-6 mt-6 md:max-w-32.5" />
         </div>

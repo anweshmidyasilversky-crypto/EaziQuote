@@ -7,6 +7,7 @@ export type CustomBtnProps = {
   bgColor?: string;
   withSpinner?: boolean;
   isSubmitting?: boolean;
+  btncls?: string;
 };
 
 export function CustomBtn({
@@ -16,10 +17,11 @@ export function CustomBtn({
   bgColor,
   withSpinner,
   isSubmitting,
+  btncls,
 }: CustomBtnProps) {
   return (
     <button
-      className={`h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth ${bgColor}`}
+      className={`h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth ${bgColor} ${btncls}`}
       onClick={onClick}
     >
       {leftIcon && <img src={leftIcon} className="h-4 w-4" />}
