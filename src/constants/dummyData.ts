@@ -35,6 +35,94 @@ export interface ClientDataWithFilters extends ClientItem {
   activityCount: number; // Required for "Most Active" filter
 }
 
+export enum ClientActivityStatus {
+  Paid = "Paid",
+  Overdue = "Overdue",
+  Sent = "Sent",
+  Rejected = "Rejected",
+  Due = "Due",
+  Draft = "Draft",
+  Approved = "Approved",
+  Completed = "Completed",
+  Cancelled = "Cancelled",
+}
+
+export interface ClientActivity {
+  id: string;
+  title: string;
+  quoteInvoice: string;
+  amount: number;
+  status: ClientActivityStatus;
+  creationDate: string;
+  expiryDueDate: string;
+}
+
+export const mockClientActivity: ClientActivity[] = [
+  {
+    id: "1",
+    title: "Office Interior Design",
+    quoteInvoice: "QT-2025-101",
+    amount: 48500,
+    status: ClientActivityStatus.Sent,
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "2",
+    title: "Residential Plumbing Works",
+    quoteInvoice: "QT-2025-102",
+    amount: 4850,
+    status: ClientActivityStatus.Draft,
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "3",
+    title: "Retail Store Interior Fit-Out",
+    quoteInvoice: "INV-2025-103",
+    amount: 4850,
+    status: ClientActivityStatus.Overdue,
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "4",
+    title: "Electrical Wiring & Lighting",
+    quoteInvoice: "INV-2025-104",
+    amount: 4850,
+    status: ClientActivityStatus.Paid,
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "5",
+    title: "Painting & Finishing Services",
+    quoteInvoice: "QT-2025-105",
+    amount: 4850,
+    status: ClientActivityStatus.Draft,
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "6",
+    title: "Office Interior Design",
+    quoteInvoice: "QT-2025-101",
+    amount: 4850,
+    status: ClientActivityStatus.Sent,
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+  {
+    id: "7",
+    title: "Residential Plumbing Works",
+    quoteInvoice: "QT-2025-102",
+    amount: 4850,
+    status: ClientActivityStatus.Draft,
+    creationDate: "12 Sep 2025",
+    expiryDueDate: "12 Sep 2025",
+  },
+];
+
 export const mockClientData: ClientDataWithFilters[] = [
   {
     id: "1",
@@ -117,15 +205,15 @@ export const mockClientData: ClientDataWithFilters[] = [
     createdAt: "2026-07-28T17:25:00Z",
     activityCount: 18,
   },
-  // {
-  //   id: "10",
-  //   client: "Sophia Turner",
-  //   company: "Turner & Turner",
-  //   phone: "(+44) 456-789-2002",
-  //   email: "st@gmail.com",
-  //   createdAt: "2026-07-25T13:40:00Z",
-  //   activityCount: 35,
-  // },
+  {
+    id: "10",
+    client: "Sophia Turner",
+    company: "Turner & Turner",
+    phone: "(+44) 456-789-2002",
+    email: "st@gmail.com",
+    createdAt: "2026-07-25T13:40:00Z",
+    activityCount: 35,
+  },
 ];
 
 export const addressList: AddressDetail[] = [

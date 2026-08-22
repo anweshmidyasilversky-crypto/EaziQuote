@@ -45,6 +45,12 @@ import searchIcon from "./icons/searchIcon.png";
 import filterIcon from "./icons/filterIcon.png";
 import ascSortIcon from "./icons/aceSortIcon.png";
 
+import greenTickIcon from "./icons/greenTickIcon.png";
+import redPoundIcon from "./icons/redPoundIcon.png";
+import greenPoundIcon from "./icons/greenPoundIcon.png";
+
+import moreIcon from "./icons/moreIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -91,4 +97,10 @@ export const assets = {
   searchIcon,
   filterIcon,
   ascSortIcon,
+
+  greenTickIcon,
+  redPoundIcon,
+  greenPoundIcon,
+
+  moreIcon,
 };

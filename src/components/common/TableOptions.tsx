@@ -7,10 +7,10 @@ import {
 import { CustomBtn } from "./CustomBtn";
 
 export type TableOptionsProp = {
-  searchTerm: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  searchTerm?: string;
+  setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
   onClick?: () => void;
-  toggleFilterSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleFilterSheetOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export function TableOptions({
@@ -31,7 +31,7 @@ export function TableOptions({
         <InputGroupInput
           placeholder="Search clients"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => setSearchTerm?.(event.target.value)}
         />
       </InputGroup>
 
@@ -39,7 +39,7 @@ export function TableOptions({
         leftIcon={assets.filterIcon}
         buttonLabel="Filters"
         bgColor="bg-client-secondary"
-        onClick={() => toggleFilterSheetOpen((curr) => !curr)}
+        onClick={() => toggleFilterSheetOpen?.((curr) => !curr)}
       />
     </div>
   );

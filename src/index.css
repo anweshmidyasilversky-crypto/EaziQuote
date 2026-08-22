@@ -63,6 +63,10 @@
 
   --color-filter-sheet-secondary: #ced4da;
 
+  --color-breadcrumb-separator: #89909d;
+
+  --color-client-detail-secondary: #ced1da;
+
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,
@@ -77,6 +81,9 @@
   }
   input[type="radio"] {
     @apply accent-brand-dark h-5 w-5;
+  }
+  button {
+    @apply enabled:cursor-pointer transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
   }
 }
 

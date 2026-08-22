@@ -1,3 +1,4 @@
+import type { useRender } from "@base-ui/react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export type CustomAvatarProps = {
@@ -9,9 +10,10 @@ export function CustomAvatar({
   src,
   fallback,
   fallbackCls,
-}: CustomAvatarProps) {
+  className,
+}: CustomAvatarProps & useRender.ComponentProps<"div">) {
   return (
-    <div className="h-8 w-8">
+    <div className={`h-8 w-8 ${className}`}>
       <Avatar className={"after:border-none"}>
         <AvatarImage src={src} />
         <AvatarFallback className={fallbackCls}> {fallback} </AvatarFallback>

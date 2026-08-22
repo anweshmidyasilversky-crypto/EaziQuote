@@ -21,8 +21,10 @@ import { TableOptions } from "../../components/common/TableOptions";
 
 import { ClientCreationForm } from "../../components/clients/ClientCreationForm";
 import { TableFilterSheet } from "../../components/common/TableFilterSheet";
+import { useNavigate } from "react-router";
 
 export function ClientIndexPage() {
+  const navigate = useNavigate();
   const columns = useMemo(
     () =>
       [
@@ -56,7 +58,14 @@ export function ClientIndexPage() {
           id: "actions",
           header: "ACTION",
           enableSorting: false,
-          cell: () => <CustomActionGroup />,
+          cell: (info) => {
+            const client = info.row.original;
+            return (
+              <CustomActionGroup
+                openFn={() => navigate(`/clients/${client.id}`)}
+              />
+            );
+          },
         },
       ] as ColumnDef<TableFeatures, ClientDataWithFilters>[],
     [],

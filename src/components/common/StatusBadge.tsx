@@ -1,5 +1,7 @@
+import type { ClientActivityStatus } from "../../constants/dummyData";
+
 export type StatusBadgeProps = {
-  status: "Sent" | "Paid" | "Overdue" | "Draft";
+  status: "Sent" | "Paid" | "Overdue" | "Draft" | ClientActivityStatus;
 };
 
 const statusColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -7,6 +9,11 @@ const statusColorMap: Record<StatusBadgeProps["status"], string> = {
   Paid: "bg-paid-badge",
   Overdue: "bg-overdue-badge",
   Draft: "bg-draft-badge",
+  Rejected: "bg-overdue-badge",
+  Due: "bg-draft-badge",
+  Approved: "bg-paid-badge",
+  Completed: "bg-paid-badge",
+  Cancelled: "bg-paid-badge",
 };
 
 const textColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -14,6 +21,11 @@ const textColorMap: Record<StatusBadgeProps["status"], string> = {
   Paid: "text-paid-text",
   Overdue: "text-overdue-text",
   Draft: "text-draft-text",
+  Rejected: "text-overdue-badge",
+  Due: "text-draft-badge",
+  Approved: "text-paid-badge",
+  Completed: "text-paid-badge",
+  Cancelled: "text-paid-badge",
 };
 
 function StatusBadge({ status }: StatusBadgeProps) {
