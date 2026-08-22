@@ -83,11 +83,11 @@ export function ClientCreationForm({
   return (
     <>
       {isFormOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 animate-in fade-in-10">
           <div className="flex min-h-screen py-8 justify-center">
-            <div className="w-[calc(100%-2rem)] max-w-125 h-fit bg-white opacity-100 rounded-[7px]">
+            <div className="w-[calc(100%-2rem)] max-w-125 h-fit bg-white opacity-100 rounded-[7px] ">
               {/* Modal */}
-              <div className="flex flex-col gap-6 w-full">
+              <div className="flex flex-col gap-6 w-full ">
                 {/* Header */}
                 <div className="flex justify-between p-5 min-h-14.75 bg-table-head rounded-[7px] overflow-hidden">
                   <span className="font-medium text-[16px] min-h-4.75">
