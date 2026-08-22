@@ -76,6 +76,7 @@ export function ClientCreationForm({
     );
     toggleIsSubmitting(false);
     reset(initialValue);
+    selectPostCode("");
     formCloseAction?.((curr) => !curr);
   };
 
@@ -94,7 +95,7 @@ export function ClientCreationForm({
                     Add Client{" "}
                   </span>
                   <button
-                    className="md:w-4 md:h-4"
+                    className="md:w-4 md:h-4 cursor-pointer"
                     onClick={() => formCloseAction?.((curr) => !curr)}
                   >
                     <XIcon className="shimmer-color-muted" />
@@ -102,14 +103,13 @@ export function ClientCreationForm({
                 </div>
 
                 {/* Form fields */}
-                <div className="flex flex-col w-full px-5 gap-4 justify-center items-center">
+                <div className="flex flex-col w-full px-5 gap-4 justify-center items-center md:[&_input]:max-w-115">
                   <CustomInput
                     control={control}
                     name="name"
                     fieldName="Client Name"
                     inptType="text"
                     placeholder="Full name"
-                    className="md:max-w-115"
                   />
 
                   <CustomInput
@@ -118,7 +118,6 @@ export function ClientCreationForm({
                     fieldName="Company Name"
                     inptType="text"
                     placeholder="Company name"
-                    className="md:max-w-115"
                   />
 
                   <CustomInput
@@ -127,7 +126,6 @@ export function ClientCreationForm({
                     fieldName="Phone"
                     inptType="text"
                     placeholder="Phone number"
-                    className="md:max-w-115"
                   />
 
                   <CustomInput
@@ -136,7 +134,6 @@ export function ClientCreationForm({
                     fieldName="Email"
                     inptType="text"
                     placeholder="Email address"
-                    className="md:max-w-115"
                   />
 
                   <Separator className={"bg-client-creation-secondary"} />
@@ -154,7 +151,6 @@ export function ClientCreationForm({
                     fieldName="Street Address"
                     inptType="text"
                     placeholder="Street address"
-                    className="md:max-w-115"
                   />
 
                   <CustomInput
@@ -163,7 +159,6 @@ export function ClientCreationForm({
                     fieldName="City"
                     inptType="text"
                     placeholder="City"
-                    className="md:max-w-115"
                   />
 
                   <CustomInput
@@ -172,7 +167,6 @@ export function ClientCreationForm({
                     fieldName="Postcode"
                     inptType="text"
                     placeholder="Postcode"
-                    className="md:max-w-115"
                   />
 
                   <CustomInput
@@ -181,7 +175,6 @@ export function ClientCreationForm({
                     fieldName="Country"
                     inptType="text"
                     placeholder="Country"
-                    className="md:max-w-115"
                   />
                 </div>
 
