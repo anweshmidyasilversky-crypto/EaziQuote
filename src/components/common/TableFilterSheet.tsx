@@ -43,6 +43,22 @@ export function TableFilterSheet({
             </span>
           </SheetHeader>
 
+          {withDateRange && (
+            <div className="my-6 min-h-25.5 flex flex-col justify-between items-center">
+              <span className="uppercase text-placeholder-text min-h-4.25 font-medium">
+                {" "}
+                Date Range{" "}
+              </span>
+
+              <div className="min-h-17.25 flex justify-between">
+                <div className="flex flex-col gap-2">
+                  <span> Start Date </span>
+                  <InputGroup></InputGroup>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Content */}
           {children}
 
