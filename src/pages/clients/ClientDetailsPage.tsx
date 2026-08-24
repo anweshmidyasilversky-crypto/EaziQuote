@@ -7,82 +7,202 @@ import {
 import {
   ClientActivityStatus,
   mockClientActivity,
-  mockClientData,
+  PaymentActivityStatus,
+  paymentData,
   type ClientActivity,
+  type ClientDataWithFilters,
+  type PaymentData,
 } from "../../constants/dummyData";
 import { ChevronRight } from "lucide-react";
-import type {
-  ColumnDef,
-  TableFeature,
-  TableFeatures,
+import {
+  filterFn_includesString,
+  type ColumnDef,
+  type ColumnFiltersState,
+  type PaginationState,
+  type TableFeatures,
 } from "@tanstack/react-table";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { CustomBtn } from "../../components/common/CustomBtn";
 import { TableOptions } from "../../components/common/TableOptions";
+import { useDebounce } from "../../hooks/debounce.hook";
+import { Separator } from "../../components/ui/separator";
+import MoreOptionsPopup from "../../components/clients/MoreOptionsPopup";
+import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
+import { formatCurrency, getClient, getInitials } from "../../lib/utils";
+import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
+import type { DefaultValues } from "react-hook-form";
+import { useAppSelector } from "../../redux/store";
+import { ClientForm } from "../../components/clients/ClientForm";
 
 export function ClientDetailsPage() {
   const param = useParams<{ id: string }>();
+  const user = useAppSelector((state) => state.user);
+  const [clientCredential, setclientCredential] = useState(
+    getClient(param.id as string) ?? (getClient("1") as ClientDataWithFilters),
+  );
   const [currTable, toggleCurrTable] = useState<"activity" | "payment">(
     "activity",
   );
-  const getClient = (clientId: string) => {
-    return mockClientData.find((client) => client.id === clientId);
-  };
+  const [searchTearm, setSearchTerm] = useState<string>("");
+  const debouncedVal = useDebounce({ value: searchTearm, delay: 500 });
+  const [shownMoreOptions, toggleMoreOptions] = useState<boolean>(false);
+  const [editPopupOpen, toggleEditPopupOpen] = useState<boolean>(false);
+  const [contactInfoOpen, toggleContactInfoOpen] = useState<boolean>(false);
+  const [tableData, setTableData] = useState<ClientActivity[] | PaymentData[]>(
+    mockClientActivity,
+  );
 
-  const clientCredential = getClient(param.id as string);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 5,
+  });
+
+  useEffect(() => {
+    setTableData(currTable === "activity" ? mockClientActivity : paymentData);
+    setPagination({
+      pageIndex: 0,
+      pageSize: 5,
+    });
+  }, [currTable]);
+
+  const localFilters: ColumnFiltersState = useMemo(
+    () => [
+      {
+        id: "title",
+        value: debouncedVal,
+      },
+    ],
+    [debouncedVal],
+  );
+
   let initial = "AC";
   if (clientCredential) {
-    const [fname, lname] = clientCredential.client.split(" ");
-    initial = fname[0].toUpperCase() + (lname ? lname[0].toUpperCase() : "");
+    initial = getInitials(clientCredential.client);
   }
 
-  const activityTableColums: ColumnDef<TableFeatures, ClientActivity>[] = [
-    {
-      accessorKey: "title",
-      header: "TITLE",
-    },
-    {
-      accessorKey: "quoteInvoice",
-      header: "QUOTE/INVOICE",
-    },
-    {
-      accessorKey: "amount",
-      header: "AMOUNT",
-      cell: (info) =>
-        new Intl.NumberFormat("en-GB", {
-          style: "currency",
-          currency: "GBP",
-        }).format(info.getValue<number>()),
-    },
-    {
-      accessorKey: "status",
-      header: "STATUS",
-      cell: (info) => {
-        const status = info.getValue<ClientActivityStatus>();
-        return <StatusBadge status={status} />;
-      },
-    },
-    {
-      accessorKey: "creationDate",
-      header: "CREATION DATE",
-    },
-    {
-      accessorKey: "expiryDueDate",
-      header: "EXPIRY/DUE DATE",
-    },
-    {
-      id: "actions",
-      header: "ACTION",
-      cell: ({ row }) => {
-        const activity = row.original;
+  const activityTableColums: ColumnDef<TableFeatures, ClientActivity>[] =
+    useMemo(
+      () => [
+        {
+          accessorKey: "title",
+          header: "TITLE",
+          enableSorting: false,
+          filterFn: filterFn_includesString,
+        },
+        {
+          accessorKey: "quoteInvoice",
+          header: "QUOTE/INVOICE",
+          enableSorting: false,
+        },
+        {
+          accessorKey: "amount",
+          header: "AMOUNT",
+          cell: (info) => formatCurrency(info.getValue<number>()),
+        },
+        {
+          accessorKey: "status",
+          header: "STATUS",
+          cell: (info) => {
+            const status = info.getValue<ClientActivityStatus>();
+            return <StatusBadge status={status} />;
+          },
+          enableSorting: false,
+        },
+        {
+          accessorKey: "creationDate",
+          header: "CREATION DATE",
+          enableSorting: false,
+        },
+        {
+          accessorKey: "expiryDueDate",
+          header: "EXPIRY/DUE DATE",
+          enableSorting: false,
+        },
+        {
+          id: "actions",
+          header: "ACTION",
+          cell: ({ row }) => {
+            const activity = row.original;
 
-        return <CustomActionGroup />;
+            return <CustomActionGroup />;
+          },
+          enableSorting: false,
+        },
+      ],
+      [],
+    );
+
+  const paymentColumns: ColumnDef<TableFeatures, PaymentData>[] = useMemo(
+    () => [
+      {
+        accessorKey: "id",
+        header: "ID",
+        enableSorting: false,
       },
-    },
-  ];
+      {
+        accessorKey: "creationDate",
+        header: "DATE",
+        enableSorting: false,
+      },
+      {
+        accessorKey: "quoteInvoice",
+        header: "TYPE",
+        enableSorting: false,
+      },
+      {
+        accessorKey: "amount",
+        header: "AMOUNT",
+        cell: (info) => formatCurrency(info.getValue<number>()),
+        enableSorting: false,
+      },
+      {
+        accessorKey: "allocated",
+        header: "ALLOCATED",
+        cell: (info) => formatCurrency(info.getValue<number>()),
+        enableSorting: false,
+      },
+      {
+        accessorKey: "credit",
+        header: "CREDIT",
+        cell: (info) => formatCurrency(info.getValue<number>()),
+        enableSorting: false,
+      },
+      {
+        accessorKey: "status",
+        header: "STATUS",
+        cell: (info) => {
+          const status = info.getValue<PaymentActivityStatus>();
+
+          return <StatusBadge status={status} />;
+        },
+        enableSorting: false,
+      },
+      {
+        accessorKey: "method",
+        header: "METHOD",
+        enableSorting: false,
+      },
+      {
+        id: "actions",
+        header: "ACTION",
+        cell: ({ row }) => {
+          const payment = row.original;
+
+          return (
+            <CustomActionGroup
+              paymentActionGroup={true}
+              paymentPending={payment.status === PaymentActivityStatus.Pending}
+            />
+          );
+        },
+        enableSorting: false,
+      },
+    ],
+    [],
+  );
 
   const clientActivitySummary: ActivitySummaryProps["summaryConfig"] = [
     {
@@ -111,6 +231,31 @@ export function ClientDetailsPage() {
       summary: "£5000",
     },
   ];
+
+  const updateClient = (data: ClientEditPayload) => {
+    const { name: client, companyName: company } = data;
+    setclientCredential({
+      ...clientCredential,
+      ...data,
+      client: client as string,
+      company: company as string,
+    });
+    toggleEditPopupOpen(false);
+  };
+
+  const clientEditDefaultValues: DefaultValues<ClientEditPayload> = {
+    name: clientCredential.client,
+    companyName: clientCredential.company,
+    phone: clientCredential.phone,
+    email: clientCredential.email,
+    street: user.street,
+    city: user.city,
+    postCode: user.postCode,
+    country: user.country,
+  };
+
+  const isActivityTable = currTable === "activity";
+
   return (
     <div>
       {/* Heading and breadcrumb */}
@@ -142,7 +287,7 @@ export function ClientDetailsPage() {
                 </span>
               </div>
               <div className="flex flex-1 flex-col items-center">
-                <span className="font-semibold text-lg md:text-xl">
+                <span className="font-semibold text-lg md:text-xl text-nowrap">
                   {" "}
                   {clientCredential?.client ?? "Alexander Christopher"}{" "}
                 </span>
@@ -153,19 +298,31 @@ export function ClientDetailsPage() {
               </div>
             </div>
 
-            <button className="flex items-center justify-center bg-[#F5F6FB] w-9 h-9 rounded-[10px] shrink-0">
-              <img
-                src={assets.moreIcon}
-                alt="More options"
-                className="h-4 w-3 object-contain"
-              />
-            </button>
+            {/* More options */}
+            <MoreOptionsPopup
+              isPopupOpen={shownMoreOptions}
+              togglePopupOpen={toggleMoreOptions}
+              editAction={() => toggleEditPopupOpen((curr) => !curr)}
+              contactInfoAction={() => toggleContactInfoOpen((curr) => !curr)}
+            >
+              <span
+                className="flex items-center justify-center bg-[#F5F6FB] w-9 h-9 rounded-[10px] shrink-0 cursor-pointer"
+                onClick={() => toggleMoreOptions((curr) => !curr)}
+              >
+                <img
+                  src={assets.moreIcon}
+                  alt="More options"
+                  className="h-4 w-3 object-contain"
+                />
+              </span>
+            </MoreOptionsPopup>
           </div>
           {/* Activity summary */}
           <ActivitySummary summaryConfig={clientActivitySummary} />
         </div>
 
         <div className="w-full min-h-8.75 border-b border-b-client-detail-secondary">
+          {/* Table Toggles */}
           <div className="flex">
             <button
               className={`${currTable === "activity" ? "btn-auth" : ""} rounded-b-none w-34.5 min-h-4.75`}
@@ -184,18 +341,66 @@ export function ClientDetailsPage() {
         </div>
 
         <div className="flex flex-col py-4.5 gap-4.5 bg-white rounded-[7px]">
-          <div className="flex justify-between p-5">
-            <span className="font-semibold uppercase"> Recent Activity </span>
-            <CustomBtn leftIcon={assets.plusIcon} buttonLabel="New Quote" />
+          <div className="flex items-center justify-between px-5">
+            <span className="font-medium text-xs md:text-[16px] min-h-4.75">
+              {" "}
+              {isActivityTable ? "Recent Activity" : "Payments"}{" "}
+            </span>
+            <div className="max-w-fit">
+              <CustomBtn
+                leftIcon={assets.plusIcon}
+                buttonLabel={
+                  isActivityTable ? "New Quote" : "Create Payment Record"
+                }
+              />
+            </div>
           </div>
 
-          <TableOptions />
-          <CustomDataTable
-            columns={activityTableColums}
-            data={mockClientActivity}
-          />
+          <Separator className={`bg-separator`} />
+
+          {isActivityTable && (
+            <>
+              <TableOptions
+                searchPlaceHolder="Search quotes & invoices"
+                searchTerm={searchTearm}
+                setSearchTerm={setSearchTerm}
+              />
+              <CustomDataTable
+                columns={activityTableColums}
+                data={tableData as ClientActivity[]}
+                localFilters={localFilters}
+                showPaginated={true}
+                pagination={pagination}
+                setPagination={setPagination}
+              />
+            </>
+          )}
+
+          {!isActivityTable && (
+            <CustomDataTable
+              columns={paymentColumns}
+              data={tableData as PaymentData[]}
+              showPaginated={true}
+              pagination={pagination}
+              setPagination={setPagination}
+            />
+          )}
         </div>
       </div>
+
+      <ClientForm
+        isFormOpen={editPopupOpen}
+        mode="updation"
+        clientEditFn={updateClient}
+        defaultValues={clientEditDefaultValues}
+        toggleFormOpen={toggleEditPopupOpen}
+      />
+
+      <ClientDetailsPopup
+        isOpen={contactInfoOpen}
+        toggleOpen={toggleContactInfoOpen}
+        currClient={clientCredential}
+      />
     </div>
   );
 }

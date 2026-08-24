@@ -45,6 +45,15 @@ export enum ClientActivityStatus {
   Approved = "Approved",
   Completed = "Completed",
   Cancelled = "Cancelled",
+  Received = "Received",
+}
+
+export enum PaymentActivityStatus {
+  Pending = "Pending",
+  Received = "Received",
+  Failed = "Failed",
+  Cancelled = "Cancelled",
+  Refunded = "Refunded",
 }
 
 export interface ClientActivity {
@@ -56,6 +65,76 @@ export interface ClientActivity {
   creationDate: string;
   expiryDueDate: string;
 }
+
+export type PaymentData = {
+  id: string;
+  quoteInvoice: "Invoice" | "Deposit";
+  amount: number;
+  status: PaymentActivityStatus;
+  creationDate: string;
+  expiryDueDate: string | null;
+  allocated: number;
+  credit: number;
+  method: "Cash" | "Stripe";
+};
+
+export const paymentData: PaymentData[] = [
+  {
+    id: "PMT5",
+    quoteInvoice: "Invoice",
+    amount: 5000,
+    status: PaymentActivityStatus.Received,
+    creationDate: "25 Mar 2026",
+    expiryDueDate: null,
+    allocated: 3000,
+    credit: 2000,
+    method: "Cash",
+  },
+  {
+    id: "PMT4",
+    quoteInvoice: "Invoice",
+    amount: 2000,
+    status: PaymentActivityStatus.Pending,
+    creationDate: "20 May 2026",
+    expiryDueDate: null,
+    allocated: 1000,
+    credit: 1000,
+    method: "Stripe",
+  },
+  {
+    id: "PMT3",
+    quoteInvoice: "Deposit",
+    amount: 2000,
+    status: PaymentActivityStatus.Pending,
+    creationDate: "2 May 2026",
+    expiryDueDate: null,
+    allocated: 1500,
+    credit: 500,
+    method: "Stripe",
+  },
+  {
+    id: "PMT2",
+    quoteInvoice: "Invoice",
+    amount: 1000,
+    status: PaymentActivityStatus.Received,
+    creationDate: "25 Apr 2026",
+    expiryDueDate: null,
+    allocated: 1000,
+    credit: 0,
+    method: "Cash",
+  },
+  {
+    id: "PMT1",
+    quoteInvoice: "Deposit",
+    amount: 3000,
+    status: PaymentActivityStatus.Pending,
+    creationDate: "20 Apr 2026",
+    expiryDueDate: null,
+    allocated: 0,
+    credit: 3000,
+    method: "Stripe",
+  },
+];
 
 export const mockClientActivity: ClientActivity[] = [
   {

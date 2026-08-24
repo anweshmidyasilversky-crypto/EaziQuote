@@ -1,7 +1,16 @@
-import type { ClientActivityStatus } from "../../constants/dummyData";
+import type {
+  ClientActivityStatus,
+  PaymentActivityStatus,
+} from "../../constants/dummyData";
 
 export type StatusBadgeProps = {
-  status: "Sent" | "Paid" | "Overdue" | "Draft" | ClientActivityStatus;
+  status:
+    | "Sent"
+    | "Paid"
+    | "Overdue"
+    | "Draft"
+    | ClientActivityStatus
+    | PaymentActivityStatus;
 };
 
 const statusColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -14,6 +23,10 @@ const statusColorMap: Record<StatusBadgeProps["status"], string> = {
   Approved: "bg-paid-badge",
   Completed: "bg-paid-badge",
   Cancelled: "bg-paid-badge",
+  Received: "bg-paid-badge",
+  Pending: "bg-draft-badge",
+  Failed: "bg-overdue-badge",
+  Refunded: "bg-paid-badge",
 };
 
 const textColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -21,18 +34,23 @@ const textColorMap: Record<StatusBadgeProps["status"], string> = {
   Paid: "text-paid-text",
   Overdue: "text-overdue-text",
   Draft: "text-draft-text",
-  Rejected: "text-overdue-badge",
-  Due: "text-draft-badge",
-  Approved: "text-paid-badge",
-  Completed: "text-paid-badge",
-  Cancelled: "text-paid-badge",
+  Rejected: "text-overdue-text",
+  Due: "text-draft-text",
+  Approved: "text-paid-text",
+  Completed: "text-paid-text",
+  Cancelled: "text-paid-text",
+
+  Received: "text-paid-text",
+  Pending: "text-draft-text",
+  Failed: "text-overdue-text",
+  Refunded: "text-paid-text",
 };
 
 function StatusBadge({ status }: StatusBadgeProps) {
   console.log(statusColorMap[status]);
   return (
     <div
-      className={`flex px-2.5 min-h-6 w-fit items-center ${statusColorMap[status]} ${textColorMap[status]}`}
+      className={`flex px-2.5 min-h-6 w-fit rounded items-center ${statusColorMap[status]} ${textColorMap[status]}`}
     >
       <span> {status} </span>
     </div>

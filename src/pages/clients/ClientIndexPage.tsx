@@ -19,9 +19,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "../../hooks/debounce.hook";
 import { TableOptions } from "../../components/common/TableOptions";
 
-import { ClientCreationForm } from "../../components/clients/ClientCreationForm";
+import { ClientForm } from "../../components/clients/ClientForm";
 import { TableFilterSheet } from "../../components/common/TableFilterSheet";
 import { useNavigate } from "react-router";
+import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
+import { nanoid } from "@reduxjs/toolkit";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
@@ -169,6 +171,25 @@ export function ClientIndexPage() {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [debouncedSearchParam]);
 
+  const clientCreatFn = (data: ClientCreationPayload) => {
+    const { name: client, companyName: company } = data;
+    const newClient: ClientDataWithFilters = {
+      id: nanoid(),
+      ...data,
+      client,
+      company,
+      createdAt: new Date().toISOString(),
+      activityCount: 0,
+    };
+    setClientData((curr) =>
+      [...curr, newClient].toSorted(
+        (client1, client2) =>
+          new Date(client2.createdAt).getTime() -
+          new Date(client1.createdAt).getTime(),
+      ),
+    );
+  };
+
   return (
     <>
       <div className="relative px-6 pt-6 pb-5 flex flex-col gap-6">
@@ -190,10 +211,11 @@ export function ClientIndexPage() {
             buttonLabel="Add Client"
             onClick={() => toggleIsPopoverOpen((curr) => !curr)}
           />
-          <ClientCreationForm
-            setClientData={setClientData}
+          <ClientForm
             isFormOpen={isPopoverOpen}
-            formCloseAction={toggleIsPopoverOpen}
+            toggleFormOpen={toggleIsPopoverOpen}
+            mode="creation"
+            clientCreatFn={clientCreatFn}
           />
         </div>
 

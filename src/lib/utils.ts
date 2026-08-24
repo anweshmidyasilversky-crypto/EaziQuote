@@ -1,6 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { addressList, type AddressDetail } from "../constants/dummyData";
+import {
+  addressList,
+  mockClientData,
+  type AddressDetail,
+} from "../constants/dummyData";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -79,3 +83,21 @@ export function getRandomIndex(length: number): number {
 export function getAddress(postCode: string): AddressDetail | undefined {
   return addressList.find((address) => address.postCode === postCode);
 }
+
+export function getClient(clientId: string) {
+  return mockClientData.find(
+    (clientCredential) => clientCredential.id === clientId,
+  );
+}
+
+export const getInitials = (fullName: string) => {
+  const [fname, lname] = fullName.split(" ");
+  return fname[0].toUpperCase() + (lname ? lname[0].toUpperCase() : "");
+};
+
+export const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+  }).format(value);
+};

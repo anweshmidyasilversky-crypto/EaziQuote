@@ -1,4 +1,5 @@
 import { Spinner } from "../ui/spinner";
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
 
 export type CustomBtnProps = {
   buttonLabel: string;
@@ -18,10 +19,11 @@ export function CustomBtn({
   withSpinner,
   isSubmitting,
   btncls,
-}: CustomBtnProps) {
+  className,
+}: CustomBtnProps & ButtonPrimitive.Props) {
   return (
     <button
-      className={`h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth ${bgColor} ${btncls}`}
+      className={`h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth ${bgColor} ${btncls} ${className}`}
       onClick={onClick}
     >
       {leftIcon && <img src={leftIcon} className="h-4 w-4" />}

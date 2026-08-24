@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { type UserSignupPayload } from "../../types/user.signup.payload.type";
+import { type UserSignupPayload } from "@/types/user.signup.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { UserSignupPayloadSchema } from "../../validation/user.signup.payload.schema";
 import { useRef, useState } from "react";

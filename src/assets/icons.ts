@@ -51,6 +51,13 @@ import greenPoundIcon from "./icons/greenPoundIcon.png";
 
 import moreIcon from "./icons/moreIcon.png";
 
+import phoneIcon from "./icons/phoneIcon.png";
+
+import emailIcon from "./icons/emailIcon.png";
+import locationIcon from "./icons/locationIcon.png";
+
+import shareIcon from "./icons/shareIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -103,4 +110,11 @@ export const assets = {
   greenPoundIcon,
 
   moreIcon,
+
+  phoneIcon,
+
+  emailIcon,
+  locationIcon,
+
+  shareIcon,
 };

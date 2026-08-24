@@ -8,6 +8,7 @@ import { CustomBtn } from "./CustomBtn";
 
 export type TableOptionsProp = {
   searchTerm?: string;
+  searchPlaceHolder?: string;
   setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
   onClick?: () => void;
   toggleFilterSheetOpen?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,6 +16,7 @@ export type TableOptionsProp = {
 
 export function TableOptions({
   searchTerm,
+  searchPlaceHolder,
   setSearchTerm,
   toggleFilterSheetOpen,
 }: TableOptionsProp) {
@@ -29,7 +31,7 @@ export function TableOptions({
         </InputGroupAddon>
 
         <InputGroupInput
-          placeholder="Search clients"
+          placeholder={searchPlaceHolder ?? "Search clients"}
           value={searchTerm}
           onChange={(event) => setSearchTerm?.(event.target.value)}
         />

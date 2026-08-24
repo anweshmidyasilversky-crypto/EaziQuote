@@ -3,7 +3,7 @@ import { assets } from "../../assets/icons";
 
 export function AuthLayout() {
   return (
-    <div className="w-full h-full">
+    <div className="bg-auth min-h-screen min-w-screen">
       <div className="w-full max-h-[14.62rem] flex justify-center items-center relative overflow-hidden">
         <img
           className="w-full h-full object-cover"
@@ -15,8 +15,9 @@ export function AuthLayout() {
           <img className="max-w-[10.34rem] h-8" src={assets.logo} alt="Logo" />
         </div>
       </div>
-
-      <Outlet />
+      <div className="">
+        <Outlet />
+      </div>
     </div>
   );
 }

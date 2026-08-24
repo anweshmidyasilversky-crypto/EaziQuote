@@ -4,6 +4,10 @@ export type CustomActionGroupProps = {
   openFn?: () => void;
   editFn?: () => void;
   deleteFn?: () => void;
+
+  paymentActionGroup?: boolean;
+  paymentPending?: boolean;
+  shareAction?: () => void;
 };
 
 export type ActionBtnList = Array<{
@@ -16,6 +20,9 @@ export function CustomActionGroup({
   openFn,
   editFn,
   deleteFn,
+  paymentActionGroup,
+  paymentPending,
+  shareAction,
 }: CustomActionGroupProps) {
   const btnList: ActionBtnList = [
     {
@@ -35,12 +42,30 @@ export function CustomActionGroup({
     },
   ];
   return (
-    <div className="flex gap-2 min-h-6 min-w-6 w-fit max-w-25">
-      {btnList.map((btn) => (
-        <button key={btn.id} onClick={btn.action}>
-          <img src={btn.icon} className="w-4 h-4" />
+    <div className="flex gap-2 min-h-6 min-w-6 w-fit shrik-0">
+      {btnList.map((btn) => {
+        if (paymentActionGroup && btn.id !== "openEye") {
+          return <></>;
+        }
+        return (
+          <button
+            key={btn.id}
+            onClick={btn.action}
+            className="flex w-4 shrink-0 items-center justify-center"
+          >
+            <img src={btn.icon} className="w-4 aspect-square" />
+          </button>
+        );
+      })}
+
+      {paymentActionGroup && paymentPending && (
+        <button
+          onClick={shareAction}
+          className="flex w-4 shrink-0 items-center justify-center"
+        >
+          <img src={assets.shareIcon} className="w-4 aspect-square" />
         </button>
-      ))}
+      )}
     </div>
   );
 }

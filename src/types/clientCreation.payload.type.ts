@@ -1,8 +1,5 @@
 import type { BusinessAddressPayload } from "./businessAddress.payload.type";
+import type { ClientCommonType } from "./client.common.type";
 
-export interface ClientCreationPayload extends BusinessAddressPayload {
-  name: string;
-  companyName: string;
-  phone: string;
-  email: string;
-}
+export interface ClientCreationPayload
+  extends BusinessAddressPayload, ClientCommonType {}

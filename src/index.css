@@ -72,11 +72,13 @@
     #082b60 0%,
     #000000 100%
   );
+
+  --background-image-auth: linear-gradient(222.9deg, #f2eeec 0%, #e8e8f2 100%);
 }
 
 @layer base {
   body {
-    @apply font-sans;
+    font-family: var(--font-sans);
     @apply text-black-text;
   }
   input[type="radio"] {
@@ -103,8 +105,21 @@
     text-center;
 }
 
+@utility auth-page-bg {
+  body {
+    background: var(--background-auth);
+    min-h: 100vh;
+  }
+}
+
 @utility dashboard-card-theme {
   @apply bg-white shadow-[0_1px_2px_rgba(56,65,74,0.14902)];
+}
+
+@utility popup-theme {
+  @apply rounded-lg bg-white opacity-100 shadow-[2px_2px_16px_rgba(133,147,163,0.4)] [&_button]:w-full
+  [&_button]:min-h-8.25 [&_button]:bg-white [&_button]:text-black-text
+   [&_button]:hover:bg-white [&_button]:justify-start!;
 }
 
 @utility auth-card {

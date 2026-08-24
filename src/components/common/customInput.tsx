@@ -192,6 +192,13 @@ export function CustomInput<T extends FieldValues>({
                   alignAltImg={imgAltAlign}
                 />
               )}
+              {inptType === "textarea" && (
+                <textarea
+                  value={value}
+                  onChange={onChange}
+                  className={`${fieldStyle} min-h-20.25 md:min-w-105 overflow-y-auto ${className}`}
+                />
+              )}
               {error && (
                 <p
                   className={`text-sm text-rose-600 ${inptType === "image" ? "flex justify-center" : ""} `}
