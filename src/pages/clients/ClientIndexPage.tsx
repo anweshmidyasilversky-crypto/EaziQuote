@@ -17,13 +17,14 @@ import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "../../hooks/debounce.hook";
-import { TableOptions } from "../../components/common/TableOptions";
 
 import { ClientForm } from "../../components/clients/ClientForm";
 import { TableFilterSheet } from "../../components/common/TableFilterSheet";
 import { useNavigate } from "react-router";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
 import { nanoid } from "@reduxjs/toolkit";
+import SearchInputGruop from "../../components/common/SearchInputGruop";
+import FilterBtn from "../../components/common/FilterBtn";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
@@ -220,11 +221,6 @@ export function ClientIndexPage() {
         </div>
 
         <div className="flex flex-col bg-table rounded-[10px] dashboard-card-theme gap-4.5 py-4.5">
-          <TableOptions
-            toggleFilterSheetOpen={toggleFilterOpen}
-            searchTerm={searchParam}
-            setSearchTerm={setSearchParam}
-          />
           <CustomDataTable
             columns={columns}
             data={clientData}
@@ -233,6 +229,13 @@ export function ClientIndexPage() {
             showPaginated={true}
             pagination={pagination}
             setPagination={setPagination}
+            tableOptionsLeft={SearchInputGruop({
+              searchTerm: searchParam,
+              setSearchTerm: setSearchParam,
+            })}
+            tableOptionsRight={FilterBtn({
+              toggleFilterSheetOpen: toggleFilterOpen,
+            })}
           />
         </div>
 

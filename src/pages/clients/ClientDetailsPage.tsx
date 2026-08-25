@@ -26,7 +26,6 @@ import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { useEffect, useMemo, useState } from "react";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { CustomBtn } from "../../components/common/CustomBtn";
-import { TableOptions } from "../../components/common/TableOptions";
 import { useDebounce } from "../../hooks/debounce.hook";
 import { Separator } from "../../components/ui/separator";
 import MoreOptionsPopup from "../../components/clients/MoreOptionsPopup";
@@ -36,6 +35,8 @@ import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup"
 import type { DefaultValues } from "react-hook-form";
 import { useAppSelector } from "../../redux/store";
 import { ClientForm } from "../../components/clients/ClientForm";
+import SearchInputGruop from "../../components/common/SearchInputGruop";
+import FilterBtn from "../../components/common/FilterBtn";
 
 export function ClientDetailsPage() {
   const param = useParams<{ id: string }>();
@@ -360,11 +361,6 @@ export function ClientDetailsPage() {
 
           {isActivityTable && (
             <>
-              <TableOptions
-                searchPlaceHolder="Search quotes & invoices"
-                searchTerm={searchTearm}
-                setSearchTerm={setSearchTerm}
-              />
               <CustomDataTable
                 columns={activityTableColums}
                 data={tableData as ClientActivity[]}
@@ -372,6 +368,12 @@ export function ClientDetailsPage() {
                 showPaginated={true}
                 pagination={pagination}
                 setPagination={setPagination}
+                tableOptionsLeft={SearchInputGruop({
+                  searchTerm: searchTearm,
+                  setSearchTerm: setSearchTerm,
+                  searchPlaceHolder: "Search quotes & invoices",
+                })}
+                tableOptionsRight={FilterBtn({})}
               />
             </>
           )}
