@@ -67,6 +67,8 @@
 
   --color-client-detail-secondary: #ced1da;
 
+  --color-warning-text: #ff8503;
+
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,
@@ -95,6 +97,27 @@
   ::-webkit-scrollbar {
     display: none; /* Chrome, Safari, and Opera */
   }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+  }
+}
+
+@utility page-name {
+  @apply font-bold text-[24px] leading-none tracking-normal min-h-7.25;
+}
+
+@utility page-info {
+  @apply font-medium text-[14px] leading-none tracking-normal min-h-4.25;
+}
+
+@utility table-theme {
+  @apply bg-white flex flex-col gap-6 rounded-[7px] py-6;
+}
+
+@utility subtotal-field {
+  @apply font-normal text-[14px] text-placeholder-text min-h-4.25;
 }
 
 @utility pagination-btn {

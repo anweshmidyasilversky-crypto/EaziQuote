@@ -58,6 +58,12 @@ import locationIcon from "./icons/locationIcon.png";
 
 import shareIcon from "./icons/shareIcon.png";
 
+import calendarIcon from "./icons/calendarIcon.png";
+import orangeClockIcon from "./icons/orangeClockIcon.png";
+import OrangeHourGlassIcon from "./icons/orangeHourGlassIcon.png";
+import previewIcon from "./icons/previewIcon.png";
+import warningIcon from "./icons/warningIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -117,4 +123,9 @@ export const assets = {
   locationIcon,
 
   shareIcon,
+  calendarIcon,
+  orangeClockIcon,
+  OrangeHourGlassIcon,
+  previewIcon,
+  warningIcon,
 };

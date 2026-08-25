@@ -1,6 +1,7 @@
 import type {
   ClientActivityStatus,
   PaymentActivityStatus,
+  QuoteActivityStatus,
 } from "../../constants/dummyData";
 
 export type StatusBadgeProps = {
@@ -10,7 +11,8 @@ export type StatusBadgeProps = {
     | "Overdue"
     | "Draft"
     | ClientActivityStatus
-    | PaymentActivityStatus;
+    | PaymentActivityStatus
+    | QuoteActivityStatus;
 };
 
 const statusColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -27,6 +29,8 @@ const statusColorMap: Record<StatusBadgeProps["status"], string> = {
   Pending: "bg-draft-badge",
   Failed: "bg-overdue-badge",
   Refunded: "bg-paid-badge",
+  Accepted: "bg-paid-badge",
+  Expired: "bg-overdue-badge",
 };
 
 const textColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -44,6 +48,9 @@ const textColorMap: Record<StatusBadgeProps["status"], string> = {
   Pending: "text-draft-text",
   Failed: "text-overdue-text",
   Refunded: "text-paid-text",
+
+  Accepted: "text-paid-text",
+  Expired: "text-overdue-text",
 };
 
 function StatusBadge({ status }: StatusBadgeProps) {

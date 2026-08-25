@@ -15,6 +15,8 @@ import { DashboardIndexPage } from "../pages/dashboard/DashboardIndexPage";
 import { ClientIndexPage } from "../pages/clients/ClientIndexPage";
 import { DashboardLayout } from "../components/dashboard/DashboardLayout";
 import { ClientDetailsPage } from "../pages/clients/ClientDetailsPage";
+import { QuotesIndexPage } from "../pages/quotes/QuotesIndexPage";
+import { QuotesDetailsPage } from "../pages/quotes/QuotesDetailsPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -81,6 +83,14 @@ export const authRoutes: RouteObject[] = [
               {
                 path: "clients/:id",
                 Component: ClientDetailsPage,
+              },
+              {
+                path: "quotes",
+                Component: QuotesIndexPage,
+              },
+              {
+                path: "quotes/:id",
+                Component: QuotesDetailsPage,
               },
             ],
           },

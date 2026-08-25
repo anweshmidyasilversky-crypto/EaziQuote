@@ -2,10 +2,10 @@ export type KpiCardProps = {
   title: string;
   value: string;
   kpiIcon: string;
-  iconBg: string;
+  iconCls?: string;
 };
 
-export function KpiCard({ title, value, iconBg, kpiIcon }: KpiCardProps) {
+export function KpiCard({ title, value, iconCls, kpiIcon }: KpiCardProps) {
   return (
     <div className="flex justify-between min-h-[113.5px] dashboard-card-theme rounded-[10px] p-4.5 ">
       {/* kpi det */}
@@ -21,7 +21,7 @@ export function KpiCard({ title, value, iconBg, kpiIcon }: KpiCardProps) {
 
       {/* kpi icon */}
       <div
-        className={`flex justify-center items-center h-12 w-12 rounded-full ${iconBg}`}
+        className={`flex justify-center items-center h-12 w-12 rounded-full ${iconCls}`}
       >
         <img src={kpiIcon} className="w-4.5 h-[18.52px]" />
       </div>

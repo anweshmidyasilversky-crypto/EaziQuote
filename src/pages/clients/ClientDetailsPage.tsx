@@ -13,12 +13,10 @@ import {
   type ClientDataWithFilters,
   type PaymentData,
 } from "../../constants/dummyData";
-import { ChevronRight } from "lucide-react";
 import {
   filterFn_includesString,
   type ColumnDef,
   type ColumnFiltersState,
-  type PaginationState,
   type TableFeatures,
 } from "@tanstack/react-table";
 import StatusBadge from "../../components/common/StatusBadge";
@@ -37,6 +35,20 @@ import { useAppSelector } from "../../redux/store";
 import { ClientForm } from "../../components/clients/ClientForm";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
+import {
+  RenderMultiSelectCheckbox,
+  type CheckboxConfig,
+} from "../../components/common/RenderMultiSelectCheckbox";
+import { TableFilterSheet } from "../../components/common/TableFilterSheet";
+import {
+  DateRangePicker,
+  type DateRange,
+} from "../../components/common/DateRangePicket";
+import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
+import {
+  CustomToggleGroup,
+  type CustomToggleGroupProps,
+} from "../../components/common/CustomToggleGroup";
 
 export function ClientDetailsPage() {
   const param = useParams<{ id: string }>();
@@ -44,9 +56,7 @@ export function ClientDetailsPage() {
   const [clientCredential, setclientCredential] = useState(
     getClient(param.id as string) ?? (getClient("1") as ClientDataWithFilters),
   );
-  const [currTable, toggleCurrTable] = useState<"activity" | "payment">(
-    "activity",
-  );
+  const [currTable, toggleCurrTable] = useState<string>("activity");
   const [searchTearm, setSearchTerm] = useState<string>("");
   const debouncedVal = useDebounce({ value: searchTearm, delay: 500 });
   const [shownMoreOptions, toggleMoreOptions] = useState<boolean>(false);
@@ -55,18 +65,72 @@ export function ClientDetailsPage() {
   const [tableData, setTableData] = useState<ClientActivity[] | PaymentData[]>(
     mockClientActivity,
   );
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 5,
+  const [filterOpen, toggleFilterOpen] = useState<boolean>(false);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: undefined,
+    endDate: undefined,
   });
+  const [filters, setFilters] = useState<string[]>([]);
 
+  {
+    /* Checkbox config */
+  }
+  const checkboxConfig: CheckboxConfig = useMemo(
+    () => [
+      {
+        id: "paid",
+        label: "Paid",
+        value: "paid",
+      },
+      {
+        id: "due",
+        label: "Due",
+        value: "due",
+      },
+      {
+        id: "overdue",
+        label: "Overdue",
+        value: "overdue",
+      },
+      {
+        id: "draft",
+        label: "Draft",
+        value: "draft",
+      },
+      {
+        id: "sent",
+        label: "Sent",
+        value: "sent",
+      },
+      {
+        id: "approved",
+        label: "Approved",
+        value: "approved",
+      },
+      {
+        id: "rejected",
+        label: "Rejected",
+        value: "rejected",
+      },
+      {
+        id: "completed",
+        label: "Completed",
+        value: "completed",
+      },
+      {
+        id: "cancelled",
+        label: "Cancelled",
+        value: "cancelled",
+      },
+    ],
+    [],
+  );
+
+  {
+    /* Toggle tables based on which data is shown */
+  }
   useEffect(() => {
     setTableData(currTable === "activity" ? mockClientActivity : paymentData);
-    setPagination({
-      pageIndex: 0,
-      pageSize: 5,
-    });
   }, [currTable]);
 
   const localFilters: ColumnFiltersState = useMemo(
@@ -257,23 +321,21 @@ export function ClientDetailsPage() {
 
   const isActivityTable = currTable === "activity";
 
+  const toggleConfig: CustomToggleGroupProps["toggleConfig"] = [
+    {
+      btnId: "activity",
+      btnLabel: "Reacent Activity",
+    },
+    {
+      btnId: "payment",
+      btnLabel: "Payment",
+    },
+  ];
+
   return (
     <div>
       {/* Heading and breadcrumb */}
-      <div className="min-h-10.75 bg-white w-full flex justify-between dashboard-card-theme py-3 px-6">
-        <span className="font-semibold uppercase text-[16px]">
-          {" "}
-          Client Detail{" "}
-        </span>
-        <div className="flex  items-center">
-          <span className="text-[14px]"> Clients </span>
-          <ChevronRight className="text-breadcrumb-separator h-4" />
-          <span className="text-placeholder-text text-[14px]">
-            {" "}
-            Client Detail{" "}
-          </span>
-        </div>
-      </div>
+      <HeaderBreadCrumb pageName="Client Details" />
 
       <div className="flex flex-col gap-6 p-6">
         {/* Client info & summary */}
@@ -322,24 +384,11 @@ export function ClientDetailsPage() {
           <ActivitySummary summaryConfig={clientActivitySummary} />
         </div>
 
-        <div className="w-full min-h-8.75 border-b border-b-client-detail-secondary">
-          {/* Table Toggles */}
-          <div className="flex">
-            <button
-              className={`${currTable === "activity" ? "btn-auth" : ""} rounded-b-none w-34.5 min-h-4.75`}
-              onClick={() => toggleCurrTable("activity")}
-            >
-              Recent Activity
-            </button>
-
-            <button
-              className={`${currTable === "payment" ? "btn-auth" : ""} rounded-b-none w-34.5 min-h-4.75`}
-              onClick={() => toggleCurrTable("payment")}
-            >
-              Payment
-            </button>
-          </div>
-        </div>
+        <CustomToggleGroup
+          toggleConfig={toggleConfig}
+          activeId={currTable}
+          toggleActive={toggleCurrTable}
+        />
 
         <div className="flex flex-col py-4.5 gap-4.5 bg-white rounded-[7px]">
           <div className="flex items-center justify-between px-5">
@@ -366,14 +415,14 @@ export function ClientDetailsPage() {
                 data={tableData as ClientActivity[]}
                 localFilters={localFilters}
                 showPaginated={true}
-                pagination={pagination}
-                setPagination={setPagination}
                 tableOptionsLeft={SearchInputGruop({
                   searchTerm: searchTearm,
                   setSearchTerm: setSearchTerm,
                   searchPlaceHolder: "Search quotes & invoices",
                 })}
-                tableOptionsRight={FilterBtn({})}
+                tableOptionsRight={FilterBtn({
+                  toggleFilterSheetOpen: toggleFilterOpen,
+                })}
               />
             </>
           )}
@@ -383,8 +432,6 @@ export function ClientDetailsPage() {
               columns={paymentColumns}
               data={tableData as PaymentData[]}
               showPaginated={true}
-              pagination={pagination}
-              setPagination={setPagination}
             />
           )}
         </div>
@@ -403,6 +450,33 @@ export function ClientDetailsPage() {
         toggleOpen={toggleContactInfoOpen}
         currClient={clientCredential}
       />
+
+      <TableFilterSheet isOpen={filterOpen} toggleIsOpen={toggleFilterOpen}>
+        <div className="flex flex-col gap-6 mt-6 px-5">
+          <div className="min-h-25.5 flex flex-col gap-4">
+            <span className="text-placeholder-text min-h-4.25 font-medium text-sm">
+              {" "}
+              Date Range{" "}
+            </span>
+            <DateRangePicker
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+            />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <span className="text-placeholder-text min-h-4.25 font-medium text-sm">
+              {" "}
+              Status{" "}
+            </span>
+            <RenderMultiSelectCheckbox
+              checkboxconfig={checkboxConfig}
+              selectedFilters={filters}
+              toggleSelectedFilters={setFilters}
+            />
+          </div>
+        </div>
+      </TableFilterSheet>
     </div>
   );
 }

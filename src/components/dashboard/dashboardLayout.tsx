@@ -30,6 +30,7 @@ export function DashboardLayout() {
       label: "Quotes",
       activeBtn: assets.quotesActiveIcon,
       inactiveBtn: assets.quotesIcon,
+      clickHandler: () => navigate("/quotes"),
     },
     {
       id: "invoices",

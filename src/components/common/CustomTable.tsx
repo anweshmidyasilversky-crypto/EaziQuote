@@ -18,7 +18,7 @@ import {
   type PaginationState,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<TableFeatures, TData>[];
@@ -30,8 +30,6 @@ interface DataTableProps<TData extends RowData> {
   globalFilterTerm?: string;
   localFilters?: ColumnFiltersState;
   showPaginated?: boolean;
-  pagination?: PaginationState;
-  setPagination?: React.Dispatch<React.SetStateAction<PaginationState>>;
 
   tableOptionsLeft?: React.ReactNode;
   tableOptionsRight?: React.ReactNode;
@@ -47,12 +45,14 @@ function CustomTable<TData extends RowData>({
   globalFilterTerm,
   localFilters,
   showPaginated,
-  pagination,
-  setPagination,
 
   tableOptionsLeft,
   tableOptionsRight,
 }: DataTableProps<TData>) {
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 5,
+  });
   const totalRecords = data.length;
   let startItemNo: number | undefined;
   let endItemNo: number | undefined;
@@ -70,6 +70,10 @@ function CustomTable<TData extends RowData>({
           )
         : 0;
   }
+
+  useEffect(() => {
+    setPagination?.((curr) => ({ ...curr, pageIndex: 0 }));
+  }, [localFilters, globalFilterTerm]);
 
   const table = useTable({
     features: tableFeatures({
@@ -216,9 +220,22 @@ function CustomTable<TData extends RowData>({
                 <span> Previous </span>
               </button>
 
-              <span className="btn-auth rounded-1 font-regular text-[14px] max-w-8.5 max-h-8">
+              <button className="btn-auth rounded-1 font-regular text-[14px] max-w-8.5 max-h-8">
                 {pagination.pageIndex + 1}
-              </span>
+              </button>
+
+              <button
+                className="btn-auth rounded-1 font-regular text-[14px] max-w-8.5 max-h-8 disabled:cursor-not-allowed bg-transparent text-black-text ring-1 ring-[#E4E6F4] hover:text-white"
+                disabled={!table.getCanNextPage()}
+                onClick={() =>
+                  setPagination((curr) => ({
+                    ...curr,
+                    pageIndex: pagination.pageIndex + 1,
+                  }))
+                }
+              >
+                {pagination.pageIndex + 2}
+              </button>
 
               <button
                 type="button"

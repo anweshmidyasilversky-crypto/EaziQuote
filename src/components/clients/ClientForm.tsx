@@ -92,7 +92,7 @@ export function ClientForm({
         >
           {/* Fields */}
 
-          <div className="flex flex-col w-full px-5 gap-4 justify-center items-center md:[&_input]:max-w-115">
+          <div className="flex flex-col w-full gap-4 justify-center items-center md:[&_input]:max-w-115">
             <CustomInput
               control={control}
               name={"name"}

@@ -78,6 +78,243 @@ export type PaymentData = {
   method: "Cash" | "Stripe";
 };
 
+export enum QuoteActivityStatus {
+  Draft = "Draft",
+  Sent = "Sent",
+  Accepted = "Accepted",
+  Rejected = "Rejected",
+  Expired = "Expired",
+  Cancelled = "Cancelled",
+}
+
+export type QuoteData = {
+  id: string;
+  title: string;
+  quote: string;
+  client: string;
+  amount: number;
+  status: QuoteActivityStatus;
+  creationDate: string;
+  expiryDate: string;
+  paymentMethod: "Cash" | "Online";
+};
+
+export type ItemData = {
+  itemName: string;
+  category: "Materials" | "Services";
+  subcategory: string;
+  quantity: string;
+  pricePerUnit: number;
+  unitCost: number;
+  total: number;
+};
+
+export const itemData: ItemData[] = [
+  {
+    itemName: "Floor Tiles",
+    category: "Materials",
+    subcategory: "Tools",
+    quantity: "250 sq.ft",
+    pricePerUnit: 12,
+    unitCost: 6,
+    total: 3000,
+  },
+  {
+    itemName: "Glass Partition",
+    category: "Materials",
+    subcategory: "Ceiling",
+    quantity: "4 panels",
+    pricePerUnit: 150,
+    unitCost: 75,
+    total: 600,
+  },
+  {
+    itemName: "Painting",
+    category: "Services",
+    subcategory: "Painting",
+    quantity: "20 hours",
+    pricePerUnit: 60,
+    unitCost: 30,
+    total: 900,
+  },
+  {
+    itemName: "Carpet Replacement",
+    category: "Services",
+    subcategory: "Carpeting",
+    quantity: "250 sq.ft",
+    pricePerUnit: 12,
+    unitCost: 6,
+    total: 3000,
+  },
+  {
+    itemName: "Floor Renovation",
+    category: "Services",
+    subcategory: "Flooring",
+    quantity: "20 hours",
+    pricePerUnit: 60,
+    unitCost: 30,
+    total: 900,
+  },
+  {
+    itemName: "Wooden Doors",
+    category: "Materials",
+    subcategory: "Doors",
+    quantity: "8 units",
+    pricePerUnit: 280,
+    unitCost: 180,
+    total: 2240,
+  },
+  {
+    itemName: "LED Lighting",
+    category: "Materials",
+    subcategory: "Electrical",
+    quantity: "24 units",
+    pricePerUnit: 45,
+    unitCost: 25,
+    total: 1080,
+  },
+  {
+    itemName: "Plumbing Installation",
+    category: "Services",
+    subcategory: "Plumbing",
+    quantity: "16 hours",
+    pricePerUnit: 75,
+    unitCost: 40,
+    total: 1200,
+  },
+  {
+    itemName: "Wall Panels",
+    category: "Materials",
+    subcategory: "Wall Finishing",
+    quantity: "120 sq.ft",
+    pricePerUnit: 35,
+    unitCost: 20,
+    total: 4200,
+  },
+  {
+    itemName: "Electrical Wiring",
+    category: "Services",
+    subcategory: "Electrical",
+    quantity: "180 metres",
+    pricePerUnit: 18,
+    unitCost: 10,
+    total: 3240,
+  },
+];
+
+export const quoteData: QuoteData[] = [
+  {
+    id: "QT-2025-101",
+    title: "Office Interior Design",
+    quote: "QT-2025-101",
+    client: "Emma Robinson",
+    amount: 4850,
+    status: QuoteActivityStatus.Sent,
+    creationDate: "12 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-102",
+    title: "Residential Plumbing Works",
+    quote: "QT-2025-102",
+    client: "Daniel Murphy",
+    amount: 6200,
+    status: QuoteActivityStatus.Draft,
+    creationDate: "15 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-103",
+    title: "Retail Store Interior Fit-Out",
+    quote: "QT-2025-103",
+    client: "Olivia Bennett",
+    amount: 3450,
+    status: QuoteActivityStatus.Sent,
+    creationDate: "02 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-104",
+    title: "Electrical Wiring & Lighting",
+    quote: "QT-2025-104",
+    client: "James Carter",
+    amount: 5175,
+    status: QuoteActivityStatus.Draft,
+    creationDate: "18 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-105",
+    title: "Painting & Finishing Services",
+    quote: "QT-2025-105",
+    client: "Sophia Turner",
+    amount: 2900,
+    status: QuoteActivityStatus.Draft,
+    creationDate: "18 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-101-2",
+    title: "Office Interior Design",
+    quote: "QT-2025-101",
+    client: "Emma Robinson",
+    amount: 4850,
+    status: QuoteActivityStatus.Sent,
+    creationDate: "12 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-102-2",
+    title: "Residential Plumbing Works",
+    quote: "QT-2025-102",
+    client: "Daniel Murphy",
+    amount: 6200,
+    status: QuoteActivityStatus.Draft,
+    creationDate: "15 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-103-2",
+    title: "Retail Store Interior Fit-Out",
+    quote: "QT-2025-103",
+    client: "Olivia Bennett",
+    amount: 3450,
+    status: QuoteActivityStatus.Sent,
+    creationDate: "02 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-104-2",
+    title: "Electrical Wiring & Lighting",
+    quote: "QT-2025-104",
+    client: "James Carter",
+    amount: 5175,
+    status: QuoteActivityStatus.Draft,
+    creationDate: "18 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "QT-2025-105-2",
+    title: "Painting & Finishing Services",
+    quote: "QT-2025-105",
+    client: "Sophia Turner",
+    amount: 2900,
+    status: QuoteActivityStatus.Draft,
+    creationDate: "18 Sep 2025",
+    expiryDate: "12 Sep 2025",
+    paymentMethod: "Cash",
+  },
+];
+
 export const paymentData: PaymentData[] = [
   {
     id: "PMT5",

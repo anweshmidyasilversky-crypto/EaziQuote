@@ -1,5 +1,4 @@
 import { assets } from "../../assets/icons";
-import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
 import { CustomBtn } from "../common/CustomBtn";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 

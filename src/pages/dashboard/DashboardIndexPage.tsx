@@ -70,25 +70,25 @@ export function DashboardIndexPage() {
       title: "Outstanding Invoices",
       value: "£12,500.00",
       kpiIcon: assets.invoiceColored,
-      iconBg: "bg-transparent-royal-blue",
+      iconCls: "bg-transparent-royal-blue",
     },
     {
       title: "Pending Quotes",
       value: "£8,250.00",
       kpiIcon: assets.clockColored,
-      iconBg: "bg-transparent-liquid-lava",
+      iconCls: "bg-transparent-liquid-lava",
     },
     {
       title: "Money due this week",
       value: "£32,580",
       kpiIcon: assets.poundColored,
-      iconBg: "bg-transparent-ming-green",
+      iconCls: "bg-transparent-ming-green",
     },
     {
       title: "Quotes Accepted (Last 30 Days)",
       value: "20",
       kpiIcon: assets.invoiceColored,
-      iconBg: "bg-transparent-royal-blue",
+      iconCls: "bg-transparent-royal-blue",
     },
   ];
 
@@ -130,7 +130,7 @@ export function DashboardIndexPage() {
                   title={kpiConfig.title}
                   value={kpiConfig.value}
                   kpiIcon={kpiConfig.kpiIcon}
-                  iconBg={kpiConfig.iconBg}
+                  iconCls={kpiConfig.iconCls}
                 />
               );
             })}

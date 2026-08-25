@@ -1,5 +1,5 @@
 import { assets } from "../../assets/icons";
-import { CustomBtn } from "../../components/common/CustomBtn";
+import { type CustomBtnProps } from "../../components/common/CustomBtn";
 import {
   filterFn_includesString,
   type ColumnDef,
@@ -25,6 +25,7 @@ import type { ClientCreationPayload } from "../../types/clientCreation.payload.t
 import { nanoid } from "@reduxjs/toolkit";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
+import { CustomHeader } from "../../components/common/CustomHeader";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
@@ -90,10 +91,6 @@ export function ClientIndexPage() {
         new Date(client1.createdAt).getTime(),
     ),
   );
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 5,
-  });
   const [isPopoverOpen, toggleIsPopoverOpen] = useState(false);
 
   {
@@ -168,9 +165,6 @@ export function ClientIndexPage() {
     ],
     [debouncedSearchParam],
   );
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-  }, [debouncedSearchParam]);
 
   const clientCreatFn = (data: ClientCreationPayload) => {
     const { name: client, companyName: company } = data;
@@ -191,34 +185,32 @@ export function ClientIndexPage() {
     );
   };
 
+  {
+    /* buttons */
+  }
+  const btnConfigList: CustomBtnProps[] = [
+    {
+      leftIcon: assets.plusIcon,
+      buttonLabel: "Add Client",
+      onClick: () => toggleIsPopoverOpen((curr) => !curr),
+    },
+  ];
+
   return (
     <>
       <div className="relative px-6 pt-6 pb-5 flex flex-col gap-6">
         {/* Header */}
-        <div className="flex justify-between items-center w-full min-h-13.5">
-          <div className="flex flex-col items-center gap-2 h-full">
-            <span className="min-h-7.25 font-bold text-xl md:text-2xl self-start">
-              {" "}
-              Clients{" "}
-            </span>
-            <span className="min-h-4.25 text-placeholder-text text-[14px]">
-              {" "}
-              Manage all your clients{" "}
-            </span>
-          </div>
-
-          <CustomBtn
-            leftIcon={assets.plusIcon}
-            buttonLabel="Add Client"
-            onClick={() => toggleIsPopoverOpen((curr) => !curr)}
-          />
-          <ClientForm
-            isFormOpen={isPopoverOpen}
-            toggleFormOpen={toggleIsPopoverOpen}
-            mode="creation"
-            clientCreatFn={clientCreatFn}
-          />
-        </div>
+        <CustomHeader
+          header="Clients"
+          headerInfo="Manage all your clients"
+          btnConfigList={btnConfigList}
+        />
+        <ClientForm
+          isFormOpen={isPopoverOpen}
+          toggleFormOpen={toggleIsPopoverOpen}
+          mode="creation"
+          clientCreatFn={clientCreatFn}
+        />
 
         <div className="flex flex-col bg-table rounded-[10px] dashboard-card-theme gap-4.5 py-4.5">
           <CustomDataTable
@@ -227,8 +219,6 @@ export function ClientIndexPage() {
             hiddenCols={hiddenCols}
             localFilters={localFilter}
             showPaginated={true}
-            pagination={pagination}
-            setPagination={setPagination}
             tableOptionsLeft={SearchInputGruop({
               searchTerm: searchParam,
               setSearchTerm: setSearchParam,

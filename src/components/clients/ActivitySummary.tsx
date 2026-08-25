@@ -11,7 +11,7 @@ export interface ActivitySummaryProps {
 
 export function ActivitySummary({ summaryConfig }: ActivitySummaryProps) {
   return (
-    <div className="flex w-full items-stretch rounded-[10px] dashboard-card-theme overflow-hidden">
+    <div className="flex w-full min-h-27.75 items-stretch rounded-[10px] dashboard-card-theme overflow-hidden">
       {summaryConfig.map((summaryDet, index) => (
         <React.Fragment key={summaryDet.summaryTitle}>
           <div className="flex p-3 sm:p-4 flex-col justify-center gap-2 flex-1 min-w-0">

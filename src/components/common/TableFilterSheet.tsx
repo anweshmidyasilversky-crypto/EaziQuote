@@ -2,7 +2,6 @@ import { XIcon } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetFooter } from "../ui/sheet";
 import { Separator } from "../ui/separator";
 import { CustomBtn } from "./CustomBtn";
-import { InputGroup } from "../ui/input-group";
 
 export interface TableFilterSheetProps {
   children: React.ReactNode;
@@ -10,11 +9,6 @@ export interface TableFilterSheetProps {
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   applyFn?: () => void;
   clearFn?: () => void;
-  withDateRange?: boolean;
-  dateRangeObj?: {
-    startDate: Date;
-    endDate: Date;
-  };
 }
 
 export function TableFilterSheet({
@@ -23,7 +17,6 @@ export function TableFilterSheet({
   applyFn,
   clearFn,
   children,
-  withDateRange,
 }: TableFilterSheetProps) {
   return (
     <Sheet open={isOpen} onOpenChange={toggleIsOpen} modal={false}>
@@ -42,22 +35,6 @@ export function TableFilterSheet({
               />
             </span>
           </SheetHeader>
-
-          {withDateRange && (
-            <div className="my-6 min-h-25.5 flex flex-col justify-between items-center">
-              <span className="uppercase text-placeholder-text min-h-4.25 font-medium">
-                {" "}
-                Date Range{" "}
-              </span>
-
-              <div className="min-h-17.25 flex justify-between">
-                <div className="flex flex-col gap-2">
-                  <span> Start Date </span>
-                  <InputGroup></InputGroup>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Content */}
           {children}

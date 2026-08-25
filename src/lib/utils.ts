@@ -2,8 +2,12 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
   addressList,
+  itemData,
   mockClientData,
+  QuoteActivityStatus,
+  quoteData,
   type AddressDetail,
+  type QuoteData,
 } from "../constants/dummyData";
 
 export function cn(...inputs: ClassValue[]) {
@@ -100,4 +104,19 @@ export const formatCurrency = (value: number) => {
     style: "currency",
     currency: "GBP",
   }).format(value);
+};
+
+export const getQuoteFromId = (id: string): QuoteData => {
+  return (
+    quoteData.find((quote) => quote.id === id) || {
+      id: "QT-2025-101",
+      title: "Office Interior Design",
+      quote: "QT-2025-101",
+      client: "Emma Robinson",
+      amount: 4850,
+      status: QuoteActivityStatus.Sent,
+      creationDate: "12 Sep 2025",
+      expiryDate: "12 Sep 2025",
+    }
+  );
 };
