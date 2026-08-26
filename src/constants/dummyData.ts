@@ -130,6 +130,33 @@ export interface Invoice {
   status: InvoiceStatus;
 }
 
+export interface QuoteSection {
+  order: number;
+  section: string;
+  description: string;
+}
+
+export const quoteSectionData: QuoteSection[] = [
+  {
+    order: 1,
+    section: "Introduction",
+    description:
+      "1. Emergency Leak Repair. Located under the kitchen sink — replaced damaged T-joint and resealed all fittings. Materials Used: Sealant, T-joint.",
+  },
+  {
+    order: 2,
+    section: "About Us",
+    description:
+      "Alpha Renovates Pvt. Ltd. has been providing reliable, professional plumbing solutions across Brighton and surrounding areas since 2015.",
+  },
+  {
+    order: 3,
+    section: "Detailed Terms & Conditions",
+    description:
+      "This quote is valid for 30 days from the issue date. Payment terms: 14 days from invoice date.",
+  },
+];
+
 export const invoiceData: Invoice[] = [
   {
     id: "INV-2025-101",

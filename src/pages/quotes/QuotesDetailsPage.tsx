@@ -30,6 +30,7 @@ import { StatusDropDown } from "../../components/quotes/StatusDropDown";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
 import { ShareOptions } from "../../components/common/ShareOptions";
 import { QuoteDescriptionPage } from "./QuoteDescriptionPage";
+import { QuoteSectionPage } from "./QuoteSectionPage";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
@@ -278,6 +279,7 @@ export function QuotesDetailsPage() {
         )}
 
         {activeTable === "description" && <QuoteDescriptionPage />}
+        {activeTable === "section" && <QuoteSectionPage />}
       </div>
 
       <ClientDetailsPopup
