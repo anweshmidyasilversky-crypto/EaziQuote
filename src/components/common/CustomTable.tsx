@@ -16,11 +16,14 @@ import {
   createPaginatedRowModel,
   rowPaginationFeature,
   type PaginationState,
+  flexRender,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
 import { memo, useEffect, useState } from "react";
+import { Separator } from "../ui/separator";
+import React from "react";
 
-interface DataTableProps<TData extends RowData> {
+export interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<TableFeatures, TData>[];
   data: TData[];
   title?: string;
@@ -33,6 +36,7 @@ interface DataTableProps<TData extends RowData> {
 
   tableOptionsLeft?: React.ReactNode;
   tableOptionsRight?: React.ReactNode;
+  withFooterBorder?: boolean;
 }
 
 function CustomTable<TData extends RowData>({
@@ -48,6 +52,7 @@ function CustomTable<TData extends RowData>({
 
   tableOptionsLeft,
   tableOptionsRight,
+  withFooterBorder,
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -109,6 +114,23 @@ function CustomTable<TData extends RowData>({
       pagination,
     },
   });
+
+  const pageCount = table.getPageCount();
+  const currentPage = pagination.pageIndex;
+  const visiblePages = 3;
+
+  let startPage = Math.max(0, currentPage - 1);
+  let endPage = startPage + visiblePages - 1;
+
+  if (endPage >= pageCount) {
+    endPage = pageCount - 1;
+    startPage = Math.max(0, endPage - visiblePages + 1);
+  }
+
+  const pageNumbers = Array.from(
+    { length: Math.max(0, endPage - startPage + 1) },
+    (_, i) => startPage + i,
+  );
 
   return (
     <>
@@ -197,6 +219,38 @@ function CustomTable<TData extends RowData>({
                 </tr>
               ))}
             </tbody>
+
+            {/* Table Footer */}
+            <tfoot>
+              {withFooterBorder && (
+                <tr className="h-4 pointer-events-none select-none">
+                  <td colSpan={table.getVisibleFlatColumns().length}>
+                    {" "}
+                    <Separator className={`bg-separator`} />{" "}
+                  </td>
+                </tr>
+              )}
+              {table.getFooterGroups().map((footerGroup) => (
+                <tr
+                  key={footerGroup.id}
+                  className="hover:bg-slate-50/50 transition-colors"
+                >
+                  {footerGroup.headers.map((header) => (
+                    <td
+                      key={header.id}
+                      className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.footer,
+                            header.getContext(),
+                          )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tfoot>
           </table>
         </div>
 
@@ -220,22 +274,77 @@ function CustomTable<TData extends RowData>({
                 <span> Previous </span>
               </button>
 
-              <button className="btn-auth rounded-1 font-regular text-[14px] max-w-8.5 max-h-8">
-                {pagination.pageIndex + 1}
-              </button>
+              {/* First page + left ellipsis */}
+              {startPage > 0 && (
+                <>
+                  <button
+                    className={`table-pagination-btn-common ${
+                      currentPage === 0 ? "" : "table-pagination-btn-inactive"
+                    }`}
+                    onClick={() =>
+                      setPagination((curr) => ({
+                        ...curr,
+                        pageIndex: 0,
+                      }))
+                    }
+                  >
+                    1
+                  </button>
 
-              <button
-                className="btn-auth rounded-1 font-regular text-[14px] max-w-8.5 max-h-8 disabled:cursor-not-allowed bg-transparent text-black-text ring-1 ring-[#E4E6F4] hover:text-white"
-                disabled={!table.getCanNextPage()}
-                onClick={() =>
-                  setPagination((curr) => ({
-                    ...curr,
-                    pageIndex: pagination.pageIndex + 1,
-                  }))
-                }
-              >
-                {pagination.pageIndex + 2}
-              </button>
+                  {startPage > 1 && (
+                    <span className="table-pagination-btn-inactive min-w-8.5 min-h-8 rounded text-center hover:text-black-text">
+                      ...
+                    </span>
+                  )}
+                </>
+              )}
+
+              {/* Current page window */}
+              {pageNumbers.map((pageIndex) => (
+                <button
+                  key={pageIndex}
+                  className={`table-pagination-btn-common ${
+                    currentPage === pageIndex
+                      ? ""
+                      : "table-pagination-btn-inactive"
+                  }`}
+                  onClick={() =>
+                    setPagination((curr) => ({
+                      ...curr,
+                      pageIndex,
+                    }))
+                  }
+                >
+                  {pageIndex + 1}
+                </button>
+              ))}
+
+              {/* Right ellipsis + last page */}
+              {endPage < pageCount - 1 && (
+                <>
+                  {endPage < pageCount - 2 && (
+                    <span className="table-pagination-btn-inactive min-w-8.5 min-h-8 rounded text-center hover:text-black-text">
+                      ...
+                    </span>
+                  )}
+
+                  <button
+                    className={`table-pagination-btn-common ${
+                      currentPage === pageCount - 1
+                        ? ""
+                        : "table-pagination-btn-inactive"
+                    }`}
+                    onClick={() =>
+                      setPagination((curr) => ({
+                        ...curr,
+                        pageIndex: pageCount - 1,
+                      }))
+                    }
+                  >
+                    {pageCount}
+                  </button>
+                </>
+              )}
 
               <button
                 type="button"

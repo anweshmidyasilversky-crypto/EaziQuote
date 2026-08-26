@@ -64,6 +64,11 @@ import OrangeHourGlassIcon from "./icons/orangeHourGlassIcon.png";
 import previewIcon from "./icons/previewIcon.png";
 import warningIcon from "./icons/warningIcon.png";
 
+import whatsAppIcon from "./icons/WhatsAppIcon.png";
+import facebooksIcon from "./icons/FacebookIcon.png";
+import gmailIcon from "./icons/GmailIcon.png";
+import twitterIcon from "./icons/TwitterIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -128,4 +133,9 @@ export const assets = {
   OrangeHourGlassIcon,
   previewIcon,
   warningIcon,
+
+  whatsAppIcon,
+  facebooksIcon,
+  twitterIcon,
+  gmailIcon,
 };

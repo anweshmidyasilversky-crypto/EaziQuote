@@ -89,6 +89,9 @@
   button {
     @apply enabled:cursor-pointer transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
   }
+  a {
+    @apply text-brand-dark cursor-pointer;
+  }
   html {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
@@ -102,6 +105,14 @@
     display: none;
     -webkit-appearance: none;
   }
+}
+
+@utility table-pagination-btn-common {
+  @apply btn-auth rounded font-normal text-[14px] max-w-8.5 max-h-8;
+}
+
+@utility table-pagination-btn-inactive {
+  @apply disabled:cursor-not-allowed bg-transparent text-black-text ring-1 ring-[#E4E6F4] hover:text-white;
 }
 
 @utility page-name {
@@ -118,6 +129,10 @@
 
 @utility subtotal-field {
   @apply font-normal text-[14px] text-placeholder-text min-h-4.25;
+}
+
+@utility subtotal-value {
+  @apply subtotal-field text-black-text!;
 }
 
 @utility pagination-btn {

@@ -7,6 +7,7 @@ import {
   QuoteActivityStatus,
   quoteData,
   type AddressDetail,
+  type ClientDataWithFilters,
   type QuoteData,
 } from "../constants/dummyData";
 
@@ -89,8 +90,19 @@ export function getAddress(postCode: string): AddressDetail | undefined {
 }
 
 export function getClient(clientId: string) {
-  return mockClientData.find(
-    (clientCredential) => clientCredential.id === clientId,
+  return (
+    mockClientData.find(
+      (clientCredential) => clientCredential.id === clientId,
+    ) ??
+    ({
+      id: "1",
+      client: "Emma Smith",
+      company: "Smith & Co Builders",
+      phone: "(+44) 456-789-2002",
+      email: "es@gmail.com",
+      createdAt: "2026-08-15T10:30:00Z",
+      activityCount: 24,
+    } as ClientDataWithFilters)
   );
 }
 
@@ -108,7 +120,8 @@ export const formatCurrency = (value: number) => {
 
 export const getQuoteFromId = (id: string): QuoteData => {
   return (
-    quoteData.find((quote) => quote.id === id) || {
+    quoteData.find((quote) => quote.id === id) ||
+    ({
       id: "QT-2025-101",
       title: "Office Interior Design",
       quote: "QT-2025-101",
@@ -117,6 +130,6 @@ export const getQuoteFromId = (id: string): QuoteData => {
       status: QuoteActivityStatus.Sent,
       creationDate: "12 Sep 2025",
       expiryDate: "12 Sep 2025",
-    }
+    } as QuoteData)
   );
 };

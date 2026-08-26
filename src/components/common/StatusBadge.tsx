@@ -1,3 +1,4 @@
+import { ChevronDown, type LucideIcon } from "lucide-react";
 import type {
   ClientActivityStatus,
   PaymentActivityStatus,
@@ -13,6 +14,8 @@ export type StatusBadgeProps = {
     | ClientActivityStatus
     | PaymentActivityStatus
     | QuoteActivityStatus;
+
+  ChevronIcon?: LucideIcon;
 };
 
 const statusColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -53,13 +56,18 @@ const textColorMap: Record<StatusBadgeProps["status"], string> = {
   Expired: "text-overdue-text",
 };
 
-function StatusBadge({ status }: StatusBadgeProps) {
+function StatusBadge({ status, ChevronIcon }: StatusBadgeProps) {
   console.log(statusColorMap[status]);
   return (
     <div
-      className={`flex px-2.5 min-h-6 w-fit rounded items-center ${statusColorMap[status]} ${textColorMap[status]}`}
+      className={`flex justify-between px-2.5 min-h-6 w-fit rounded items-center ${statusColorMap[status]} ${textColorMap[status]}`}
     >
       <span> {status} </span>
+      {ChevronIcon && (
+        <div className="p-0.5 ml-1 mix-blend-multiply">
+          <ChevronIcon className="w-5 aspect-square" />
+        </div>
+      )}
     </div>
   );
 }
