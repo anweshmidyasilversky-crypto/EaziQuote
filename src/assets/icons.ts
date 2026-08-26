@@ -68,6 +68,7 @@ import whatsAppIcon from "./icons/WhatsAppIcon.png";
 import facebooksIcon from "./icons/FacebookIcon.png";
 import gmailIcon from "./icons/GmailIcon.png";
 import twitterIcon from "./icons/TwitterIcon.png";
+import attachmentIcon from "./icons/attachmentIcon.png";
 
 export const assets = {
   loginHeader,
@@ -138,4 +139,5 @@ export const assets = {
   facebooksIcon,
   twitterIcon,
   gmailIcon,
+  attachmentIcon,
 };

@@ -107,6 +107,14 @@
   }
 }
 
+@utility quote-description-header {
+  @apply font-medium text-base min-h-4.75;
+}
+
+@utility quote-description-section {
+  @apply flex flex-col gap-4;
+}
+
 @utility table-pagination-btn-common {
   @apply btn-auth rounded font-normal text-[14px] max-w-8.5 max-h-8;
 }
