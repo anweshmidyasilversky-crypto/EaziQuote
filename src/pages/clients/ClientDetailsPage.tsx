@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { assets } from "../../assets/icons";
 import {
   ActivitySummary,
@@ -51,6 +51,7 @@ import {
 } from "../../components/common/CustomToggleGroup";
 
 export function ClientDetailsPage() {
+  const navigate = useNavigate();
   const param = useParams<{ id: string }>();
   const user = useAppSelector((state) => state.user);
   const [clientCredential, setclientCredential] = useState(
@@ -192,7 +193,11 @@ export function ClientDetailsPage() {
           cell: ({ row }) => {
             const activity = row.original;
 
-            return <CustomActionGroup />;
+            return (
+              <CustomActionGroup
+                openFn={() => navigate(`/quotes/${activity.quoteInvoice}`)}
+              />
+            );
           },
           enableSorting: false,
         },

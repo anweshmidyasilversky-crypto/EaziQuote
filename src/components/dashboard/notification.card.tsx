@@ -9,7 +9,7 @@ export type NotificationCardProps = {
 
 export function NotificationCard({ notifications }: NotificationCardProps) {
   return (
-    <div className="min-h-60 w-full flex flex-col items-center rounded-[10px] py-4.5 dashboard-card-theme gap-4.5 grow">
+    <div className="min-h-60 overflow-y-auto w-full flex flex-col items-center rounded-[10px] py-4.5 dashboard-card-theme gap-4.5 grow">
       {/* notification card header */}
       <div className="w-full flex justify-between px-5 items-center">
         <span className="min-h-4.75 font-medium text-[16px]">

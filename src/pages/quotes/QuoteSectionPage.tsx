@@ -32,9 +32,7 @@ export function QuoteSectionPage() {
       <CustomDataTable
         columns={quoteSectionColumns}
         data={quoteSectionData}
-        tableOptionsLeft={
-          <span className="quote-description-header"> Sections </span>
-        }
+        tableOptionsLeft={<span className="header"> Sections </span>}
       />
     </div>
   );

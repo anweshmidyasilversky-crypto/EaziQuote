@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { assets } from "../../assets/icons";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
@@ -14,8 +15,12 @@ import {
 import { formatOrdinalDate } from "../../lib/utils";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
+import { ClientForm } from "../../components/clients/ClientForm";
+import { useState } from "react";
 
 export function DashboardIndexPage() {
+  const navigate = useNavigate();
+  const [clientFormOpen, toggleClientFormOpen] = useState(false);
   const columns: ColumnDef<TableFeatures, TransactionItem>[] = [
     {
       accessorKey: "title",
@@ -61,7 +66,11 @@ export function DashboardIndexPage() {
       id: "actions",
       header: "ACTION",
       enableSorting: false,
-      cell: () => <CustomActionGroup />,
+      cell: (info) => (
+        <CustomActionGroup
+          openFn={() => navigate(`/quotes/${info.row.original.quoteInvoice}`)}
+        />
+      ),
     },
   ];
 
@@ -116,7 +125,11 @@ export function DashboardIndexPage() {
 
             <CustomBtn buttonLabel="New Invoice" leftIcon={assets.plusIcon} />
 
-            <CustomBtn buttonLabel="Add Client" leftIcon={assets.plusIcon} />
+            <CustomBtn
+              buttonLabel="Add Client"
+              leftIcon={assets.plusIcon}
+              onClick={() => toggleClientFormOpen((curr) => !curr)}
+            />
           </div>
         </div>
 
@@ -143,12 +156,15 @@ export function DashboardIndexPage() {
             {" "}
             Recent Activity{" "}
           </span>
-          <CustomDataTable
-            columns={columns}
-            data={transactionItems.slice(0, 5)}
-          />
+          <CustomDataTable columns={columns} data={transactionItems} />
         </div>
       </div>
+
+      <ClientForm
+        isFormOpen={clientFormOpen}
+        toggleFormOpen={toggleClientFormOpen}
+        mode="creation"
+      />
     </div>
   );
 }

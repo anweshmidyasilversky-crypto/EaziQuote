@@ -10,7 +10,7 @@ export function QuoteDescriptionPage() {
   return (
     <div className="bg-white rounded-[7px] flex flex-col gap-6 p-5">
       <div className="quote-description-section">
-        <span className="quote-description-header"> Job Description </span>
+        <span className="header"> Job Description </span>
         <span className="text-placeholder-text text-sm">
           This quote covers the renovation of Acme Corp’s office space,
           including material supply, floor tiling, and partition adjustments. It
@@ -27,10 +27,7 @@ export function QuoteDescriptionPage() {
       <div className="dashed-y-separators" />
 
       <div className="quote-description-section">
-        <span className="quote-description-header">
-          {" "}
-          Notes (Not visible on quote){" "}
-        </span>
+        <span className="header"> Notes (Not visible on quote) </span>
         <span className="text-placeholder-text text-sm">
           The client, Brightline Solutions, is looking for a complete redesign
           of their 3rd-floor workspace to support a hybrid work model. During
@@ -50,7 +47,7 @@ export function QuoteDescriptionPage() {
       <div className="dashed-y-separators" />
 
       <div className="quote-description-section">
-        <span className="quote-description-header"> Attachments </span>
+        <span className="header"> Attachments </span>
         <div className="grid grid-cols-3 gap-4">
           {Array.from({ length: 6 }, (_, i) => i + 1).map((i) => (
             <div

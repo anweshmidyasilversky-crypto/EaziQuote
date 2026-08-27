@@ -107,7 +107,7 @@
   }
 }
 
-@utility quote-description-header {
+@utility header {
   @apply font-medium text-base min-h-4.75;
 }
 
