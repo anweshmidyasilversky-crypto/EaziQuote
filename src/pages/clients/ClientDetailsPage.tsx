@@ -372,6 +372,7 @@ export function ClientDetailsPage() {
               togglePopupOpen={toggleMoreOptions}
               editAction={() => toggleEditPopupOpen((curr) => !curr)}
               contactInfoAction={() => toggleContactInfoOpen((curr) => !curr)}
+              withContactInfo
             >
               <span
                 className="flex items-center justify-center bg-[#F5F6FB] w-9 h-9 rounded-[10px] shrink-0 cursor-pointer"

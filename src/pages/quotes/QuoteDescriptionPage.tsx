@@ -1,4 +1,4 @@
-import { assets } from "../../assets/icons";
+import StyledAttachments from "../../components/common/StyledAttachments";
 
 export function QuoteDescriptionPage() {
   const jobDet = [
@@ -48,26 +48,9 @@ export function QuoteDescriptionPage() {
 
       <div className="quote-description-section">
         <span className="header"> Attachments </span>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="attachment-layout">
           {Array.from({ length: 6 }, (_, i) => i + 1).map((i) => (
-            <div
-              className="min-h-12 flex justify-between items-center border rounded-[7px] border-separator border-dashed p-2 pr-4"
-              key={i}
-            >
-              <div className="min-h-8 flex gap-3 items-center">
-                <div className="bg-table-head w-8 rounded-xs aspect-square flex items-center justify-center cursor-pointer">
-                  <img
-                    src={assets.attachmentIcon}
-                    className="w-4 aspect-square"
-                  />
-                </div>
-                <span> {`Attachment${i}.png`} </span>
-              </div>
-
-              <button>
-                <img src={assets.moreIcon} className="w-3.75 h-0.75" />
-              </button>
-            </div>
+            <StyledAttachments fileName={`Attachment${i}.png`} />
           ))}
         </div>
       </div>

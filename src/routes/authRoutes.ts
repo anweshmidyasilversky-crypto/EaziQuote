@@ -17,6 +17,7 @@ import { DashboardLayout } from "../components/dashboard/DashboardLayout";
 import { ClientDetailsPage } from "../pages/clients/ClientDetailsPage";
 import { QuotesIndexPage } from "../pages/quotes/QuotesIndexPage";
 import { QuotesDetailsPage } from "../pages/quotes/QuotesDetailsPage";
+import { CreateQuotePage } from "../pages/quotes/CreateQuotePage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -84,13 +85,30 @@ export const authRoutes: RouteObject[] = [
                 path: "clients/:id",
                 Component: ClientDetailsPage,
               },
+              // {
+              //   path: "quotes",
+              //   Component: QuotesIndexPage,
+              // },
+              // {
+              //   path: "quotes/:id",
+              //   Component: QuotesDetailsPage,
+              // },
               {
                 path: "quotes",
-                Component: QuotesIndexPage,
-              },
-              {
-                path: "quotes/:id",
-                Component: QuotesDetailsPage,
+                children: [
+                  {
+                    index: true,
+                    Component: QuotesIndexPage,
+                  },
+                  {
+                    path: ":id",
+                    Component: QuotesDetailsPage,
+                  },
+                  {
+                    path: "manage-quotes",
+                    Component: CreateQuotePage,
+                  },
+                ],
               },
             ],
           },

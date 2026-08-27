@@ -188,6 +188,7 @@ export function QuotesIndexPage() {
     {
       leftIcon: assets.plusIcon,
       buttonLabel: "New Quote",
+      onClick: () => navigate("/quotes/manage-quotes"),
     },
   ];
 

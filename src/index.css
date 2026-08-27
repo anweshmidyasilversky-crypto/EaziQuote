@@ -69,6 +69,10 @@
 
   --color-warning-text: #ff8503;
 
+  --color-manage-quote-secondary: #0597ff;
+
+  --color-input-field-border: #ced1da;
+
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,
@@ -105,6 +109,42 @@
     display: none;
     -webkit-appearance: none;
   }
+}
+
+@utility attachment-layout {
+  @apply grid grid-cols-3 gap-4;
+}
+
+@utility attachment-box {
+  @apply min-h-12 flex justify-between items-center border rounded-[7px] border-separator border-dashed p-2 pr-4;
+}
+
+@utility input-field {
+  @apply flex flex-row items-center p-3 gap-3 w-full h-11 bg-white border border-input-field-border rounded-[7px] self-stretch transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 flex-1 disabled:bg-table-head! disabled:text-muted disabled:placeholder:text-muted;
+}
+
+@utility input-error {
+  @apply border-rose-300 bg-rose-50 focus:border-rose-500 focus:ring-2 focus:ring-rose-100;
+}
+
+@utility input-valid {
+  @apply border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100;
+}
+
+@utility error-text {
+  @apply text-sm text-rose-600;
+}
+
+@utility input-label {
+  @apply h-4.25 font-normal text-[14px] leading-4.25 text-black-text flex justify-center gap-1.5 items-center;
+}
+
+@utility input-non-oriented {
+  @apply flex items-start p-0 gap-2 w-full min-h-17.25 self-stretch;
+}
+
+@utility create-quote-toggle {
+  @apply bg-transparent text-black-text disabled:text-muted;
 }
 
 @utility header {

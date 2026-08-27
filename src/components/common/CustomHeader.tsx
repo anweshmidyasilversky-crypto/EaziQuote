@@ -2,7 +2,7 @@ import { CustomBtn, type CustomBtnProps } from "./CustomBtn";
 
 export type CustomHeaderProps = {
   header: string;
-  headerInfo: string;
+  headerInfo?: string;
   btnConfigList: CustomBtnProps[];
 };
 

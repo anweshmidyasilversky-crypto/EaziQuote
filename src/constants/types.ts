@@ -4,3 +4,7 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/webp",
   "image/jpg",
 ];
+
+export const ALLOWED_ATTACHMENT_TYPES = ["application/pdf"].concat(
+  ALLOWED_IMAGE_TYPES,
+);

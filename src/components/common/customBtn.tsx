@@ -9,7 +9,7 @@ export type CustomBtnProps = {
   withSpinner?: boolean;
   isSubmitting?: boolean;
   btncls?: string;
-};
+} & ButtonPrimitive.Props;
 
 export function CustomBtn({
   buttonLabel,
@@ -20,7 +20,7 @@ export function CustomBtn({
   isSubmitting,
   btncls,
   className,
-}: CustomBtnProps & ButtonPrimitive.Props) {
+}: CustomBtnProps) {
   return (
     <button
       className={`h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth ${bgColor} ${btncls} ${className}`}

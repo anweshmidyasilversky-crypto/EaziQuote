@@ -16,24 +16,33 @@ export interface DateRange {
 export type DateRangePickerProps = {
   dateRange: DateRange;
   setDateRange: React.Dispatch<React.SetStateAction<DateRange>>;
+  startDateAlias?: string;
+  endDateAlias?: string;
 };
 export function DateRangePicker({
   dateRange,
   setDateRange,
+  startDateAlias,
+  endDateAlias,
 }: DateRangePickerProps) {
-  console.log(dateRange);
   const [calenderOpen, toggleCalenderOpen] = useState<
     Record<keyof DateRange, boolean>
   >({
     startDate: false,
     endDate: false,
   });
+  const [startDateName, endDateName] = [
+    startDateAlias ?? "Start Date",
+    endDateAlias ?? "End Date",
+  ];
 
   const formatLocalDate = (date: Date | undefined): string => {
     if (!date) return "";
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
+
     return `${year}-${month}-${day}`;
   };
 
@@ -43,40 +52,42 @@ export function DateRangePicker({
       [key]: !curr[key],
     }));
   };
+
   return (
-    <div className="flex flex-row justify-between gap-4 items-center">
+    <div className="flex w-full flex-1 flex-row items-center gap-4">
       {Object.keys(dateRange).map((dateKey) => {
         const key = dateKey as keyof DateRange;
-        return (
-          <div className="flex flex-col gap-2" key={key}>
-            <span className="text-sm min-h-4.25">
-              {" "}
-              {key === "startDate" ? "Start Date" : "End Date"}{" "}
-            </span>
-            <InputGroup className="border-2 border-muted min-h-11">
-              <InputGroupAddon align={"inline-end"}>
-                <img src={assets.calendarIcon} className="w-5 aspect-square" />
-              </InputGroupAddon>
 
+        return (
+          <div className="flex min-w-0 flex-1 flex-col gap-2" key={key}>
+            <span className="min-h-4.25 text-sm">
+              {key === "startDate" ? startDateName : endDateName}
+            </span>
+
+            <InputGroup className="min-h-11 w-full border border-input-field-border">
               <Popover
                 open={calenderOpen[key]}
-                onOpenChange={() => popoverToggle(key)}
+                onOpenChange={(open) =>
+                  toggleCalenderOpen((curr) => ({
+                    ...curr,
+                    [key]: open,
+                  }))
+                }
               >
-                <PopoverTrigger onClick={() => popoverToggle(key)}>
+                <PopoverTrigger className="w-full">
                   <InputGroupInput
                     placeholder={
-                      key === "startDate" ? "Start Date" : "End Date"
+                      key === "startDate" ? startDateName : endDateName
                     }
                     type="text"
                     value={formatLocalDate(dateRange[key])}
-                    className="min-h-11 rounded-[7px] border-muted"
-                    onClick={() => popoverToggle(key)}
+                    className="min-h-11 w-full rounded-[7px]"
                     readOnly
                   />
                 </PopoverTrigger>
 
                 <PopoverContent
-                  className={`bg-white opacity-100 ring-0`}
+                  className="bg-white opacity-100 ring-0"
                   side="bottom"
                   align="start"
                 >
@@ -84,20 +95,29 @@ export function DateRangePicker({
                     mode="single"
                     selected={dateRange[key]}
                     onSelect={(value) => {
-                      setDateRange({ ...dateRange, [key]: value });
-                      popoverToggle(key);
+                      setDateRange({
+                        ...dateRange,
+                        [key]: value,
+                      });
+
+                      toggleCalenderOpen((curr) => ({
+                        ...curr,
+                        [key]: false,
+                      }));
                     }}
                     className="w-full h-full [&_table]:w-full [&_tr]:flex [&_tr]:justify-between [&_td]:flex-1 [&_th]:flex-1 [&_th]:text-center"
                     modifiersClassNames={{
                       selected:
-                        "bg-[#0f172a] text-white font-medium hover:bg-[#0f172a]!",
-
-                      today:
-                        "ring-1 bg-transparent text-slate-900 font-bold hover:ring-0",
+                        "bg-brand-dark text-white font-medium hover:bg-brand-dark!",
+                      today: "ring-1 bg-gray text-black font-bold hover:ring-0",
                     }}
                   />
                 </PopoverContent>
               </Popover>
+
+              <InputGroupAddon align="inline-end">
+                <img src={assets.calendarIcon} className="aspect-square w-5" />
+              </InputGroupAddon>
             </InputGroup>
           </div>
         );

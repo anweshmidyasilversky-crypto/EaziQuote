@@ -9,6 +9,7 @@ export type MoreOptionsPopupProps = {
   deleteAction?: () => void;
   contactInfoAction?: () => void;
   children?: React.ReactNode;
+  withContactInfo?: boolean;
 };
 function MoreOptionsPopup({
   isPopupOpen,
@@ -17,6 +18,7 @@ function MoreOptionsPopup({
   deleteAction,
   contactInfoAction,
   children,
+  withContactInfo,
 }: MoreOptionsPopupProps) {
   const closePopup = () => togglePopupOpen(false);
   return (
@@ -27,14 +29,16 @@ function MoreOptionsPopup({
         side="bottom"
         align="start"
       >
-        <CustomBtn
-          leftIcon={assets.phoneIcon}
-          buttonLabel="Contact Info"
-          onClick={() => {
-            contactInfoAction?.();
-            closePopup();
-          }}
-        />
+        {withContactInfo && (
+          <CustomBtn
+            leftIcon={assets.phoneIcon}
+            buttonLabel="Contact Info"
+            onClick={() => {
+              contactInfoAction?.();
+              closePopup();
+            }}
+          />
+        )}
         <CustomBtn
           leftIcon={assets.pencilIcon}
           buttonLabel="Edit"
@@ -43,7 +47,14 @@ function MoreOptionsPopup({
             closePopup();
           }}
         />
-        <CustomBtn leftIcon={assets.binIcon} buttonLabel="Delete" />
+        <CustomBtn
+          leftIcon={assets.binIcon}
+          buttonLabel="Delete"
+          onClick={() => {
+            deleteAction?.();
+            closePopup();
+          }}
+        />
       </PopoverContent>
     </Popover>
   );

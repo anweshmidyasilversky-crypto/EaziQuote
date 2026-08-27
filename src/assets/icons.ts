@@ -70,6 +70,9 @@ import gmailIcon from "./icons/GmailIcon.png";
 import twitterIcon from "./icons/TwitterIcon.png";
 import attachmentIcon from "./icons/attachmentIcon.png";
 
+import shareIconWhite from "./icons/shareIconWhite.png";
+import plusIconBlack from "./icons/plusIconBlack.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -140,4 +143,7 @@ export const assets = {
   twitterIcon,
   gmailIcon,
   attachmentIcon,
+
+  shareIconWhite,
+  plusIconBlack,
 };

@@ -9,3 +9,4 @@ export const POSTCODE = { minLength: 3, maxLength: 10 };
 export const COUNTRY = { minLength: 4, maxLength: 60 };
 export const BRAND_LOGO = { maxSize: 50 };
 export const PROFILE_PIC = { maxsize: 20 };
+export const ATTACHMENTS = { maxsize: 20 };

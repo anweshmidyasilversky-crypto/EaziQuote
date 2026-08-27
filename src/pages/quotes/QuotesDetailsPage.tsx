@@ -170,6 +170,8 @@ export function QuotesDetailsPage() {
                   />
                 }
               />
+
+              {/* Subtotal Breakdown */}
               <div className="px-5">
                 <div className="dashed-y-separators" />
               </div>

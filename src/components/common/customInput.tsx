@@ -31,6 +31,7 @@ export type CustomInputProps<T extends FieldValues> = {
   imgAltCls?: string;
   imgAltAlign?: "center" | "end";
   orientation?: "verticle" | "horizontal";
+  leftNode?: React.ReactNode;
 };
 
 function formatLabel(fieldName: string) {
@@ -57,26 +58,18 @@ export function CustomInput<T extends FieldValues>({
   withLabel = true,
   disabled = false,
   orientation,
+  leftNode,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
   const labelText = formatLabel(fieldName);
 
-  const fieldStyle = `flex flex-row items-center p-3 gap-3 w-full max-w-96.5 h-11 bg-white border border-[#CED1DA] rounded-[7px] self-stretch flex-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60`;
-  const errorStateStyle =
-    "border-rose-300 bg-rose-50 focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
-  const validStateStyle =
-    "border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
-
   return (
     <div
-      className={`flex ${["verticle", undefined].includes(orientation) ? "flex-col" : ""} items-start p-0 gap-2 w-full min-h-17.25 self-stretch flex-none`}
+      className={`input-non-oriented ${["verticle", undefined].includes(orientation) ? "flex-col" : "text-nowrap items-center! justify-center!"}`}
     >
       {withLabel && (
-        <label
-          htmlFor={fieldName as string}
-          className=" h-4.25 font-normal text-[14px] leading-4.25 text-black-text flex justify-center gap-1.5 items-center"
-        >
+        <label htmlFor={fieldName as string} className="input-label">
           {labelText}{" "}
           <button
             onClick={(e) => {
@@ -89,127 +82,169 @@ export function CustomInput<T extends FieldValues>({
           </button>
         </label>
       )}
-      <Controller
-        name={name as Path<T>}
-        control={control}
-        render={({ field: { onChange, value }, fieldState: { error } }) => {
-          const fieldValue = value ?? "";
+      <div className="w-full flex gap-2">
+        {leftNode}
+        <Controller
+          name={name as Path<T>}
+          control={control}
+          render={({ field: { onChange, value }, fieldState: { error } }) => {
+            const fieldValue = value ?? "";
 
-          return (
-            <div className="w-full space-y-2">
-              {inptType === "select" && (
-                <select
-                  disabled={disabled}
-                  id={fieldName}
-                  name={fieldName}
-                  value={fieldValue}
-                  onChange={(event) => onChange(event.target.value)}
-                  className={`${className} ${fieldStyle} select-input-style ${error ? errorStateStyle : validStateStyle}  `}
-                >
-                  {selectOptions?.map((selectOption) => {
-                    return (
-                      <option
-                        value={selectOption.value}
-                        key={selectOption.value}
+            return (
+              <div className="w-full space-y-2">
+                {inptType === "select" && (
+                  <select
+                    disabled={disabled}
+                    id={fieldName}
+                    name={fieldName}
+                    value={fieldValue}
+                    onChange={(event) => onChange(event.target.value)}
+                    className={`${className} input-field select-input-style ${error ? `input-error` : `input-valid`}  `}
+                  >
+                    {selectOptions?.map((selectOption) => {
+                      return (
+                        <option
+                          value={selectOption.value}
+                          key={selectOption.value}
+                        >
+                          {" "}
+                          {selectOption.label}{" "}
+                        </option>
+                      );
+                    })}
+                  </select>
+                )}{" "}
+                {["password", "text"].includes(inptType) && (
+                  <div className="relative">
+                    <input
+                      type={
+                        isPasswordField
+                          ? showPassword
+                            ? "text"
+                            : "password"
+                          : inptType
+                      }
+                      disabled={disabled}
+                      id={fieldName}
+                      name={fieldName}
+                      placeholder={placeholder ?? "......"}
+                      value={fieldValue}
+                      onChange={onChange}
+                      className={` input-field ${
+                        error ? `input-error` : `input-valid`
+                      } ${className}`}
+                    />
+                    {isPasswordField ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute inset-y-0 right-3 flex items-center text-sm font-medium text-indigo-600 transition hover:text-indigo-700"
                       >
-                        {" "}
-                        {selectOption.label}{" "}
-                      </option>
-                    );
-                  })}
-                </select>
-              )}{" "}
-              {["password", "text"].includes(inptType) && (
-                <div className="relative">
-                  <input
-                    type={
-                      isPasswordField
-                        ? showPassword
-                          ? "text"
-                          : "password"
-                        : inptType
-                    }
+                        {showPassword ? (
+                          <EyeOff color="gray" />
+                        ) : (
+                          <Eye color="gray" />
+                        )}
+                      </button>
+                    ) : null}
+                  </div>
+                )}
+                {inptType === "color" && (
+                  <div className="color-input-wrapper">
+                    <input
+                      type="color"
+                      disabled={disabled}
+                      id={fieldName}
+                      name={fieldName}
+                      value={fieldValue}
+                      onChange={onChange}
+                      className={
+                        className ??
+                        `rounded-color-input ${
+                          error ? `input-error` : `input-valid`
+                        }`
+                      }
+                    />
+                  </div>
+                )}
+                {inptType === "switch" && (
+                  <Switch
                     disabled={disabled}
                     id={fieldName}
-                    name={fieldName}
-                    placeholder={placeholder ?? "......"}
-                    value={fieldValue}
-                    onChange={onChange}
-                    className={` ${fieldStyle} ${
-                      error ? errorStateStyle : validStateStyle
-                    } ${className}`}
+                    checked={Boolean(value)}
+                    onCheckedChange={onChange}
+                    className={`${className}`}
                   />
-                  {isPasswordField ? (
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute inset-y-0 right-3 flex items-center text-sm font-medium text-indigo-600 transition hover:text-indigo-700"
+                )}
+                {inptType === "image" && (
+                  <ImageInput
+                    imgFile={value}
+                    setImgFile={onChange}
+                    alt={imgAlt ?? assets.cameraIcon}
+                    altClass={
+                      imgAltCls ?? "object-contain h-21 w-21 object-bottom"
+                    }
+                    alignAltImg={imgAltAlign}
+                  />
+                )}
+                {inptType === "textarea" && (
+                  <textarea
+                    value={value}
+                    onChange={onChange}
+                    className={`input-field min-h-20.25 md:min-w-105 overflow-y-auto ${className}`}
+                  />
+                )}
+                {inptType === "file" && (
+                  <>
+                    <label
+                      htmlFor={fieldName}
+                      className={`flex h-11 w-full cursor-pointer items-center overflow-hidden rounded-[7px] border border-input-field-border bg-white text-sm ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
                     >
-                      {showPassword ? (
-                        <EyeOff color="gray" />
-                      ) : (
-                        <Eye color="gray" />
-                      )}
-                    </button>
-                  ) : null}
-                </div>
-              )}
-              {inptType === "color" && (
-                <div className="color-input-wrapper">
-                  <input
-                    type="color"
-                    disabled={disabled}
-                    id={fieldName}
-                    name={fieldName}
-                    value={fieldValue}
-                    onChange={onChange}
-                    className={
-                      className ??
-                      `rounded-color-input ${
-                        error ? errorStateStyle : validStateStyle
-                      }`
-                    }
-                  />
-                </div>
-              )}
-              {inptType === "switch" && (
-                <Switch
-                  disabled={disabled}
-                  id={fieldName}
-                  checked={Boolean(value)}
-                  onCheckedChange={onChange}
-                  className={className}
-                />
-              )}
-              {inptType === "image" && (
-                <ImageInput
-                  imgFile={value}
-                  setImgFile={onChange}
-                  alt={imgAlt ?? assets.cameraIcon}
-                  altClass={
-                    imgAltCls ?? "object-contain h-21 w-21 object-bottom"
-                  }
-                  alignAltImg={imgAltAlign}
-                />
-              )}
-              {inptType === "textarea" && (
-                <textarea
-                  value={value}
-                  onChange={onChange}
-                  className={`${fieldStyle} min-h-20.25 md:min-w-105 overflow-y-auto ${className}`}
-                />
-              )}
-              {error && (
-                <p
-                  className={`text-sm text-rose-600 ${inptType === "image" ? "flex justify-center" : ""} `}
-                >
-                  {error.message}
-                </p>
-              )}
-            </div>
-          );
-        }}
-      />
+                      <span className="flex h-full items-center border-r border-input-field-border bg-table-head px-3 text-black-text">
+                        Choose File
+                      </span>
+
+                      <span className="px-3 text-muted">
+                        {Array.isArray(value) && value.length > 0
+                          ? `${value.length} ${
+                              value.length === 1 ? "file" : "files"
+                            } chosen`
+                          : "No file chosen"}
+                      </span>
+                    </label>
+
+                    <input
+                      type="file"
+                      id={fieldName}
+                      name={fieldName}
+                      disabled={disabled}
+                      multiple
+                      className="hidden"
+                      onChange={(event) => {
+                        const fileList = event.target.files;
+                        const prev = (value ? [...value] : []) as File[];
+                        let files = Array.from(fileList ?? []);
+                        // Filter already added files
+                        const uniqueFiles = files.filter((file) =>
+                          prev.every((prevFile) => prevFile.name !== file.name),
+                        );
+                        onChange(prev.concat(uniqueFiles));
+                      }}
+                    />
+                  </>
+                )}
+                {error && (
+                  <p
+                    className={`text-sm text-rose-600 ${inptType === "image" ? "flex justify-center" : ""} `}
+                  >
+                    {error.message}
+                  </p>
+                )}
+              </div>
+            );
+          }}
+        />
+      </div>
     </div>
   );
 }
