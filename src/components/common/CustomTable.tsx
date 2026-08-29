@@ -100,9 +100,9 @@ function CustomTable<TData extends RowData>({
 
     columns,
     data,
-    autoResetPageIndex: false,
+    autoResetPageIndex: showPaginated ? false : undefined,
 
-    onPaginationChange: setPagination,
+    onPaginationChange: showPaginated ? setPagination : undefined,
 
     initialState: {
       columnVisibility: hiddenCols,
@@ -111,7 +111,7 @@ function CustomTable<TData extends RowData>({
     state: {
       columnFilters: localFilters,
       globalFilter: globalFilterTerm,
-      pagination,
+      pagination: showPaginated ? pagination : undefined,
     },
   });
 

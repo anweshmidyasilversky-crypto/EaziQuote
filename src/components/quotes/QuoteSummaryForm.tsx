@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { quoteSummarySchema } from "../../validation/quote.summary.schema";
 import { CustomInput } from "../common/CustomInput";
@@ -13,6 +13,7 @@ import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { mockClientData } from "../../constants/dummyData";
 import { nanoid } from "@reduxjs/toolkit";
+import { cn } from "../../lib/utils";
 
 function QuoteSummaryForm() {
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
@@ -22,6 +23,7 @@ function QuoteSummaryForm() {
     setValue,
     handleSubmit,
     formState: { errors },
+    clearErrors,
   } = useForm<QuoteSummary>({
     defaultValues: {
       quoteTitle: "",
@@ -31,6 +33,7 @@ function QuoteSummaryForm() {
       hidePhoneNumber: true,
       clientId: undefined,
       jobDescription: "",
+      attachments: [],
     },
     resolver: yupResolver(quoteSummarySchema),
   });
@@ -38,6 +41,14 @@ function QuoteSummaryForm() {
     startDate: undefined,
     endDate: undefined,
   });
+  useEffect(() => {
+    setValue("quoteDate", dateRange.startDate?.toDateString() as string);
+    clearErrors("quoteDate");
+  }, [dateRange.startDate]);
+  useEffect(() => {
+    setValue("expiryDate", dateRange.endDate?.toDateString() as string);
+    clearErrors("expiryDate");
+  }, [dateRange.endDate]);
 
   const attachments = watch().attachments;
 
@@ -75,12 +86,32 @@ function QuoteSummaryForm() {
           />
         </div>
 
-        <DateRangePicker
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          startDateAlias="Quote Date"
-          endDateAlias="Expiry Date"
-        />
+        <div className="flex flex-col gap-2">
+          <DateRangePicker
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            startDateAlias="Quote Date"
+            endDateAlias="Expiry Date"
+            startDateStyle={`${errors.quoteDate ? `input-error!` : ``}`}
+            endDateStyle={`${errors.expiryDate ? `input-error!` : ``}`}
+          />
+          <div className="grid grid-cols-2 w-full">
+            {errors.quoteDate && (
+              <span className={cn("error-text input-field border-0!")}>
+                {" "}
+                {errors.quoteDate.message}{" "}
+              </span>
+            )}
+            {errors.expiryDate && (
+              <span
+                className={cn("input-field error-text col-start-2 border-0!")}
+              >
+                {" "}
+                {errors.expiryDate.message}{" "}
+              </span>
+            )}
+          </div>
+        </div>
 
         <CustomInput
           control={control}
@@ -88,7 +119,7 @@ function QuoteSummaryForm() {
           fieldName="Hide your Phone Number"
           inptType="switch"
           orientation="horizontal"
-          className="max-w-11!"
+          className={cn("max-w-11! translate-y-0!")}
         />
 
         <Separator className={`bg-separator`} />
@@ -109,9 +140,11 @@ function QuoteSummaryForm() {
                 getItemValue={(clientCredential) => clientCredential.id}
                 onValueChange={(clientCredential) => {
                   setValue("clientId", clientCredential as string);
+                  clearErrors("clientId");
                 }}
                 placeholder="Search or select a client"
                 emptyMessage="Consider adding this client"
+                className={cn(`${errors.clientId ? `input-error` : ``}`)}
               />
               {errors.clientId && (
                 <span className="error-text"> {errors.clientId.message} </span>

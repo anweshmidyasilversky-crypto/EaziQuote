@@ -7,6 +7,7 @@ import {
   InputGroupInput,
 } from "../ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Input as InputPrimitive } from "@base-ui/react";
 
 export interface DateRange {
   startDate: Date | undefined;
@@ -18,12 +19,18 @@ export type DateRangePickerProps = {
   setDateRange: React.Dispatch<React.SetStateAction<DateRange>>;
   startDateAlias?: string;
   endDateAlias?: string;
-};
+  startDateStyle?: InputPrimitive.Props["className"];
+  endDateStyle?: InputPrimitive.Props["className"];
+} & InputPrimitive.Props;
+
 export function DateRangePicker({
   dateRange,
   setDateRange,
   startDateAlias,
   endDateAlias,
+  className,
+  startDateStyle,
+  endDateStyle,
 }: DateRangePickerProps) {
   const [calenderOpen, toggleCalenderOpen] = useState<
     Record<keyof DateRange, boolean>
@@ -46,13 +53,6 @@ export function DateRangePicker({
     return `${year}-${month}-${day}`;
   };
 
-  const popoverToggle = (key: keyof DateRange) => {
-    toggleCalenderOpen((curr) => ({
-      ...curr,
-      [key]: !curr[key],
-    }));
-  };
-
   return (
     <div className="flex w-full flex-1 flex-row items-center gap-4">
       {Object.keys(dateRange).map((dateKey) => {
@@ -64,7 +64,9 @@ export function DateRangePicker({
               {key === "startDate" ? startDateName : endDateName}
             </span>
 
-            <InputGroup className="min-h-11 w-full border border-input-field-border">
+            <InputGroup
+              className={`min-h-11 w-full border border-input-field-border ${className} ${key === "startDate" ? startDateStyle : endDateStyle}`}
+            >
               <Popover
                 open={calenderOpen[key]}
                 onOpenChange={(open) =>
@@ -81,7 +83,7 @@ export function DateRangePicker({
                     }
                     type="text"
                     value={formatLocalDate(dateRange[key])}
-                    className="min-h-11 w-full rounded-[7px]"
+                    className={`min-h-11 w-full rounded-[7px]`}
                     readOnly
                   />
                 </PopoverTrigger>

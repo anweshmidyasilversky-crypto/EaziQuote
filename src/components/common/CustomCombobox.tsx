@@ -7,6 +7,7 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import { useState } from "react";
+import { Input as InputPrimitive } from "@base-ui/react";
 
 interface CustomComboboxProps<T, V = T> {
   items: T[];
@@ -15,6 +16,7 @@ interface CustomComboboxProps<T, V = T> {
   getItemValue?: (item: T) => V;
   placeholder?: string;
   emptyMessage?: string;
+  className?: InputPrimitive.Props["className"];
 }
 
 export function CustomCombobox<T, V = T>({
@@ -24,6 +26,7 @@ export function CustomCombobox<T, V = T>({
   getItemValue = (item) => item as unknown as V,
   placeholder = "Select an item...",
   emptyMessage = "No results found.",
+  className,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(null);
 
@@ -44,9 +47,7 @@ export function CustomCombobox<T, V = T>({
     >
       <ComboboxInput
         placeholder={placeholder}
-        className="
-          input-field h-full max-h-11
-        "
+        className={`input-field h-full max-h-11 ${className}`}
       />
 
       <ComboboxContent className="z-100 w-full bg-white">

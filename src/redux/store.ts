@@ -1,6 +1,11 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
 import userReducer from "./slices/user.slice";
+import clientsReducer from "./slices/clients.slice";
+import categoriesReducer from "./slices/categories.slice";
+import subCategoriesReducer from "./slices/subCategories.slice";
+import itemsReducer from "./slices/items.slice";
+import quotesReducer from "./slices/quotes.slice";
 import {
   useSelector,
   useDispatch,
@@ -28,6 +33,11 @@ const config = {
 
 const rootReduces = combineReducers({
   user: userReducer,
+  clients: clientsReducer,
+  categories: categoriesReducer,
+  subCategories: subCategoriesReducer,
+  items: itemsReducer,
+  quotes: quotesReducer,
 });
 
 const persistedReducer = persistReducer(config, rootReduces);

@@ -191,7 +191,7 @@ export function CustomInput<T extends FieldValues>({
                   <textarea
                     value={value}
                     onChange={onChange}
-                    className={`input-field min-h-20.25 md:min-w-105 overflow-y-auto ${className}`}
+                    className={`input-field min-h-20.25 md:min-w-105 overflow-y-auto ${className} ${error ? `input-error` : ``}`}
                   />
                 )}
                 {inptType === "file" && (

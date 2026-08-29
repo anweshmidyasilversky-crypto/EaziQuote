@@ -2,7 +2,6 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
   addressList,
-  itemData,
   mockClientData,
   QuoteActivityStatus,
   quoteData,
@@ -10,10 +9,36 @@ import {
   type ClientDataWithFilters,
   type QuoteData,
 } from "../constants/dummyData";
+import { useAppSelector } from "../redux/store";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const getClientIdx = (clientId: string) => {
+  const clients = useAppSelector((state) => state.clients);
+  return clients.findIndex((client) => client.id === clientId);
+};
+
+export const getCategoryIdx = (catId: string) => {
+  const categories = useAppSelector((state) => state.categories);
+  return categories.findIndex((categories) => categories.id === catId);
+};
+
+export const getSubCategoryIdx = (subCatId: string) => {
+  const subCategories = useAppSelector((state) => state.subCategories);
+  return subCategories.findIndex((subCategory) => subCategory.id === subCatId);
+};
+
+export const getItemIdx = (itemId: string) => {
+  const items = useAppSelector((state) => state.items);
+  return items.findIndex((item) => item.id === itemId);
+};
+
+export const getQuoteIdx = (quoteId: string) => {
+  const quotes = useAppSelector((state) => state.quotes);
+  return quotes.findIndex((quote) => quote.id === quoteId);
+};
 
 export const formatOrdinalDate = (date: Date): string => {
   const day = date.getDate();
