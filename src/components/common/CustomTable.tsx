@@ -256,7 +256,7 @@ function CustomTable<TData extends RowData>({
 
         {/* Table Footer only if pagination is applied*/}
         {showPaginated && pagination && (
-          <div className="flex justify-between px-6 pt-6">
+          <div className="flex justify-between items-center gap-2 px-6 pt-6">
             <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
               {" "}
               Showing <b> {startItemNo} </b> to <b> {endItemNo} </b> of{" "}

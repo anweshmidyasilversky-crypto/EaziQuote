@@ -86,7 +86,7 @@ function QuoteSummaryForm() {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-0.5">
           <DateRangePicker
             dateRange={dateRange}
             setDateRange={setDateRange}
@@ -97,7 +97,9 @@ function QuoteSummaryForm() {
           />
           <div className="grid grid-cols-2 w-full">
             {errors.quoteDate && (
-              <span className={cn("error-text input-field border-0!")}>
+              <span
+                className={cn("error-text input-field border-0! mt-0 pl-0")}
+              >
                 {" "}
                 {errors.quoteDate.message}{" "}
               </span>

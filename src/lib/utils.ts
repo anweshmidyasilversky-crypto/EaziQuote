@@ -10,6 +10,7 @@ import {
   type QuoteData,
 } from "../constants/dummyData";
 import { useAppSelector } from "../redux/store";
+import type { Quote } from "../types/quote.type";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -38,6 +39,11 @@ export const getItemIdx = (itemId: string) => {
 export const getQuoteIdx = (quoteId: string) => {
   const quotes = useAppSelector((state) => state.quotes);
   return quotes.findIndex((quote) => quote.id === quoteId);
+};
+
+export const getClientById = (clientId: string) => {
+  const clients = useAppSelector((state) => state.clients);
+  return clients.find((client) => client.id === clientId);
 };
 
 export const formatOrdinalDate = (date: Date): string => {

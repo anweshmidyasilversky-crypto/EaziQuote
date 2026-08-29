@@ -73,6 +73,8 @@
 
   --color-input-field-border: #ced1da;
 
+  --color-custom-dialog-primary: #f5f6fb;
+  --color-custom-dialog-secondary: #fff;
   --background-image-sidebar-btn: linear-gradient(
     270deg,
     #082b60 0%,

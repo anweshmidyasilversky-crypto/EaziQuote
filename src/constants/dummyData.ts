@@ -136,6 +136,51 @@ export interface QuoteSection {
   description: string;
 }
 
+export interface PresetQuote {
+  id: string;
+  templateName: string;
+  items: number;
+  description: string;
+}
+
+export const presetQuoteData: PresetQuote[] = [
+  {
+    id: "standard-boiler-install",
+    templateName: "Standard Boiler Install",
+    items: 20,
+    description:
+      "A comprehensive preset designed for residential boiler installations. It includes all key components such as boiler unit, fittings, pipework, insulation materials, labour hours, and disposal of old units. Perfect for heating engineers who frequently...",
+  },
+  {
+    id: "bathroom-renovation-basic",
+    templateName: "Bathroom Renovation Basic",
+    items: 10,
+    description:
+      "This preset covers everything needed for a typical bathroom renovation — from plumbing and waterproofing to tiling, sanitary fittings, and final cleanup. Each section is pre-organised with material and labour breakdowns, making it easy to...",
+  },
+  {
+    id: "full-kitchen-refurbishment",
+    templateName: "Full Kitchen Refurbishment",
+    items: 20,
+    description:
+      "Built for complete kitchen overhaul projects, this preset includes cabinetry assembly, countertop installation, plumbing connections, appliance fitting, and finishing details like painting or electrical adjustments. Ideal for builders or interior...",
+  },
+  {
+    id: "annual-maintenance-service",
+    templateName: "Annual Maintenance Service",
+    items: 12,
+    description:
+      "A reusable quote layout for recurring service contracts or yearly maintenance visits. It details inspection charges, minor repair tasks, parts replacement, and follow-up scheduling options. This preset helps service providers maintain uniform...",
+  },
+  {
+    id: "patio-construction-package",
+    templateName: "Patio Construction Package",
+    items: 25,
+    description:
+      "Tailored for outdoor landscaping professionals, this preset outlines groundwork preparation, paving materials, installation labour, waste removal, and sealing finishes. It’s ideal for those offering fixed-size patio packages or custom outdoor...",
+  },
+];
+
 export const quoteSectionData: QuoteSection[] = [
   {
     order: 1,

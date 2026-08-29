@@ -2,8 +2,8 @@ import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import {
   itemData as mockItemData,
   type QuoteData,
-  type ItemData,
   invoiceData,
+  type ItemData,
 } from "../../constants/dummyData";
 import { useMemo, useState } from "react";
 import {

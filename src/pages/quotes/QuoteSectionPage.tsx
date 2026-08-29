@@ -1,6 +1,7 @@
 import { type TableFeatures, type ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { quoteSectionData, type QuoteSection } from "../../constants/dummyData";
+import { quoteSectionData } from "../../constants/dummyData";
+import { type QuoteSection } from "../../types/quoteSection.type";
 import { CustomDataTable } from "../../components/common/CustomTable";
 
 export function QuoteSectionPage() {

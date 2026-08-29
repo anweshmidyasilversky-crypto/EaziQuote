@@ -2,8 +2,8 @@ import type { Item } from "./item.type";
 import type { QuoteSection } from "./quoteSection.type";
 
 export interface Quote {
-  // Summary Section
   id: string;
+  title: string;
   referenceNumber: string;
   quoteDate: string;
   expiryDate: string;

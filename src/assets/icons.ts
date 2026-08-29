@@ -73,6 +73,9 @@ import attachmentIcon from "./icons/attachmentIcon.png";
 import shareIconWhite from "./icons/shareIconWhite.png";
 import plusIconBlack from "./icons/plusIconBlack.png";
 
+import pencilFilledIcon from "./icons/pencilFilledIcon.png";
+import thunderBoltIcon from "./icons/thunderBoltIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -146,4 +149,7 @@ export const assets = {
 
   shareIconWhite,
   plusIconBlack,
+
+  pencilFilledIcon,
+  thunderBoltIcon,
 };

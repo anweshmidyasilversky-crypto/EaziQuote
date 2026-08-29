@@ -5,7 +5,6 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type ColumnVisibilityState,
-  type PaginationState,
   type TableFeatures,
 } from "@tanstack/react-table";
 import {
@@ -15,7 +14,7 @@ import {
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDebounce } from "../../hooks/debounce.hook";
 
 import { ClientForm } from "../../components/clients/ClientForm";

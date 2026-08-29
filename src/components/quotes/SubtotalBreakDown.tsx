@@ -7,7 +7,8 @@ import { assets } from "../../assets/icons";
 import type { ItemData, QuoteData } from "../../constants/dummyData";
 import { formatCurrency } from "../../lib/utils";
 import { useMemo, useState } from "react";
-import TableDialog from "../common/TableDialog";
+import CustomDialog from "../common/CustomDialog";
+import { CustomDataTable } from "../common/CustomTable";
 
 export type SubtotalBreakDownProps = {
   paymentMethod: QuoteData["paymentMethod"];
@@ -182,14 +183,18 @@ export function SubtotalBreakDown({
         )}
       </div>
 
-      <TableDialog
-        header="Margin"
+      <CustomDialog
         dialogOpen={tableOpen}
         toggleDialogOpen={toggleTableOpen}
-        columns={marginColumns}
-        data={marginData}
-        showPaginated={marginData.length > 5}
-      />
+        header="Margin"
+        withFooter
+      >
+        <CustomDataTable
+          columns={marginColumns}
+          data={marginData}
+          showPaginated={marginData.length > 5}
+        />
+      </CustomDialog>
     </>
   );
 }

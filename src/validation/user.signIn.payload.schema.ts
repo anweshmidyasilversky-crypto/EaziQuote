@@ -11,14 +11,9 @@ import {
 export const valdiatePassword = (password: string) => {
   if (password.length < PASSWORD.minLength) {
     return minLengthMsg("password", PASSWORD.minLength);
+  } else if (password.length > PASSWORD.maxLength) {
+    return maxLengthMsg("password", PASSWORD.maxLength);
   }
-  const hasSpecial = /[^a-zA-Z0-9 ]/.test(password);
-  const alphaNumeric = /[^a-zA-Z0-9 ]/.test(password);
-
-  if (!(hasSpecial && alphaNumeric)) {
-    return `Should've alphabet & special character`;
-  }
-
   return true;
 };
 
