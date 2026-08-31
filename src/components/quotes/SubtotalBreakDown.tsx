@@ -4,21 +4,24 @@ import type {
   TableFeatures,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
-import type { ItemData, QuoteData } from "../../constants/dummyData";
+import type { QuoteLineItem } from "../../types/quoteLineItem.type";
+import type { QuotePaymentMethod } from "../../types/quote.type";
 import { formatCurrency } from "../../lib/utils";
 import { useMemo, useState } from "react";
 import CustomDialog from "../common/CustomDialog";
 import { CustomDataTable } from "../common/CustomTable";
 
 export type SubtotalBreakDownProps = {
-  paymentMethod: QuoteData["paymentMethod"];
-  quote: QuoteData;
-  itemDetails: ItemData[];
+  paymentMethod: QuotePaymentMethod;
+  /** Pre-computed quote amount: sum of all item totals */
+  subtotal: number;
+  items: QuoteLineItem[];
   taxPercentage: number;
   marginPercentage: number;
   discountPercentage: number;
   reqDeposite: number;
 };
+
 type MarginSplit = {
   itemName: string;
   revenew: number;
@@ -26,25 +29,25 @@ type MarginSplit = {
 };
 
 export function SubtotalBreakDown({
-  quote,
+  subtotal,
   marginPercentage,
   taxPercentage,
   discountPercentage,
   reqDeposite,
-  itemDetails,
+  items,
   paymentMethod,
 }: SubtotalBreakDownProps) {
   const [tableOpen, toggleTableOpen] = useState(false);
-  console.log(itemDetails);
+
   const getSum = (
     info: HeaderContext<TableFeatures, MarginSplit>,
     col: string,
   ) => {
-    console.log(info.table.getRowModel().rows[0].original);
     return info.table
       .getFilteredRowModel()
       .rows.reduce((acc, row) => acc + (row.getValue<number>(col) || 0), 0);
   };
+
   const marginColumns: ColumnDef<TableFeatures, MarginSplit>[] = useMemo(
     () =>
       [
@@ -56,7 +59,7 @@ export function SubtotalBreakDown({
         },
         {
           accessorKey: "revenew",
-          header: "REVENEW",
+          header: "REVENUE",
           enableSorting: false,
           cell: (info) => formatCurrency(info.getValue<number>()),
           footer: (info) => formatCurrency(getSum(info, "revenew")),
@@ -75,46 +78,46 @@ export function SubtotalBreakDown({
           accessorFn: (row) => (row.revenew * row.margin) / 100,
           cell: (info) =>
             formatCurrency(info.row.getValue<number>("margin")) +
-            `(${info.row.original.margin}%)`,
+            ` (${info.row.original.margin}%)`,
           footer: (info) => {
             const sum = getSum(info, "margin");
-            const percentage =
-              ((getSum(info, "revenew") - sum) * 100) / getSum(info, "revenew");
-            return `${formatCurrency(sum)}(${percentage}%)`;
+            const revenue = getSum(info, "revenew");
+            const percentage = revenue > 0 ? ((revenue - sum) * 100) / revenue : 0;
+            return `${formatCurrency(sum)} (${percentage.toFixed(1)}%)`;
           },
           enableSorting: false,
         },
       ] as ColumnDef<TableFeatures, MarginSplit>[],
     [],
   );
-  let marginData: MarginSplit[] = [];
-  itemDetails.forEach((item) =>
-    marginData.push({
-      itemName: item.itemName,
-      revenew: item.total,
-      margin: Object.hasOwn(item, "margin")
-        ? (item["margin" as keyof ItemData] as number)
-        : 50,
-    }),
-  );
-  console.log(`Margin Data: `, marginData);
+
+  // Build margin data from QuoteLineItem — use unitCost to derive margin %
+  const marginData: MarginSplit[] = items.map((item) => {
+    const revenue = item.total; // pricePerUnit × quantity
+    const cost = item.unitCost * item.quantity;
+    const margin = revenue > 0 ? Math.round(((revenue - cost) / revenue) * 100) : 0;
+    return { itemName: item.name, revenew: revenue, margin };
+  });
+
+  const applyPercentage = (base: number, percentage: number) =>
+    (base * percentage) / 100;
 
   const renderProps = {
-    subtotal: quote.amount,
+    subtotal,
     margin: marginPercentage,
     tax: taxPercentage,
     discount: discountPercentage,
   };
-  const applyPercentage = (base: number, percentage: number) =>
-    (base * percentage) / 100;
+
   let extraCharges = 0;
+
   return (
     <>
       <div className="flex flex-col p-5 gap-4">
         {Object.keys(renderProps).map((field) => {
           const key = field as keyof typeof renderProps;
           if (!["subtotal", "margin"].includes(field)) {
-            extraCharges += applyPercentage(quote.amount, renderProps[key]);
+            extraCharges += applyPercentage(subtotal, renderProps[key]);
           }
           return (
             <div className="flex justify-between" key={field}>
@@ -123,10 +126,10 @@ export function SubtotalBreakDown({
                 {field} {field !== "subtotal" && `(${renderProps[key]}%)`}{" "}
               </span>
               <span className="subtotal-value">
-                {field === "subtotal" && formatCurrency(quote.amount)}
+                {field === "subtotal" && formatCurrency(subtotal)}
                 {field === "margin" && (
                   <a
-                    className="underline"
+                    className="underline cursor-pointer"
                     onClick={() => toggleTableOpen((curr) => !curr)}
                   >
                     {" "}
@@ -134,9 +137,7 @@ export function SubtotalBreakDown({
                   </a>
                 )}
                 {!["subtotal", "margin"].includes(field) &&
-                  formatCurrency(
-                    applyPercentage(quote.amount, renderProps[key]),
-                  )}
+                  formatCurrency(applyPercentage(subtotal, renderProps[key]))}
               </span>
             </div>
           );
@@ -147,14 +148,14 @@ export function SubtotalBreakDown({
           <div>
             <span className="subtotal-field"> Grand Total </span>
             <span className="font-bold subtotal-value">
-              {formatCurrency(quote.amount + extraCharges)}
+              {formatCurrency(subtotal + extraCharges)}
             </span>
           </div>
 
           <div className="dashed-y-separators" />
 
           <div>
-            <span className="subtotal-field"> Deposite Required </span>
+            <span className="subtotal-field"> Deposit Required </span>
             <span className="subtotal-value">
               {" "}
               {formatCurrency(reqDeposite)}{" "}

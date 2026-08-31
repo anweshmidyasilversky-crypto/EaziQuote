@@ -108,7 +108,6 @@ export type ItemData = {
   quantity: string;
   pricePerUnit: number;
   unitCost: number;
-  total: number;
 };
 
 export type InvoiceStatus =
@@ -323,7 +322,6 @@ export const itemData: ItemData[] = [
     quantity: "250 sq.ft",
     pricePerUnit: 12,
     unitCost: 6,
-    total: 3000,
   },
   {
     itemName: "Glass Partition",
@@ -332,7 +330,6 @@ export const itemData: ItemData[] = [
     quantity: "4 panels",
     pricePerUnit: 150,
     unitCost: 75,
-    total: 600,
   },
   {
     itemName: "Painting",
@@ -341,7 +338,6 @@ export const itemData: ItemData[] = [
     quantity: "20 hours",
     pricePerUnit: 60,
     unitCost: 30,
-    total: 900,
   },
   {
     itemName: "Carpet Replacement",
@@ -350,7 +346,6 @@ export const itemData: ItemData[] = [
     quantity: "250 sq.ft",
     pricePerUnit: 12,
     unitCost: 6,
-    total: 3000,
   },
   {
     itemName: "Floor Renovation",
@@ -359,7 +354,6 @@ export const itemData: ItemData[] = [
     quantity: "20 hours",
     pricePerUnit: 60,
     unitCost: 30,
-    total: 900,
   },
   {
     itemName: "Wooden Doors",
@@ -368,7 +362,6 @@ export const itemData: ItemData[] = [
     quantity: "8 units",
     pricePerUnit: 280,
     unitCost: 180,
-    total: 2240,
   },
   {
     itemName: "LED Lighting",
@@ -377,7 +370,6 @@ export const itemData: ItemData[] = [
     quantity: "24 units",
     pricePerUnit: 45,
     unitCost: 25,
-    total: 1080,
   },
   {
     itemName: "Plumbing Installation",
@@ -386,7 +378,6 @@ export const itemData: ItemData[] = [
     quantity: "16 hours",
     pricePerUnit: 75,
     unitCost: 40,
-    total: 1200,
   },
   {
     itemName: "Wall Panels",
@@ -395,7 +386,6 @@ export const itemData: ItemData[] = [
     quantity: "120 sq.ft",
     pricePerUnit: 35,
     unitCost: 20,
-    total: 4200,
   },
   {
     itemName: "Electrical Wiring",
@@ -404,7 +394,6 @@ export const itemData: ItemData[] = [
     quantity: "180 metres",
     pricePerUnit: 18,
     unitCost: 10,
-    total: 3240,
   },
   {
     itemName: "Marble Flooring",
@@ -413,7 +402,6 @@ export const itemData: ItemData[] = [
     quantity: "180 sq.ft",
     pricePerUnit: 45,
     unitCost: 28,
-    total: 8100,
   },
   {
     itemName: "False Ceiling",
@@ -422,7 +410,6 @@ export const itemData: ItemData[] = [
     quantity: "320 sq.ft",
     pricePerUnit: 18,
     unitCost: 10,
-    total: 5760,
   },
   {
     itemName: "Aluminum Windows",
@@ -431,7 +418,6 @@ export const itemData: ItemData[] = [
     quantity: "12 units",
     pricePerUnit: 220,
     unitCost: 140,
-    total: 2640,
   },
   {
     itemName: "Wooden Flooring",
@@ -440,7 +426,6 @@ export const itemData: ItemData[] = [
     quantity: "200 sq.ft",
     pricePerUnit: 32,
     unitCost: 20,
-    total: 6400,
   },
   {
     itemName: "Interior Doors",
@@ -449,7 +434,6 @@ export const itemData: ItemData[] = [
     quantity: "6 units",
     pricePerUnit: 350,
     unitCost: 220,
-    total: 2100,
   },
   {
     itemName: "Ceramic Wall Tiles",
@@ -458,7 +442,6 @@ export const itemData: ItemData[] = [
     quantity: "300 sq.ft",
     pricePerUnit: 14,
     unitCost: 8,
-    total: 4200,
   },
   {
     itemName: "Bathroom Fixtures",
@@ -467,7 +450,6 @@ export const itemData: ItemData[] = [
     quantity: "5 sets",
     pricePerUnit: 180,
     unitCost: 110,
-    total: 900,
   },
   {
     itemName: "Copper Pipes",
@@ -476,7 +458,6 @@ export const itemData: ItemData[] = [
     quantity: "120 metres",
     pricePerUnit: 22,
     unitCost: 14,
-    total: 2640,
   },
   {
     itemName: "Power Sockets",
@@ -485,7 +466,6 @@ export const itemData: ItemData[] = [
     quantity: "30 units",
     pricePerUnit: 18,
     unitCost: 10,
-    total: 540,
   },
   {
     itemName: "Ceiling Fans",
@@ -494,7 +474,6 @@ export const itemData: ItemData[] = [
     quantity: "10 units",
     pricePerUnit: 95,
     unitCost: 60,
-    total: 950,
   },
   {
     itemName: "Wall Painting",
@@ -503,7 +482,6 @@ export const itemData: ItemData[] = [
     quantity: "35 hours",
     pricePerUnit: 55,
     unitCost: 28,
-    total: 1925,
   },
   {
     itemName: "Floor Polishing",
@@ -512,7 +490,6 @@ export const itemData: ItemData[] = [
     quantity: "240 sq.ft",
     pricePerUnit: 15,
     unitCost: 8,
-    total: 3600,
   },
   {
     itemName: "Carpentry Work",
@@ -521,7 +498,6 @@ export const itemData: ItemData[] = [
     quantity: "28 hours",
     pricePerUnit: 70,
     unitCost: 40,
-    total: 1960,
   },
   {
     itemName: "AC Installation",
@@ -530,7 +506,6 @@ export const itemData: ItemData[] = [
     quantity: "4 units",
     pricePerUnit: 180,
     unitCost: 100,
-    total: 720,
   },
   {
     itemName: "Electrical Maintenance",
@@ -539,7 +514,6 @@ export const itemData: ItemData[] = [
     quantity: "24 hours",
     pricePerUnit: 65,
     unitCost: 35,
-    total: 1560,
   },
   {
     itemName: "Plumbing Repair",
@@ -548,7 +522,6 @@ export const itemData: ItemData[] = [
     quantity: "12 hours",
     pricePerUnit: 80,
     unitCost: 45,
-    total: 960,
   },
   {
     itemName: "Wallpaper Installation",
@@ -557,7 +530,6 @@ export const itemData: ItemData[] = [
     quantity: "280 sq.ft",
     pricePerUnit: 16,
     unitCost: 9,
-    total: 4480,
   },
   {
     itemName: "Office Partition",
@@ -566,7 +538,6 @@ export const itemData: ItemData[] = [
     quantity: "6 panels",
     pricePerUnit: 175,
     unitCost: 100,
-    total: 1050,
   },
   {
     itemName: "Granite Countertop",
@@ -575,7 +546,6 @@ export const itemData: ItemData[] = [
     quantity: "45 sq.ft",
     pricePerUnit: 55,
     unitCost: 35,
-    total: 2475,
   },
   {
     itemName: "Kitchen Cabinets",
@@ -584,7 +554,6 @@ export const itemData: ItemData[] = [
     quantity: "10 units",
     pricePerUnit: 320,
     unitCost: 210,
-    total: 3200,
   },
   {
     itemName: "Glass Door",
@@ -593,7 +562,6 @@ export const itemData: ItemData[] = [
     quantity: "3 units",
     pricePerUnit: 420,
     unitCost: 280,
-    total: 1260,
   },
   {
     itemName: "Drainage Installation",
@@ -602,7 +570,6 @@ export const itemData: ItemData[] = [
     quantity: "18 hours",
     pricePerUnit: 72,
     unitCost: 38,
-    total: 1296,
   },
   {
     itemName: "Lighting Installation",
@@ -611,7 +578,6 @@ export const itemData: ItemData[] = [
     quantity: "20 hours",
     pricePerUnit: 58,
     unitCost: 30,
-    total: 1160,
   },
   {
     itemName: "Tile Grouting",
@@ -620,7 +586,6 @@ export const itemData: ItemData[] = [
     quantity: "260 sq.ft",
     pricePerUnit: 10,
     unitCost: 5,
-    total: 2600,
   },
   {
     itemName: "Wood Paneling",
@@ -629,7 +594,6 @@ export const itemData: ItemData[] = [
     quantity: "150 sq.ft",
     pricePerUnit: 38,
     unitCost: 24,
-    total: 5700,
   },
   {
     itemName: "Insulation Work",
@@ -638,7 +602,6 @@ export const itemData: ItemData[] = [
     quantity: "300 sq.ft",
     pricePerUnit: 14,
     unitCost: 8,
-    total: 4200,
   },
   {
     itemName: "Reception Counter",
@@ -647,7 +610,6 @@ export const itemData: ItemData[] = [
     quantity: "1 unit",
     pricePerUnit: 850,
     unitCost: 550,
-    total: 850,
   },
   {
     itemName: "Office Chairs",
@@ -656,7 +618,6 @@ export const itemData: ItemData[] = [
     quantity: "18 units",
     pricePerUnit: 145,
     unitCost: 90,
-    total: 2610,
   },
 ];
 

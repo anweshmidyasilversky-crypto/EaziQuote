@@ -2,54 +2,98 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
   addressList,
-  mockClientData,
   QuoteActivityStatus,
-  quoteData,
   type AddressDetail,
   type ClientDataWithFilters,
   type QuoteData,
 } from "../constants/dummyData";
 import { useAppSelector } from "../redux/store";
 import type { Quote } from "../types/quote.type";
+import type { Client } from "../types/client.type";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const getClientIdx = (clientId: string) => {
-  const clients = useAppSelector((state) => state.clients);
-  return clients.findIndex((client) => client.id === clientId);
+// ── Redux selector helpers ────────────────────────────────────────────────────
+// NOTE: these are React hooks — only call them inside React function components.
+
+export const useClientById = (clientId: string) => {
+  return useAppSelector((state) =>
+    state.clients.find((c) => c.id === clientId),
+  );
 };
 
-export const getCategoryIdx = (catId: string) => {
-  const categories = useAppSelector((state) => state.categories);
-  return categories.findIndex((categories) => categories.id === catId);
+export const useQuoteById = (quoteId: string) => {
+  return useAppSelector((state) => state.quotes.find((q) => q.id === quoteId));
 };
 
-export const getSubCategoryIdx = (subCatId: string) => {
-  const subCategories = useAppSelector((state) => state.subCategories);
-  return subCategories.findIndex((subCategory) => subCategory.id === subCatId);
+// ── Computed value helpers ────────────────────────────────────────────────────
+
+/**
+ * Derive the total amount for a quote by summing all line item totals.
+ * Rule: item.total = item.pricePerUnit × item.quantity (stored on the item).
+ */
+export const getQuoteAmount = (quote: Quote): number =>
+  quote.items?.reduce((sum, item) => sum + item.total, 0) || 0;
+
+/**
+ * Map a Redux `Quote` + client lookup to the `QuoteData` shape used by tables.
+ * The `amount` field is computed from line items — never stored separately.
+ */
+export const quoteToDisplayData = (
+  quote: Quote,
+  clients: Client[],
+): QuoteData => {
+  const client = clients.find((c) => c.id === quote.clientId);
+  return {
+    id: quote.id,
+    title: quote.title,
+    quote: quote.referenceNumber,
+    client: client?.name ?? "Unknown Client",
+    companyName: client?.companyName,
+    amount: getQuoteAmount(quote),
+    // QuoteActivityStatus values match QuoteStatus — cast is safe
+    status: quote.status as unknown as QuoteActivityStatus,
+    creationDate: formatDisplayDate(quote.quoteDate),
+    expiryDate: formatDisplayDate(quote.expiryDate),
+    paymentMethod: quote.paymentMethod as "Cash" | "Online",
+  };
 };
 
-export const getItemIdx = (itemId: string) => {
-  const items = useAppSelector((state) => state.items);
-  return items.findIndex((item) => item.id === itemId);
-};
+/**
+ * Map a Redux `Client` to the `ClientDataWithFilters` shape used by tables.
+ * `activityCount` is computed as the number of quotes associated with this client.
+ */
+export const clientToDisplayData = (
+  client: Client,
+  quotes: Quote[],
+): ClientDataWithFilters => ({
+  id: client.id,
+  client: client.name,
+  company: client.companyName,
+  phone: client.phone,
+  email: client.email,
+  createdAt: client.createdAt ?? new Date().toISOString(),
+  activityCount: quotes.filter((q) => q.clientId === client.id).length,
+});
 
-export const getQuoteIdx = (quoteId: string) => {
-  const quotes = useAppSelector((state) => state.quotes);
-  return quotes.findIndex((quote) => quote.id === quoteId);
-};
+// ── Date formatting helpers ───────────────────────────────────────────────────
 
-export const getClientById = (clientId: string) => {
-  const clients = useAppSelector((state) => state.clients);
-  return clients.find((client) => client.id === clientId);
+/** Format a "YYYY-MM-DD" or ISO string to "DD Mon YYYY" for display */
+export const formatDisplayDate = (dateStr: string): string => {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr; // return as-is if unparseable
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(d);
 };
 
 export const formatOrdinalDate = (date: Date): string => {
   const day = date.getDate();
 
-  // 1. Determine the mathematical ordinal suffix
   let suffix = "th";
   if (day < 11 || day > 13) {
     switch (day % 10) {
@@ -65,11 +109,9 @@ export const formatOrdinalDate = (date: Date): string => {
     }
   }
 
-  // 2. Extract the weekday and short month using 'en-GB'
-  const weekday = date.toLocaleDateString("en-GB", { weekday: "long" }); // e.g., "Tuesday"
-  const month = date.toLocaleDateString("en-GB", { month: "short" }); // e.g., "Oct"
+  const weekday = date.toLocaleDateString("en-GB", { weekday: "long" });
+  const month = date.toLocaleDateString("en-GB", { month: "short" });
 
-  // 3. Assemble the pieces
   return `${weekday}, ${day}${suffix} ${month}`;
 };
 
@@ -79,17 +121,14 @@ export function getFormattedTimeDiff(
   const targetDate = new Date(timestamp);
   const now = new Date();
 
-  // Get absolute difference in seconds
   const diffInSecs = Math.floor(
     Math.abs(targetDate.getTime() - now.getTime()) / 1000,
   );
 
-  // Time conversion constants
   const secsInDay = 86400;
   const secsInHour = 3600;
   const secsInMin = 60;
 
-  // Check highest unit down to lowest
   if (diffInSecs >= secsInDay) {
     const days = Math.floor(diffInSecs / secsInDay);
     return `${days} day${days > 1 ? "s" : ""}`;
@@ -120,23 +159,6 @@ export function getAddress(postCode: string): AddressDetail | undefined {
   return addressList.find((address) => address.postCode === postCode);
 }
 
-export function getClient(clientId: string) {
-  return (
-    mockClientData.find(
-      (clientCredential) => clientCredential.id === clientId,
-    ) ??
-    ({
-      id: "1",
-      client: "Emma Smith",
-      company: "Smith & Co Builders",
-      phone: "(+44) 456-789-2002",
-      email: "es@gmail.com",
-      createdAt: "2026-08-15T10:30:00Z",
-      activityCount: 24,
-    } as ClientDataWithFilters)
-  );
-}
-
 export const getInitials = (fullName: string) => {
   const [fname, lname] = fullName.split(" ");
   return fname[0].toUpperCase() + (lname ? lname[0].toUpperCase() : "");
@@ -149,18 +171,35 @@ export const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-export const getQuoteFromId = (id: string): QuoteData => {
-  return (
-    quoteData.find((quote) => quote.id === id) ||
-    ({
-      id: "QT-2025-101",
-      title: "Office Interior Design",
-      quote: "QT-2025-101",
-      client: "Emma Robinson",
-      amount: 4850,
-      status: QuoteActivityStatus.Sent,
-      creationDate: "12 Sep 2025",
-      expiryDate: "12 Sep 2025",
-    } as QuoteData)
-  );
+export const nextQuoteRefNo = () => {
+  const quotes = useAppSelector((state) => state.quotes);
+  let maxId = 1;
+  const currYear = new Date().getFullYear().toString();
+  quotes.forEach((quote) => {
+    const [_, quoteYear, quoteNo] = quote.referenceNumber.split("-");
+    if (currYear === quoteYear) {
+      maxId = Math.max(maxId, Number(quoteNo) + 1);
+    }
+  });
+  return `QT-${currYear}-${maxId}`;
+};
+
+export const getQuote = (refNo: string) => {
+  const quotes = useAppSelector((state) => state.quotes);
+  return quotes.find((quote) => quote.referenceNumber === refNo);
+};
+
+export const getClient = (clientId: string | undefined) => {
+  const clients = useAppSelector((state) => state.clients);
+  return clients.find((client) => client.id === clientId);
+};
+
+export const getCategory = (catId: string) => {
+  const categories = useAppSelector((state) => state.categories);
+  return categories.find((category) => category.id === catId);
+};
+
+export const getSubCategory = (subCatId: string) => {
+  const subCategories = useAppSelector((state) => state.subCategories);
+  return subCategories.find((subCategory) => subCategory.id === subCatId);
 };

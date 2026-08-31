@@ -1,8 +1,8 @@
 import { XIcon } from "lucide-react";
 import React from "react";
-import { CustomBtn } from "../common/CustomBtn";
+import { CustomBtn } from "./CustomBtn";
 
-export interface ClientFormLayoutProps {
+export interface FormLayoutProps {
   isFormOpen: boolean;
   formHeading: string;
   sumbitBtnLabel: string;
@@ -12,7 +12,7 @@ export interface ClientFormLayoutProps {
   submitHanlder: () => void;
 }
 
-export function ClientFormLayout({
+export function FormLayout({
   isFormOpen,
   formHeading,
   sumbitBtnLabel,
@@ -20,7 +20,7 @@ export function ClientFormLayout({
   formCloseAction,
   isSubmitting,
   submitHanlder,
-}: ClientFormLayoutProps) {
+}: FormLayoutProps) {
   return (
     <>
       {isFormOpen && (
@@ -48,7 +48,7 @@ export function ClientFormLayout({
                 </div>
               </div>
               {/* Form footer */}
-              <div className="px-10 pb-5 pt-6">
+              <div className="px-5 pb-5 pt-6">
                 <div className="w-fit max-w-25">
                   <CustomBtn
                     buttonLabel={sumbitBtnLabel}

@@ -6,15 +6,6 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "../../components/ui/combobox";
-import {
-  addressList,
   postalCodes,
   type AddressDetail,
 } from "../../constants/dummyData";
@@ -29,7 +20,6 @@ import { useNavigate } from "react-router";
 import type { UserType } from "../../types/user.type";
 import { toast } from "react-toastify";
 import { PostCodeSelectComboBox } from "../../components/common/PostCodeSelectComboBox";
-import { get } from "firebase/database";
 import { getAddress } from "../../lib/utils";
 
 export function BusinessAddressForm() {
@@ -41,14 +31,13 @@ export function BusinessAddressForm() {
   const { control, setValue, handleSubmit, clearErrors } =
     useForm<BusinessAddressPayload>({
       defaultValues: {
-        postCode: user.postCode ?? "",
-        street: user.street ?? "",
+        postCode: user.postCode ?? " ",
+        street: user.street ?? " ",
         city: user.city ?? "",
         country: user.country ?? "",
       },
       resolver: yupResolver(businessAddressSchema),
     });
-
   const getAddressFromPostalCode = (postCode: string) => {
     const address = getAddress(postCode);
 
@@ -68,6 +57,7 @@ export function BusinessAddressForm() {
     };
     dispath(updateUser(businessAddress));
     toast.success("Successfully added business address");
+    navigate("/dashboard");
   };
 
   return (

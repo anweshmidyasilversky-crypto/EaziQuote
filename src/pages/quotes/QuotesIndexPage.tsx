@@ -11,13 +11,17 @@ import {
 import { type CustomBtnProps } from "../../components/common/CustomBtn";
 import {
   presetQuoteData,
-  quoteData,
   type PresetQuote,
   type QuoteActivityStatus,
   type QuoteData,
 } from "../../constants/dummyData";
 import { useMemo, useState } from "react";
-import { cn, formatCurrency } from "../../lib/utils";
+import {
+  cn,
+  formatCurrency,
+  nextQuoteRefNo,
+  quoteToDisplayData,
+} from "../../lib/utils";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
@@ -25,7 +29,7 @@ import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { useDebounce } from "../../hooks/debounce.hook";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
-import { TableFilterSheet } from "../../components/common/TableFilterSheet";
+import { CustomSheet } from "../../components/common/CustomSheet";
 import {
   RenderMultiSelectCheckbox,
   type CheckboxConfig,
@@ -38,30 +42,50 @@ import { CustomHeader } from "../../components/common/CustomHeader";
 import { useNavigate } from "react-router";
 import React from "react";
 import CustomDialog from "../../components/common/CustomDialog";
+import { useAppSelector } from "../../redux/store";
 
 export function QuotesIndexPage() {
-  const summary: ActivitySummaryProps["summaryConfig"] = [
-    {
-      summaryTitle: "Total Quotes",
-      summary: 64,
-      summaryIcon: assets.invoiceColored,
-    },
-    {
-      summaryTitle: "Accepted",
-      summary: "16",
-      summaryIcon: assets.greenTickIcon,
-    },
-    {
-      summaryTitle: "Pending",
-      summary: "16",
-      summaryIcon: assets.orangeClockIcon,
-    },
-    {
-      summaryTitle: "Expired",
-      summary: "6",
-      summaryIcon: assets.OrangeHourGlassIcon,
-    },
-  ];
+  // Redux state
+  const reduxQuotes = useAppSelector((state) => state.quotes);
+  const reduxClients = useAppSelector((state) => state.clients);
+
+  // Map Quote[] → QuoteData[] (client name lookup + amount derived from items)
+  const quotes: QuoteData[] = useMemo(
+    () => reduxQuotes.map((q) => quoteToDisplayData(q, reduxClients)),
+    [reduxQuotes, reduxClients],
+  );
+
+  //Summary cards
+  const summary: ActivitySummaryProps["summaryConfig"] = useMemo(() => {
+    const accepted = quotes.filter((q) =>
+      ["Accepted", "Sent"].includes(q.status as string),
+    ).length;
+    const pending = quotes.filter((q) => q.status === "Draft").length;
+    const expired = quotes.filter((q) => q.status === "Expired").length;
+    return [
+      {
+        summaryTitle: "Total Quotes",
+        summary: quotes.length,
+        summaryIcon: assets.invoiceColored,
+      },
+      {
+        summaryTitle: "Accepted",
+        summary: String(accepted),
+        summaryIcon: assets.greenTickIcon,
+      },
+      {
+        summaryTitle: "Pending",
+        summary: String(pending),
+        summaryIcon: assets.orangeClockIcon,
+      },
+      {
+        summaryTitle: "Expired",
+        summary: String(expired),
+        summaryIcon: assets.OrangeHourGlassIcon,
+      },
+    ];
+  }, [quotes]);
+
   const navigate = useNavigate();
 
   const quoteColumns: ColumnDef<TableFeatures, QuoteData>[] = useMemo(
@@ -83,7 +107,6 @@ export function QuotesIndexPage() {
         header: "CLIENT",
         cell: (info) => {
           const client = info.getValue<QuoteData["client"]>();
-
           return <ClientNameBadge name={client} />;
         },
         enableSorting: false,
@@ -94,14 +117,13 @@ export function QuotesIndexPage() {
         header: "AMOUNT",
         cell: (info) => formatCurrency(info.getValue<number>()),
         enableGlobalFilters: false,
-        // Sorting intentionally enabled
+        // Sorting intentionally enabled for amount
       },
       {
         accessorKey: "status",
         header: "STATUS",
         cell: (info) => {
           const status = info.getValue<QuoteActivityStatus>();
-
           return <StatusBadge status={status} />;
         },
         enableSorting: false,
@@ -124,7 +146,6 @@ export function QuotesIndexPage() {
         header: "ACTION",
         cell: ({ row }) => {
           const quote = row.original;
-
           return (
             <CustomActionGroup openFn={() => navigate(`/quotes/${quote.id}`)} />
           );
@@ -185,46 +206,17 @@ export function QuotesIndexPage() {
 
   const checkboxConfig: CheckboxConfig = useMemo(
     () => [
-      {
-        id: "draft",
-        label: "Draft",
-        value: "draft",
-      },
-      {
-        id: "completed",
-        label: "Completed",
-        value: "completed",
-      },
-      {
-        id: "sent",
-        label: "Sent",
-        value: "sent",
-      },
-      {
-        id: "approved",
-        label: "Approved",
-        value: "approved",
-      },
-      {
-        id: "paid",
-        label: "Paid",
-        value: "paid",
-      },
-      {
-        id: "rejected",
-        label: "Rejected",
-        value: "rejected",
-      },
-      {
-        id: "cancelled",
-        label: "Cancelled",
-        value: "cancelled",
-      },
+      { id: "draft", label: "Draft", value: "draft" },
+      { id: "completed", label: "Completed", value: "completed" },
+      { id: "sent", label: "Sent", value: "sent" },
+      { id: "approved", label: "Approved", value: "approved" },
+      { id: "paid", label: "Paid", value: "paid" },
+      { id: "rejected", label: "Rejected", value: "rejected" },
+      { id: "cancelled", label: "Cancelled", value: "cancelled" },
     ],
     [],
   );
 
-  const [quotes, _] = useState(quoteData);
   const [searchParam, setSearchParam] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchParam, delay: 500 });
   const [filerOpen, toggleFilterOpen] = useState(false);
@@ -282,7 +274,11 @@ export function QuotesIndexPage() {
           />
         </div>
 
-        <TableFilterSheet isOpen={filerOpen} toggleIsOpen={toggleFilterOpen}>
+        <CustomSheet
+          isOpen={filerOpen}
+          toggleIsOpen={toggleFilterOpen}
+          withClearOption
+        >
           <div className="flex flex-col gap-6 mt-6 px-5">
             <div className="min-h-25.5 flex flex-col gap-4">
               <span className="text-placeholder-text min-h-4.25 font-medium text-sm">
@@ -307,10 +303,10 @@ export function QuotesIndexPage() {
               />
             </div>
           </div>
-        </TableFilterSheet>
+        </CustomSheet>
       </div>
 
-      {/* Dialog to choose between track from strach or with preset */}
+      {/* Dialog to choose between track from scratch or with preset */}
       <CustomDialog
         dialogOpen={quoteDialogOpen}
         toggleDialogOpen={toggleQuoteDialogOpen}
@@ -321,14 +317,14 @@ export function QuotesIndexPage() {
           <span className="text-sm text-placeholder-text px-5 min-h-8.5">
             {" "}
             {
-              "Choose how you’d like to begin. You can start fresh and build your quote step by step, or save time by using one of your preset quote templates."
+              "Choose how you'd like to begin. You can start fresh and build your quote step by step, or save time by using one of your preset quote templates."
             }{" "}
           </span>
 
           <div className="flex gap-4 justify-center">
             <div
               className="bg-custom-dialog-primary flex flex-col items-center min-w-55 gap-4 rounded-lg py-4 cursor-pointer"
-              onClick={() => navigate("/quotes/manage-quotes")}
+              onClick={() => navigate(`/quotes/manage-quotes/`)}
             >
               <img src={assets.pencilFilledIcon} className="w-8 h-8" />
               <span> {"Start from Scratch"} </span>

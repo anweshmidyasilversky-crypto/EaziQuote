@@ -17,6 +17,9 @@ interface CustomComboboxProps<T, V = T> {
   placeholder?: string;
   emptyMessage?: string;
   className?: InputPrimitive.Props["className"];
+  selected?: T;
+  inputLeftNode?: React.ReactNode;
+  inputRightNode?: React.ReactNode;
 }
 
 export function CustomCombobox<T, V = T>({
@@ -27,8 +30,13 @@ export function CustomCombobox<T, V = T>({
   placeholder = "Select an item...",
   emptyMessage = "No results found.",
   className,
+  selected,
+  inputLeftNode,
+  inputRightNode,
 }: CustomComboboxProps<T, V>) {
-  const [value, setValue] = useState<string | null>(null);
+  const [value, setValue] = useState<string | null>(
+    selected ? getItemLabel(selected) : null,
+  );
 
   const handleValueChange = (item: T | null) => {
     onValueChange?.(item === null ? null : getItemValue(item));
@@ -41,21 +49,24 @@ export function CustomCombobox<T, V = T>({
       onValueChange={(item) => handleValueChange?.(item)}
       value={value as T}
       itemToStringValue={(item) => {
-        console.log(getItemLabel(item), item);
         return getItemLabel(item);
       }}
     >
-      <ComboboxInput
-        placeholder={placeholder}
-        className={`input-field h-full max-h-11 ${className}`}
-      />
+      <div className="flex gap-2 h-11 items-center w-full">
+        {inputLeftNode}
+        <ComboboxInput
+          placeholder={placeholder}
+          className={`input-field h-full max-h-11 grow ${className}`}
+        />
+        {inputRightNode}
+      </div>
 
       <ComboboxContent className="z-100 w-full bg-white">
         <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
 
         <ComboboxList>
           {(item) => (
-            <ComboboxItem key={String(getItemValue(item))} value={item}>
+            <ComboboxItem key={String(getItemLabel(item))} value={item}>
               {getItemLabel(item)}
             </ComboboxItem>
           )}

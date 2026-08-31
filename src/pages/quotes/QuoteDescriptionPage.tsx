@@ -1,59 +1,68 @@
 import StyledAttachments from "../../components/common/StyledAttachments";
+import type { Quote } from "../../types/quote.type";
+import { useAppSelector } from "../../redux/store";
+import { useParams } from "react-router";
 
-export function QuoteDescriptionPage() {
-  const jobDet = [
-    "Material Supply – Provision of high-quality materials for flooring, partitions, and finishing.",
-    "Floor Tiling – Removal of existing surface and installation of new tiles across designated areas.",
-    "Partition Adjustments – Modifications and realignment of partitions to match the client’s updated layout.",
-  ];
+export type QuoteDescriptionPageProps = {
+  quote?: Quote;
+};
+
+export function QuoteDescriptionPage({ quote: propsQuote }: QuoteDescriptionPageProps = {}) {
+  const params = useParams<{ id: string }>();
+  const reduxQuote = useAppSelector((state) =>
+    state.quotes.find((q) => q.id === params.id) ?? state.quotes[0],
+  );
+
+  const quote = propsQuote ?? reduxQuote;
+
+  const jobDescription =
+    quote?.jobDescription ||
+    "This quote covers the full renovation and fit-out work, including material supply and installation services.";
+
+  const notes =
+    quote?.notes ||
+    "No internal notes have been recorded for this quote.";
+
+  const attachments = quote?.attachments ?? [];
 
   return (
     <div className="bg-white rounded-[7px] flex flex-col gap-6 p-5">
       <div className="quote-description-section">
         <span className="header"> Job Description </span>
-        <span className="text-placeholder-text text-sm">
-          This quote covers the renovation of Acme Corp’s office space,
-          including material supply, floor tiling, and partition adjustments. It
-          also includes labor for installation and finishing work.
-          <ul className="list-disc p-5">
-            {jobDet.map((det) => (
-              <li> {det} </li>
-            ))}
-          </ul>
+        <span className="text-placeholder-text text-sm whitespace-pre-line">
+          {jobDescription}
         </span>
-        <a className="underline"> Read More </a>
       </div>
 
       <div className="dashed-y-separators" />
 
       <div className="quote-description-section">
         <span className="header"> Notes (Not visible on quote) </span>
-        <span className="text-placeholder-text text-sm">
-          The client, Brightline Solutions, is looking for a complete redesign
-          of their 3rd-floor workspace to support a hybrid work model. During
-          the initial discussion, they emphasized the need for modular
-          furniture, soundproof meeting pods, and eco-friendly materials
-          wherever possible. The proposed layout (v2) includes an open
-          collaboration area and separate focus zones, which the client seemed
-          to appreciate. They also expressed interest in exploring additional
-          lighting options and asked for cost comparisons between standard and
-          smart LED systems. The client’s preliminary budget is around £18,000,
-          but there’s flexibility if sustainable or higher-quality materials are
-          justified.
+        <span className="text-placeholder-text text-sm whitespace-pre-line">
+          {notes}
         </span>
-        <a className="underline"> Read More </a>
       </div>
 
       <div className="dashed-y-separators" />
 
       <div className="quote-description-section">
         <span className="header"> Attachments </span>
-        <div className="attachment-layout">
-          {Array.from({ length: 6 }, (_, i) => i + 1).map((i) => (
-            <StyledAttachments fileName={`Attachment${i}.png`} />
-          ))}
-        </div>
+        {attachments.length > 0 ? (
+          <div className="attachment-layout">
+            {attachments.map((att, idx) => (
+              <StyledAttachments
+                key={att.name ?? idx}
+                fileName={att.name}
+              />
+            ))}
+          </div>
+        ) : (
+          <span className="text-placeholder-text text-sm">
+            No attachments uploaded for this quote.
+          </span>
+        )}
       </div>
     </div>
   );
 }
+

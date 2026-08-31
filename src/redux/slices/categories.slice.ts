@@ -1,21 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Category } from "../../types/category.types";
-import { getCategoryIdx } from "../../lib/utils";
 
-export const categoriesInitialState: Category[] = [];
+export const categoriesInitialState: Category[] = [
+  { id: "cat-materials", name: "Materials" },
+  { id: "cat-services", name: "Services" },
+];
 
 export const categoriesSlice = createSlice({
   initialState: categoriesInitialState,
   name: "categories",
   reducers: {
     addCategory: (state, action: PayloadAction<Category>) => {
-      Object.assign(state, [...state, action.payload]);
+      state.push(action.payload);
     },
 
     removeCategory: (state, action: PayloadAction<{ id: string }>) => {
-      const idx = getCategoryIdx(action.payload.id);
+      const idx = state.findIndex((cat) => cat.id === action.payload.id);
       if (idx !== -1) {
-        Object.assign(state, state.toSpliced(idx, 1));
+        state.splice(idx, 1);
       }
     },
   },

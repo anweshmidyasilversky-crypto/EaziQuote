@@ -28,7 +28,12 @@ import { useDebounce } from "../../hooks/debounce.hook";
 import { Separator } from "../../components/ui/separator";
 import MoreOptionsPopup from "../../components/clients/MoreOptionsPopup";
 import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
-import { formatCurrency, getClient, getInitials } from "../../lib/utils";
+import {
+  formatCurrency,
+  getInitials,
+  getQuoteAmount,
+  formatDisplayDate,
+} from "../../lib/utils";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
 import type { DefaultValues } from "react-hook-form";
 import { useAppSelector } from "../../redux/store";
@@ -39,7 +44,7 @@ import {
   RenderMultiSelectCheckbox,
   type CheckboxConfig,
 } from "../../components/common/RenderMultiSelectCheckbox";
-import { TableFilterSheet } from "../../components/common/TableFilterSheet";
+import { CustomSheet } from "../../components/common/CustomSheet";
 import {
   DateRangePicker,
   type DateRange,
@@ -54,8 +59,36 @@ export function ClientDetailsPage() {
   const navigate = useNavigate();
   const param = useParams<{ id: string }>();
   const user = useAppSelector((state) => state.user);
-  const [clientCredential, setclientCredential] = useState(
-    getClient(param.id as string) ?? (getClient("1") as ClientDataWithFilters),
+  const reduxClients = useAppSelector((state) => state.clients);
+  const reduxQuotes = useAppSelector((state) => state.quotes);
+
+  // Find client from Redux by route param ID, fallback to first client
+  const foundClient =
+    reduxClients.find((c) => c.id === param.id) ?? reduxClients[0];
+
+  // Derive client quotes as ClientActivity objects
+  const clientActivities: ClientActivity[] = useMemo(() => {
+    const matchingQuotes = reduxQuotes.filter(
+      (q) => q.clientId === foundClient?.id,
+    );
+    if (matchingQuotes.length === 0) return mockClientActivity;
+    return matchingQuotes.map((q) => ({
+      id: q.id,
+      title: q.title,
+      quoteInvoice: q.referenceNumber,
+      amount: getQuoteAmount(q),
+      status: q.status as ClientActivityStatus,
+      creationDate: formatDisplayDate(q.quoteDate),
+      expiryDueDate: formatDisplayDate(q.expiryDate),
+    }));
+  }, [reduxQuotes, foundClient]);
+
+  const [clientCredential, setclientCredential] = useState<ClientDataWithFilters>(
+    {
+      client: foundClient.name ?? "Emma", company: foundClient.companyName ?? "Company",
+      activityCount: reduxQuotes.filter((q) => q.clientId === foundClient?.id).length,
+      createdAt: foundClient?.createdAt ?? new Date().toISOString(), ...foundClient
+    }
   );
   const [currTable, toggleCurrTable] = useState<string>("activity");
   const [searchTearm, setSearchTerm] = useState<string>("");
@@ -64,7 +97,7 @@ export function ClientDetailsPage() {
   const [editPopupOpen, toggleEditPopupOpen] = useState<boolean>(false);
   const [contactInfoOpen, toggleContactInfoOpen] = useState<boolean>(false);
   const [tableData, setTableData] = useState<ClientActivity[] | PaymentData[]>(
-    mockClientActivity,
+    clientActivities,
   );
   const [filterOpen, toggleFilterOpen] = useState<boolean>(false);
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -89,9 +122,9 @@ export function ClientDetailsPage() {
         value: "due",
       },
       {
-        id: "overdue",
-        label: "Overdue",
-        value: "overdue",
+        id: "pending",
+        label: "Pending",
+        value: "pending",
       },
       {
         id: "draft",
@@ -104,6 +137,11 @@ export function ClientDetailsPage() {
         value: "sent",
       },
       {
+        id: "completed",
+        label: "Completed",
+        value: "completed",
+      },
+      {
         id: "approved",
         label: "Approved",
         value: "approved",
@@ -112,11 +150,6 @@ export function ClientDetailsPage() {
         id: "rejected",
         label: "Rejected",
         value: "rejected",
-      },
-      {
-        id: "completed",
-        label: "Completed",
-        value: "completed",
       },
       {
         id: "cancelled",
@@ -131,8 +164,8 @@ export function ClientDetailsPage() {
     /* Toggle tables based on which data is shown */
   }
   useEffect(() => {
-    setTableData(currTable === "activity" ? mockClientActivity : paymentData);
-  }, [currTable]);
+    setTableData(currTable === "activity" ? clientActivities : paymentData);
+  }, [currTable, clientActivities]);
 
   const localFilters: ColumnFiltersState = useMemo(
     () => [
@@ -274,33 +307,46 @@ export function ClientDetailsPage() {
     [],
   );
 
-  const clientActivitySummary: ActivitySummaryProps["summaryConfig"] = [
-    {
-      summaryTitle: "Total quotes",
-      summaryIcon: assets.invoiceColored,
-      summary: 20,
-    },
-    {
-      summaryTitle: "quotes accepted",
-      summaryIcon: assets.greenTickIcon,
-      summary: 16,
-    },
-    {
-      summaryTitle: "total invoices",
-      summaryIcon: assets.invoiceColored,
-      summary: 12,
-    },
-    {
-      summaryTitle: "outstanding balance",
-      summaryIcon: assets.redPoundIcon,
-      summary: "£2000",
-    },
-    {
-      summaryTitle: "available credit",
-      summaryIcon: assets.greenPoundIcon,
-      summary: "£5000",
-    },
-  ];
+  const clientActivitySummary: ActivitySummaryProps["summaryConfig"] =
+    useMemo(() => {
+      const matchingQuotes = reduxQuotes.filter(
+        (q) => q.clientId === foundClient?.id,
+      );
+      const acceptedQuotes = matchingQuotes.filter(
+        (q) => q.status === "Accepted",
+      );
+      const outstanding = matchingQuotes
+        .filter((q) => q.status === "Sent")
+        .reduce((sum, q) => sum + getQuoteAmount(q), 0);
+
+      return [
+        {
+          summaryTitle: "Total quotes",
+          summaryIcon: assets.invoiceColored,
+          summary: matchingQuotes.length,
+        },
+        {
+          summaryTitle: "quotes accepted",
+          summaryIcon: assets.greenTickIcon,
+          summary: acceptedQuotes.length,
+        },
+        {
+          summaryTitle: "total invoices",
+          summaryIcon: assets.invoiceColored,
+          summary: matchingQuotes.length > 0 ? matchingQuotes.length : 12,
+        },
+        {
+          summaryTitle: "outstanding balance",
+          summaryIcon: assets.redPoundIcon,
+          summary: formatCurrency(outstanding),
+        },
+        {
+          summaryTitle: "available credit",
+          summaryIcon: assets.greenPoundIcon,
+          summary: "£5,000.00",
+        },
+      ];
+    }, [reduxQuotes, foundClient]);
 
   const updateClient = (data: ClientEditPayload) => {
     const { name: client, companyName: company } = data;
@@ -457,7 +503,11 @@ export function ClientDetailsPage() {
         currClient={clientCredential}
       />
 
-      <TableFilterSheet isOpen={filterOpen} toggleIsOpen={toggleFilterOpen}>
+      <CustomSheet
+        isOpen={filterOpen}
+        toggleIsOpen={toggleFilterOpen}
+        withClearOption
+      >
         <div className="flex flex-col gap-6 mt-6 px-5">
           <div className="min-h-25.5 flex flex-col gap-4">
             <span className="text-placeholder-text min-h-4.25 font-medium text-sm">
@@ -482,7 +532,7 @@ export function ClientDetailsPage() {
             />
           </div>
         </div>
-      </TableFilterSheet>
+      </CustomSheet>
     </div>
   );
 }

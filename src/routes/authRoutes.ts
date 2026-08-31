@@ -85,14 +85,6 @@ export const authRoutes: RouteObject[] = [
                 path: "clients/:id",
                 Component: ClientDetailsPage,
               },
-              // {
-              //   path: "quotes",
-              //   Component: QuotesIndexPage,
-              // },
-              // {
-              //   path: "quotes/:id",
-              //   Component: QuotesDetailsPage,
-              // },
               {
                 path: "quotes",
                 children: [
@@ -101,12 +93,12 @@ export const authRoutes: RouteObject[] = [
                     Component: QuotesIndexPage,
                   },
                   {
-                    path: ":id",
-                    Component: QuotesDetailsPage,
+                    path: "manage-quotes/:id?",
+                    Component: CreateQuotePage,
                   },
                   {
-                    path: "manage-quotes",
-                    Component: CreateQuotePage,
+                    path: ":id",
+                    Component: QuotesDetailsPage,
                   },
                 ],
               },

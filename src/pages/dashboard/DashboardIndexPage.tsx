@@ -9,18 +9,73 @@ import StatusBadge from "../../components/common/StatusBadge";
 import { NotificationCard } from "../../components/dashboard/Notification.card";
 import {
   notifications,
-  transactionItems,
   type TransactionItem,
 } from "../../constants/dummyData";
-import { formatOrdinalDate } from "../../lib/utils";
+import {
+  formatCurrency,
+  formatDisplayDate,
+  formatOrdinalDate,
+  getQuoteAmount,
+} from "../../lib/utils";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useAppSelector } from "../../redux/store";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
+
+  // ── Redux state ─────────────────────────────────────────────────────────────
+  const reduxQuotes = useAppSelector((state) => state.quotes);
+  const reduxClients = useAppSelector((state) => state.clients);
+
+  // Derive transactionItems from Redux quotes (most recent first)
+  const transactionItems: TransactionItem[] = useMemo(() => {
+    return [...reduxQuotes]
+      .sort(
+        (a, b) =>
+          new Date(b.quoteDate).getTime() - new Date(a.quoteDate).getTime(),
+      )
+      .map((q) => {
+        const client = reduxClients.find((c) => c.id === q.clientId);
+        const amount = getQuoteAmount(q); // sum of item totals
+        return {
+          id: q.id,
+          title: q.title,
+          quoteInvoice: q.referenceNumber,
+          client: client?.name ?? "Unknown Client",
+          amount: formatCurrency(amount),
+          status: q.status as TransactionItem["status"],
+          creationDate: formatDisplayDate(q.quoteDate),
+          expiryDueDate: formatDisplayDate(q.expiryDate),
+        };
+      });
+  }, [reduxQuotes, reduxClients]);
+
+  // ── KPI metrics derived from Redux ──────────────────────────────────────────
+  const kpiValues = useMemo(() => {
+    const sentQuotes = reduxQuotes.filter((q) => q.status === "Sent");
+    const draftQuotes = reduxQuotes.filter((q) => q.status === "Draft");
+    const acceptedLast30 = reduxQuotes.filter((q) => q.status === "Accepted");
+
+    const outstandingTotal = sentQuotes.reduce(
+      (sum, q) => sum + getQuoteAmount(q),
+      0,
+    );
+    const pendingTotal = draftQuotes.reduce(
+      (sum, q) => sum + getQuoteAmount(q),
+      0,
+    );
+
+    return {
+      outstanding: formatCurrency(outstandingTotal),
+      pending: formatCurrency(pendingTotal),
+      acceptedCount: String(acceptedLast30.length),
+    };
+  }, [reduxQuotes]);
+
   const columns: ColumnDef<TableFeatures, TransactionItem>[] = [
     {
       accessorKey: "title",
@@ -68,7 +123,7 @@ export function DashboardIndexPage() {
       enableSorting: false,
       cell: (info) => (
         <CustomActionGroup
-          openFn={() => navigate(`/quotes/${info.row.original.quoteInvoice}`)}
+          openFn={() => navigate(`/quotes/${info.row.original.id}`)}
         />
       ),
     },
@@ -77,13 +132,13 @@ export function DashboardIndexPage() {
   const kpiCardConfig: KpiCardProps[] = [
     {
       title: "Outstanding Invoices",
-      value: "£12,500.00",
+      value: kpiValues.outstanding,
       kpiIcon: assets.invoiceColored,
       iconCls: "bg-transparent-royal-blue",
     },
     {
       title: "Pending Quotes",
-      value: "£8,250.00",
+      value: kpiValues.pending,
       kpiIcon: assets.clockColored,
       iconCls: "bg-transparent-liquid-lava",
     },
@@ -95,7 +150,7 @@ export function DashboardIndexPage() {
     },
     {
       title: "Quotes Accepted (Last 30 Days)",
-      value: "20",
+      value: kpiValues.acceptedCount,
       kpiIcon: assets.invoiceColored,
       iconCls: "bg-transparent-royal-blue",
     },
@@ -107,7 +162,7 @@ export function DashboardIndexPage() {
       <div className="px-6 pt-6 flex pb-5 flex-col gap-6">
         {/* Heading */}
         <div className="flex w-full h-13.5 justify-between">
-          {/* Date and greating */}
+          {/* Date and greeting */}
           <div className="flex flex-col gap-2">
             <span className="text-placeholder-text">
               {" "}
@@ -134,7 +189,7 @@ export function DashboardIndexPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-x-6">
-          {/* kpi cards */}
+          {/* KPI cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {kpiCardConfig.map((kpiConfig) => {
               return (

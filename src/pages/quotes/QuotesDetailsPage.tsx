@@ -1,16 +1,10 @@
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
-import {
-  itemData as mockItemData,
-  type QuoteData,
-  invoiceData,
-  type ItemData,
-} from "../../constants/dummyData";
 import { useMemo, useState } from "react";
 import {
   formatCurrency,
-  getClient,
+  formatDisplayDate,
   getInitials,
-  getQuoteFromId,
+  getQuoteAmount,
 } from "../../lib/utils";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { useParams } from "react-router";
@@ -31,27 +25,55 @@ import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup"
 import { ShareOptions } from "../../components/common/ShareOptions";
 import { QuoteDescriptionPage } from "./QuoteDescriptionPage";
 import { QuoteSectionPage } from "./QuoteSectionPage";
+import { useAppSelector } from "../../redux/store";
+import type { QuoteLineItem } from "../../types/quoteLineItem.type";
+import type { ClientDataWithFilters } from "../../constants/dummyData";
+import { invoiceData, QuoteActivityStatus } from "../../constants/dummyData";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
-  const quote = getQuoteFromId(params.id);
-  const invoices = quote.invoices ?? invoiceData;
-  const itemColumns: ColumnDef<TableFeatures, ItemData>[] = useMemo(
+
+  // ── Read from Redux ─────────────────────────────────────────────────────────
+  const quote = useAppSelector((state) =>
+    state.quotes.find((q) => q.id === params.id),
+  );
+  const allClients = useAppSelector((state) => state.clients);
+
+  // Fallback to first quote if ID not found (graceful degradation)
+  const activeQuote = useAppSelector((state) => quote ?? state.quotes[0]);
+
+  const client = allClients.find((c) => c.id === activeQuote?.clientId);
+
+  // Derived amount: sum of all line item totals (pricePerUnit × quantity)
+  const quoteAmount = activeQuote ? getQuoteAmount(activeQuote) : 0;
+
+  // ── Items table columns ─────────────────────────────────────────────────────
+  const itemColumns: ColumnDef<TableFeatures, QuoteLineItem>[] = useMemo(
     () => [
       {
-        accessorKey: "itemName",
+        accessorKey: "name",
         header: "ITEM NAME",
         enableSorting: false,
       },
       {
-        accessorKey: "category",
+        accessorKey: "catId",
         header: "CATEGORY",
         enableSorting: false,
+        cell: (info) => {
+          // Resolve category name from catId
+          const catId = info.getValue<string>();
+          return catId === "cat-materials" ? "Materials" : "Services";
+        },
       },
       {
-        accessorKey: "subcategory",
+        accessorKey: "subCatId",
         header: "SUBCATEGORY",
         enableSorting: false,
+        cell: (info) => {
+          // Pretty-print subCatId (strip prefix)
+          const raw = info.getValue<string>();
+          return raw.replace(/^(sub-|svc-)/, "").replace(/-/g, " ");
+        },
       },
       {
         accessorKey: "quantity",
@@ -80,13 +102,13 @@ export function QuotesDetailsPage() {
     [],
   );
 
-  const [itemData, _] = useState(mockItemData);
   const [globalFilter, setGlobalFilter] = useState("");
   const deboucedFilter = useDebounce({ value: globalFilter, delay: 500 });
   const [activeTable, toggleActiveTable] = useState("summary");
-  const [quoteCurrStatus, toggleQuoteCurrStatus] = useState<
-    QuoteData["status"]
-  >(quote.status);
+  const [quoteCurrStatus, toggleQuoteCurrStatus] =
+    useState<QuoteActivityStatus>(
+      (activeQuote?.status ?? "Draft") as QuoteActivityStatus,
+    );
   const [clientDetailOpen, toggleClientDetailOpen] = useState(false);
   const [shareBoxOpen, toggleShareBoxOpen] = useState(false);
 
@@ -109,35 +131,33 @@ export function QuotesDetailsPage() {
   ];
 
   const toggleGroupConfig: CustomToggleGroupProps["toggleConfig"] = [
-    {
-      btnId: "summary",
-      btnLabel: "Summary",
-    },
-    {
-      btnId: "description",
-      btnLabel: "Description",
-    },
-    {
-      btnId: "section",
-      btnLabel: "Section",
-    },
+    { btnId: "summary", btnLabel: "Summary" },
+    { btnId: "description", btnLabel: "Description" },
+    { btnId: "section", btnLabel: "Section" },
   ];
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }).format(date);
+  // Build a ClientDataWithFilters-compatible object for the popup
+  const clientDisplayData: ClientDataWithFilters = {
+    id: client?.id ?? "",
+    client: client?.name ?? "Unknown Client",
+    company: client?.companyName ?? "",
+    phone: client?.phone ?? "",
+    email: client?.email ?? "",
+    createdAt: client?.createdAt ?? new Date().toISOString(),
+    activityCount: 0,
   };
+
+  if (!activeQuote) {
+    return <div className="p-6 text-placeholder-text">No quote found.</div>;
+  }
 
   return (
     <div>
       <HeaderBreadCrumb pageName="Quote Detail" />
       <div className="flex flex-col gap-6 px-6 pt-6 pb-8.5">
         <CustomHeader
-          header={quote.title}
-          headerInfo={quote.id}
+          header={activeQuote.title}
+          headerInfo={activeQuote.id}
           btnConfigList={btnConfigList}
         />
 
@@ -149,11 +169,11 @@ export function QuotesDetailsPage() {
 
         {activeTable === "summary" && (
           <div className="flex gap-6">
-            {/* Render Table */}
+            {/* Items Table */}
             <div className="table-theme! overflow-hidden grow">
               <CustomDataTable
                 columns={itemColumns}
-                data={itemData}
+                data={activeQuote.items}
                 globalFilterTerm={deboucedFilter}
                 showPaginated
                 tableOptionsLeft={
@@ -179,19 +199,19 @@ export function QuotesDetailsPage() {
               <div className="w-full flex justify-end">
                 <div className="max-w-75">
                   <SubtotalBreakDown
-                    quote={quote}
+                    subtotal={quoteAmount}
                     marginPercentage={50}
                     taxPercentage={18}
                     discountPercentage={10}
                     reqDeposite={1500}
-                    paymentMethod={quote.paymentMethod}
-                    itemDetails={itemData}
+                    paymentMethod={activeQuote.paymentMethod}
+                    items={activeQuote.items}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Info cards */}
+            {/* Info Cards */}
             <div className="flex flex-col gap-6">
               <CustomInfoCard header="Basic Information">
                 <div className="flex flex-col gap-6 [&_div]:flex [&_div]:justify-between">
@@ -199,7 +219,7 @@ export function QuotesDetailsPage() {
                     <span className="text-sm"> Created on </span>
                     <span className="text-placeholder-text">
                       {" "}
-                      {formatDate(new Date(quote.creationDate))}{" "}
+                      {formatDisplayDate(activeQuote.quoteDate)}{" "}
                     </span>
                   </div>
 
@@ -207,7 +227,7 @@ export function QuotesDetailsPage() {
                     <span className="text-sm"> Expiry Date </span>
                     <span className="text-placeholder-text">
                       {" "}
-                      {formatDate(new Date(quote.expiryDate))}{" "}
+                      {formatDisplayDate(activeQuote.expiryDate)}{" "}
                     </span>
                   </div>
 
@@ -221,38 +241,36 @@ export function QuotesDetailsPage() {
                 </div>
               </CustomInfoCard>
 
-              {/* Client info */}
+              {/* Client Info */}
               <CustomInfoCard
                 header="Client Details"
                 headerLink="View Info"
                 linkAction={() => toggleClientDetailOpen((curr) => !curr)}
               >
                 <div className="flex gap-4 min-h-12">
-                  {/* Initials */}
                   <div className="bg-transparent-royal-blue rounded-lg flex items-center justify-center min-w-12">
                     <span className="text-brand-dark min-h-5.5 font-medium text-lg">
                       {" "}
-                      {getInitials(quote.client)}{" "}
+                      {getInitials(client?.name ?? "Unknown Client")}{" "}
                     </span>
                   </div>
-                  {/* name & brand */}
                   <div className="flex flex-col justify-between items-center">
                     <span className="font-medium text-base">
                       {" "}
-                      {quote.client}{" "}
+                      {client?.name ?? "Unknown Client"}{" "}
                     </span>
                     <span className="text-placeholder-text text-sm">
                       {" "}
-                      {quote.companyName ?? "Smith & Co Builders"}{" "}
+                      {client?.companyName ?? ""}{" "}
                     </span>
                   </div>
                 </div>
               </CustomInfoCard>
 
-              {/* Invoice info card */}
+              {/* Invoice info card — kept as-is (uses dummyData invoiceData) */}
               <CustomInfoCard header="Invoices">
                 <div className="flex flex-col gap-3 max-h-125 overflow-y-auto">
-                  {invoices.map((invoice) => (
+                  {invoiceData.map((invoice) => (
                     <div
                       key={invoice.id}
                       className="min-h-15.5 flex justify-between items-center border border-dashed border-separator px-4 py-3 rounded-[7px]"
@@ -262,13 +280,11 @@ export function QuotesDetailsPage() {
                           {" "}
                           {invoice.id}{" "}
                         </span>
-
                         <span className="text-placeholder-text">
                           {" "}
                           {formatCurrency(invoice.total)}{" "}
                         </span>
                       </div>
-
                       <div className="bg-table-head min-h-6 rounded-sm px-2.5 flex items-center font-medium text-xs">
                         {invoice.status}
                       </div>
@@ -280,20 +296,22 @@ export function QuotesDetailsPage() {
           </div>
         )}
 
-        {activeTable === "description" && <QuoteDescriptionPage />}
+        {activeTable === "description" && (
+          <QuoteDescriptionPage quote={activeQuote} />
+        )}
         {activeTable === "section" && <QuoteSectionPage />}
       </div>
 
       <ClientDetailsPopup
         isOpen={clientDetailOpen}
         toggleOpen={toggleClientDetailOpen}
-        currClient={{ ...getClient(""), client: quote.client }}
+        currClient={clientDisplayData}
       />
 
       <ShareOptions
         isOpen={shareBoxOpen}
         toggleIsOpen={toggleShareBoxOpen}
-        clientEmail={getClient("").email}
+        clientEmail={client?.email ?? ""}
       />
     </div>
   );

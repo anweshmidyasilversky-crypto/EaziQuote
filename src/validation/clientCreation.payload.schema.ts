@@ -23,5 +23,6 @@ export const clientCreationSchema: yup.ObjectSchema<ClientCreationPayload> = yup
       ),
     phone: userProfileSchema.fields.phoneNo as yup.StringSchema<string>,
     email: yup.string().required(emptyMsg("Email")).email(invalidMsg("Email")),
+    createdAt: yup.string().optional(),
   })
   .concat(businessAddressSchema);

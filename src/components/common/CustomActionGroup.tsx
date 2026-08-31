@@ -4,6 +4,7 @@ export type CustomActionGroupProps = {
   openFn?: () => void;
   editFn?: () => void;
   deleteFn?: () => void;
+  withOpen?: boolean;
 
   paymentActionGroup?: boolean;
   paymentPending?: boolean;
@@ -23,6 +24,7 @@ export function CustomActionGroup({
   paymentActionGroup,
   paymentPending,
   shareAction,
+  withOpen = true,
 }: CustomActionGroupProps) {
   const btnList: ActionBtnList = [
     {
@@ -41,6 +43,9 @@ export function CustomActionGroup({
       action: deleteFn,
     },
   ];
+  if (!withOpen) {
+    btnList.splice(0, 1);
+  }
   return (
     <div className="flex gap-2 min-h-6 min-w-6 w-fit shrik-0">
       {btnList.map((btn) => {

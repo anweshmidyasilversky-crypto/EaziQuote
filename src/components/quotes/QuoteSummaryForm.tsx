@@ -11,12 +11,23 @@ import { ClientForm } from "../clients/ClientForm";
 import { type QuoteSummary } from "../../types/quoteCreation.payload.type";
 import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { mockClientData } from "../../constants/dummyData";
-import { nanoid } from "@reduxjs/toolkit";
-import { cn } from "../../lib/utils";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { cn, getClient, getQuote } from "../../lib/utils";
+import { updateQuote } from "../../redux/slices/quotes.slice";
+import { toast } from "react-toastify";
+import { Navigate, useNavigate } from "react-router";
 
-function QuoteSummaryForm() {
+export type QuoteSummaryFormProps = {
+  refNo: string;
+  submitAction?: () => void;
+};
+
+function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
+  const currQuote = getQuote(refNo);
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
+  const clients = useAppSelector((state) => state.clients);
+  const currClient = getClient(currQuote?.clientId);
+  const navigate = useNavigate();
   const {
     control,
     watch,
@@ -26,21 +37,22 @@ function QuoteSummaryForm() {
     clearErrors,
   } = useForm<QuoteSummary>({
     defaultValues: {
-      quoteTitle: "",
-      referenceNumber: nanoid(),
-      quoteDate: "",
-      expiryDate: "",
-      hidePhoneNumber: true,
-      clientId: undefined,
-      jobDescription: "",
-      attachments: [],
+      quoteTitle: currQuote?.title ?? "",
+      referenceNumber: refNo,
+      quoteDate: currQuote?.quoteDate ?? "",
+      expiryDate: currQuote?.expiryDate ?? "",
+      hidePhoneNumber: currQuote?.hidePhoneNumber ?? true,
+      clientId: currQuote?.clientId ?? undefined,
+      jobDescription: currQuote?.jobDescription ?? "",
+      attachments: currQuote?.attachments ?? [],
     },
     resolver: yupResolver(quoteSummarySchema),
   });
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: undefined,
-    endDate: undefined,
+    startDate: currQuote ? new Date(currQuote.quoteDate) : undefined,
+    endDate: currQuote ? new Date(currQuote.expiryDate) : undefined,
   });
+  const dispatch = useAppDispatch();
   useEffect(() => {
     setValue("quoteDate", dateRange.startDate?.toDateString() as string);
     clearErrors("quoteDate");
@@ -60,7 +72,20 @@ function QuoteSummaryForm() {
   };
 
   const submitHandler = (data: QuoteSummary) => {
-    console.log(data);
+    dispatch(
+      updateQuote({
+        id: refNo,
+        title: data.quoteTitle,
+        ...data,
+        hasCompletedSummary: true,
+        status: "Draft",
+      }),
+    );
+    toast.success(`Updated quote summary`);
+    submitAction?.();
+    navigate(`/quotes/manage-quotes/${refNo}`, {
+      replace: true,
+    });
   };
 
   return (
@@ -137,11 +162,12 @@ function QuoteSummaryForm() {
             />
             <div className="flex flex-col gap-2 w-full">
               <CustomCombobox
-                items={mockClientData}
-                getItemLabel={(clientCredential) => clientCredential.client}
-                getItemValue={(clientCredential) => clientCredential.id}
-                onValueChange={(clientCredential) => {
-                  setValue("clientId", clientCredential as string);
+                items={clients}
+                selected={currClient}
+                getItemLabel={(client) => client.name}
+                getItemValue={(client) => client.id}
+                onValueChange={(clientId) => {
+                  setValue("clientId", clientId as string);
                   clearErrors("clientId");
                 }}
                 placeholder="Search or select a client"

@@ -1,5 +1,5 @@
 export interface QuoteSection {
   order: string;
-  title: string;
+  section: string;
   description: string;
 }

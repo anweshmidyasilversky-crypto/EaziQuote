@@ -7,10 +7,7 @@ import {
   type ColumnVisibilityState,
   type TableFeatures,
 } from "@tanstack/react-table";
-import {
-  mockClientData,
-  type ClientDataWithFilters,
-} from "../../constants/dummyData";
+import { type ClientDataWithFilters } from "../../constants/dummyData";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
@@ -18,16 +15,31 @@ import { useMemo, useState } from "react";
 import { useDebounce } from "../../hooks/debounce.hook";
 
 import { ClientForm } from "../../components/clients/ClientForm";
-import { TableFilterSheet } from "../../components/common/TableFilterSheet";
+import { CustomSheet } from "../../components/common/CustomSheet";
 import { useNavigate } from "react-router";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
 import { nanoid } from "@reduxjs/toolkit";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
 import { CustomHeader } from "../../components/common/CustomHeader";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
+import { addClient } from "../../redux/slices/clients.slice";
+import { clientToDisplayData } from "../../lib/utils";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  // ── Redux state ─────────────────────────────────────────────────────────────
+  const reduxClients = useAppSelector((state) => state.clients);
+  const reduxQuotes = useAppSelector((state) => state.quotes);
+
+  // Map Client[] → ClientDataWithFilters[] (activityCount from quote count)
+  const baseClientData: ClientDataWithFilters[] = useMemo(
+    () => reduxClients.map((c) => clientToDisplayData(c, reduxQuotes)),
+    [reduxClients, reduxQuotes],
+  );
+
   const columns = useMemo(
     () =>
       [
@@ -84,91 +96,73 @@ export function ClientIndexPage() {
 
   const [searchParam, setSearchParam] = useState("");
   const [clientData, setClientData] = useState<ClientDataWithFilters[]>(
-    mockClientData.toSorted(
-      (client1, client2) =>
-        new Date(client2.createdAt).getTime() -
-        new Date(client1.createdAt).getTime(),
+    baseClientData.toSorted(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     ),
   );
   const [isPopoverOpen, toggleIsPopoverOpen] = useState(false);
 
-  {
-    /* Handle filters */
-  }
   const filters: { label: string; value: string }[] = useMemo(
     () => [
-      {
-        value: "asc",
-        label: "A-Z",
-      },
-      {
-        value: "desc",
-        label: "Z-A",
-      },
-      {
-        value: "recent",
-        label: "Recently Added",
-      },
-      {
-        value: "active",
-        label: "Most Active",
-      },
+      { value: "asc", label: "A-Z" },
+      { value: "desc", label: "Z-A" },
+      { value: "recent", label: "Recently Added" },
+      { value: "active", label: "Most Active" },
     ],
     [],
   );
   const [activeFilter, toggleActiveFilter] = useState<string>("recent");
   const [isFilterOpen, toggleFilterOpen] = useState(false);
-  let tableData = clientData;
+
   const getFilteredData = (filter: string) => {
-    let res = clientData;
     switch (filter) {
       case "asc":
-        res = tableData.toSorted((client1, client2) =>
-          client1.client.localeCompare(client2.client),
-        );
-        break;
-
+        return clientData.toSorted((a, b) => a.client.localeCompare(b.client));
       case "desc":
-        res = tableData.toSorted((client1, client2) =>
-          client2.client.localeCompare(client1.client),
-        );
-        break;
-
+        return clientData.toSorted((a, b) => b.client.localeCompare(a.client));
       case "recent":
-        res = tableData.toSorted(
-          (client1, client2) =>
-            new Date(client2.createdAt).getTime() -
-            new Date(client1.createdAt).getTime(),
+        return clientData.toSorted(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
-        break;
-
       case "active":
-        res = tableData.toSorted(
-          (client1, client2) => client2.activityCount - client1.activityCount,
+        return clientData.toSorted(
+          (a, b) => b.activityCount - a.activityCount,
         );
+      default:
+        return clientData;
     }
-    return res;
   };
-  const applyFiler = () => setClientData(getFilteredData(activeFilter));
+
+  const applyFilter = () => setClientData(getFilteredData(activeFilter));
   const clearFilter = () => {
     toggleActiveFilter("recent");
     setClientData(getFilteredData("recent"));
   };
+
   const debouncedSearchParam = useDebounce({ value: searchParam, delay: 500 });
   const localFilter: ColumnFiltersState = useMemo(
-    () => [
-      {
-        id: "client",
-        value: debouncedSearchParam,
-      },
-    ],
+    () => [{ id: "client", value: debouncedSearchParam }],
     [debouncedSearchParam],
   );
 
   const clientCreatFn = (data: ClientCreationPayload) => {
+    const newClientId = nanoid();
     const { name: client, companyName: company } = data;
-    const newClient: ClientDataWithFilters = {
-      id: nanoid(),
+
+    // Dispatch to Redux store
+    dispatch(
+      addClient({
+        id: newClientId,
+        ...data,
+        createdAt: new Date().toISOString(),
+      }),
+    );
+
+    // Also update local display state immediately
+    const newDisplayClient: ClientDataWithFilters = {
+      id: newClientId,
       ...data,
       client,
       company,
@@ -176,17 +170,13 @@ export function ClientIndexPage() {
       activityCount: 0,
     };
     setClientData((curr) =>
-      [...curr, newClient].toSorted(
-        (client1, client2) =>
-          new Date(client2.createdAt).getTime() -
-          new Date(client1.createdAt).getTime(),
+      [...curr, newDisplayClient].toSorted(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       ),
     );
   };
 
-  {
-    /* buttons */
-  }
   const btnConfigList: CustomBtnProps[] = [
     {
       leftIcon: assets.plusIcon,
@@ -228,10 +218,11 @@ export function ClientIndexPage() {
           />
         </div>
 
-        <TableFilterSheet
+        <CustomSheet
           isOpen={isFilterOpen}
           toggleIsOpen={toggleFilterOpen}
-          applyFn={applyFiler}
+          withClearOption
+          submitFn={applyFilter}
           clearFn={clearFilter}
         >
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
@@ -254,7 +245,7 @@ export function ClientIndexPage() {
               </span>
             ))}
           </div>
-        </TableFilterSheet>
+        </CustomSheet>
       </div>
     </>
   );

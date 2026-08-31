@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import type { CustomBtnProps } from "../../components/common/CustomBtn";
@@ -8,6 +8,9 @@ import {
   type CustomToggleGroupProps,
 } from "../../components/common/CustomToggleGroup";
 import QuoteSummaryForm from "../../components/quotes/QuoteSummaryForm";
+import ItemSelectForm from "../../components/quotes/ItemSelectForm";
+import { useParams } from "react-router";
+import { useAppSelector } from "../../redux/store";
 
 enum toggleId {
   Summary = "summary",
@@ -15,48 +18,52 @@ enum toggleId {
   Sections = "sections",
 }
 
-export type CreateQuotePageProps = {};
 export function CreateQuotePage() {
   const [formCurrSection, changeFormCurrSection] = useState<string>(
     toggleId.Summary,
   );
+  const params = useParams<{ id: string }>();
+  const quotes = useAppSelector((state) => state.quotes);
+  const currQuote = quotes.find((quote) => quote.referenceNumber === params.id);
+  const nextId = quotes.reduce((prev, quote) => {
+    const currYear = new Date().getFullYear();
+    const [_, quoteYear, num] = quote.referenceNumber.split("-");
+    if (Number(quoteYear) === currYear) {
+      return Math.max(Number(num) + 1, prev);
+    }
+    return prev;
+  }, 1);
+  const nextRefNo = `QT-${new Date().getFullYear()}-${nextId}`;
+  const refNo = params.id ?? nextRefNo;
 
-  const btnConfigList: CustomBtnProps[] = useMemo(
-    () => [
-      {
-        buttonLabel: "Download",
-        leftIcon: assets.plusIcon,
-      },
-      {
-        buttonLabel: "share",
-        leftIcon: assets.shareIconWhite,
-        className: `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
-      },
-    ],
-    [],
-  );
+  const btnConfigList: CustomBtnProps[] = [
+    {
+      buttonLabel: "Download",
+      leftIcon: assets.plusIcon,
+    },
+    {
+      buttonLabel: "share",
+      leftIcon: assets.shareIconWhite,
+      className: `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
+    },
+  ];
 
-  const isActive = (id: string) => true;
-  const toggleConfig: CustomToggleGroupProps["toggleConfig"] = useMemo(
-    () => [
-      {
-        btnId: toggleId.Summary,
-        btnLabel: "Summary",
-        disabled: !isActive(toggleId.Summary),
-      },
-      {
-        btnId: toggleId.Items,
-        btnLabel: "Items",
-        disabled: !isActive(toggleId.Items),
-      },
-      {
-        btnId: toggleId.Sections,
-        btnLabel: "Sections",
-        disabled: !isActive(toggleId.Sections),
-      },
-    ],
-    [],
-  );
+  const toggleConfig: CustomToggleGroupProps["toggleConfig"] = [
+    {
+      btnId: toggleId.Summary,
+      btnLabel: "Summary",
+    },
+    {
+      btnId: toggleId.Items,
+      btnLabel: "Items",
+      disabled: !(currQuote?.hasCompletedSummary ?? false),
+    },
+    {
+      btnId: toggleId.Sections,
+      btnLabel: "Sections",
+      disabled: !(currQuote?.isItemsSelected ?? false),
+    },
+  ];
 
   return (
     <React.Fragment>
@@ -74,7 +81,13 @@ export function CreateQuotePage() {
                 toggleActive={changeFormCurrSection}
                 className={`bg-transparent! text-black-text [&_button]:disabled:text-muted create-quote-toggle [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark [&_.btnActive]:text-brand-dark [&_.btnActive]:bg-transparent [&_button]:max-w-22.75! px-2`}
               />
-              <QuoteSummaryForm />
+              {formCurrSection === toggleId.Summary && (
+                <QuoteSummaryForm
+                  refNo={refNo}
+                  submitAction={() => changeFormCurrSection(toggleId.Items)}
+                />
+              )}
+              {formCurrSection === toggleId.Items && <ItemSelectForm />}
             </div>
           </div>
         </div>

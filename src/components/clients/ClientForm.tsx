@@ -8,7 +8,7 @@ import { getAddress } from "../../lib/utils";
 import { postalCodes, type AddressDetail } from "../../constants/dummyData";
 import { PostCodeSelectComboBox } from "../common/PostCodeSelectComboBox";
 import React, { useState } from "react";
-import { ClientFormLayout } from "./ClientFormLayout";
+import { FormLayout } from "../common/FormLayout";
 import { type ClientEditPayload } from "../../types/clientEdit.payload.type";
 
 export type ClientFormProps = {
@@ -79,7 +79,7 @@ export function ClientForm({
   return (
     <>
       {isFormOpen && (
-        <ClientFormLayout
+        <FormLayout
           isFormOpen={isFormOpen}
           formHeading={mode === "creation" ? "Add Client" : "Edit Client"}
           sumbitBtnLabel={mode === "creation" ? "Save Client" : "Update Client"}
@@ -166,7 +166,7 @@ export function ClientForm({
               placeholder="Country"
             />
           </div>
-        </ClientFormLayout>
+        </FormLayout>
       )}
     </>
   );
