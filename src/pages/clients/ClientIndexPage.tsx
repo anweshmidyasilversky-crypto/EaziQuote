@@ -11,7 +11,7 @@ import { type ClientDataWithFilters } from "../../constants/dummyData";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "../../hooks/debounce.hook";
 
 import { ClientForm } from "../../components/clients/ClientForm";
@@ -23,12 +23,21 @@ import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { addClient } from "../../redux/slices/clients.slice";
+import { addClient, updateClient } from "../../redux/slices/clients.slice";
 import { clientToDisplayData } from "../../lib/utils";
+import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
+import type { Client } from "../../types/client.type";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [activeFilter, toggleActiveFilter] = useState<string>("recent");
+  const [isFilterOpen, toggleFilterOpen] = useState(false);
+  const [clientEditModal, toggleClientEditModal] = useState(false);
+  const [targetClient, setTargetClient] = useState<Client>();
+  const [searchParam, setSearchParam] = useState("");
+
+  const [isPopoverOpen, toggleIsPopoverOpen] = useState(false);
 
   // ── Redux state ─────────────────────────────────────────────────────────────
   const reduxClients = useAppSelector((state) => state.clients);
@@ -39,6 +48,15 @@ export function ClientIndexPage() {
     () => reduxClients.map((c) => clientToDisplayData(c, reduxQuotes)),
     [reduxClients, reduxQuotes],
   );
+  const [clientData, setClientData] = useState<ClientDataWithFilters[]>([]);
+  useEffect(() => {
+    setClientData(
+      baseClientData.toSorted(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ),
+    );
+  }, [baseClientData]);
 
   const columns = useMemo(
     () =>
@@ -78,6 +96,18 @@ export function ClientIndexPage() {
             return (
               <CustomActionGroup
                 openFn={() => navigate(`/clients/${client.id}`)}
+                editFn={() => {
+                  setTargetClient({
+                    ...client,
+                    street: "1600 Amphitheatre Driveway Sandra",
+                    postCode: "CA 94043",
+                    city: "Queens",
+                    name: client.client,
+                    companyName: client.company,
+                    country: "USA",
+                  });
+                  toggleClientEditModal((curr) => !curr);
+                }}
               />
             );
           },
@@ -94,15 +124,6 @@ export function ClientIndexPage() {
     [],
   );
 
-  const [searchParam, setSearchParam] = useState("");
-  const [clientData, setClientData] = useState<ClientDataWithFilters[]>(
-    baseClientData.toSorted(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    ),
-  );
-  const [isPopoverOpen, toggleIsPopoverOpen] = useState(false);
-
   const filters: { label: string; value: string }[] = useMemo(
     () => [
       { value: "asc", label: "A-Z" },
@@ -112,8 +133,6 @@ export function ClientIndexPage() {
     ],
     [],
   );
-  const [activeFilter, toggleActiveFilter] = useState<string>("recent");
-  const [isFilterOpen, toggleFilterOpen] = useState(false);
 
   const getFilteredData = (filter: string) => {
     switch (filter) {
@@ -127,9 +146,7 @@ export function ClientIndexPage() {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
       case "active":
-        return clientData.toSorted(
-          (a, b) => b.activityCount - a.activityCount,
-        );
+        return clientData.toSorted((a, b) => b.activityCount - a.activityCount);
       default:
         return clientData;
     }
@@ -177,6 +194,15 @@ export function ClientIndexPage() {
     );
   };
 
+  const clientEditFn = (data: ClientEditPayload) => {
+    dispatch(
+      updateClient({
+        id: targetClient?.id ?? "",
+        ...data,
+      }),
+    );
+  };
+
   const btnConfigList: CustomBtnProps[] = [
     {
       leftIcon: assets.plusIcon,
@@ -199,6 +225,14 @@ export function ClientIndexPage() {
           toggleFormOpen={toggleIsPopoverOpen}
           mode="creation"
           clientCreatFn={clientCreatFn}
+        />
+
+        <ClientForm
+          isFormOpen={clientEditModal}
+          toggleFormOpen={toggleClientEditModal}
+          mode="updation"
+          clientEditFn={clientEditFn}
+          defaultValues={targetClient}
         />
 
         <div className="flex flex-col bg-table rounded-[10px] dashboard-card-theme gap-4.5 py-4.5">

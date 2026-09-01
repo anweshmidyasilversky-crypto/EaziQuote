@@ -15,7 +15,10 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { cn, getClient, getQuote } from "../../lib/utils";
 import { updateQuote } from "../../redux/slices/quotes.slice";
 import { toast } from "react-toastify";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
+import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
+import { nanoid } from "@reduxjs/toolkit";
+import { addClient } from "../../redux/slices/clients.slice";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
@@ -70,6 +73,17 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
       attachments?.filter((attachment) => attachment.name !== fileName),
     );
   };
+  const clientCreateAction = (data: ClientCreationPayload) => {
+    const newClientId = nanoid();
+    // Dispatch to Redux store
+    dispatch(
+      addClient({
+        id: newClientId,
+        ...data,
+        createdAt: new Date().toISOString(),
+      }),
+    );
+  };
 
   const submitHandler = (data: QuoteSummary) => {
     dispatch(
@@ -79,6 +93,7 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
         ...data,
         hasCompletedSummary: true,
         status: "Draft",
+        items: [],
       }),
     );
     toast.success(`Updated quote summary`);
@@ -225,6 +240,7 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
         isFormOpen={clientFormOpen}
         toggleFormOpen={toggleClientFormOpen}
         mode="creation"
+        clientCreatFn={clientCreateAction}
       />
     </React.Fragment>
   );

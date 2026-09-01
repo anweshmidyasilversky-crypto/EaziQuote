@@ -10,6 +10,7 @@ import { formatCurrency } from "../../lib/utils";
 import { useMemo, useState } from "react";
 import CustomDialog from "../common/CustomDialog";
 import { CustomDataTable } from "../common/CustomTable";
+import AddDeposite from "./AddDeposite";
 
 export type SubtotalBreakDownProps = {
   paymentMethod: QuotePaymentMethod;
@@ -19,7 +20,7 @@ export type SubtotalBreakDownProps = {
   taxPercentage: number;
   marginPercentage: number;
   discountPercentage: number;
-  reqDeposite: number;
+  reqDeposite?: number;
 };
 
 type MarginSplit = {
@@ -34,10 +35,13 @@ export function SubtotalBreakDown({
   taxPercentage,
   discountPercentage,
   reqDeposite,
-  items,
+  items: renderItems,
   paymentMethod,
 }: SubtotalBreakDownProps) {
+  const items = renderItems ?? [];
   const [tableOpen, toggleTableOpen] = useState(false);
+  const [depositeDialog, toggleDepositeDialog] = useState(false);
+  const [deposite, setDeposite] = useState(reqDeposite);
 
   const getSum = (
     info: HeaderContext<TableFeatures, MarginSplit>,
@@ -82,7 +86,8 @@ export function SubtotalBreakDown({
           footer: (info) => {
             const sum = getSum(info, "margin");
             const revenue = getSum(info, "revenew");
-            const percentage = revenue > 0 ? ((revenue - sum) * 100) / revenue : 0;
+            const percentage =
+              revenue > 0 ? ((revenue - sum) * 100) / revenue : 0;
             return `${formatCurrency(sum)} (${percentage.toFixed(1)}%)`;
           },
           enableSorting: false,
@@ -95,7 +100,8 @@ export function SubtotalBreakDown({
   const marginData: MarginSplit[] = items.map((item) => {
     const revenue = item.total; // pricePerUnit × quantity
     const cost = item.unitCost * item.quantity;
-    const margin = revenue > 0 ? Math.round(((revenue - cost) / revenue) * 100) : 0;
+    const margin =
+      revenue > 0 ? Math.round(((revenue - cost) / revenue) * 100) : 0;
     return { itemName: item.name, revenew: revenue, margin };
   });
 
@@ -120,7 +126,7 @@ export function SubtotalBreakDown({
             extraCharges += applyPercentage(subtotal, renderProps[key]);
           }
           return (
-            <div className="flex justify-between" key={field}>
+            <div className="flex justify-between gap-4" key={field}>
               <span className="subtotal-field">
                 {" "}
                 {field} {field !== "subtotal" && `(${renderProps[key]}%)`}{" "}
@@ -154,13 +160,22 @@ export function SubtotalBreakDown({
 
           <div className="dashed-y-separators" />
 
-          <div>
-            <span className="subtotal-field"> Deposit Required </span>
-            <span className="subtotal-value">
-              {" "}
-              {formatCurrency(reqDeposite)}{" "}
-            </span>
-          </div>
+          {deposite ? (
+            <div>
+              <span className="subtotal-field"> Deposit Required </span>
+              <span className="subtotal-value">
+                {" "}
+                {formatCurrency(deposite)}{" "}
+              </span>
+            </div>
+          ) : (
+            <a
+              className="cursor-pointer"
+              onClick={() => toggleDepositeDialog((curr) => !curr)}
+            >
+              {`+ Add Deposit`}
+            </a>
+          )}
 
           <div>
             <span className="subtotal-field"> Payment Method </span>
@@ -196,6 +211,13 @@ export function SubtotalBreakDown({
           showPaginated={marginData.length > 5}
         />
       </CustomDialog>
+
+      <AddDeposite
+        isOpen={depositeDialog}
+        toggleOpen={toggleDepositeDialog}
+        totalAmount={subtotal}
+        setDeposite={setDeposite}
+      />
     </>
   );
 }

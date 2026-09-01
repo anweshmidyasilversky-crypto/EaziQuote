@@ -114,7 +114,7 @@ export function CustomInput<T extends FieldValues>({
                     })}
                   </select>
                 )}{" "}
-                {["password", "text"].includes(inptType) && (
+                {["password", "text", "number"].includes(inptType) && (
                   <div className="relative">
                     <input
                       type={

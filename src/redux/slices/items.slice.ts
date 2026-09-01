@@ -376,7 +376,10 @@ export const itemsSlice = createSlice({
       state.push(action.payload);
     },
 
-    updateItem: (state, action: PayloadAction<Item>) => {
+    updateItem: (
+      state,
+      action: PayloadAction<Partial<Omit<Item, "id">> & Pick<Item, "id">>,
+    ) => {
       const { id, ...patch } = action.payload;
       const idx = state.findIndex((item) => item.id === id);
       Object.assign([

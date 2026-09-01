@@ -12,6 +12,7 @@ export type CustomDialogProps = {
   withFooter?: boolean;
   footerBtnLabel?: string;
   footerBtnAction?: () => void;
+  footerRightNode?: React.ReactNode;
 };
 
 function CustomDialog({
@@ -23,6 +24,7 @@ function CustomDialog({
   withFooter,
   footerBtnLabel,
   footerBtnAction,
+  footerRightNode,
 }: CustomDialogProps) {
   return (
     <Dialog open={dialogOpen} onOpenChange={toggleDialogOpen}>
@@ -46,7 +48,7 @@ function CustomDialog({
         {withFooter && (
           <div className="flex flex-col gap-6 py-5">
             <div className="dashed-y-separators" />
-            <div className="px-5">
+            <div className="px-5 flex gap-3 items-center">
               <CustomBtn
                 buttonLabel={footerBtnLabel ?? "Got it!"}
                 onClick={() => {
@@ -54,6 +56,7 @@ function CustomDialog({
                   toggleDialogOpen((curr) => !curr);
                 }}
               />
+              {footerRightNode}
             </div>
           </div>
         )}

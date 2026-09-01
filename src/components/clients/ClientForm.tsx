@@ -40,16 +40,18 @@ export function ClientForm({
     country: "",
   };
 
-  const { control, setValue, clearErrors, handleSubmit, reset } = useForm<
-    ClientCreationPayload | ClientEditPayload
-  >({
-    defaultValues: defaultValues ?? initialValue,
-    resolver: yupResolver(
-      mode === "creation"
-        ? clientCreationSchema
-        : clientCreationSchema.deepPartial(),
-    ),
-  });
+  const { control, setValue, setValues, clearErrors, handleSubmit, reset } =
+    useForm<ClientCreationPayload | ClientEditPayload>({
+      defaultValues: defaultValues ?? initialValue,
+      resolver: yupResolver(
+        mode === "creation"
+          ? clientCreationSchema
+          : clientCreationSchema.deepPartial(),
+      ),
+    });
+  if (defaultValues) {
+    setValues(defaultValues);
+  }
   const [postCode, selectPostCode] = useState<string | null>(null);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
   const setAddress = (postCode: string) => {
@@ -71,7 +73,7 @@ export function ClientForm({
       clientEditFn?.(data as ClientEditPayload);
     }
     toggleIsSubmitting(false);
-    reset(defaultValues ?? initialValue);
+    reset();
     selectPostCode("");
     toggleFormOpen(false);
   };
@@ -86,6 +88,7 @@ export function ClientForm({
           formCloseAction={() => {
             toggleFormOpen((curr) => !curr);
             clearErrors();
+            reset();
           }}
           isSubmitting={isSubmitting}
           submitHanlder={handleSubmit(submitHandler)}

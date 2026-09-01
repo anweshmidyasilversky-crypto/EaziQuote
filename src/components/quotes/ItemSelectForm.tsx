@@ -15,11 +15,11 @@ import {
   RenderMultiSelectCheckbox,
   type CheckboxConfig,
 } from "../common/RenderMultiSelectCheckbox";
-import type { Category } from "../../types/category.types";
 import ItemForm from "../items/ItemForm";
 import type { ItemCreationPayload } from "../../types/itemCreation.payload.type";
-import type { ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { addItem, updateItem } from "../../redux/slices/items.slice";
+import type { ItemEditPayload } from "../../types/itemEdit.payload.type";
+import { SubtotalBreakDown } from "./SubtotalBreakDown";
 
 export type DisplayCatalogItem = {
   id: string;
@@ -41,6 +41,7 @@ function ItemSelectForm() {
   const [checkboxConfig, setCheckBoxConfig] = useState<CheckboxConfig>([]);
   const [filters, setFilters] = useState<string[]>([]);
   const [createItemModal, toggleCreateItemModal] = useState(false);
+  const [editItemModal, toggleEditItemModal] = useState(false);
 
   const getCategory = (catId: string) => {
     console.log(catId);
@@ -60,6 +61,17 @@ function ItemSelectForm() {
   const [itemQty, setItemQty] = useState(quantities);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
+  const [editingItem, setEditingItem] = useState<
+    ItemEditPayload & Pick<Item, "id">
+  >();
+
+  const itemAddHandler = (item: ItemCreationPayload) => {
+    dispatch(addItem({ ...item, id: item.name.toLowerCase() }));
+  };
+
+  const itemEditHandler = (patch: ItemEditPayload) => {
+    dispatch(updateItem(Object.assign(patch, { id: editingItem?.id ?? "" })));
+  };
 
   const itemSelectColumns = useMemo(
     () =>
@@ -106,7 +118,6 @@ function ItemSelectForm() {
                 buttonLabel={qty.toString()}
                 leftIcon={assets.minusIconBlue}
                 leftAction={() => {
-                  console.log(`clicked`);
                   qty > 0
                     ? setItemQty((curr) => ({
                         ...curr,
@@ -138,7 +149,23 @@ function ItemSelectForm() {
         {
           id: "action",
           header: "ACTION",
-          cell: () => <CustomActionGroup withOpen={false} />,
+          cell: (cell) => {
+            const item = cell.row.original;
+            return (
+              <CustomActionGroup
+                withOpen={false}
+                editFn={() => {
+                  setEditingItem({
+                    ...item,
+                    name: item.name,
+                    unit: item.unit,
+                    pricePerUnit: item.pricePerUnit,
+                  });
+                  toggleEditItemModal((curr) => !curr);
+                }}
+              />
+            );
+          },
         },
       ] as ColumnDef<TableFeatures, Item>[],
     [itemQty],
@@ -154,10 +181,6 @@ function ItemSelectForm() {
       }));
     setCheckBoxConfig(checkBoxConfig);
   }, [filterCategory]);
-
-  const itemAddHandler = (item: ItemCreationPayload) => {
-    dispatch(addItem({ ...item, id: item.name.toLowerCase() }));
-  };
 
   return (
     <>
@@ -193,6 +216,11 @@ function ItemSelectForm() {
         globalFilterTerm={debouncedSearchTerm}
       />
       <div className="dashed-y-separators" />
+
+      {/* <SubtotalBreakDown 
+      subtotal={5000}
+      items={}
+      /> */}
 
       {/* Filter sheet */}
       <CustomSheet
@@ -234,6 +262,15 @@ function ItemSelectForm() {
         mode="creation"
         isOpen={createItemModal}
         toggleIsOpen={toggleCreateItemModal}
+        creationFn={itemAddHandler}
+      />
+
+      <ItemForm
+        mode="updation"
+        isOpen={editItemModal}
+        toggleIsOpen={toggleEditItemModal}
+        defaultValues={editingItem}
+        editFn={itemEditHandler}
       />
     </>
   );

@@ -31,17 +31,26 @@ function ItemForm({
   creationFn,
   editFn,
 }: ItemFormProps) {
+  console.log(defaultValues);
   const [categoryForm, toggleCategoryForm] = useState(false);
   const [subCategoryForm, toggleSubCategoryForm] = useState(false);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
   const categories = useAppSelector((state) => state.categories);
   const subCategories = useAppSelector((state) => state.subCategories);
+  const getCategory = (catId: string) => {
+    return categories.find((category) => category.id === catId);
+  };
+  const getSubCategory = (subCatId: string) => {
+    return subCategories.find((subCategory) => subCategory.id === subCatId);
+  };
 
   const {
     control,
     setValue,
     handleSubmit,
     watch,
+    reset,
+    setValues,
     formState: { errors },
     clearErrors,
   } = useForm<ItemCreationPayload | ItemEditPayload>({
@@ -57,6 +66,9 @@ function ItemForm({
         : itemCreationSchema.deepPartial(),
     ),
   });
+  if (defaultValues) {
+    setValues(defaultValues);
+  }
   const submitHandler = (data: ItemCreationPayload | ItemEditPayload) => {
     toggleIsSubmitting(true);
     if (mode === "creation") {
@@ -64,6 +76,7 @@ function ItemForm({
     } else {
       editFn?.(data);
     }
+    reset();
     toggleIsSubmitting(false);
     toggleIsOpen(false);
   };
@@ -75,6 +88,7 @@ function ItemForm({
         formCloseAction={() => {
           toggleIsOpen((curr) => !curr);
           clearErrors();
+          reset();
         }}
         formHeading={mode === "creation" ? "Add Item" : "Edit Item"}
         sumbitBtnLabel="Save Item"
@@ -85,7 +99,7 @@ function ItemForm({
           <span> Category </span>
           <CustomCombobox
             items={categories}
-            getItemLabel={(category) => category.name}
+            getItemLabel={(category) => category?.name ?? ""}
             onValueChange={(category) => {
               category ? setValue("catId", category.id) : undefined;
               clearErrors("catId");
@@ -102,6 +116,7 @@ function ItemForm({
                 onClick={() => toggleCategoryForm((curr) => !curr)}
               />
             }
+            selected={getCategory(defaultValues?.catId ?? "") ?? null}
           />
           {errors.catId && (
             <span className="error-text"> {errors.catId.message} </span>
@@ -114,7 +129,7 @@ function ItemForm({
             items={subCategories.filter(
               (subCategory) => subCategory.catId === watch().catId,
             )}
-            getItemLabel={(subCategory) => subCategory.name}
+            getItemLabel={(subCategory) => subCategory?.name ?? ""}
             onValueChange={(subCategory) => {
               subCategory ? setValue("subCatId", subCategory.id) : undefined;
               clearErrors("subCatId");
@@ -131,6 +146,7 @@ function ItemForm({
                 onClick={() => toggleSubCategoryForm((curr) => !curr)}
               />
             }
+            selected={getSubCategory(defaultValues?.subCatId ?? "") ?? null}
           />
           {errors.subCatId && (
             <span className="error-text"> {errors.subCatId.message} </span>

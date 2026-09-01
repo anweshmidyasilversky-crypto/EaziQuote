@@ -41,7 +41,7 @@ export interface DataTableProps<TData extends RowData> {
 
 function CustomTable<TData extends RowData>({
   columns,
-  data,
+  data: renderData,
   title,
   headerSlot,
   customFeatures,
@@ -58,7 +58,8 @@ function CustomTable<TData extends RowData>({
     pageIndex: 0,
     pageSize: 5,
   });
-  const totalRecords = data.length;
+  const data = renderData ?? [];
+  const totalRecords = data?.length ?? 0;
   let startItemNo: number | undefined;
   let endItemNo: number | undefined;
   if (pagination) {

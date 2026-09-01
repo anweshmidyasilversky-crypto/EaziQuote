@@ -37,6 +37,7 @@ export function QuotesDetailsPage() {
   const quote = useAppSelector((state) =>
     state.quotes.find((q) => q.id === params.id),
   );
+
   const allClients = useAppSelector((state) => state.clients);
 
   // Fallback to first quote if ID not found (graceful degradation)
