@@ -44,21 +44,22 @@ function ItemForm({
     return subCategories.find((subCategory) => subCategory.id === subCatId);
   };
 
+  console.log(defaultValues);
+
   const {
     control,
     setValue,
     handleSubmit,
     watch,
     reset,
-    setValues,
     formState: { errors },
     clearErrors,
   } = useForm<ItemCreationPayload | ItemEditPayload>({
     defaultValues: defaultValues ?? {
-      catId: "",
-      subCatId: "",
       name: "",
       unit: "",
+      pricePerUnit: undefined,
+      unitPrice: undefined,
     },
     resolver: yupResolver(
       mode === "creation"
@@ -66,9 +67,6 @@ function ItemForm({
         : itemCreationSchema.deepPartial(),
     ),
   });
-  if (defaultValues) {
-    setValues(defaultValues);
-  }
   const submitHandler = (data: ItemCreationPayload | ItemEditPayload) => {
     toggleIsSubmitting(true);
     if (mode === "creation") {

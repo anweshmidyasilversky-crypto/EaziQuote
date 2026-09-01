@@ -20,6 +20,8 @@ import type { ItemCreationPayload } from "../../types/itemCreation.payload.type"
 import { addItem, updateItem } from "../../redux/slices/items.slice";
 import type { ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { SubtotalBreakDown } from "./SubtotalBreakDown";
+import { nanoid } from "@reduxjs/toolkit";
+import { PaymentMethods } from "@/types/addDeposite.payload.type";
 
 export type DisplayCatalogItem = {
   id: string;
@@ -50,15 +52,10 @@ function ItemSelectForm() {
   const getSubCategory = (subCatId: string) => {
     return subCategories.find((subCategory) => subCategory.id === subCatId);
   };
-  const quantities: Record<string, number> = {};
-  useEffect(
-    () =>
-      items.forEach((item) => {
-        quantities[item.id] = 0;
-      }),
-    [items],
-  );
-  const [itemQty, setItemQty] = useState(quantities);
+  const getItem = (itemId: string) => {
+    return items.find((item) => item.id === itemId);
+  };
+  const [itemQty, setItemQty] = useState<Record<string, number>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
   const [editingItem, setEditingItem] = useState<
@@ -217,10 +214,25 @@ function ItemSelectForm() {
       />
       <div className="dashed-y-separators" />
 
-      {/* <SubtotalBreakDown 
-      subtotal={5000}
-      items={}
-      /> */}
+      <div className="flex w-full mr-auto justify-end">
+        <div className="max-w-75">
+          <SubtotalBreakDown
+            items={Object.keys(itemQty).map((itemId) => {
+              const { id, ...item } = getItem(itemId) as Item;
+              return {
+                ...item,
+                itemId: itemId,
+                id: nanoid(),
+                unitCost: item.unitPrice,
+                quantity: itemQty[itemId],
+                total: itemQty[itemId] * item.pricePerUnit,
+              };
+            })}
+            paymentMethod={PaymentMethods.stripe}
+            taxPercentage={18}
+          />
+        </div>
+      </div>
 
       {/* Filter sheet */}
       <CustomSheet

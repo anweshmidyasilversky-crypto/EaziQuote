@@ -13,6 +13,7 @@ export type CustomDialogProps = {
   footerBtnLabel?: string;
   footerBtnAction?: () => void;
   footerRightNode?: React.ReactNode;
+  closeOnSubmit?: boolean;
 };
 
 function CustomDialog({
@@ -25,6 +26,7 @@ function CustomDialog({
   footerBtnLabel,
   footerBtnAction,
   footerRightNode,
+  closeOnSubmit = true,
 }: CustomDialogProps) {
   return (
     <Dialog open={dialogOpen} onOpenChange={toggleDialogOpen}>
@@ -53,7 +55,9 @@ function CustomDialog({
                 buttonLabel={footerBtnLabel ?? "Got it!"}
                 onClick={() => {
                   footerBtnAction?.();
-                  toggleDialogOpen((curr) => !curr);
+                  if (closeOnSubmit) {
+                    toggleDialogOpen((curr) => !curr);
+                  }
                 }}
               />
               {footerRightNode}

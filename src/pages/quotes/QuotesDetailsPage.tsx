@@ -4,7 +4,6 @@ import {
   formatCurrency,
   formatDisplayDate,
   getInitials,
-  getQuoteAmount,
 } from "../../lib/utils";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { useParams } from "react-router";
@@ -29,6 +28,7 @@ import { useAppSelector } from "../../redux/store";
 import type { QuoteLineItem } from "../../types/quoteLineItem.type";
 import type { ClientDataWithFilters } from "../../constants/dummyData";
 import { invoiceData, QuoteActivityStatus } from "../../constants/dummyData";
+import { PaymentMethods } from "@/types/addDeposite.payload.type";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
@@ -44,9 +44,6 @@ export function QuotesDetailsPage() {
   const activeQuote = useAppSelector((state) => quote ?? state.quotes[0]);
 
   const client = allClients.find((c) => c.id === activeQuote?.clientId);
-
-  // Derived amount: sum of all line item totals (pricePerUnit × quantity)
-  const quoteAmount = activeQuote ? getQuoteAmount(activeQuote) : 0;
 
   // ── Items table columns ─────────────────────────────────────────────────────
   const itemColumns: ColumnDef<TableFeatures, QuoteLineItem>[] = useMemo(
@@ -200,12 +197,10 @@ export function QuotesDetailsPage() {
               <div className="w-full flex justify-end">
                 <div className="max-w-75">
                   <SubtotalBreakDown
-                    subtotal={quoteAmount}
-                    marginPercentage={50}
                     taxPercentage={18}
                     discountPercentage={10}
                     reqDeposite={1500}
-                    paymentMethod={activeQuote.paymentMethod}
+                    paymentMethod={PaymentMethods.cash}
                     items={activeQuote.items}
                   />
                 </div>

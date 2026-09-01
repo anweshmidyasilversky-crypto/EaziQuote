@@ -5,7 +5,7 @@ import {
   type CustomToggleGroupProps,
 } from "../common/CustomToggleGroup";
 import { CustomInput } from "../common/CustomInput";
-import { useForm } from "react-hook-form";
+import { useForm, type DefaultValues } from "react-hook-form";
 import {
   PaymentMethods,
   type AddDepositePayload,
@@ -26,6 +26,8 @@ export type AddDepositeProps = {
   toggleOpen: React.Dispatch<React.SetStateAction<boolean>>;
   totalAmount: number;
   setDeposite: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setPaymentMode: React.Dispatch<React.SetStateAction<PaymentMethods>>;
+  defaultValues: DefaultValues<AddDepositePayload>;
 };
 
 function AddDeposite({
@@ -33,6 +35,8 @@ function AddDeposite({
   toggleOpen,
   totalAmount,
   setDeposite,
+  setPaymentMode,
+  defaultValues,
 }: AddDepositeProps) {
   enum toggleBtn {
     fixed = "fixed",
@@ -58,9 +62,7 @@ function AddDeposite({
     reset,
     handleSubmit,
   } = useForm<AddDepositePayload>({
-    defaultValues: {
-      paymentMethod: PaymentMethods.stripe,
-    },
+    defaultValues: defaultValues,
     resolver: yupResolver(
       yup.object({
         deposite:
@@ -76,7 +78,10 @@ function AddDeposite({
     } else {
       setDeposite(data.deposite);
     }
+    setPaymentMode(data.paymentMethod);
     reset();
+    toggleActive(toggleBtn.fixed);
+    toggleOpen(false);
   };
 
   return (
@@ -90,12 +95,15 @@ function AddDeposite({
       footerRightNode={
         <CustomBtn
           buttonLabel="clear"
-          btncls={cn(`bg-custom-dialog-primary text-black-text`)}
+          btncls={cn(
+            `bg-custom-dialog-primary hover:bg-custom-dialog-primary text-black-text`,
+          )}
           onClick={reset}
         />
       }
+      closeOnSubmit={false}
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 w-125 p-5">
         {/* Deposite select toggle */}
         <div className="flex flex-col gap-2">
           <span> Deposite Type </span>
@@ -106,12 +114,15 @@ function AddDeposite({
               }
               activeId={activeToggle}
               toggleConfig={toggleBtnConfig}
+              containerCls={cn(`border-0! `)}
+              btnCls={cn(`rounded-[5px]! grow`)}
+              className={cn(`items-center`)}
             />
           </div>
         </div>
 
         {/* Form fields */}
-        <div className="flex w-full flex-col gap-2">
+        <div className="flex w-full max-w-125 flex-col gap-2">
           <CustomInput
             control={control}
             inptType="number"
@@ -125,7 +136,7 @@ function AddDeposite({
             errors.deposite === undefined && (
               <span className="text-xs text-placeholder-text">
                 {" "}
-                {`= ${formatCurrency((totalAmount * watch().deposite) / 100)} of ${formatCurrency(totalAmount)} grand total`}{" "}
+                {`= ${formatCurrency((totalAmount * (watch().deposite ?? 0)) / 100)} of ${formatCurrency(totalAmount)} grand total`}{" "}
               </span>
             )}
         </div>

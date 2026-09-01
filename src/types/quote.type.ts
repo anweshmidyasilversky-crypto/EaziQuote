@@ -1,3 +1,4 @@
+import type { PaymentMethods } from "./addDeposite.payload.type";
 import type { QuoteLineItem } from "./quoteLineItem.type";
 import type { QuoteSection } from "./quoteSection.type";
 
@@ -11,7 +12,7 @@ export type QuoteStatus =
 
 export type QuotePaymentMethod = "Cash" | "Online";
 
-export type QuoteAttachment = File
+export type QuoteAttachment = File;
 
 export interface Quote {
   id: string;
@@ -30,7 +31,7 @@ export interface Quote {
   status: QuoteStatus;
 
   /** Payment method chosen for this quote */
-  paymentMethod: QuotePaymentMethod;
+  paymentMethod: PaymentMethods;
 
   /**
    * Line items belonging to this quote.
@@ -42,4 +43,3 @@ export interface Quote {
   isItemsSelected?: boolean;
   sections?: QuoteSection[];
 }
-

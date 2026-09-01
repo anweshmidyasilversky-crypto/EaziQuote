@@ -32,7 +32,7 @@ export function DashboardSidebarButton({
     >
       <img src={leftIcon} className="h-6 w-6" />
       <span
-        className={`font-medium font-sans text-[12px] md:text-[16px] h-4.75 max-w-30 ${currActive === id ? "text-white" : "text-inactive-btn"}`}
+        className={`font-medium font-sans text-[12px] md:text-[16px] h-4.75 max-w-30 min-h-6 ${currActive === id ? "text-white" : "text-inactive-btn"}`}
       >
         {" "}
         {buttonLabel}{" "}
