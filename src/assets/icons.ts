@@ -79,6 +79,8 @@ import thunderBoltIcon from "./icons/thunderBoltIcon.png";
 import plusIconBlue from "./icons/plusIconBlue.png";
 import minusIconBlue from "./icons/minusIconBlue.png";
 
+import copyIcon from "./icons/copyIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -158,4 +160,6 @@ export const assets = {
 
   plusIconBlue,
   minusIconBlue,
+
+  copyIcon,
 };

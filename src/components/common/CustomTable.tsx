@@ -17,6 +17,7 @@ import {
   rowPaginationFeature,
   type PaginationState,
   flexRender,
+  rowSelectionFeature,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
 import { memo, useEffect, useState } from "react";
@@ -37,6 +38,8 @@ export interface DataTableProps<TData extends RowData> {
   tableOptionsLeft?: React.ReactNode;
   tableOptionsRight?: React.ReactNode;
   withFooterBorder?: boolean;
+  withSelectionToggle?: boolean;
+  rowIdSelector?: (row: TData) => string;
 }
 
 function CustomTable<TData extends RowData>({
@@ -53,11 +56,14 @@ function CustomTable<TData extends RowData>({
   tableOptionsLeft,
   tableOptionsRight,
   withFooterBorder,
+  rowIdSelector,
+  withSelectionToggle = false,
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 5,
   });
+  const [rowSelection, setRowSelection] = useState({});
   const data = renderData ?? [];
   const totalRecords = data?.length ?? 0;
   let startItemNo: number | undefined;
@@ -96,6 +102,8 @@ function CustomTable<TData extends RowData>({
       rowPaginationFeature,
       paginatedRowModel: createPaginatedRowModel(),
 
+      rowSelectionFeature,
+
       ...customFeatures,
     }),
 
@@ -113,7 +121,13 @@ function CustomTable<TData extends RowData>({
       columnFilters: localFilters,
       globalFilter: globalFilterTerm,
       pagination: showPaginated ? pagination : undefined,
+      rowSelection: withSelectionToggle ? rowSelection : undefined,
     },
+
+    onRowSelectionChange: withSelectionToggle ? setRowSelection : undefined,
+    enableRowSelection: withSelectionToggle,
+
+    getRowId: rowIdSelector ? rowIdSelector : undefined,
   });
 
   const pageCount = table.getPageCount();

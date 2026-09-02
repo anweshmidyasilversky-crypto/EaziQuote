@@ -18,4 +18,6 @@ export interface UserType {
   isSubscribed: boolean;
   endDate: string;
   vatNumber?: string;
+  stripConnected?: boolean;
+  bankInfoAdded?: boolean;
 }

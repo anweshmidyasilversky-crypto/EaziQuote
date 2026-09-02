@@ -13,7 +13,7 @@ import { ProfileCreateGuard } from "../guards/profileCreateGuard";
 import { AuthGuard } from "../guards/authGuard";
 import { DashboardIndexPage } from "../pages/dashboard/DashboardIndexPage";
 import { ClientIndexPage } from "../pages/clients/ClientIndexPage";
-import { DashboardLayout } from "../components/dashboard/DashboardLayout";
+import { DashboardLayout } from "../components/dashboard/dashboardLayout";
 import { ClientDetailsPage } from "../pages/clients/ClientDetailsPage";
 import { QuotesIndexPage } from "../pages/quotes/QuotesIndexPage";
 import { QuotesDetailsPage } from "../pages/quotes/QuotesDetailsPage";

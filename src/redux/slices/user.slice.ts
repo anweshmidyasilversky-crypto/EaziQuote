@@ -20,6 +20,8 @@ const initialState: UserType = {
   isBusinessAddressProvided: false,
   isSubscribed: false,
   endDate: "11/20/2025",
+  stripConnected: false,
+  bankInfoAdded: false,
 };
 
 export const userSlice = createSlice({

@@ -4,7 +4,7 @@ import {
   CustomToggleGroup,
   type CustomToggleGroupProps,
 } from "../common/CustomToggleGroup";
-import { CustomInput } from "../common/CustomInput";
+import { CustomInput } from "../common/customInput";
 import { useForm, type DefaultValues } from "react-hook-form";
 import {
   PaymentMethods,

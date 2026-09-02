@@ -1,3 +1,7 @@
+import type {
+  Align,
+  Side,
+} from "@base-ui/react/internals/useAnchorPositioning";
 import { assets } from "../../assets/icons";
 import { CustomBtn } from "../common/CustomBtn";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -10,7 +14,13 @@ export type MoreOptionsPopupProps = {
   contactInfoAction?: () => void;
   children?: React.ReactNode;
   withContactInfo?: boolean;
+  withCopyOption?: boolean;
+  copyAction?: () => void;
+  align?: Align;
+  side?: Side;
+  popoverTarget?: string;
 };
+
 function MoreOptionsPopup({
   isPopupOpen,
   togglePopupOpen,
@@ -19,6 +29,11 @@ function MoreOptionsPopup({
   contactInfoAction,
   children,
   withContactInfo,
+  withCopyOption = false,
+  copyAction,
+  align,
+  side,
+  popoverTarget,
 }: MoreOptionsPopupProps) {
   const closePopup = () => togglePopupOpen(false);
   return (
@@ -26,8 +41,9 @@ function MoreOptionsPopup({
       <PopoverTrigger> {children} </PopoverTrigger>
       <PopoverContent
         className={`popup-theme flex flex-col gap-1  w-fit ring-0`}
-        side="bottom"
-        align="start"
+        side={side ?? "bottom"}
+        align={align ?? "start"}
+        popoverTarget={popoverTarget}
       >
         {withContactInfo && (
           <CustomBtn
@@ -47,6 +63,18 @@ function MoreOptionsPopup({
             closePopup();
           }}
         />
+
+        {withCopyOption && (
+          <CustomBtn
+            leftIcon={assets.copyIcon}
+            buttonLabel="Duplicate"
+            onClick={() => {
+              copyAction?.();
+              closePopup();
+            }}
+          />
+        )}
+
         <CustomBtn
           leftIcon={assets.binIcon}
           buttonLabel="Delete"

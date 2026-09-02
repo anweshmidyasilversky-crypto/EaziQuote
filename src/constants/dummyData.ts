@@ -1,3 +1,5 @@
+import type { QuoteSection } from "@/types/quoteSection.type";
+
 export type AddressDetail = {
   street: string;
   city: string;
@@ -129,12 +131,6 @@ export interface Invoice {
   status: InvoiceStatus;
 }
 
-export interface QuoteSection {
-  order: number;
-  section: string;
-  description: string;
-}
-
 export interface PresetQuote {
   id: string;
   templateName: string;
@@ -182,18 +178,21 @@ export const presetQuoteData: PresetQuote[] = [
 
 export const quoteSectionData: QuoteSection[] = [
   {
+    id: "1",
     order: 1,
     section: "Introduction",
     description:
       "1. Emergency Leak Repair. Located under the kitchen sink — replaced damaged T-joint and resealed all fittings. Materials Used: Sealant, T-joint.",
   },
   {
+    id: "2",
     order: 2,
     section: "About Us",
     description:
       "Alpha Renovates Pvt. Ltd. has been providing reliable, professional plumbing solutions across Brighton and surrounding areas since 2015.",
   },
   {
+    id: "3",
     order: 3,
     section: "Detailed Terms & Conditions",
     description:

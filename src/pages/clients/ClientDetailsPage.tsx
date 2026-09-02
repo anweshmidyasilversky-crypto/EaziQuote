@@ -24,7 +24,7 @@ import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { useEffect, useMemo, useState } from "react";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { CustomBtn } from "../../components/common/CustomBtn";
-import { useDebounce } from "../../hooks/debounce.hook";
+import { useDebounce } from "../../hooks/useDebounce";
 import { Separator } from "../../components/ui/separator";
 import MoreOptionsPopup from "../../components/clients/MoreOptionsPopup";
 import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
@@ -83,13 +83,15 @@ export function ClientDetailsPage() {
     }));
   }, [reduxQuotes, foundClient]);
 
-  const [clientCredential, setclientCredential] = useState<ClientDataWithFilters>(
-    {
-      client: foundClient.name ?? "Emma", company: foundClient.companyName ?? "Company",
-      activityCount: reduxQuotes.filter((q) => q.clientId === foundClient?.id).length,
-      createdAt: foundClient?.createdAt ?? new Date().toISOString(), ...foundClient
-    }
-  );
+  const [clientCredential, setclientCredential] =
+    useState<ClientDataWithFilters>({
+      client: foundClient.name ?? "Emma",
+      company: foundClient.companyName ?? "Company",
+      activityCount: reduxQuotes.filter((q) => q.clientId === foundClient?.id)
+        .length,
+      createdAt: foundClient?.createdAt ?? new Date().toISOString(),
+      ...foundClient,
+    });
   const [currTable, toggleCurrTable] = useState<string>("activity");
   const [searchTearm, setSearchTerm] = useState<string>("");
   const debouncedVal = useDebounce({ value: searchTearm, delay: 500 });
@@ -229,6 +231,9 @@ export function ClientDetailsPage() {
             return (
               <CustomActionGroup
                 openFn={() => navigate(`/quotes/${activity.quoteInvoice}`)}
+                editFn={() =>
+                  navigate(`/quotes/manage-quotes/${activity.quoteInvoice}`)
+                }
               />
             );
           },

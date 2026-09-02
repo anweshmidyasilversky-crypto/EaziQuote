@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Quote } from "../../types/quote.type";
 import type { QuoteLineItem } from "../../types/quoteLineItem.type";
 import type { QuoteSection } from "../../types/quoteSection.type";
+import { PaymentMethods } from "@/types/addDeposite.payload.type";
 
 // ── Helper: compute total for a line item ────────────────────────────────────
 const lineTotal = (pricePerUnit: number, quantity: number) =>
@@ -278,19 +279,22 @@ const items_105: QuoteLineItem[] = [
 // ── Seeded quote sections ────────────────────────────────────────────────────
 const sections_101: QuoteSection[] = [
   {
-    order: "1",
+    id: "1",
+    order: 1,
     section: "Introduction & Overview",
     description:
       "This quote covers the comprehensive renovation of the office space, including material supply, floor tiling, LED lighting installation, and acoustic partition adjustments.",
   },
   {
-    order: "2",
+    id: "2",
+    order: 2,
     section: "Scope of Work & Materials",
     description:
       "Alpha Renovates Pvt. Ltd. provides complete interior refurbishment, premium quality floor tiling, ambient lighting, and bespoke partition fittings.",
   },
   {
-    order: "3",
+    id: "3",
+    order: 3,
     section: "Detailed Terms & Conditions",
     description:
       "This quote is valid for 30 days from the issue date. Payment terms: 14 days from invoice date. 50% deposit required upon project commencement.",
@@ -299,19 +303,22 @@ const sections_101: QuoteSection[] = [
 
 const sections_102: QuoteSection[] = [
   {
-    order: "1",
+    id: "1",
+    order: 1,
     section: "Project Scope",
     description:
       "Full residential plumbing overhaul including copper pipework, sanitary ware installation, and complete drainage testing.",
   },
   {
-    order: "2",
+    id: "2",
+    order: 2,
     section: "Materials & Guarantees",
     description:
       "All copper pipes and brass fittings carry a 5-year manufacturer guarantee. Installation tested to WRAS standards.",
   },
   {
-    order: "3",
+    id: "3",
+    order: 3,
     section: "Terms & Handover",
     description:
       "14 days payment term following project sign-off and pressure testing certificate delivery.",
@@ -320,19 +327,22 @@ const sections_102: QuoteSection[] = [
 
 const sections_103: QuoteSection[] = [
   {
-    order: "1",
+    id: "1",
+    order: 1,
     section: "Store Front & Tiling",
     description:
       "Ceramic wall and floor tiling across commercial retail space, glass partition installation, and low-voltage lighting.",
   },
   {
-    order: "2",
+    id: "2",
+    order: 2,
     section: "Safety & Compliance",
     description:
       "All materials and structural partitions comply with commercial building regulations and fire safety codes.",
   },
   {
-    order: "3",
+    id: "3",
+    order: 3,
     section: "Warranty & Aftercare",
     description:
       "12 months comprehensive aftercare service included for all installed fixtures and fittings.",
@@ -341,19 +351,22 @@ const sections_103: QuoteSection[] = [
 
 const sections_104: QuoteSection[] = [
   {
-    order: "1",
+    id: "1",
+    order: 1,
     section: "Electrical Rewiring",
     description:
       "Complete 180m conduit rewiring, high-efficiency commercial LED lighting arrays, and surge-protected power socket distribution.",
   },
   {
-    order: "2",
+    id: "2",
+    order: 2,
     section: "Testing & Certification",
     description:
       "Includes NICEIC electrical installation condition report and safety certification upon completion.",
   },
   {
-    order: "3",
+    id: "3",
+    order: 3,
     section: "Payment Schedule",
     description:
       "50% deposit required upon project start, remaining balance due within 7 days of final testing certification.",
@@ -362,19 +375,22 @@ const sections_104: QuoteSection[] = [
 
 const sections_105: QuoteSection[] = [
   {
-    order: "1",
+    id: "1",
+    order: 1,
     section: "Surface Preparation & Painting",
     description:
       "Two coats of premium matte finish on all internal walls, hardwood floor machine polishing, and designer wallpaper installation.",
   },
   {
-    order: "2",
+    id: "2",
+    order: 2,
     section: "Cleanup & Disposal",
     description:
       "Daily site cleanup and eco-friendly disposal of all old floor coverings and surface residues.",
   },
   {
-    order: "3",
+    id: "3",
+    order: 3,
     section: "Payment Terms",
     description:
       "Balance due upon final client walk-through and completion sign-off.",
@@ -398,7 +414,7 @@ export const quotesInitialState: Quote[] = [
     attachments: [],
     hasCompletedSummary: true,
     status: "Sent",
-    paymentMethod: "Cash",
+    paymentMethod: PaymentMethods.cash,
     isItemsSelected: true,
     items: items_101,
     sections: sections_101,
@@ -418,7 +434,7 @@ export const quotesInitialState: Quote[] = [
     attachments: [],
     hasCompletedSummary: true,
     status: "Draft",
-    paymentMethod: "Cash",
+    paymentMethod: PaymentMethods.cash,
     isItemsSelected: true,
     items: items_102,
     sections: sections_102,
@@ -438,7 +454,7 @@ export const quotesInitialState: Quote[] = [
     attachments: [],
     hasCompletedSummary: true,
     status: "Sent",
-    paymentMethod: "Online",
+    paymentMethod: PaymentMethods.stripe,
     isItemsSelected: true,
     items: items_103,
     sections: sections_103,
@@ -458,7 +474,7 @@ export const quotesInitialState: Quote[] = [
     attachments: [],
     hasCompletedSummary: true,
     status: "Draft",
-    paymentMethod: "Cash",
+    paymentMethod: PaymentMethods.cash,
     isItemsSelected: true,
     items: items_104,
     sections: sections_104,
@@ -478,7 +494,7 @@ export const quotesInitialState: Quote[] = [
     attachments: [],
     hasCompletedSummary: true,
     status: "Draft",
-    paymentMethod: "Online",
+    paymentMethod: PaymentMethods.stripe,
     isItemsSelected: true,
     items: items_105,
     sections: sections_105,
@@ -559,18 +575,18 @@ export const quotesSlice = createSlice({
       }
     },
 
-    /** Remove a section from a quote by order */
+    /** Remove a section from a quote by id */
     removeQuoteSection: (
       state,
       action: PayloadAction<{
         quoteId: string;
-        order: string;
+        id: string;
       }>,
     ) => {
       const quote = state.find((q) => q.id === action.payload.quoteId);
       if (quote && quote.sections) {
         quote.sections = quote.sections.filter(
-          (s) => s.order !== action.payload.order,
+          (s) => s.id !== action.payload.id,
         );
       }
     },

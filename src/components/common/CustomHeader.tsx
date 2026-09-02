@@ -1,9 +1,10 @@
+import React from "react";
 import { CustomBtn, type CustomBtnProps } from "./CustomBtn";
 
 export type CustomHeaderProps = {
   header: string;
   headerInfo?: string;
-  btnConfigList: CustomBtnProps[];
+  btnConfigList: (CustomBtnProps | React.ReactNode)[];
 };
 
 export function CustomHeader({
@@ -23,9 +24,19 @@ export function CustomHeader({
       </div>
 
       <div className="flex justify-between gap-3">
-        {btnConfigList.map((btnConfig) => (
-          <CustomBtn {...btnConfig} key={btnConfig.buttonLabel} />
-        ))}
+        {btnConfigList.map((btnConfig, index) => {
+          if (React.isValidElement(btnConfig)) {
+            return <React.Fragment key={index}>{btnConfig}</React.Fragment>;
+          }
+          const props = btnConfig as CustomBtnProps;
+          return (
+            <CustomBtn
+              {...props}
+              key={props.buttonLabel || index}
+              id={props.buttonLabel}
+            />
+          );
+        })}
       </div>
     </div>
   );

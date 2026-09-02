@@ -6,7 +6,7 @@ import { subCategorySchema } from "../../validation/itemCreation.payload.schema"
 import { CustomSheet } from "../common/CustomSheet";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { CustomInput } from "../common/CustomInput";
+import { CustomInput } from "../common/customInput";
 import { addSubCategory } from "../../redux/slices/subCategories.slice";
 import { cn } from "../../lib/utils";
 

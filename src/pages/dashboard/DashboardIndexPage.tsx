@@ -4,13 +4,10 @@ import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { CustomBtn } from "../../components/common/CustomBtn";
 import { CustomDataTable } from "../../components/common/CustomTable";
-import { KpiCard, type KpiCardProps } from "../../components/common/KpiCard";
+import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
 import StatusBadge from "../../components/common/StatusBadge";
-import { NotificationCard } from "../../components/dashboard/Notification.card";
-import {
-  notifications,
-  type TransactionItem,
-} from "../../constants/dummyData";
+import { NotificationCard } from "../../components/dashboard/notification.card";
+import { notifications, type TransactionItem } from "../../constants/dummyData";
 import {
   formatCurrency,
   formatDisplayDate,
@@ -124,6 +121,9 @@ export function DashboardIndexPage() {
       cell: (info) => (
         <CustomActionGroup
           openFn={() => navigate(`/quotes/${info.row.original.id}`)}
+          editFn={() =>
+            navigate(`/quotes/manage-quotes/${info.row.original.id}`)
+          }
         />
       ),
     },
@@ -176,7 +176,11 @@ export function DashboardIndexPage() {
 
           {/* Button Group */}
           <div className="flex justify-between min-w-fit w-full max-w-99.5">
-            <CustomBtn buttonLabel="New Quote" leftIcon={assets.plusIcon} />
+            <CustomBtn
+              buttonLabel="New Quote"
+              leftIcon={assets.plusIcon}
+              onClick={() => navigate(`/quotes/manage-quotes/`)}
+            />
 
             <CustomBtn buttonLabel="New Invoice" leftIcon={assets.plusIcon} />
 

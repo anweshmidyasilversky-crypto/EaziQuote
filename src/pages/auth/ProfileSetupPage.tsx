@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { useForm } from "react-hook-form";
-import { CustomInput } from "../../components/common/CustomInput";
+import { CustomInput } from "../../components/common/customInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { userProfileSchema } from "../../validation/userProfile.payload.schema";
 import type { UserProfilePayload } from "../../types/userProfile.payload.type";

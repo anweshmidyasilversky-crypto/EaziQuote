@@ -7,7 +7,7 @@ import {
 } from "react-hook-form";
 import { Eye, EyeOff, type LucideIcon } from "lucide-react";
 import { Switch } from "../ui/switch";
-import { ImageInput } from "../auth/ImageInput";
+import { ImageInput } from "../auth/imageInput";
 import { assets } from "../../assets/icons";
 
 export type SelectOptions = {
@@ -189,9 +189,10 @@ export function CustomInput<T extends FieldValues>({
                 )}
                 {inptType === "textarea" && (
                   <textarea
-                    value={value}
+                    value={fieldValue}
                     onChange={onChange}
                     className={`input-field min-h-20.25 md:min-w-105 overflow-y-auto ${className} ${error ? `input-error` : ``}`}
+                    placeholder={placeholder}
                   />
                 )}
                 {inptType === "file" && (

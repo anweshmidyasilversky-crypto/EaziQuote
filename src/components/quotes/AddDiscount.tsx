@@ -5,7 +5,7 @@ import { useForm, type DefaultValues } from "react-hook-form";
 import { type AddDiscountPayload } from "@/types/addDiscount.payload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { amountSchema } from "@/validation/addDeposite.payload.schema";
-import { CustomInput } from "../common/CustomInput";
+import { CustomInput } from "../common/customInput";
 import { CustomBtn } from "../common/CustomBtn";
 import { cn } from "@/lib/utils";
 

@@ -1,3 +1,5 @@
+import type { QuoteSection } from "./quoteSection.type";
+
 export interface QuoteSummary {
   quoteTitle: string;
   referenceNumber: string;
@@ -39,14 +41,6 @@ export interface QuoteDeposit {
   type: "percentage" | "fixed";
   value: number;
   amount: number;
-}
-
-export interface QuoteSection {
-  id?: string;
-  order: number;
-  section: string;
-  description: string;
-  selected: boolean;
 }
 
 export interface QuoteCreationPayload extends QuoteSummary, QuoteMargins {

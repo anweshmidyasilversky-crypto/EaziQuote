@@ -12,7 +12,7 @@ import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { useEffect, useMemo, useState } from "react";
-import { useDebounce } from "../../hooks/debounce.hook";
+import { useDebounce } from "../../hooks/useDebounce";
 
 import { ClientForm } from "../../components/clients/ClientForm";
 import { CustomSheet } from "../../components/common/CustomSheet";

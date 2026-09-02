@@ -2,7 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { quoteSummarySchema } from "../../validation/quote.summary.schema";
-import { CustomInput } from "../common/CustomInput";
+import { CustomInput } from "../common/customInput";
 import { DateRangePicker, type DateRange } from "../common/DateRangePicket";
 import { Separator } from "../ui/separator";
 import { CustomBtn } from "../common/CustomBtn";

@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import type { Item } from "../../types/item.type";
 import { CustomBtn } from "../common/CustomBtn";
 import { assets } from "../../assets/icons";
-import { useDebounce } from "../../hooks/debounce.hook";
+import { useDebounce } from "../../hooks/useDebounce";
 import SearchInputGruop from "../common/SearchInputGruop";
 import { CustomSheet } from "../common/CustomSheet";
 import { CustomCombobox } from "../common/CustomCombobox";
@@ -22,6 +22,9 @@ import type { ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { SubtotalBreakDown } from "./SubtotalBreakDown";
 import { nanoid } from "@reduxjs/toolkit";
 import { PaymentMethods } from "@/types/addDeposite.payload.type";
+import { toast } from "react-toastify";
+import { updateQuote } from "@/redux/slices/quotes.slice";
+import type { QuoteLineItem } from "@/types/quoteLineItem.type";
 
 export type DisplayCatalogItem = {
   id: string;
@@ -33,7 +36,17 @@ export type DisplayCatalogItem = {
   unitCost: number;
 };
 
-function ItemSelectForm() {
+export type ItemSelectFormProps = {
+  refNo: string;
+  submitAction: () => void;
+  preSelectedItems?: Record<string, number>;
+};
+
+function ItemSelectForm({
+  refNo,
+  submitAction,
+  preSelectedItems,
+}: ItemSelectFormProps) {
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state.items);
   const categories = useAppSelector((state) => state.categories);
@@ -44,6 +57,14 @@ function ItemSelectForm() {
   const [filters, setFilters] = useState<string[]>([]);
   const [createItemModal, toggleCreateItemModal] = useState(false);
   const [editItemModal, toggleEditItemModal] = useState(false);
+  const [itemQty, setItemQty] = useState<Record<string, number>>(
+    preSelectedItems ?? {},
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
+  const [editingItem, setEditingItem] = useState<
+    ItemEditPayload & Pick<Item, "id">
+  >();
 
   const getCategory = (catId: string) => {
     console.log(catId);
@@ -55,12 +76,6 @@ function ItemSelectForm() {
   const getItem = (itemId: string) => {
     return items.find((item) => item.id === itemId);
   };
-  const [itemQty, setItemQty] = useState<Record<string, number>>({});
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
-  const [editingItem, setEditingItem] = useState<
-    ItemEditPayload & Pick<Item, "id">
-  >();
 
   const itemAddHandler = (item: ItemCreationPayload) => {
     dispatch(addItem({ ...item, id: item.name.toLowerCase() }));
@@ -68,6 +83,40 @@ function ItemSelectForm() {
 
   const itemEditHandler = (patch: ItemEditPayload) => {
     dispatch(updateItem(Object.assign(patch, { id: editingItem?.id ?? "" })));
+  };
+
+  const convertToQuoteLineItem = (
+    itemId: string,
+    qty: number,
+  ): QuoteLineItem => {
+    const item = getItem(itemId) as Item;
+    const { id: i, ...patch } = item;
+    return {
+      id: nanoid(),
+      itemId: itemId,
+      quantity: qty,
+      ...patch,
+      unitCost: patch.unitPrice,
+      total: patch.pricePerUnit * qty,
+    };
+  };
+
+  const addQuoteLineItem = () => {
+    if (Object.keys(itemQty).length == 0) {
+      toast.error("Please add an item to continue");
+      return;
+    }
+    dispatch(
+      updateQuote({
+        id: refNo,
+        items: Object.keys(itemQty).map((itemId) =>
+          convertToQuoteLineItem(itemId, itemQty[itemId]),
+        ),
+        isItemsSelected: true,
+      }),
+    );
+    toast.success("Added selected items");
+    submitAction();
   };
 
   const itemSelectColumns = useMemo(
@@ -111,16 +160,21 @@ function ItemSelectForm() {
             const qty = itemQty[itemId] ?? 0;
             return (
               <CustomBtn
-                className="bg-transparent! btn-auth border border-brand-dark text-black-text"
+                className="bg-transparent! btn-auth border border-brand-dark text-black-text w-25!"
                 buttonLabel={qty.toString()}
                 leftIcon={assets.minusIconBlue}
                 leftAction={() => {
-                  qty > 0
-                    ? setItemQty((curr) => ({
-                        ...curr,
-                        [itemId]: qty - 1,
-                      }))
-                    : 0;
+                  if (itemQty[itemId] == 1) {
+                    setItemQty((curr) => {
+                      const { [itemId]: _, ...rest } = curr;
+                      return rest;
+                    });
+                  } else {
+                    setItemQty((curr) => ({
+                      ...curr,
+                      [itemId]: qty - 1,
+                    }));
+                  }
                 }}
                 leftCls={cn("h-0.5!")}
                 rightIcon={assets.plusIconBlue}
@@ -137,9 +191,14 @@ function ItemSelectForm() {
         {
           id: "total",
           header: "TOTAL",
+          size: 100,
           cell: (cell) => {
             const item = cell.row.original;
-            return formatCurrency((itemQty[item.id] ?? 0) * item.pricePerUnit);
+            return (
+              <span className="w-25!">
+                {formatCurrency((itemQty[item.id] ?? 0) * item.pricePerUnit)}
+              </span>
+            );
           },
           enableSorting: false,
         },
@@ -214,7 +273,8 @@ function ItemSelectForm() {
       />
       <div className="dashed-y-separators" />
 
-      <div className="flex w-full mr-auto justify-end">
+      <div className="flex w-full px-5 justify-between">
+        <CustomBtn buttonLabel="Save Items" onClick={addQuoteLineItem} />
         <div className="max-w-75">
           <SubtotalBreakDown
             items={Object.keys(itemQty).map((itemId) => {

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { assets } from "../../assets/icons";
+import DeleteDialog from "./DeleteDialog";
 
 export type CustomActionGroupProps = {
   openFn?: () => void;
@@ -26,6 +28,7 @@ export function CustomActionGroup({
   shareAction,
   withOpen = true,
 }: CustomActionGroupProps) {
+  const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const btnList: ActionBtnList = [
     {
       id: "openEye",
@@ -40,37 +43,45 @@ export function CustomActionGroup({
     {
       id: "deleteBin",
       icon: assets.binIcon,
-      action: deleteFn,
+      action: () => toggleDeleteDialogOpen((curr) => !curr),
     },
   ];
   if (!withOpen) {
     btnList.splice(0, 1);
   }
   return (
-    <div className="flex gap-2 min-h-6 min-w-6 w-fit shrik-0">
-      {btnList.map((btn) => {
-        if (paymentActionGroup && btn.id !== "openEye") {
-          return <></>;
-        }
-        return (
+    <>
+      <div className="flex gap-2 min-h-6 min-w-6 w-fit shrik-0">
+        {btnList.map((btn) => {
+          if (paymentActionGroup && btn.id !== "openEye") {
+            return <></>;
+          }
+          return (
+            <button
+              key={btn.id}
+              onClick={btn.action}
+              className="flex w-4 shrink-0 items-center justify-center"
+            >
+              <img src={btn.icon} className="w-4 aspect-square" />
+            </button>
+          );
+        })}
+
+        {paymentActionGroup && paymentPending && (
           <button
-            key={btn.id}
-            onClick={btn.action}
+            onClick={shareAction}
             className="flex w-4 shrink-0 items-center justify-center"
           >
-            <img src={btn.icon} className="w-4 aspect-square" />
+            <img src={assets.shareIcon} className="w-4 aspect-square" />
           </button>
-        );
-      })}
+        )}
+      </div>
 
-      {paymentActionGroup && paymentPending && (
-        <button
-          onClick={shareAction}
-          className="flex w-4 shrink-0 items-center justify-center"
-        >
-          <img src={assets.shareIcon} className="w-4 aspect-square" />
-        </button>
-      )}
-    </div>
+      <DeleteDialog
+        isOpen={deleteDialogOpen}
+        toggleOpen={toggleDeleteDialogOpen}
+        deleteAction={deleteFn}
+      />
+    </>
   );
 }

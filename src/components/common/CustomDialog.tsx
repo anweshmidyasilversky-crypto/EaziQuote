@@ -14,6 +14,9 @@ export type CustomDialogProps = {
   footerBtnAction?: () => void;
   footerRightNode?: React.ReactNode;
   closeOnSubmit?: boolean;
+  showFooterSeparator?: boolean;
+  xIconAction?: () => void;
+  withXIcon?: boolean;
 };
 
 function CustomDialog({
@@ -27,6 +30,9 @@ function CustomDialog({
   footerBtnAction,
   footerRightNode,
   closeOnSubmit = true,
+  showFooterSeparator = true,
+  withXIcon = true,
+  xIconAction,
 }: CustomDialogProps) {
   return (
     <Dialog open={dialogOpen} onOpenChange={toggleDialogOpen}>
@@ -39,17 +45,22 @@ function CustomDialog({
           className={`bg-custom-dialog-primary w-full min-h-15 flex justify-between items-center border-b-2 border-b-client-detail-secondary rounded-t-[7px] p-5 ${headerCls}`}
         >
           <span className="font-medium text-base"> {header} </span>
-          <XIcon
-            className={`text-muted hover:text-black-text`}
-            onClick={() => toggleDialogOpen(false)}
-          />
+          {withXIcon && (
+            <XIcon
+              className={`text-muted hover:text-black-text`}
+              onClick={() => {
+                xIconAction?.();
+                toggleDialogOpen(false);
+              }}
+            />
+          )}
         </div>
 
         {children}
 
         {withFooter && (
           <div className="flex flex-col gap-6 py-5">
-            <div className="dashed-y-separators" />
+            {showFooterSeparator && <div className="dashed-y-separators" />}
             <div className="px-5 flex gap-3 items-center">
               <CustomBtn
                 buttonLabel={footerBtnLabel ?? "Got it!"}

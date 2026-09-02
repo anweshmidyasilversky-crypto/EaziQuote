@@ -9,8 +9,9 @@ import {
 } from "../../components/common/CustomToggleGroup";
 import QuoteSummaryForm from "../../components/quotes/QuoteSummaryForm";
 import ItemSelectForm from "../../components/quotes/ItemSelectForm";
-import { useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useAppSelector } from "../../redux/store";
+import SectionSelectForm from "@/components/quotes/SectionSelectForm";
 
 enum toggleId {
   Summary = "summary",
@@ -19,10 +20,12 @@ enum toggleId {
 }
 
 export function CreateQuotePage() {
+  const navigate = useNavigate();
   const [formCurrSection, changeFormCurrSection] = useState<string>(
     toggleId.Summary,
   );
   const params = useParams<{ id: string }>();
+  const location = useLocation();
   const quotes = useAppSelector((state) => state.quotes);
   const currQuote = quotes.find((quote) => quote.referenceNumber === params.id);
   const nextId = quotes.reduce((prev, quote) => {
@@ -35,6 +38,13 @@ export function CreateQuotePage() {
   }, 1);
   const nextRefNo = `QT-${new Date().getFullYear()}-${nextId}`;
   const refNo = params.id ?? nextRefNo;
+  const isEditing = location.pathname.split("/").includes("manage-quotes");
+  let preSelectedItems: Record<string, number> = {};
+  if (isEditing) {
+    currQuote?.items.forEach((item) => {
+      preSelectedItems[item.itemId ?? ""] = item.quantity;
+    });
+  }
 
   const btnConfigList: CustomBtnProps[] = [
     {
@@ -87,7 +97,22 @@ export function CreateQuotePage() {
                   submitAction={() => changeFormCurrSection(toggleId.Items)}
                 />
               )}
-              {formCurrSection === toggleId.Items && <ItemSelectForm />}
+              {formCurrSection === toggleId.Items && (
+                <ItemSelectForm
+                  refNo={refNo}
+                  submitAction={() => changeFormCurrSection(toggleId.Sections)}
+                  preSelectedItems={preSelectedItems}
+                />
+              )}
+
+              {formCurrSection === toggleId.Sections && (
+                <SectionSelectForm
+                  refNo={refNo}
+                  submitAction={() =>
+                    navigate(`/quotes/${refNo}`, { replace: true })
+                  }
+                />
+              )}
             </div>
           </div>
         </div>

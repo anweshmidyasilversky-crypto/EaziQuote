@@ -16,17 +16,12 @@ import {
   type QuoteData,
 } from "../../constants/dummyData";
 import { useMemo, useState } from "react";
-import {
-  cn,
-  formatCurrency,
-  nextQuoteRefNo,
-  quoteToDisplayData,
-} from "../../lib/utils";
+import { cn, formatCurrency, quoteToDisplayData } from "../../lib/utils";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
-import { useDebounce } from "../../hooks/debounce.hook";
+import { useDebounce } from "../../hooks/useDebounce";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
 import { CustomSheet } from "../../components/common/CustomSheet";
@@ -147,7 +142,10 @@ export function QuotesIndexPage() {
         cell: ({ row }) => {
           const quote = row.original;
           return (
-            <CustomActionGroup openFn={() => navigate(`/quotes/${quote.id}`)} />
+            <CustomActionGroup
+              openFn={() => navigate(`/quotes/${quote.id}`)}
+              editFn={() => navigate(`/quotes/manage-quotes/${quote.id}`)}
+            />
           );
         },
         enableSorting: false,
@@ -348,6 +346,9 @@ export function QuotesIndexPage() {
         header="Select Preset Quote"
         withFooter
         footerBtnLabel="Continue"
+        footerBtnAction={() => {
+          navigate(`/quotes/manage-quotes/`);
+        }}
       >
         <div className="lg:min-w-250 flex flex-col gap-4.5 mt-6 max-h-120 overflow-y-auto">
           <div className="px-5">

@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from "react-router";
 import { DashboardSidebarButton } from "./DashboardSidebarButton";
 import { useState } from "react";
 import { useAppSelector } from "../../redux/store";
-import { CustomAvatar } from "../common/CustomAvatar";
+import { CustomAvatar } from "../common/customAvatar";
 export function DashboardLayout() {
   const [activeBtn, toggleActiveBtn] = useState<string>("dashboard");
   const navigate = useNavigate();

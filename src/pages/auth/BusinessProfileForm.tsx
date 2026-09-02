@@ -14,14 +14,14 @@ import { BusinessProfilePayloadSchema } from "../../validation/businessProfile.s
 import {
   CustomInput,
   type SelectOptions,
-} from "../../components/common/CustomInput";
+} from "../../components/common/customInput";
 import { CircleAlertIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import { BrandColorPreview } from "../../components/auth/BrandColor.preview";
+import { BrandColorPreview } from "../../components/auth/brandColor.preview";
 import type { UserType } from "../../types/user.type";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";

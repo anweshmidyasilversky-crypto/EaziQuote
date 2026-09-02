@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { CustomSheet } from "../common/CustomSheet";
 import { useAppDispatch } from "../../redux/store";
 import { addCategory } from "../../redux/slices/categories.slice";
-import { CustomInput } from "../common/CustomInput";
+import { CustomInput } from "../common/customInput";
 import { cn } from "../../lib/utils";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { categorySchema } from "../../validation/itemCreation.payload.schema";

@@ -1,5 +1,6 @@
 export interface QuoteSection {
-  order: string;
+  id: string;
+  order: number;
   section: string;
   description: string;
 }

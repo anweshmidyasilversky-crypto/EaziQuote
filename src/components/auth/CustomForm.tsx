@@ -4,7 +4,7 @@ import {
   type DefaultValues,
   type Resolver,
 } from "react-hook-form";
-import { CustomInput, type CustomInputProps } from "../common/CustomInput";
+import { CustomInput, type CustomInputProps } from "../common/customInput";
 import { useState } from "react";
 import { Spinner } from "../ui/spinner";
 
