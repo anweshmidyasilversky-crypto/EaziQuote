@@ -81,6 +81,24 @@ import minusIconBlue from "./icons/minusIconBlue.png";
 
 import copyIcon from "./icons/copyIcon.png";
 
+import subscriptionIconWhite from "./icons/subscriptionIconWhite.png";
+import userIconBlue from "./icons/userIconBlue.png";
+import subscriptionIconBlue from "./icons/subscriptionIconBlue.png";
+import paymentIconBlue from "./icons/paymentsIconBlue.png";
+import rectangleBlue from "./icons/rectangleIconBlue.png";
+import groupUserIconBlue from "./icons/userGroupIconBlue.png";
+import sectionsIconBlue from "./icons/sectionsIconBlue.png";
+import categoryIconBlue from "./icons/categoriesIconBlue.png";
+import subCategoryIconBlue from "./icons/subCategoriesIconBlue.png";
+import itemsIconBlue from "./icons/itemIconBlue.png";
+import notificationIconBlue from "./icons/notificationIconBlue.png";
+import videoTutorialIconBlue from "./icons/tutorialIconBlue.png";
+import changepasswordIconBlue from "./icons/passwordChangeIconBlue.png";
+import infoIcon from "./icons/infoIcon.png";
+import visaIconBlue from "./icons/visaIcon.png";
+import downloadIconBlue from "./icons/downloadIcon.png";
+import tickMarkGreenIcon from "./icons/tickMarkGreenIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -162,4 +180,22 @@ export const assets = {
   minusIconBlue,
 
   copyIcon,
+
+  subscriptionIconWhite,
+  userIconBlue,
+  subscriptionIconBlue,
+  paymentIconBlue,
+  rectangleBlue,
+  groupUserIconBlue,
+  sectionsIconBlue,
+  categoryIconBlue,
+  subCategoryIconBlue,
+  itemsIconBlue,
+  notificationIconBlue,
+  videoTutorialIconBlue,
+  changepasswordIconBlue,
+  infoIcon,
+  visaIconBlue,
+  downloadIconBlue,
+  tickMarkGreenIcon,
 };

@@ -27,16 +27,19 @@ import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup"
 import { ShareOptions } from "../../components/common/ShareOptions";
 import { QuoteDescriptionPage } from "./QuoteDescriptionPage";
 import { QuoteSectionPage } from "./QuoteSectionPage";
-import { useAppSelector } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import type { QuoteLineItem } from "../../types/quoteLineItem.type";
 import type { ClientDataWithFilters } from "../../constants/dummyData";
 import { invoiceData, QuoteActivityStatus } from "../../constants/dummyData";
 import { PaymentMethods } from "@/types/addDeposite.payload.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
 import DeleteDialog from "@/components/common/DeleteDialog";
+import { addQuote } from "@/redux/slices/quotes.slice";
+import { toast } from "react-toastify";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   // ── Read from Redux ─────────────────────────────────────────────────────────
   const quote = useAppSelector((state) =>
@@ -44,6 +47,7 @@ export function QuotesDetailsPage() {
   );
 
   const allClients = useAppSelector((state) => state.clients);
+  const quotes = useAppSelector((state) => state.quotes);
 
   // Fallback to first quote if ID not found (graceful degradation)
   const activeQuote = useAppSelector((state) => quote ?? state.quotes[0]);
@@ -61,6 +65,16 @@ export function QuotesDetailsPage() {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
 
   const client = allClients.find((c) => c.id === activeQuote?.clientId);
+
+  const nextId = quotes.reduce((prev, quote) => {
+    const currYear = new Date().getFullYear();
+    const [_, quoteYear, num] = quote.referenceNumber.split("-");
+    if (Number(quoteYear) === currYear) {
+      return Math.max(Number(num) + 1, prev);
+    }
+    return prev;
+  }, 1);
+  const nextRefNo = `QT-${new Date().getFullYear()}-${nextId}`;
 
   // ── Items table columns ─────────────────────────────────────────────────────
   const itemColumns: ColumnDef<TableFeatures, QuoteLineItem>[] = useMemo(
@@ -136,6 +150,17 @@ export function QuotesDetailsPage() {
       editAction={() =>
         navigate(`/quotes/manage-quotes/${params.id ?? "QT-2025-101"}`)
       }
+      copyAction={() => {
+        dispatch(
+          addQuote({
+            ...quote,
+            id: nextRefNo,
+            title: quote?.title + "-(Copy)",
+          }),
+        );
+        toast.success("Successfully copied the quote");
+        navigate(`/quotes`);
+      }}
     >
       <CustomBtn
         buttonLabel="More Actions"

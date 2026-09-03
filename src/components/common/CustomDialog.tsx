@@ -17,6 +17,9 @@ export type CustomDialogProps = {
   showFooterSeparator?: boolean;
   xIconAction?: () => void;
   withXIcon?: boolean;
+  contentCls?: string;
+  footerCls?: string;
+  footerBtnCls?: string;
 };
 
 function CustomDialog({
@@ -33,12 +36,15 @@ function CustomDialog({
   showFooterSeparator = true,
   withXIcon = true,
   xIconAction,
+  contentCls,
+  footerCls,
+  footerBtnCls,
 }: CustomDialogProps) {
   return (
     <Dialog open={dialogOpen} onOpenChange={toggleDialogOpen}>
       <DialogTrigger />
       <DialogContent
-        className={`dashboard-card-theme bg-white w-fit! max-w-screen! ring-0 p-0 gap-0`}
+        className={`dashboard-card-theme bg-white w-fit! max-w-screen! ring-0 p-0 gap-0 ${contentCls}`}
         showCloseButton={false}
       >
         <div
@@ -59,11 +65,12 @@ function CustomDialog({
         {children}
 
         {withFooter && (
-          <div className="flex flex-col gap-6 py-5">
+          <div className={`flex flex-col gap-6 py-5 ${footerCls}`}>
             {showFooterSeparator && <div className="dashed-y-separators" />}
             <div className="px-5 flex gap-3 items-center">
               <CustomBtn
                 buttonLabel={footerBtnLabel ?? "Got it!"}
+                className={footerBtnCls}
                 onClick={() => {
                   footerBtnAction?.();
                   if (closeOnSubmit) {

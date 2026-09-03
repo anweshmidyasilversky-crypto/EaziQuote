@@ -64,16 +64,17 @@ export function DashboardLayout() {
       label: "Settings",
       activeBtn: assets.settingsActiveIcon,
       inactiveBtn: assets.settingsIcon,
+      clickHandler: () => navigate("/settings"),
     },
   ];
   return (
     <div className="w-screen h-screen flex">
-      <div className="bg-sidebar md:w-75 max-w-75 h-screen border-r-sidebar-border border-r-[0.5px]">
+      <div className="bg-sidebar sm:w-auto md:w-63 max-w-63 h-screen border-r-sidebar-border border-r-[0.5px]">
         <div className="flex justify-center items-center mb-10">
           <img src={assets.sidebarLogo} className="h-6 mt-6 md:max-w-32.5" />
         </div>
 
-        <div className="flex flex-col gap-5 justify-center items-center">
+        <div className="flex flex-col gap-5 p-6 pl-4.5 justify-center items-center">
           {btnConfig.map((btn) => {
             return (
               <DashboardSidebarButton

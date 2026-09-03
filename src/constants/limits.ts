@@ -10,3 +10,5 @@ export const COUNTRY = { minLength: 4, maxLength: 60 };
 export const BRAND_LOGO = { maxSize: 50 };
 export const PROFILE_PIC = { maxsize: 20 };
 export const ATTACHMENTS = { maxsize: 20 };
+export const CARD_NUMBER = { minLength: 15, maxLength: 19 };
+export const CARD_CVC_CODE = { minLength: 3, maxLength: 4 };

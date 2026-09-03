@@ -18,6 +18,8 @@ import { ClientDetailsPage } from "../pages/clients/ClientDetailsPage";
 import { QuotesIndexPage } from "../pages/quotes/QuotesIndexPage";
 import { QuotesDetailsPage } from "../pages/quotes/QuotesDetailsPage";
 import { CreateQuotePage } from "../pages/quotes/CreateQuotePage";
+import SettingsIndexPage from "@/pages/settings/SettingsIndexPage";
+import SubscriptionPage from "@/pages/settings/SuscriptionPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -99,6 +101,19 @@ export const authRoutes: RouteObject[] = [
                   {
                     path: ":id",
                     Component: QuotesDetailsPage,
+                  },
+                ],
+              },
+              {
+                path: "settings",
+                children: [
+                  {
+                    index: true,
+                    Component: SettingsIndexPage,
+                  },
+                  {
+                    path: "subscription",
+                    Component: SubscriptionPage,
                   },
                 ],
               },

@@ -311,7 +311,7 @@ export function QuotesIndexPage() {
         header="Create a New Quote"
         headerCls={cn(`border-0!`)}
       >
-        <div className="flex flex-col gap-6 py-5 mt-6">
+        <div className="flex flex-col gap-6 py-5 mt-6 max-w-125!">
           <span className="text-sm text-placeholder-text px-5 min-h-8.5">
             {" "}
             {

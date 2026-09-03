@@ -1,5 +1,5 @@
 export const minLengthMsg = (fieldName: string, minLength: number) =>
-  `${fieldName} must be atleast ${minLength} long`;
+  `${fieldName} must be atleast ${minLength} characters long`;
 export const maxLengthMsg = (fieldName: string, maxLength: number) =>
   `${fieldName} can't excced length ${maxLength}`;
 export const notSelectedMsg = (fieldName: string) => `Select ${fieldName}`;

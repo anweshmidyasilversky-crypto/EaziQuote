@@ -218,21 +218,36 @@ function CustomTable<TData extends RowData>({
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-slate-50/50 transition-colors"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
-                    >
-                      {<table.FlexRender cell={cell} />}
-                    </td>
-                  ))}
+              {table.getRowModel().rows.length === 0 ? (
+                <tr className="hover:bg-slate-50/50 transition-colors">
+                  <td
+                    colSpan={table.getVisibleLeafColumns().length}
+                    className="py-4 text-sm font-normal text-slate-600 whitespace-nowrap text-center"
+                  >
+                    <div className="flex flex-col gap-4.5">
+                      <Separator className={`bg-separator`} />
+                      No results found
+                      <Separator className={`bg-separator`} />
+                    </div>
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-slate-50/50 transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                      >
+                        {<table.FlexRender cell={cell} />}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
 
             {/* Table Footer */}

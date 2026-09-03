@@ -1,3 +1,4 @@
+import type { Invoice } from "@/types/invoice.type";
 import type { QuoteSection } from "@/types/quoteSection.type";
 
 export type AddressDetail = {
@@ -111,25 +112,6 @@ export type ItemData = {
   pricePerUnit: number;
   unitCost: number;
 };
-
-export type InvoiceStatus =
-  | "Paid"
-  | "Pending"
-  | "Overdue"
-  | "Draft"
-  | "Cancelled";
-
-export interface Invoice {
-  id: string;
-  itemName: string;
-  category: string;
-  subcategory: string;
-  quantity: string;
-  pricePerUnit: number;
-  unitCost: number;
-  total: number;
-  status: InvoiceStatus;
-}
 
 export interface PresetQuote {
   id: string;
@@ -1156,3 +1138,50 @@ export const transactionItems: TransactionItem[] = [
     expiryDueDate: "12 Sep 2025",
   },
 ];
+
+export const countryStates: Record<string, string[]> = {
+  India: [
+    "West Bengal",
+    "Maharashtra",
+    "Karnataka",
+    "Tamil Nadu",
+    "Gujarat",
+    "Rajasthan",
+  ],
+
+  "United States": [
+    "California",
+    "Texas",
+    "New York",
+    "Florida",
+    "Washington",
+    "Illinois",
+  ],
+
+  "United Kingdom": [
+    "England",
+    "Scotland",
+    "Wales",
+    "Northern Ireland",
+    "Greater London",
+    "West Midlands",
+  ],
+
+  Canada: [
+    "Ontario",
+    "Quebec",
+    "British Columbia",
+    "Alberta",
+    "Manitoba",
+    "Saskatchewan",
+  ],
+
+  Australia: [
+    "New South Wales",
+    "Victoria",
+    "Queensland",
+    "Western Australia",
+    "South Australia",
+    "Tasmania",
+  ],
+};

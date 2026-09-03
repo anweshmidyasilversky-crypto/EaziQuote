@@ -1,9 +1,10 @@
-import { ChevronDown, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import type {
   ClientActivityStatus,
   PaymentActivityStatus,
   QuoteActivityStatus,
 } from "../../constants/dummyData";
+import type { InvoiceStatus } from "@/types/invoice.type";
 
 export type StatusBadgeProps = {
   status:
@@ -13,7 +14,8 @@ export type StatusBadgeProps = {
     | "Draft"
     | ClientActivityStatus
     | PaymentActivityStatus
-    | QuoteActivityStatus;
+    | QuoteActivityStatus
+    | InvoiceStatus;
 
   ChevronIcon?: LucideIcon;
 };

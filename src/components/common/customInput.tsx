@@ -32,6 +32,7 @@ export type CustomInputProps<T extends FieldValues> = {
   imgAltAlign?: "center" | "end";
   orientation?: "verticle" | "horizontal";
   leftNode?: React.ReactNode;
+  textInputFormatter?: (val: string) => string;
 };
 
 function formatLabel(fieldName: string) {
@@ -59,6 +60,7 @@ export function CustomInput<T extends FieldValues>({
   disabled = false,
   orientation,
   leftNode,
+  textInputFormatter,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
@@ -129,7 +131,13 @@ export function CustomInput<T extends FieldValues>({
                       name={fieldName}
                       placeholder={placeholder ?? "......"}
                       value={fieldValue}
-                      onChange={onChange}
+                      onChange={(event) => {
+                        if (textInputFormatter) {
+                          onChange(textInputFormatter(event.target.value));
+                        } else {
+                          onChange(event.target.value);
+                        }
+                      }}
                       className={` input-field ${
                         error ? `input-error` : `input-valid`
                       } ${className}`}

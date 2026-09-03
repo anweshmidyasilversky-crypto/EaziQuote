@@ -83,7 +83,11 @@
     #000000 100%
   );
 
+  --color-settings-card-secondary: #F5F6FB;
+  --color-settings-card-btn: #389C7B;
+
   --background-image-auth: linear-gradient(222.9deg, #f2eeec 0%, #e8e8f2 100%);
+  --background-image-subscription-gradient: linear-gradient(270deg, #082B60 0%, #000000 100%);
 }
 
 @layer base {
