@@ -11,7 +11,6 @@ export type CustomBtnProps = {
   leftCls?: string;
   rightCls?: string;
   bgColor?: string;
-  withSpinner?: boolean;
   isSubmitting?: boolean;
   btncls?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -26,7 +25,6 @@ export function CustomBtn({
   rightCls,
   onClick,
   bgColor,
-  withSpinner,
   isSubmitting,
   btncls,
   className,
@@ -52,7 +50,7 @@ export function CustomBtn({
         </span>
       )}
       <span className="flex flex-none min-h-4.25 w-fit font-sans font-normal text-[14px] text-nowrap">
-        {withSpinner && isSubmitting ? <Spinner /> : buttonLabel}
+        {isSubmitting ? <Spinner /> : buttonLabel}
       </span>
       {rightIcon && (
         <span

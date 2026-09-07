@@ -14,6 +14,7 @@ export interface CustomSheetProps {
   applyBtnLabel?: string;
   closeOnApply?: boolean;
   closeAction?: () => void;
+  header?: string;
 }
 
 export function CustomSheet({
@@ -27,6 +28,7 @@ export function CustomSheet({
   applyBtnLabel,
   closeAction,
   closeOnApply = true,
+  header,
 }: CustomSheetProps) {
   return (
     <Sheet open={isOpen} onOpenChange={toggleIsOpen} modal={false}>
@@ -38,7 +40,7 @@ export function CustomSheet({
           {/* Header */}
           <SheetHeader className="w-full shrink-0 bg-filter-selection-header p-5 min-h-15">
             <span className="flex w-full items-center justify-between text-[16px] font-medium">
-              Filters
+              {header ?? "Filters"}
               <XIcon
                 className="shimmer-color-muted cursor-pointer"
                 onClick={() => {

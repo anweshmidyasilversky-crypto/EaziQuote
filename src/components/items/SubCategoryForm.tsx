@@ -53,6 +53,7 @@ function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
       submitFn={handleSubmit(submitHandler)}
       closeOnApply={false}
       applyBtnCls={cn(`max-w-full!`)}
+      header="Add Subcategory"
     >
       <div className="p-5 flex flex-col gap-5">
         <div className="flex flex-col gap-2">

@@ -1,4 +1,4 @@
-import { PlusIcon } from "lucide-react";
+import { PencilIcon, PlusIcon } from "lucide-react";
 
 export type ImageInputProps = {
   imgFile: File | undefined;
@@ -7,6 +7,8 @@ export type ImageInputProps = {
   altClass?: string;
   altText?: string;
   alignAltImg?: "center" | "end";
+  withEditIcon?: boolean;
+  iconBadgeCls?: string;
 };
 
 export function ImageInput({
@@ -16,6 +18,8 @@ export function ImageInput({
   altClass,
   altText,
   alignAltImg,
+  withEditIcon = false,
+  iconBadgeCls,
 }: ImageInputProps) {
   return (
     <div className="flex justify-center">
@@ -49,8 +53,19 @@ export function ImageInput({
                 />
               </div>
 
-              <div className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-brand-dark text-white border-2 border-white shadow-lg hover:bg-brand-hover transition-colors">
-                <PlusIcon className="h-5 w-5 stroke-2" />
+              <div
+                className={`absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-brand-dark text-white border-2 border-white shadow-lg hover:bg-brand-hover transition-colors ${iconBadgeCls}`}
+              >
+                {withEditIcon ? (
+                  <PencilIcon
+                    className="h-5 w-5"
+                    fill="white"
+                    stroke="#0B3268"
+                    strokeWidth={1}
+                  />
+                ) : (
+                  <PlusIcon className="h-5 w-5 stroke-2" />
+                )}
               </div>
             </div>
           </div>

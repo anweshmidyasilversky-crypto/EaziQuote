@@ -38,6 +38,7 @@ function SettingsIndexPage() {
       title: "Profile",
       titleDesc:
         "Manage your company profile, including name, contact info, and logo.",
+      onClick: () => navigate("/settings/profile"),
     },
     {
       icon: assets.subscriptionIconBlue,
@@ -79,12 +80,14 @@ function SettingsIndexPage() {
       title: "Team Members",
       titleDesc:
         "Add or manage staff accounts and set their roles or access permissions.",
+      onClick: () => navigate(`/settings/team-members`),
     },
     {
       icon: assets.sectionsIconBlue,
       title: "Sections",
       titleDesc:
         "Save and manage reusable text blocks for quick insertion into your quotes and invoices.",
+      onClick: () => navigate(`/settings/sections`),
     },
     {
       icon: assets.categoryIconBlue,

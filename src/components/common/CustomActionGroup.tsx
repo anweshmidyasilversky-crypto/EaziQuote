@@ -8,6 +8,7 @@ export type CustomActionGroupProps = {
   deleteFn?: () => void;
   downloadFn?: () => void;
   withOpen?: boolean;
+  withDelete?: boolean;
 
   paymentActionGroup?: boolean;
   paymentPending?: boolean;
@@ -31,6 +32,7 @@ export function CustomActionGroup({
   withOpen = true,
   downloadOnly,
   downloadFn,
+  withDelete = true,
 }: CustomActionGroupProps) {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const btnList: ActionBtnList = [
@@ -52,6 +54,9 @@ export function CustomActionGroup({
   ];
   if (!withOpen) {
     btnList.splice(0, 1);
+  }
+  if (!withDelete) {
+    btnList.splice(btnList.length - 1, 1);
   }
   if (downloadOnly) {
     btnList.splice(0, btnList.length);

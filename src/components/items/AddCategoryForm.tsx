@@ -41,6 +41,7 @@ function AddCategoryForm({ isOpen, toggleIsOpen }: AddCategoryFormProps) {
       applyBtnLabel="save Category"
       closeOnApply={false}
       closeAction={() => clearErrors()}
+      header="Add Category"
     >
       <div className="p-5">
         <CustomInput

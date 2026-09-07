@@ -6,12 +6,14 @@ import { useRender } from "@base-ui/react/use-render";
 export type ClientNameBadgeProps = {
   name: string;
   withName?: boolean;
+  imgSrc?: string;
 };
 
 export function ClientNameBadge({
   name,
   withName = true,
   className,
+  imgSrc,
 }: ClientNameBadgeProps & useRender.ComponentProps<"span">) {
   const randomColConfig = colorThemes[getRandomIndex(colorThemes.length)];
   const [firstName, lastName] = name.split(" ");
@@ -21,7 +23,7 @@ export function ClientNameBadge({
   return (
     <div className={`flex items-center min-h-8 gap-2 w-fit ${className}`}>
       <CustomAvatar
-        src=""
+        src={imgSrc ?? ""}
         fallback={initials}
         fallbackCls={` ${randomColConfig.textCol} ${randomColConfig.bgCol}`}
       />

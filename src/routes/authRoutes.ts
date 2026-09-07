@@ -20,6 +20,9 @@ import { QuotesDetailsPage } from "../pages/quotes/QuotesDetailsPage";
 import { CreateQuotePage } from "../pages/quotes/CreateQuotePage";
 import SettingsIndexPage from "@/pages/settings/SettingsIndexPage";
 import SubscriptionPage from "@/pages/settings/SuscriptionPage";
+import ProfilePage from "@/pages/settings/ProfilePage";
+import TeamMembersPage from "@/pages/settings/TeamMembersPage";
+import SectionsPage from "@/pages/settings/SectionsPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -114,6 +117,18 @@ export const authRoutes: RouteObject[] = [
                   {
                     path: "subscription",
                     Component: SubscriptionPage,
+                  },
+                  {
+                    path: "profile",
+                    Component: ProfilePage,
+                  },
+                  {
+                    path: "team-members",
+                    Component: TeamMembersPage,
+                  },
+                  {
+                    path: "sections",
+                    Component: SectionsPage,
                   },
                 ],
               },

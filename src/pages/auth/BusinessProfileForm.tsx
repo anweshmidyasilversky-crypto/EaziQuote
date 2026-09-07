@@ -49,7 +49,7 @@ export function BusinessProfileForm() {
     const businessProfile: Partial<UserType> = {
       ...data,
       isBusinessProfileCreated: true,
-      businessLogoUrl: URL.createObjectURL(data.brandLogo),
+      businessLogoUrl: URL.createObjectURL(data.brandLogo as File),
     };
     dispath(updateUser(businessProfile));
     toast.success("Business profile complete");
@@ -125,7 +125,7 @@ export function BusinessProfileForm() {
               >
                 <BrandColorPreview
                   closePreviewFunc={() => toggleIsPopoverOpen((curr) => !curr)}
-                  chosenColor={chosenColor}
+                  chosenColor={chosenColor as string}
                 />
               </PopoverContent>
             </Popover>

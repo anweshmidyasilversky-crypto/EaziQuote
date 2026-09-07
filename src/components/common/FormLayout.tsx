@@ -25,7 +25,7 @@ export function FormLayout({
     <>
       {isFormOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/30 animate-in fade-in-10">
-          <div className="flex min-h-screen py-8 justify-center">
+          <div className="flex min-h-screen py-8 items-center justify-center">
             <div className="w-[calc(100%-2rem)] max-w-125 h-fit bg-white opacity-100 rounded-[7px] ">
               {/* Modal */}
               <div className="flex flex-col gap-6 w-full ">
@@ -52,7 +52,6 @@ export function FormLayout({
                 <div className="w-fit max-w-25">
                   <CustomBtn
                     buttonLabel={sumbitBtnLabel}
-                    withSpinner={true}
                     isSubmitting={isSubmitting}
                     onClick={submitHanlder}
                   />

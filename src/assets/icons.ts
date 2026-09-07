@@ -99,6 +99,8 @@ import visaIconBlue from "./icons/visaIcon.png";
 import downloadIconBlue from "./icons/downloadIcon.png";
 import tickMarkGreenIcon from "./icons/tickMarkGreenIcon.png";
 
+import userImgFemale from "./icons/userImgFemale.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -198,4 +200,5 @@ export const assets = {
   visaIconBlue,
   downloadIconBlue,
   tickMarkGreenIcon,
+  userImgFemale,
 };
