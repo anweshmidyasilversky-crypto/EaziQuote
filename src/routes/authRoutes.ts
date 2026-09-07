@@ -23,6 +23,7 @@ import SubscriptionPage from "@/pages/settings/SuscriptionPage";
 import ProfilePage from "@/pages/settings/ProfilePage";
 import TeamMembersPage from "@/pages/settings/TeamMembersPage";
 import SectionsPage from "@/pages/settings/SectionsPage";
+import CategoriesPage from "@/pages/settings/CategoriesPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -129,6 +130,10 @@ export const authRoutes: RouteObject[] = [
                   {
                     path: "sections",
                     Component: SectionsPage,
+                  },
+                  {
+                    path: "categories",
+                    Component: CategoriesPage,
                   },
                 ],
               },

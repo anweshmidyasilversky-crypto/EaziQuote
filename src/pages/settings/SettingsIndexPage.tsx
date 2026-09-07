@@ -94,6 +94,7 @@ function SettingsIndexPage() {
       title: "Categories",
       titleDesc:
         "Organize your work by defining main categories for materials, labor, or services.",
+      onClick: () => navigate(`/settings/categories`),
     },
     {
       icon: assets.subCategoryIconBlue,

@@ -203,3 +203,10 @@ export const getSubCategory = (subCatId: string) => {
   const subCategories = useAppSelector((state) => state.subCategories);
   return subCategories.find((subCategory) => subCategory.id === subCatId);
 };
+
+/**
+ * Generates a random integer between a lower bound (lb) and an upper bound (ub) inclusive.
+ */
+export function getRandomNumber(lb: number, ub: number): number {
+  return Math.floor(Math.random() * (ub - lb + 1)) + lb;
+}
