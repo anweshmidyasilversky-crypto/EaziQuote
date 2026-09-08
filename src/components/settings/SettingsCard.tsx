@@ -56,8 +56,17 @@ function SettingsCard({
                   {title}{" "}
                 </span>
                 {titleRightIcon && (
-                  <button onClick={rightIconAction}>
-                    <img src={titleRightIcon} className="w-3.5 aspect-auto" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      rightIconAction?.();
+                    }}
+                    className="h-5 w-5"
+                  >
+                    <img
+                      src={titleRightIcon}
+                      className="w-3.5 h-3.5 aspect-auto"
+                    />
                   </button>
                 )}
               </div>

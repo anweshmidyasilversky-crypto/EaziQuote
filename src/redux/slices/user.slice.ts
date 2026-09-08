@@ -22,6 +22,8 @@ const initialState: UserType = {
   endDate: "11/20/2025",
   stripConnected: false,
   bankInfoAdded: false,
+  billingPreferenceProvided: false,
+  quoteSettingsDone: false,
 };
 
 export const userSlice = createSlice({

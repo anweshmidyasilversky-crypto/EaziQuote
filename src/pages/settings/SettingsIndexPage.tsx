@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import StripeAdvisoryDialog, {
   type StripeAdvisoryDialogProps,
 } from "./StripeAdvisoryDialog";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 function SettingsIndexPage() {
   const navigate = useNavigate();
@@ -56,6 +56,7 @@ function SettingsIndexPage() {
         stripAdvisoryType.current = "advisory";
         toggleStripeDialogOpen((curr) => !curr);
       },
+      onClick: () => navigate(`/settings/payments-and-invoicing`),
     },
     {
       icon: assets.rectangleBlue,
@@ -115,17 +116,20 @@ function SettingsIndexPage() {
       title: "Notifications Preference",
       titleDesc:
         "Choose when and how you receive alerts about quotes, invoices, and jobs.",
+      onClick: () => navigate(`/settings/notifications-preference`),
     },
     {
       icon: assets.videoTutorialIconBlue,
       title: "Video Tutorials",
       titleDesc:
         "Watch quick guides and walkthroughs to help you get the most out of EasyQuotes.",
+      onClick: () => window.open(`https://eaziquote.com/tutorials`, `_blank`),
     },
     {
       icon: assets.changepasswordIconBlue,
       title: "Change Password",
       titleDesc: "Update your account password to keep your profile secure.",
+      onClick: () => navigate(`/settings/change-password`),
     },
   ];
 
@@ -159,6 +163,17 @@ function SettingsIndexPage() {
             : undefined
         }
       />
+
+      <footer className="min-h-15 w-full bg-settings-footer flex px-5 gap-8 text-sm [&_a]:text-placeholder-text! items-center">
+        <a href="https://eaziquote.com/legal/terms-of-service" target="_blank">
+          {" "}
+          {"Terms of Service"}{" "}
+        </a>
+        <a href="https://eaziquote.com/legal/privacy-policy" target="_blank">
+          {" "}
+          {"Privacy Policy"}{" "}
+        </a>
+      </footer>
     </>
   );
 }

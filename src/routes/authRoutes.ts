@@ -26,6 +26,9 @@ import SectionsPage from "@/pages/settings/SectionsPage";
 import CategoriesPage from "@/pages/settings/CategoriesPage";
 import SubCategoriesPage from "@/pages/settings/SubCategoriesPage";
 import ItemsPage from "@/pages/settings/ItemsPage";
+import PaymentAndInvoicePage from "@/pages/settings/PaymentAndInvoicePage";
+import NotificationPreferencesPage from "@/pages/settings/NotificationPreferencesPage";
+import ChangePasswordPage from "@/pages/settings/ChangePasswordPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -144,6 +147,18 @@ export const authRoutes: RouteObject[] = [
                   {
                     path: "items",
                     Component: ItemsPage,
+                  },
+                  {
+                    path: "payments-and-invoicing",
+                    Component: PaymentAndInvoicePage,
+                  },
+                  {
+                    path: "notifications-preference",
+                    Component: NotificationPreferencesPage,
+                  },
+                  {
+                    path: "change-password",
+                    Component: ChangePasswordPage,
                   },
                 ],
               },

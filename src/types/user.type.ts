@@ -1,3 +1,6 @@
+import type { BankInfo } from "./bankInfo.payload";
+import type { BillingPreference } from "./billingPreference.payload.type";
+
 export interface UserType {
   name: string;
   profileImgUrl: string | undefined;
@@ -20,4 +23,8 @@ export interface UserType {
   vatNumber?: string;
   stripConnected?: boolean;
   bankInfoAdded?: boolean;
+  billingPreferenceProvided?: boolean;
+  quoteSettingsDone?: boolean;
+  bankInfo?: BankInfo;
+  billingPref?: BillingPreference;
 }
