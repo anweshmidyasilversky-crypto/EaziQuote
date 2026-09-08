@@ -103,6 +103,12 @@ import userImgFemale from "./icons/userImgFemale.png";
 import importIcon from "./icons/importIcon.png";
 import fileImportIcon from "./icons/fileImportIcon.png";
 
+import starIcon from "./icons/starIcon.png";
+import infinityIcon from "./icons/infinityIcon.png";
+import clientGroupIcon from "./icons/clientsGroupIcon.png";
+import brushIcon from "./icons/brushIcon.png";
+import statisticsIcon from "./icons/statisticIcon.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -206,4 +212,9 @@ export const assets = {
 
   importIcon,
   fileImportIcon,
+  starIcon,
+  infinityIcon,
+  statisticsIcon,
+  brushIcon,
+  clientGroupIcon,
 };

@@ -101,7 +101,10 @@ export function DashboardLayout() {
                 {`${user.isSubscribed ? "Plan" : "Free trial"} ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
               </span>
 
-              <button className="btn-auth flex items-center justify-center h-full min-h-8 md:min-w-24.25 md:max-w-24.25 py-2 px-3 gap-2 rounded-0.5 bg-sidebar-btn">
+              <button
+                className="btn-auth flex items-center justify-center h-full min-h-8 md:min-w-24.25 md:max-w-24.25 py-2 px-3 gap-2 rounded-0.5 bg-sidebar-btn"
+                onClick={() => navigate(`/subscribe-plan`)}
+              >
                 <span className="font-sans text-sm">Subscribe</span>
                 <img src={assets.arrowRight} className="max-h-2 max-w-1" />
               </button>

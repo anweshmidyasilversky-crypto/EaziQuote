@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { assets } from "../../assets/icons";
 import { type NotificationItem } from "../../constants/dummyData";
 import { getFormattedTimeDiff } from "../../lib/utils";
@@ -8,6 +9,7 @@ export type NotificationCardProps = {
 };
 
 export function NotificationCard({ notifications }: NotificationCardProps) {
+  const navigate = useNavigate();
   return (
     <div className="min-h-60 overflow-y-auto w-full flex flex-col items-center rounded-[10px] py-4.5 dashboard-card-theme gap-4.5 grow">
       {/* notification card header */}
@@ -18,7 +20,10 @@ export function NotificationCard({ notifications }: NotificationCardProps) {
         </span>
 
         <div className="flex items-center gap-1.5">
-          <button className="text-american-blue font-normal text-xs cursor-pointer">
+          <button
+            className="text-american-blue font-normal text-xs cursor-pointer"
+            onClick={() => navigate(`/dashboard/notifications`)}
+          >
             {" "}
             View All{" "}
           </button>

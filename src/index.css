@@ -92,6 +92,9 @@
 
   --color-settings-items-secondary: #0597FF;
 
+  --color-subcription-card-primary: #F5F6FB;
+  --color-subscription-card-secondary: #E4E6F4;
+
   --background-image-auth: linear-gradient(222.9deg, #f2eeec 0%, #e8e8f2 100%);
   --background-image-subscription-gradient: linear-gradient(270deg, #082B60 0%, #000000 100%);
 }

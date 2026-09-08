@@ -29,6 +29,8 @@ import ItemsPage from "@/pages/settings/ItemsPage";
 import PaymentAndInvoicePage from "@/pages/settings/PaymentAndInvoicePage";
 import NotificationPreferencesPage from "@/pages/settings/NotificationPreferencesPage";
 import ChangePasswordPage from "@/pages/settings/ChangePasswordPage";
+import NotificationsPage from "@/pages/dashboard/NotificationsPage";
+import SubscriptionIndexPage from "@/pages/subscription/SubscriptionIndexPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -85,8 +87,21 @@ export const authRoutes: RouteObject[] = [
             element: createElement(DashboardLayout),
             children: [
               {
+                path: "subscribe-plan",
+                Component: SubscriptionIndexPage,
+              },
+              {
                 path: "dashboard",
-                Component: DashboardIndexPage,
+                children: [
+                  {
+                    index: true,
+                    Component: DashboardIndexPage,
+                  },
+                  {
+                    path: "notifications",
+                    Component: NotificationsPage,
+                  },
+                ],
               },
               {
                 path: "clients",
