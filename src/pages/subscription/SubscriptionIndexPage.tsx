@@ -61,7 +61,7 @@ function SubscriptionIndexPage() {
               <img src={assets.starIcon} className="w-3 aspect-square" />
             </div>
 
-            <div className="flex flex-col gap-4 p-3 border rounded-xl border-subscription-card-secondary bg-subscription-card-secondary">
+            <div className="flex flex-col gap-4 p-3 border rounded-xl border-separator bg-subscription-card-secondary">
               {btnConfig.map((config, index) => (
                 <React.Fragment key={config.id}>
                   <div className="flex gap-3 items-center">
