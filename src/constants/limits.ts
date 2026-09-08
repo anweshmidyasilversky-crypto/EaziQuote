@@ -19,3 +19,4 @@ export const ACCOUNT_NUMBER = { minLength: 6, maxLength: 30 };
 export const SORT_CODE = { minLength: 6, maxLength: 8 };
 export const QUOTE_EXPIRY = { minLength: 1 };
 export const PAYMENT_TERMS = { minLength: 1 };
+export const SIGNATURE = { maxSize: 20 };

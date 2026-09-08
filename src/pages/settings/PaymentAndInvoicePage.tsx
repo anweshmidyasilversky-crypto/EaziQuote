@@ -5,6 +5,7 @@ import {
 } from "@/components/common/CustomToggleGroup";
 import BankInfoForm from "@/components/settings/BankInfoForm";
 import BillingPreferenceForm from "@/components/settings/BillingPreferenceForm";
+import QuoteSettingsForm from "@/components/settings/QuoteSettingsForm";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/redux/store";
 import { useState } from "react";
@@ -47,7 +48,7 @@ function PaymentAndInvoicePage() {
             `bg-transparent hover:bg-transparent text-nowrap disabled:text-placeholder-text flex-start p-0! text-left w-fit`,
           )}
           className={cn(
-            `[&_.btnActive]:text-brand-dark [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark pt-2 px-5 gap-5!`,
+            `[&_.btnActive]:text-brand-dark [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark pt-2 px-5 gap-5! [&_.btnActive]:text-base`,
           )}
         />
 
@@ -64,6 +65,8 @@ function PaymentAndInvoicePage() {
             submitAction={() => toggleActive(toggle.quoteSetting)}
           />
         )}
+
+        {activeToggle === toggle.quoteSetting && <QuoteSettingsForm />}
       </div>
     </>
   );

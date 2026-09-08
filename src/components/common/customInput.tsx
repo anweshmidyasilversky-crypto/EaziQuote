@@ -33,6 +33,7 @@ export type CustomInputProps<T extends FieldValues> = {
   orientation?: "verticle" | "horizontal";
   leftNode?: React.ReactNode;
   textInputFormatter?: (val: string) => string;
+  labelRightNode?: React.ReactNode;
 };
 
 function formatLabel(fieldName: string) {
@@ -61,6 +62,7 @@ export function CustomInput<T extends FieldValues>({
   orientation,
   leftNode,
   textInputFormatter,
+  labelRightNode,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
@@ -73,15 +75,17 @@ export function CustomInput<T extends FieldValues>({
       {withLabel && (
         <label htmlFor={fieldName as string} className="input-label">
           {labelText}{" "}
-          <button
+          <span
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               fieldBadgeAction?.();
             }}
+            className="cursor-pointer flex"
           >
             {FieldBadgeIcon && <FieldBadgeIcon className="h-3.5 w-3.5" />}
-          </button>
+            {labelRightNode && labelRightNode}
+          </span>
         </label>
       )}
       <div className="w-full flex gap-2">

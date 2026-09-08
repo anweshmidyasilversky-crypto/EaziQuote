@@ -5,11 +5,12 @@ import { CustomBtn } from "./CustomBtn";
 export interface FormLayoutProps {
   isFormOpen: boolean;
   formHeading: string;
-  sumbitBtnLabel: string;
+  sumbitBtnLabel?: string;
   children: React.ReactNode;
   formCloseAction?: () => void;
-  isSubmitting: boolean;
-  submitHanlder: () => void;
+  isSubmitting?: boolean;
+  submitHanlder?: () => void;
+  withSubmitBtn?: boolean;
 }
 
 export function FormLayout({
@@ -20,6 +21,7 @@ export function FormLayout({
   formCloseAction,
   isSubmitting,
   submitHanlder,
+  withSubmitBtn = true,
 }: FormLayoutProps) {
   return (
     <>
@@ -48,15 +50,17 @@ export function FormLayout({
                 </div>
               </div>
               {/* Form footer */}
-              <div className="px-5 pb-5 pt-6">
-                <div className="w-fit max-w-25">
-                  <CustomBtn
-                    buttonLabel={sumbitBtnLabel}
-                    isSubmitting={isSubmitting}
-                    onClick={submitHanlder}
-                  />
+              {withSubmitBtn && (
+                <div className="px-5 pb-5 pt-6">
+                  <div className="w-fit max-w-25">
+                    <CustomBtn
+                      buttonLabel={sumbitBtnLabel as string}
+                      isSubmitting={isSubmitting}
+                      onClick={submitHanlder}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
