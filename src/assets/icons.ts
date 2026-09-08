@@ -100,6 +100,8 @@ import downloadIconBlue from "./icons/downloadIcon.png";
 import tickMarkGreenIcon from "./icons/tickMarkGreenIcon.png";
 
 import userImgFemale from "./icons/userImgFemale.png";
+import importIcon from "./icons/importIcon.png";
+import fileImportIcon from "./icons/fileImportIcon.png";
 
 export const assets = {
   loginHeader,
@@ -201,4 +203,7 @@ export const assets = {
   downloadIconBlue,
   tickMarkGreenIcon,
   userImgFemale,
+
+  importIcon,
+  fileImportIcon,
 };

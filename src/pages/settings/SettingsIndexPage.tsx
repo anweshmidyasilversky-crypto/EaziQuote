@@ -101,12 +101,14 @@ function SettingsIndexPage() {
       title: "Sub-categories",
       titleDesc:
         "Create sub-level groupings under categories for more precise organization.",
+      onClick: () => navigate(`/settings/subcategories`),
     },
     {
       icon: assets.itemsIconBlue,
       title: "Items",
       titleDesc:
         "Add and manage individual items or services that appear in quotes and invoices.",
+      onClick: () => navigate(`/settings/items`),
     },
     {
       icon: assets.notificationIconBlue,

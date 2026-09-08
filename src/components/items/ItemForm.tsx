@@ -4,7 +4,7 @@ import { type ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { itemCreationSchema } from "../../validation/itemCreation.payload.schema";
 import { FormLayout } from "../common/FormLayout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CustomInput } from "../common/customInput";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { useAppSelector } from "../../redux/store";
@@ -21,6 +21,8 @@ export type ItemFormProps = {
   creationFn?: (data: ItemCreationPayload) => void;
   editFn?: (data: ItemEditPayload) => void;
   defaultValues?: DefaultValues<ItemEditPayload | ItemCreationPayload>;
+  withAddCategory?: boolean;
+  withAddSubCategory?: boolean;
 };
 
 function ItemForm({
@@ -30,6 +32,8 @@ function ItemForm({
   toggleIsOpen,
   creationFn,
   editFn,
+  withAddCategory = true,
+  withAddSubCategory = true,
 }: ItemFormProps) {
   const [categoryForm, toggleCategoryForm] = useState(false);
   const [subCategoryForm, toggleSubCategoryForm] = useState(false);
@@ -54,7 +58,7 @@ function ItemForm({
     formState: { errors },
     clearErrors,
   } = useForm<ItemCreationPayload | ItemEditPayload>({
-    defaultValues: defaultValues ?? {
+    defaultValues: {
       name: "",
       unit: "",
       pricePerUnit: undefined,
@@ -77,6 +81,20 @@ function ItemForm({
     toggleIsSubmitting(false);
     toggleIsOpen(false);
   };
+
+  useEffect(() => {
+    if (defaultValues) {
+      Object.keys(defaultValues).map((key) => {
+        const defKey = key as keyof DefaultValues<
+          ItemEditPayload | ItemCreationPayload
+        >;
+        setValue(
+          key as keyof ItemCreationPayload,
+          defaultValues?.[defKey] ?? "",
+        );
+      });
+    }
+  }, [defaultValues]);
 
   return (
     <>
@@ -104,14 +122,16 @@ function ItemForm({
             placeholder="Search or select a category"
             className={errors.catId ? `input-error` : ``}
             inputRightNode={
-              <CustomBtn
-                buttonLabel="Category"
-                leftIcon={assets.plusIconBlack}
-                btncls={cn(
-                  `input-field h-full! grow-0 py-3 bg-transparent text-black-text hover:bg-transparent`,
-                )}
-                onClick={() => toggleCategoryForm((curr) => !curr)}
-              />
+              withAddCategory ? (
+                <CustomBtn
+                  buttonLabel="Category"
+                  leftIcon={assets.plusIconBlack}
+                  btncls={cn(
+                    `input-field h-full! grow-0 py-3 bg-transparent text-black-text hover:bg-transparent`,
+                  )}
+                  onClick={() => toggleCategoryForm((curr) => !curr)}
+                />
+              ) : undefined
             }
             selected={getCategory(defaultValues?.catId ?? "") ?? null}
           />
@@ -134,14 +154,16 @@ function ItemForm({
             className={errors.subCatId ? `input-error` : ``}
             placeholder="Search or select a subcategory"
             inputRightNode={
-              <CustomBtn
-                buttonLabel="Subcategory"
-                leftIcon={assets.plusIconBlack}
-                btncls={cn(
-                  `input-field h-full! grow-0 py-3 bg-transparent text-black-text hover:bg-transparent`,
-                )}
-                onClick={() => toggleSubCategoryForm((curr) => !curr)}
-              />
+              withAddSubCategory ? (
+                <CustomBtn
+                  buttonLabel="Subcategory"
+                  leftIcon={assets.plusIconBlack}
+                  btncls={cn(
+                    `input-field h-full! grow-0 py-3 bg-transparent text-black-text hover:bg-transparent`,
+                  )}
+                  onClick={() => toggleSubCategoryForm((curr) => !curr)}
+                />
+              ) : undefined
             }
             selected={getSubCategory(defaultValues?.subCatId ?? "") ?? null}
           />
