@@ -7,21 +7,20 @@ export function ProfileCreateGuard() {
 
   const steps = [
     {
-      completed: user.isUserProfileCreated,
+      completed: user.is_profile_setup,
       path: "/profile-setup",
     },
     {
-      completed: user.isBusinessProfileCreated,
+      completed: user.is_company_profile_setup,
       path: "/business-profile",
     },
     {
-      completed: user.isBusinessAddressProvided,
+      completed: user.is_company_address_setup,
       path: "/business-address",
     },
   ];
 
   const nextStep = steps.find((step) => !step.completed);
-
   if (nextStep) {
     if (location.pathname !== nextStep.path) {
       return <Navigate to={nextStep.path} replace={true} />;

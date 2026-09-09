@@ -5,6 +5,7 @@ import type {
   QuoteActivityStatus,
 } from "../../constants/dummyData";
 import type { InvoiceStatus } from "@/types/invoice.type";
+import type { PaymentStatus } from "@/types/paymentRecord.type";
 
 export type StatusBadgeProps = {
   status:
@@ -15,7 +16,8 @@ export type StatusBadgeProps = {
     | ClientActivityStatus
     | PaymentActivityStatus
     | QuoteActivityStatus
-    | InvoiceStatus;
+    | InvoiceStatus
+    | PaymentStatus;
 
   ChevronIcon?: LucideIcon;
 };
@@ -36,6 +38,11 @@ const statusColorMap: Record<StatusBadgeProps["status"], string> = {
   Refunded: "bg-paid-badge",
   Accepted: "bg-paid-badge",
   Expired: "bg-overdue-badge",
+
+  // Api res types
+  failed: "bg-overdue-badge",
+  received: "bg-paid-badge",
+  pending: "bg-draft-badge",
 };
 
 const textColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -56,6 +63,11 @@ const textColorMap: Record<StatusBadgeProps["status"], string> = {
 
   Accepted: "text-paid-text",
   Expired: "text-overdue-text",
+
+  // Api res types
+  failed: "text-overdue-text",
+  received: "text-paid-text",
+  pending: "text-draft-text",
 };
 
 function StatusBadge({ status, ChevronIcon }: StatusBadgeProps) {

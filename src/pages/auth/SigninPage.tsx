@@ -4,19 +4,21 @@ import { type UserSignInPayload } from "../../types/user.signIn.payload.type";
 import { CustomInput } from "../../components/common/customInput";
 import { useEffect, useRef, useState } from "react";
 import { userSignInSchema } from "../../validation/user.signIn.payload.schema";
-import { signIn } from "../../lib/firebaseAuth";
-import { showFirebaseError } from "../../lib/firebase.errors";
 import { toast } from "react-toastify";
 import { Spinner } from "../../components/ui/spinner";
 import { useNavigate } from "react-router";
 import { Card, CardContent } from "../../components/ui/card";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { auth } from "../../lib/firebaseConfig";
+import { login } from "@/api/auth.api";
+import { deviceType } from "@/types/api.requests.type";
+import { setToken } from "@/redux/slices/auth.slice";
+import { isAxiosError } from "axios";
 
 export function SignInPage() {
   const rememberMe = useRef(0);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispath = useAppDispatch();
   const { control, handleSubmit } = useForm<UserSignInPayload>({
@@ -28,30 +30,34 @@ export function SignInPage() {
   });
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      navigate("");
+    if (auth.apiToken.length >= 1) {
+      navigate("/dashboard");
     }
   }, []);
 
   const onsubmit = async (data: UserSignInPayload) => {
     toggleIsSubmitting(true);
     try {
-      const userCredential = await signIn(data.email, data.password);
-      dispath(
-        updateUser({
-          email: userCredential.user.email as string,
-        }),
-      );
-      if (!userCredential.user.emailVerified) {
+      const loginResponse = await login({
+        email: data.email,
+        password: data.password,
+        device_type: deviceType.web,
+      });
+      dispath(setToken(loginResponse.payload.access_token));
+      if (!loginResponse.payload.is_email_verified) {
+        toast.error(`Please verify your email`);
         navigate("/email-verification");
       } else {
-        toast.success("Sign in success");
-        console.log("Going to profile setup");
-        navigate("/profile-setup");
+        dispath(updateUser(loginResponse.payload));
+        toast.success(`Signin success`);
+        navigate(`/dashboard`);
       }
     } catch (err) {
-      showFirebaseError(err);
+      if (isAxiosError(err)) {
+        toast.error(err.message);
+      } else {
+        toast.error(`Something went wrong`);
+      }
     } finally {
       toggleIsSubmitting(false);
     }

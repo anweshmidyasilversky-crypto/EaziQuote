@@ -37,6 +37,7 @@ export function DashboardLayout() {
       label: "Invoices",
       activeBtn: assets.invoiceActiveIcon,
       inactiveBtn: assets.invoiceIcon,
+      clickHandler: () => navigate("/invoices"),
     },
     {
       id: "clients",
@@ -52,6 +53,9 @@ export function DashboardLayout() {
       label: "Payments",
       activeBtn: assets.poundActiveIcon,
       inactiveBtn: assets.poundIcon,
+      clickHandler: () => {
+        navigate("/payments");
+      },
     },
     {
       id: "preset-quotes",

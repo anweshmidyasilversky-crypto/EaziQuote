@@ -6,6 +6,7 @@ import categoriesReducer from "./slices/categories.slice";
 import subCategoriesReducer from "./slices/subCategories.slice";
 import itemsReducer from "./slices/items.slice";
 import quotesReducer from "./slices/quotes.slice";
+import authReducer from "./slices/auth.slice";
 import {
   useSelector,
   useDispatch,
@@ -38,6 +39,7 @@ const rootReduces = combineReducers({
   subCategories: subCategoriesReducer,
   items: itemsReducer,
   quotes: quotesReducer,
+  auth: authReducer,
 });
 
 const persistedReducer = persistReducer(config, rootReduces);

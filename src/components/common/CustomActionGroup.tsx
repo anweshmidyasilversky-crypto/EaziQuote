@@ -9,6 +9,8 @@ export type CustomActionGroupProps = {
   downloadFn?: () => void;
   withOpen?: boolean;
   withDelete?: boolean;
+  withEdit?: boolean;
+  withShare?: boolean;
 
   paymentActionGroup?: boolean;
   paymentPending?: boolean;
@@ -33,6 +35,8 @@ export function CustomActionGroup({
   downloadOnly,
   downloadFn,
   withDelete = true,
+  withShare = false,
+  withEdit = true,
 }: CustomActionGroupProps) {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const btnList: ActionBtnList = [
@@ -52,6 +56,11 @@ export function CustomActionGroup({
       action: () => toggleDeleteDialogOpen((curr) => !curr),
     },
   ];
+
+  if (!withEdit) {
+    btnList.splice(1, 1);
+  }
+
   if (!withOpen) {
     btnList.splice(0, 1);
   }
@@ -64,6 +73,14 @@ export function CustomActionGroup({
       id: "download",
       icon: assets.downloadIconBlue,
       action: downloadFn,
+    });
+  }
+
+  if (withShare) {
+    btnList.push({
+      id: "share",
+      icon: assets.shareIcon,
+      action: shareAction,
     });
   }
   return (

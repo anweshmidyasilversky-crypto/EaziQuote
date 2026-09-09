@@ -1,25 +1,30 @@
 import { assets } from "../../assets/icons";
-import { auth } from "../../lib/firebaseConfig";
 import { SignInPage } from "./SigninPage";
 import { toast } from "react-toastify";
-import { sendVerificationLink } from "../../lib/firebaseAuth";
-import { showFirebaseError } from "../../lib/firebase.errors";
 import { useState } from "react";
 import { Spinner } from "../../components/ui/spinner";
+import { useAppSelector } from "@/redux/store";
+import { sendEmailVerification } from "@/api/auth.api";
+import { isAxiosError } from "axios";
 export function UnverifiedEmail() {
-  const user = auth.currentUser;
   const [isSendingLink, toggleIsSendingLink] = useState(false);
-  if (!user) {
+  const auth = useAppSelector((state) => state.auth);
+  if (auth.apiToken.length === 0) {
     return <SignInPage />;
   }
 
   const handleClick = async () => {
     toggleIsSendingLink(true);
     try {
-      await sendVerificationLink();
-      toast("Sent verification link to email", { type: "success" });
+      await sendEmailVerification();
+      toast.success("Sent verification link to email");
     } catch (err) {
-      showFirebaseError(err);
+      console.log(isAxiosError(err), err);
+      if (isAxiosError(err)) {
+        toast.error(err.response?.data.message);
+      } else {
+        toast.error((err as Error).message);
+      }
     } finally {
       toggleIsSendingLink(false);
     }
@@ -35,7 +40,7 @@ export function UnverifiedEmail() {
           />
 
           <div className="success-text-group">
-            <h1 className="h-7.25 font-sans font-semibold text-[24px] leading-7.25 text-[#2D2D2D] flex-none text-center">
+            <h1 className="h-7.25 font-sans font-semibold text-[24px] leading-7.25 text-black-text flex-none text-center">
               "Email Unverified"
             </h1>
             <p className="h-4.25 font-sans font-normal text-[14px] leading-4.25 text-[#89909D] flex-none text-center">

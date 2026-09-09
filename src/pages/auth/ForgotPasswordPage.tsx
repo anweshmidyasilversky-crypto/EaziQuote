@@ -1,6 +1,5 @@
 import { toast } from "react-toastify";
 import { showFirebaseError } from "../../lib/firebase.errors";
-import { passwordResetMail } from "../../lib/firebaseAuth";
 import { useNavigate } from "react-router";
 import { CustomForm } from "../../components/auth/CustomForm";
 import type { CustomInputProps } from "../../components/common/customInput";
@@ -11,7 +10,6 @@ export function ForgotPasswordPage() {
   const navigate = useNavigate();
   const submitHandler = async (data: { email: string }) => {
     try {
-      await passwordResetMail(data.email);
       toast("Mailed password reset link to entered email", { type: "success" });
       navigate("/");
     } catch (err) {

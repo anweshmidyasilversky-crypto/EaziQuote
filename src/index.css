@@ -1,3 +1,4 @@
+@import url(https://db.onlinewebfonts.com/c/7e39d05fff188430a1cb860db9b38881?family=PP+Mori+SemiBold);
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -10,7 +11,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+/* src/index.css */
+
 @theme {
+  --font-mori: 'PP Mori SemiBold', sans-serif;
   --color-brand-dark: #082b60;
   --color-brand-hover: #061f45;
   --color-placeholder-text: #89909d;

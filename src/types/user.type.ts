@@ -27,4 +27,8 @@ export interface UserType {
   quoteSettingsDone?: boolean;
   bankInfo?: BankInfo;
   billingPref?: BillingPreference;
+  is_email_verified?: boolean;
+  is_profile_setup?: boolean;
+  is_company_profile_setup?: boolean;
+  is_company_address_setup?: boolean;
 }

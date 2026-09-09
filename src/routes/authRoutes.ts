@@ -31,6 +31,8 @@ import NotificationPreferencesPage from "@/pages/settings/NotificationPreference
 import ChangePasswordPage from "@/pages/settings/ChangePasswordPage";
 import NotificationsPage from "@/pages/dashboard/NotificationsPage";
 import SubscriptionIndexPage from "@/pages/subscription/SubscriptionIndexPage";
+import PaymentsIndexPage from "@/pages/payments/PaymentsIndexPage";
+import InvoiceIndexPage from "@/pages/invoice/InvoiceIndexPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -125,6 +127,24 @@ export const authRoutes: RouteObject[] = [
                   {
                     path: ":id",
                     Component: QuotesDetailsPage,
+                  },
+                ],
+              },
+              {
+                path: "payments",
+                children: [
+                  {
+                    index: true,
+                    Component: PaymentsIndexPage,
+                  },
+                ],
+              },
+              {
+                path: "invoices",
+                children: [
+                  {
+                    index: true,
+                    Component: InvoiceIndexPage,
                   },
                 ],
               },

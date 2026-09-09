@@ -27,6 +27,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import type { User } from "../../types/api.responses.type";
 
 export function BusinessProfileForm() {
   const dispath = useAppDispatch();
@@ -36,19 +37,19 @@ export function BusinessProfileForm() {
   const { control, handleSubmit } = useForm<BusinessProfilePayload>({
     defaultValues: {
       brandColor: "#00AAFF",
-      businessName: user.businessName ?? "",
-      businessPhoneNo: user.businessPhoneNo ?? "",
-      trade: user.trade ?? "",
-      vatRegistered: user.vatRegistered ?? false,
-      vatNumber: user.vatNumber ?? "",
+      businessName: user.company?.name ?? "",
+      businessPhoneNo: user.company?.phone_number ?? "",
+      trade: "",
+      vatRegistered: user.company?.vat_number ? true : false,
+      vatNumber: user.company?.vat_number ?? "",
     },
     resolver: yupResolver(BusinessProfilePayloadSchema),
   });
 
   const submitHandler = async (data: BusinessProfilePayload) => {
-    const businessProfile: Partial<UserType> = {
+    const businessProfile: Partial<UserType> & Partial<User> = {
       ...data,
-      isBusinessProfileCreated: true,
+      is_company_profile_setup: true,
       businessLogoUrl: URL.createObjectURL(data.brandLogo as File),
     };
     dispath(updateUser(businessProfile));
@@ -87,9 +88,9 @@ export function BusinessProfileForm() {
                 fieldName="Brand Logo"
                 withLabel={false}
                 inptType="image"
-                imgAlt={user.businessLogoUrl ?? assets.cameraIcon}
+                imgAlt={user.company?.logo ?? assets.cameraIcon}
                 imgAltCls={
-                  user.businessLogoUrl
+                  user.company?.logo
                     ? "object-cover object-center h-full w-full"
                     : "object-center h-10 w-10"
                 }

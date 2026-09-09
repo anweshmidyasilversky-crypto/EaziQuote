@@ -18,6 +18,7 @@ import type { UserType } from "../../types/user.type";
 import { toast } from "react-toastify";
 import { PostCodeSelectComboBox } from "../../components/common/PostCodeSelectComboBox";
 import { getAddress } from "../../lib/utils";
+import type { User } from "../../types/api.responses.type";
 
 export function BusinessAddressForm() {
   const [postCode, selectPostCode] = useState<string | null>(null);
@@ -28,10 +29,10 @@ export function BusinessAddressForm() {
   const { control, setValue, handleSubmit, clearErrors } =
     useForm<BusinessAddressPayload>({
       defaultValues: {
-        postCode: user.postCode ?? " ",
-        street: user.street ?? " ",
-        city: user.city ?? "",
-        country: user.country ?? "",
+        postCode: user.company.address.postcode ?? " ",
+        street: user.company.address.address ?? " ",
+        city: user.company.address.city ?? "",
+        country: user.company.address.country ?? "",
       },
       resolver: yupResolver(businessAddressSchema),
     });
@@ -48,9 +49,9 @@ export function BusinessAddressForm() {
   };
 
   const onsubmit = (data: BusinessAddressPayload) => {
-    const businessAddress: Partial<UserType> = {
+    const businessAddress: Partial<UserType> & Partial<User> = {
       ...data,
-      isBusinessAddressProvided: true,
+      is_company_address_setup: true,
     };
     dispath(updateUser(businessAddress));
     toast.success("Successfully added business address");

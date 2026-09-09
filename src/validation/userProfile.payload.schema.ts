@@ -6,7 +6,6 @@ import {
   invalidMsg,
   InvalidType,
   minLengthMsg,
-  notSelectedMsg,
 } from "../constants/messages";
 import { FULL_NAME, PROFILE_PIC } from "../constants/limits";
 import { PHONE_NO_REGEX } from "../constants/regex";
@@ -23,8 +22,11 @@ export const userProfileSchema: yup.ObjectSchema<UserProfilePayload> =
   yup.object({
     profilePic: yup
       .mixed<File>()
-      .required(notSelectedMsg("Profile Picture"))
+      .optional()
       .test((value, ctx) => {
+        if (!value) {
+          return true;
+        }
         if (value.size / (1024 * 1024) > PROFILE_PIC.maxsize) {
           return ctx.createError({
             message: ExccedFileSizeLimit(

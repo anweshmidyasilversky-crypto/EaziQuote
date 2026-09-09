@@ -7,12 +7,9 @@ import { CustomInput } from "../../components/common/customInput";
 import { Spinner } from "../../components/ui/spinner";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
-import {
-  saveUserToDb,
-  sendVerificationLink,
-  signUp,
-} from "../../lib/firebaseAuth";
-import { showFirebaseError } from "../../lib/firebase.errors";
+import { signup } from "@/api/auth.api";
+import { deviceType } from "@/types/api.requests.type";
+import { isAxiosError } from "axios";
 
 export function SignupPage() {
   const [isSubmitting, toggleIsSubmitting] = useState(false);
@@ -35,13 +32,18 @@ export function SignupPage() {
     }
     toggleIsSubmitting(true);
     try {
-      const userCredential = await signUp(data);
-      await saveUserToDb(userCredential.user.uid, data);
-      await sendVerificationLink();
-      toast(`Signup Success, Sent verification mail`, { type: "success" });
-      navigate("/");
+      await signup({
+        email: data.email,
+        password: data.password,
+        device_type: deviceType.web,
+      });
+      toast.success(`Signup success, please check mail for verification link`);
+      navigate(`/`);
     } catch (err) {
-      showFirebaseError(err);
+      if (isAxiosError(err)) {
+        toast.error(err.message);
+      }
+      toast.error(`Something went wrong`);
     } finally {
       toggleIsSubmitting(false);
     }

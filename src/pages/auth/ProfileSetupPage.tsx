@@ -14,29 +14,42 @@ import { toast } from "react-toastify";
 import { assets } from "../../assets/icons";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { useNavigate } from "react-router";
-import type { UserType } from "../../types/user.type";
+import { profileSetup } from "@/api/user.api";
+import { isAxiosError } from "axios";
+import { useState } from "react";
+import { CustomBtn } from "@/components/common/CustomBtn";
 
 export function ProfileSetupPage() {
-  const navigate = useNavigate();
   const dispath = useAppDispatch();
   const user = useAppSelector((state) => state.user);
+  const [isSubmitting, toggleIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<UserProfilePayload>({
     defaultValues: {
       name: user.name ?? "",
-      phoneNo: user.phoneNumber ?? "",
+      phoneNo: user.phone ?? "",
     },
     resolver: yupResolver(userProfileSchema),
   });
-  const submitHandler = (data: UserProfilePayload) => {
-    const newUser: Partial<UserType> = {
-      ...data,
-      isUserProfileCreated: true,
-      profileImgUrl: URL.createObjectURL(data.profilePic),
-    };
-    dispath(updateUser(newUser));
-    toast.success("User profile is set up");
-    navigate("/business-profile");
+  const submitHandler = async (data: UserProfilePayload) => {
+    toggleIsSubmitting(true);
+    try {
+      const apiRes = await profileSetup({
+        _method: "put",
+        name: data.name,
+        phone: `+44${data.phoneNo}`,
+        avatar: data.profilePic ?? null,
+      });
+      dispath(updateUser(apiRes.payload));
+      toast.success("User profile is set up");
+    } catch (err) {
+      if (isAxiosError(err)) {
+        toast.error(err.response?.data.message);
+      } else {
+        toast.error((err as Error).message);
+      }
+    } finally {
+      toggleIsSubmitting(false);
+    }
   };
   return (
     <div className="auth-card-offset">
@@ -52,10 +65,10 @@ export function ProfileSetupPage() {
               name="profilePic"
               fieldName="Profile pic"
               withLabel={false}
-              imgAlt={user.profileImgUrl ?? assets.userIcon}
+              imgAlt={user.avatar ?? assets.userIcon}
               imgAltAlign="end"
               imgAltCls={
-                user.profileImgUrl
+                user.avatar
                   ? "object-cover object-center h-full w-full"
                   : undefined
               }
@@ -82,9 +95,13 @@ export function ProfileSetupPage() {
               placeholder="Enter phone number"
             />
 
-            <button type="submit" className="btn-auth">
-              Continue
-            </button>
+            <CustomBtn
+              buttonLabel="Continue"
+              onClick={handleSubmit(submitHandler)}
+              isSubmitting={isSubmitting}
+              className="w-full"
+              btncls="min-h-11"
+            />
           </form>
         </CardContent>
 

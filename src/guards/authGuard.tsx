@@ -6,9 +6,30 @@ export function AuthGuard() {
   const location = useLocation();
   const publicOnlyRoutes = ["/", "/signup", "/forgot-password"];
 
-  if (publicOnlyRoutes.includes(location.pathname)) {
+  if (!publicOnlyRoutes.includes(location.pathname)) {
     if (user.email.length >= 1) {
-      return <Navigate to={"/profile-setup"} replace={true} />;
+      if (
+        !user.is_email_verified &&
+        location.pathname !== "/email-verification"
+      ) {
+        return <Navigate to={"/email-verification"} replace={true} />;
+      }
+
+      const nextProfileStep = !user.is_profile_setup
+        ? "/profile-setup"
+        : !user.is_company_profile_setup
+          ? "/business-profile"
+          : !user.is_company_address_setup
+            ? "/business-address"
+            : undefined;
+
+      if (
+        user.is_email_verified &&
+        nextProfileStep &&
+        location.pathname !== nextProfileStep
+      ) {
+        return <Navigate to={nextProfileStep} replace={true} />;
+      }
     }
   } else {
     if (user.email.length == 0) {

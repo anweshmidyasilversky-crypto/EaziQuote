@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import StripeAdvisoryDialog, {
   type StripeAdvisoryDialogProps,
 } from "./StripeAdvisoryDialog";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 function SettingsIndexPage() {
   const navigate = useNavigate();
@@ -134,8 +134,8 @@ function SettingsIndexPage() {
   ];
 
   return (
-    <>
-      <div className="p-6 flex flex-col gap-4">
+    <div className="flex flex-col justify-between h-full">
+      <div className="p-6 pb-2! flex flex-col gap-4 ">
         <CustomHeader
           header="Settings"
           headerInfo="Personalise your workspace and tools"
@@ -174,7 +174,7 @@ function SettingsIndexPage() {
           {"Privacy Policy"}{" "}
         </a>
       </footer>
-    </>
+    </div>
   );
 }
 
