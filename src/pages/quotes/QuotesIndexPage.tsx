@@ -1,5 +1,6 @@
 import {
   filterFn_includesString,
+  type PaginationState,
   type ColumnDef,
   type TableFeatures,
 } from "@tanstack/react-table";
@@ -16,7 +17,13 @@ import {
   type QuoteData,
 } from "../../constants/dummyData";
 import { useMemo, useState } from "react";
-import { cn, formatCurrency, quoteToDisplayData } from "../../lib/utils";
+import {
+  cn,
+  formatCurrency,
+  formatDisplayDate,
+  formatOrdinalDate,
+  quoteToDisplayData,
+} from "../../lib/utils";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
@@ -38,6 +45,10 @@ import { useNavigate } from "react-router";
 import React from "react";
 import CustomDialog from "../../components/common/CustomDialog";
 import { useAppSelector } from "../../redux/store";
+import { useQuery } from "@tanstack/react-query";
+import { getQuoteList } from "@/api/auth.api";
+import { showErrorToast } from "@/api/axiosInstance";
+import type { Quote } from "@/types/api.responses.type";
 
 export function QuotesIndexPage() {
   // Redux state
@@ -45,45 +56,71 @@ export function QuotesIndexPage() {
   const reduxClients = useAppSelector((state) => state.clients);
 
   // Map Quote[] → QuoteData[] (client name lookup + amount derived from items)
-  const quotes: QuoteData[] = useMemo(
-    () => reduxQuotes.map((q) => quoteToDisplayData(q, reduxClients)),
-    [reduxQuotes, reduxClients],
-  );
+  const navigate = useNavigate();
+  const [searchParam, setSearchParam] = useState("");
+  const debouncedSearchTerm = useDebounce({ value: searchParam, delay: 500 });
+  const [filerOpen, toggleFilterOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: undefined,
+    endDate: undefined,
+  });
+  const [filters, setFilters] = useState<string[]>([]);
+  const [quoteDialogOpen, toggleQuoteDialogOpen] = useState(false);
+  const [presetSelectionOpen, togglePresetSelectionOpen] = useState(false);
+  const [presetSearchTerm, setPresetSearchTerm] = useState("");
+  const debouncedPresetSearchTerm = useDebounce({
+    value: presetSearchTerm,
+    delay: 500,
+  });
 
-  //Summary cards
+  const [pageNo, setPageNo] = useState(1);
+
+  const {
+    data: quotes,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["quotes", pageNo, filters, dateRange],
+    queryFn: () =>
+      getQuoteList({
+        page: pageNo,
+        status: filters,
+        start_date: dateRange.startDate?.toDateString(),
+        end_date: dateRange.endDate?.toDateString(),
+      }),
+  });
+
+  if (isError) {
+    showErrorToast(error);
+  }
+  const QuoteSummmary = quotes?.payload.summary;
+
   const summary: ActivitySummaryProps["summaryConfig"] = useMemo(() => {
-    const accepted = quotes.filter((q) =>
-      ["Accepted", "Sent"].includes(q.status as string),
-    ).length;
-    const pending = quotes.filter((q) => q.status === "Draft").length;
-    const expired = quotes.filter((q) => q.status === "Expired").length;
     return [
       {
         summaryTitle: "Total Quotes",
-        summary: quotes.length,
+        summary: QuoteSummmary?.total_count,
         summaryIcon: assets.invoiceColored,
       },
       {
         summaryTitle: "Accepted",
-        summary: String(accepted),
+        summary: QuoteSummmary?.accepted_count,
         summaryIcon: assets.greenTickIcon,
       },
       {
         summaryTitle: "Pending",
-        summary: String(pending),
+        summary: QuoteSummmary?.pending_count,
         summaryIcon: assets.orangeClockIcon,
       },
       {
         summaryTitle: "Expired",
-        summary: String(expired),
+        summary: QuoteSummmary?.expired_count,
         summaryIcon: assets.OrangeHourGlassIcon,
       },
     ];
   }, [quotes]);
 
-  const navigate = useNavigate();
-
-  const quoteColumns: ColumnDef<TableFeatures, QuoteData>[] = useMemo(
+  const quoteColumns: ColumnDef<TableFeatures, Quote>[] = useMemo(
     () => [
       {
         accessorKey: "title",
@@ -98,7 +135,7 @@ export function QuotesIndexPage() {
         filterFn: filterFn_includesString,
       },
       {
-        accessorKey: "client",
+        accessorKey: "name",
         header: "CLIENT",
         cell: (info) => {
           const client = info.getValue<QuoteData["client"]>();
@@ -108,7 +145,7 @@ export function QuotesIndexPage() {
         filterFn: filterFn_includesString,
       },
       {
-        accessorKey: "amount",
+        accessorKey: "price",
         header: "AMOUNT",
         cell: (info) => formatCurrency(info.getValue<number>()),
         enableGlobalFilters: false,
@@ -125,14 +162,26 @@ export function QuotesIndexPage() {
         enableGlobalFilters: false,
       },
       {
-        accessorKey: "creationDate",
+        accessorKey: "created_at",
         header: "CREATION DATE",
+        cell: (info) => {
+          const date = info.getValue<string | undefined>();
+          if (date) {
+            return formatDisplayDate(date);
+          }
+        },
         enableSorting: false,
         enableGlobalFilters: false,
       },
       {
-        accessorKey: "expiryDate",
+        accessorKey: "expiry_at",
         header: "EXPIRY DATE",
+        cell: (info) => {
+          const date = info.getValue<string | undefined>();
+          if (date) {
+            return formatDisplayDate(date);
+          }
+        },
         enableSorting: false,
         enableGlobalFilters: false,
       },
@@ -145,6 +194,7 @@ export function QuotesIndexPage() {
             <CustomActionGroup
               openFn={() => navigate(`/quotes/${quote.id}`)}
               editFn={() => navigate(`/quotes/manage-quotes/${quote.id}`)}
+              withEdit={row.original.is_editable}
             />
           );
         },
@@ -215,22 +265,6 @@ export function QuotesIndexPage() {
     [],
   );
 
-  const [searchParam, setSearchParam] = useState("");
-  const debouncedSearchTerm = useDebounce({ value: searchParam, delay: 500 });
-  const [filerOpen, toggleFilterOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: undefined,
-    endDate: undefined,
-  });
-  const [filters, setFilters] = useState<string[]>([]);
-  const [quoteDialogOpen, toggleQuoteDialogOpen] = useState(false);
-  const [presetSelectionOpen, togglePresetSelectionOpen] = useState(false);
-  const [presetSearchTerm, setPresetSearchTerm] = useState("");
-  const debouncedPresetSearchTerm = useDebounce({
-    value: presetSearchTerm,
-    delay: 500,
-  });
-
   const btnConfigList: CustomBtnProps[] = [
     {
       leftIcon: assets.plusIcon,
@@ -256,7 +290,7 @@ export function QuotesIndexPage() {
         <div className="table-theme">
           <CustomDataTable
             columns={quoteColumns}
-            data={quotes}
+            data={quotes?.payload.data ?? []}
             tableOptionsLeft={
               <SearchInputGruop
                 searchTerm={searchParam}

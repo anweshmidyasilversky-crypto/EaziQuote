@@ -8,10 +8,3 @@ export interface BusinessProfilePayload {
   vatRegistered: boolean;
   vatNumber?: string;
 }
-
-export interface BuisnessProfileApiPayload {
-  name: string;
-  phone: string;
-  brand_color: string;
-  vat_number?: string;
-}

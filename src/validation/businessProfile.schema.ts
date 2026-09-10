@@ -86,4 +86,6 @@ export const BusinessProfilePayloadSchema: yup.ObjectSchema<BusinessProfilePaylo
       }),
 
     trade: yup.string().required(notSelectedMsg("Trade")),
+
+    showBusinessName: yup.boolean().optional(),
   });

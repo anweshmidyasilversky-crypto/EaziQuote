@@ -20,6 +20,8 @@ interface CustomComboboxProps<T, V = T> {
   selected?: T;
   inputLeftNode?: React.ReactNode;
   inputRightNode?: React.ReactNode;
+  inptFieldValue?: string;
+  inptFieldChange?: (data: string) => void;
 }
 
 export function CustomCombobox<T, V = T>({
@@ -33,6 +35,8 @@ export function CustomCombobox<T, V = T>({
   selected,
   inputLeftNode,
   inputRightNode,
+  inptFieldValue,
+  inptFieldChange,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(
     selected ? getItemLabel(selected) : null,
@@ -51,12 +55,15 @@ export function CustomCombobox<T, V = T>({
       itemToStringValue={(item) => {
         return getItemLabel(item);
       }}
+      filter={null}
     >
       <div className="flex gap-2 h-11 items-center w-full">
         {inputLeftNode}
         <ComboboxInput
           placeholder={placeholder}
           className={`input-field h-full max-h-11 grow ${className}`}
+          value={inptFieldValue}
+          onChange={(e) => inptFieldChange?.(e.target.value)}
         />
         {inputRightNode}
       </div>

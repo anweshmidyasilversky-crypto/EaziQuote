@@ -4,10 +4,15 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
 import App from "./App.tsx";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+
+const client = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-  <TooltipProvider>
-    <App />
-    <ToastContainer />
-  </TooltipProvider>,
+  <QueryClientProvider client={client}>
+    <TooltipProvider>
+      <App />
+      <ToastContainer />
+    </TooltipProvider>
+  </QueryClientProvider>,
 );

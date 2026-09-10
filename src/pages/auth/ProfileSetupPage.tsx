@@ -15,9 +15,9 @@ import { assets } from "../../assets/icons";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { profileSetup } from "@/api/user.api";
-import { isAxiosError } from "axios";
 import { useState } from "react";
 import { CustomBtn } from "@/components/common/CustomBtn";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export function ProfileSetupPage() {
   const dispath = useAppDispatch();
@@ -33,20 +33,22 @@ export function ProfileSetupPage() {
   const submitHandler = async (data: UserProfilePayload) => {
     toggleIsSubmitting(true);
     try {
-      const apiRes = await profileSetup({
-        _method: "put",
-        name: data.name,
-        phone: `+44${data.phoneNo}`,
-        avatar: data.profilePic ?? null,
-      });
+      const formData = new FormData();
+      formData.append("_method", "put");
+      formData.append("name", data.name);
+      formData.append("phone", `+44${data.phoneNo}`);
+      formData.append(
+        "avatar",
+        data.profilePic
+          ? new Blob([data.profilePic], { type: data.profilePic.type })
+          : new Blob(),
+      );
+      console.log(Object.fromEntries(formData));
+      const apiRes = await profileSetup(formData);
       dispath(updateUser(apiRes.payload));
       toast.success("User profile is set up");
     } catch (err) {
-      if (isAxiosError(err)) {
-        toast.error(err.response?.data.message);
-      } else {
-        toast.error((err as Error).message);
-      }
+      showErrorToast(err);
     } finally {
       toggleIsSubmitting(false);
     }

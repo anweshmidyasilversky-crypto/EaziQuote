@@ -22,17 +22,25 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 import { BrandColorPreview } from "../../components/auth/brandColor.preview";
-import type { UserType } from "../../types/user.type";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import type { User } from "../../types/api.responses.type";
+import { businessProfileSetup } from "@/api/user.api";
+import { isAxiosError } from "axios";
+import { CustomBtn } from "@/components/common/CustomBtn";
+import { useMutation } from "@tanstack/react-query";
 
 export function BusinessProfileForm() {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
+  const [isSubmitting, toggleIsSubmitting] = useState(false);
+
+  const { mutateAsync: createBusinessProfile } = useMutation({
+    mutationKey: ["companyProfile"],
+    mutationFn: (data: FormData) => businessProfileSetup(data),
+  });
 
   const { control, handleSubmit } = useForm<BusinessProfilePayload>({
     defaultValues: {
@@ -47,14 +55,40 @@ export function BusinessProfileForm() {
   });
 
   const submitHandler = async (data: BusinessProfilePayload) => {
-    const businessProfile: Partial<UserType> & Partial<User> = {
-      ...data,
-      is_company_profile_setup: true,
-      businessLogoUrl: URL.createObjectURL(data.brandLogo as File),
-    };
-    dispath(updateUser(businessProfile));
-    toast.success("Business profile complete");
-    navigate("/business-address");
+    toggleIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append("name", data.businessName);
+      formData.append("phone", `+44${data.businessPhoneNo}`);
+      formData.append("address", "dummyAddress");
+      formData.append("_method", "put");
+      if (data.vatNumber) {
+        formData.append("vat_number", data.vatNumber);
+      }
+      if (data.brandLogo) {
+        formData.append(
+          "logo",
+          new Blob([data.brandLogo], { type: data.brandLogo.type }),
+        );
+      }
+      const businessProfile = await createBusinessProfile(formData);
+      dispath(
+        updateUser({
+          is_company_profile_setup: true,
+          ...businessProfile.payload,
+        }),
+      );
+      toast.success("Business profile complete");
+      navigate("/business-address");
+    } catch (err) {
+      if (isAxiosError(err)) {
+        toast.error(err.response?.data.message);
+      } else {
+        toast.error((err as Error).message);
+      }
+    } finally {
+      toggleIsSubmitting(false);
+    }
   };
 
   const [chosenColor, isVatRegistered] = useWatch({
@@ -191,15 +225,14 @@ export function BusinessProfileForm() {
                 />
               )}
 
-              <button
-                className="btn-auth"
-                onClick={(e) => {
-                  e.preventDefault();
+              <CustomBtn
+                className="w-full"
+                onClick={() => {
                   handleSubmit(submitHandler)();
                 }}
-              >
-                Continue
-              </button>
+                buttonLabel="Continue"
+                isSubmitting={isSubmitting}
+              />
             </div>
           </CardFooter>
         </Card>

@@ -5,7 +5,7 @@ export interface ActivitySummaryProps {
   summaryConfig: {
     summaryTitle: string;
     summaryIcon: string;
-    summary: number | string;
+    summary: number | string | undefined;
   }[];
 }
 
@@ -26,7 +26,7 @@ export function ActivitySummary({ summaryConfig }: ActivitySummaryProps) {
                 className="h-5 w-5 sm:h-6 sm:w-6 object-contain shrink-0"
               />
               <span className="font-semibold text-sm sm:text-base truncate">
-                {summaryDet.summary}
+                {summaryDet.summary ?? "0"}
               </span>
             </div>
           </div>

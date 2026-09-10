@@ -345,21 +345,17 @@
 
 @layer utilities {
   .select-input-style {
-    /* 1. SUPPRESS ALL DEFAULT OS INPUT AND ARROW GRAPHICS */
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     outline: none;
 
-    /* 2. POSITION THE FIGMA CHEVRON ARROW VECTOR */
-    /* Dimensions matching your specs exactly: Width 12.14px, Height 6.07px, Stroke 1.25px #2D2D2D */
+
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 1.5rem 1.5rem;
     background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==");
 
-    /* 3. PADDING ALIGNMENT */
-    /* Extra padding on the right edge prevents select option text from overlapping your custom arrow */
     padding-right: 32px;
   }
 

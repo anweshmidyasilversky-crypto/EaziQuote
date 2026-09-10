@@ -1,17 +1,22 @@
 import { assets } from "../../assets/icons";
 import { SignInPage } from "./SigninPage";
 import { toast } from "react-toastify";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Spinner } from "../../components/ui/spinner";
 import { useAppSelector } from "@/redux/store";
 import { sendEmailVerification } from "@/api/auth.api";
 import { isAxiosError } from "axios";
+import { useNavigate } from "react-router";
 export function UnverifiedEmail() {
   const [isSendingLink, toggleIsSendingLink] = useState(false);
-  const auth = useAppSelector((state) => state.auth);
-  if (auth.apiToken.length === 0) {
-    return <SignInPage />;
-  }
+  const user = useAppSelector((state) => state.user);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user.is_email_verified) {
+      navigate("/", { replace: true });
+    }
+  }, []);
 
   const handleClick = async () => {
     toggleIsSendingLink(true);

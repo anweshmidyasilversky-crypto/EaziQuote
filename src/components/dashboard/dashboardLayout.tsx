@@ -8,7 +8,7 @@ export function DashboardLayout() {
   const [activeBtn, toggleActiveBtn] = useState<string>("dashboard");
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
-  const endDate = new Date(user.endDate);
+  const endDate = new Date(user.subscription_ended_at ?? new Date());
   const btnIcon = (btnId: string, activeIcon: string, inActiveIcon: string) =>
     btnId === activeBtn ? activeIcon : inActiveIcon;
   const btnConfig: {
@@ -102,7 +102,9 @@ export function DashboardLayout() {
             {/* Subscription end detail */}
             <div className="w-80.25 min-h-8 flex gap-3 items-center">
               <span className="max-h-4.75 w-auto max-w-53 font-sans text-xs md:text-sm text-placeholder-text">
-                {`${user.isSubscribed ? "Plan" : "Free trial"} ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
+                {user.is_trial_period &&
+                  `Free trial ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
+                {`Plan ${user.is_subscription_active ? "ends" : "ended"} on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
               </span>
 
               <button
@@ -127,10 +129,9 @@ export function DashboardLayout() {
               </div>
 
               <div className="flex p-4.5 gap-3 items-center bg-header-user-det overflow-hidden">
-                <CustomAvatar src={assets.userImg} fallback="U" />
+                <CustomAvatar src={user.avatar ?? ""} fallback="U" />
                 <span className="font-sans font-medium text-[14px] min-h-4.25 max-w-21.5 text-wrap">
-                  {" "}
-                  Matt Potts{" "}
+                  {user.name}
                 </span>
               </div>
             </div>

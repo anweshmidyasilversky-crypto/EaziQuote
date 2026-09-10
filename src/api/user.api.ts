@@ -1,9 +1,7 @@
-import type { ProfileCreateApiPayload } from "@/types/userProfile.payload.type";
 import { axiosInstance } from "./axiosInstance";
 import type { ApiResponse, User } from "@/types/api.responses.type";
-import type { BuisnessProfileApiPayload } from "@/types/businessProfile.payload.type";
 
-export const profileSetup = async (payload: ProfileCreateApiPayload) => {
+export const profileSetup = async (payload: FormData) => {
   try {
     const res = await axiosInstance.post<ApiResponse<Partial<User>>>(
       `/user/profile-setup`,
@@ -15,8 +13,29 @@ export const profileSetup = async (payload: ProfileCreateApiPayload) => {
   }
 };
 
-export const businessProfileSetup = async (payload: BuisnessProfileApiPayload) => {
-    try {
-        const res = await 
-    }
-}
+export const businessProfileSetup = async (payload: FormData) => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<Partial<User>>>(
+      `/company`,
+      payload,
+    );
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const addBusinessAddress = async (payload: FormData) => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<Partial<User>>>(
+      `/company`,
+      {
+        _method: "put",
+        ...payload,
+      },
+    );
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+};

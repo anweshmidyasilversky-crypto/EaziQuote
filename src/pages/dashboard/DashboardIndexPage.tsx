@@ -8,72 +8,34 @@ import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { NotificationCard } from "../../components/dashboard/notification.card";
 import { notifications, type TransactionItem } from "../../constants/dummyData";
-import {
-  formatCurrency,
-  formatDisplayDate,
-  formatOrdinalDate,
-  getQuoteAmount,
-} from "../../lib/utils";
+import { formatOrdinalDate } from "../../lib/utils";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";
-import { useMemo, useState } from "react";
-import { useAppSelector } from "../../redux/store";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getHomePage } from "@/api/auth.api";
+import { showErrorToast } from "@/api/axiosInstance";
+import type { DashboardActivityItem } from "@/types/api.responses.type";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
 
-  // ── Redux state ─────────────────────────────────────────────────────────────
-  const reduxQuotes = useAppSelector((state) => state.quotes);
-  const reduxClients = useAppSelector((state) => state.clients);
+  const {
+    data: homePage,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: getHomePage,
+  });
 
-  // Derive transactionItems from Redux quotes (most recent first)
-  const transactionItems: TransactionItem[] = useMemo(() => {
-    return [...reduxQuotes]
-      .sort(
-        (a, b) =>
-          new Date(b.quoteDate).getTime() - new Date(a.quoteDate).getTime(),
-      )
-      .map((q) => {
-        const client = reduxClients.find((c) => c.id === q.clientId);
-        const amount = getQuoteAmount(q); // sum of item totals
-        return {
-          id: q.id,
-          title: q.title,
-          quoteInvoice: q.referenceNumber,
-          client: client?.name ?? "Unknown Client",
-          amount: formatCurrency(amount),
-          status: q.status as TransactionItem["status"],
-          creationDate: formatDisplayDate(q.quoteDate),
-          expiryDueDate: formatDisplayDate(q.expiryDate),
-        };
-      });
-  }, [reduxQuotes, reduxClients]);
+  if (isError) {
+    showErrorToast(error);
+  }
 
-  // ── KPI metrics derived from Redux ──────────────────────────────────────────
-  const kpiValues = useMemo(() => {
-    const sentQuotes = reduxQuotes.filter((q) => q.status === "Sent");
-    const draftQuotes = reduxQuotes.filter((q) => q.status === "Draft");
-    const acceptedLast30 = reduxQuotes.filter((q) => q.status === "Accepted");
-
-    const outstandingTotal = sentQuotes.reduce(
-      (sum, q) => sum + getQuoteAmount(q),
-      0,
-    );
-    const pendingTotal = draftQuotes.reduce(
-      (sum, q) => sum + getQuoteAmount(q),
-      0,
-    );
-
-    return {
-      outstanding: formatCurrency(outstandingTotal),
-      pending: formatCurrency(pendingTotal),
-      acceptedCount: String(acceptedLast30.length),
-    };
-  }, [reduxQuotes]);
-
-  const columns: ColumnDef<TableFeatures, TransactionItem>[] = [
+  const columns: ColumnDef<TableFeatures, DashboardActivityItem>[] = [
     {
       accessorKey: "title",
       header: "TITLE",
@@ -132,25 +94,40 @@ export function DashboardIndexPage() {
   const kpiCardConfig: KpiCardProps[] = [
     {
       title: "Outstanding Invoices",
-      value: kpiValues.outstanding,
+      value:
+        homePage?.payload.invoiceDetails.outstanding_invoices_amount?.toString() ??
+        "",
       kpiIcon: assets.invoiceColored,
       iconCls: "bg-transparent-royal-blue",
     },
     {
       title: "Pending Quotes",
-      value: kpiValues.pending,
+      value:
+        homePage?.payload.quoteDetails.pending_quotes_amount?.toString() ?? "",
       kpiIcon: assets.clockColored,
       iconCls: "bg-transparent-liquid-lava",
     },
     {
       title: "Money due this week",
-      value: "£32,580",
-      kpiIcon: assets.poundColored,
+      value:
+        homePage?.payload.financialSummary.money_due_this_week?.toString() ??
+        "",
+      kpiIcon: assets.greenPoundIcon,
       iconCls: "bg-transparent-ming-green",
     },
     {
       title: "Quotes Accepted (Last 30 Days)",
-      value: kpiValues.acceptedCount,
+      value:
+        homePage?.payload.recentActivities
+          .reduce(
+            (acc, activity) =>
+              acc +
+              Number(
+                activity.type === "quote" && activity.status === "accepted",
+              ),
+            0,
+          )
+          .toString() ?? "",
       kpiIcon: assets.invoiceColored,
       iconCls: "bg-transparent-royal-blue",
     },
@@ -215,7 +192,10 @@ export function DashboardIndexPage() {
             {" "}
             Recent Activity{" "}
           </span>
-          <CustomDataTable columns={columns} data={transactionItems} />
+          <CustomDataTable
+            columns={columns}
+            data={homePage?.payload.recentActivities ?? []}
+          />
         </div>
       </div>
 

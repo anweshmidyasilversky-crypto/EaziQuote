@@ -1,6 +1,11 @@
-import type { SignupPayload } from "@/types/api.requests.type";
+import type { PageFilters, SignupPayload } from "@/types/api.requests.type";
 import { axiosInstance } from "./axiosInstance";
-import type { ApiResponse, User } from "@/types/api.responses.type";
+import {
+  type ApiResponse,
+  type User,
+  type DashboardResponse,
+  type QuoteListResponse,
+} from "@/types/api.responses.type";
 
 export const signup = async (payload: SignupPayload) => {
   try {
@@ -27,5 +32,29 @@ export const sendEmailVerification = async () => {
     await axiosInstance.post(`/auth/send-verification-email`);
   } catch (error) {
     throw error;
+  }
+};
+
+export const getHomePage = async () => {
+  try {
+    const activities =
+      await axiosInstance.get<ApiResponse<DashboardResponse>>(`/home`);
+    return activities.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getQuoteList = async (filters: PageFilters) => {
+  try {
+    const quoteList = await axiosInstance.get<ApiResponse<QuoteListResponse>>(
+      `/quotes`,
+      {
+        params: { ...filters },
+      },
+    );
+    return quoteList.data;
+  } catch (err) {
+    throw err;
   }
 };

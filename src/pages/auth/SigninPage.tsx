@@ -54,7 +54,7 @@ export function SignInPage() {
       }
     } catch (err) {
       if (isAxiosError(err)) {
-        toast.error(err.message);
+        toast.error(err.response?.data.message);
       } else {
         toast.error(`Something went wrong`);
       }

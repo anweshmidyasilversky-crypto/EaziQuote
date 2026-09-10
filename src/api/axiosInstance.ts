@@ -17,10 +17,15 @@ axiosInstance.interceptors.request.use((request) => {
   return request;
 });
 
-export const handleError = (error: unknown) => {
+axiosInstance.interceptors.response.use((response) => {
+  console.log(response.data);
+  return response;
+});
+
+export const showErrorToast = (error: unknown) => {
   if (isAxiosError(error)) {
-    toast.error(error.message);
+    toast.error(error.response?.data.message);
   } else {
-    toast.error(`Something went wrong`);
+    toast.error((error as Error).message ?? `Something went wrong`);
   }
 };

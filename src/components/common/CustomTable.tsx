@@ -23,6 +23,9 @@ import { assets } from "../../assets/icons";
 import { memo, useEffect, useState } from "react";
 import { Separator } from "../ui/separator";
 import React from "react";
+import type { MetaBtn } from "@/types/api.responses.type";
+import { CustomBtn } from "./CustomBtn";
+import { cn } from "@/lib/utils";
 
 export interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<TableFeatures, TData>[];
@@ -34,6 +37,14 @@ export interface DataTableProps<TData extends RowData> {
   globalFilterTerm?: string;
   localFilters?: ColumnFiltersState;
   showPaginated?: boolean;
+
+  paginationBtns?: MetaBtn[];
+  totalRecords?: number;
+  startItemNo?: number;
+  endItemNo?: number;
+  currPageNo?: number;
+  setPageNo?: React.Dispatch<React.SetStateAction<number>>;
+  lastPageNo?: number;
 
   tableOptionsLeft?: React.ReactNode;
   tableOptionsRight?: React.ReactNode;
@@ -53,6 +64,14 @@ function CustomTable<TData extends RowData>({
   localFilters,
   showPaginated,
 
+  paginationBtns,
+  startItemNo,
+  endItemNo,
+
+  currPageNo,
+  setPageNo,
+  lastPageNo,
+
   tableOptionsLeft,
   tableOptionsRight,
   withFooterBorder,
@@ -66,8 +85,6 @@ function CustomTable<TData extends RowData>({
   const [rowSelection, setRowSelection] = useState({});
   const data = renderData ?? [];
   const totalRecords = data?.length ?? 0;
-  let startItemNo: number | undefined;
-  let endItemNo: number | undefined;
   if (pagination) {
     startItemNo =
       pagination && data.length > 0
@@ -285,7 +302,7 @@ function CustomTable<TData extends RowData>({
         </div>
 
         {/* Table Footer only if pagination is applied*/}
-        {showPaginated && pagination && (
+        {/* {showPaginated && pagination && (
           <div className="flex justify-between items-center gap-2 px-6 pt-6">
             <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
               {" "}
@@ -293,7 +310,7 @@ function CustomTable<TData extends RowData>({
               {totalRecords} items{" "}
             </span>
 
-            {/* Pagination Navigation buttons */}
+            
             <div className="w-fit flex justify-between gap-2 min-h-8 items-center">
               <button
                 type="button"
@@ -304,7 +321,7 @@ function CustomTable<TData extends RowData>({
                 <span> Previous </span>
               </button>
 
-              {/* First page + left ellipsis */}
+              
               {startPage > 0 && (
                 <>
                   <button
@@ -329,7 +346,7 @@ function CustomTable<TData extends RowData>({
                 </>
               )}
 
-              {/* Current page window */}
+              
               {pageNumbers.map((pageIndex) => (
                 <button
                   key={pageIndex}
@@ -349,7 +366,7 @@ function CustomTable<TData extends RowData>({
                 </button>
               ))}
 
-              {/* Right ellipsis + last page */}
+              
               {endPage < pageCount - 1 && (
                 <>
                   {endPage < pageCount - 2 && (
@@ -386,6 +403,51 @@ function CustomTable<TData extends RowData>({
               >
                 <span>Next</span>
               </button>
+            </div>
+          </div>
+        )} */}
+
+        {showPaginated && (
+          <div className="flex justify-between items-center gap-2 px-6 pt-6">
+            <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
+              {" "}
+              Showing <b> {startItemNo} </b> to <b> {endItemNo} </b> of{" "}
+              {totalRecords} items{" "}
+            </span>
+
+            <div className="w-fit flex justify-between gap-2 min-h-8 items-center">
+              {paginationBtns?.map((paginationBtn, index) => {
+                let label = paginationBtn.label;
+                if (index === 0) {
+                  label = "Previous";
+                } else if (index === paginationBtns?.length - 1) {
+                  label = "Next";
+                }
+                return (
+                  <CustomBtn
+                    key={label}
+                    buttonLabel={label}
+                    disabled={!paginationBtn.active}
+                    onClick={() => {
+                      if (index === 0) {
+                        setPageNo?.(Math.max(1, (currPageNo as number) - 1));
+                      } else if (index === paginationBtns?.length - 1) {
+                        setPageNo?.(
+                          Math.min(
+                            lastPageNo as number,
+                            (currPageNo as number) + 1,
+                          ),
+                        );
+                      } else {
+                        setPageNo?.(Number(label));
+                      }
+                    }}
+                    btncls={cn(
+                      `table-pagination-btn-common translate-y-0 ${paginationBtn.active ? `` : `table-pagination-btn-inactive hover:bg-transparent hover:text-black-text`}`,
+                    )}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
