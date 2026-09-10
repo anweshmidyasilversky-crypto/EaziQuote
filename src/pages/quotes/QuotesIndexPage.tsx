@@ -44,18 +44,12 @@ import { CustomHeader } from "../../components/common/CustomHeader";
 import { useNavigate } from "react-router";
 import React from "react";
 import CustomDialog from "../../components/common/CustomDialog";
-import { useAppSelector } from "../../redux/store";
 import { useQuery } from "@tanstack/react-query";
 import { getQuoteList } from "@/api/auth.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import type { Quote } from "@/types/api.responses.type";
 
 export function QuotesIndexPage() {
-  // Redux state
-  const reduxQuotes = useAppSelector((state) => state.quotes);
-  const reduxClients = useAppSelector((state) => state.clients);
-
-  // Map Quote[] → QuoteData[] (client name lookup + amount derived from items)
   const navigate = useNavigate();
   const [searchParam, setSearchParam] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchParam, delay: 500 });
@@ -79,6 +73,7 @@ export function QuotesIndexPage() {
     data: quotes,
     isError,
     error,
+    isFetching,
   } = useQuery({
     queryKey: ["quotes", pageNo, filters, dateRange],
     queryFn: () =>
@@ -89,6 +84,9 @@ export function QuotesIndexPage() {
         end_date: dateRange.endDate?.toDateString(),
       }),
   });
+  const quoteItemStartNo =
+    (pageNo - 1) * (quotes?.payload.meta.per_page ?? 0) + 1;
+  const quoteItemEndNo = quoteItemStartNo + (quotes?.payload.data?.length ?? 0);
 
   if (isError) {
     showErrorToast(error);
@@ -303,6 +301,13 @@ export function QuotesIndexPage() {
             }
             globalFilterTerm={debouncedSearchTerm}
             showPaginated={true}
+            paginationBtns={quotes?.payload.meta.links}
+            currPageNo={pageNo}
+            lastPageNo={quotes?.payload.meta.last_page}
+            startItemNo={quoteItemStartNo}
+            endItemNo={quoteItemEndNo}
+            setPageNo={setPageNo}
+            isFetching={isFetching}
           />
         </div>
 

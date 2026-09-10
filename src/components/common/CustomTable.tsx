@@ -26,6 +26,7 @@ import React from "react";
 import type { MetaBtn } from "@/types/api.responses.type";
 import { CustomBtn } from "./CustomBtn";
 import { cn } from "@/lib/utils";
+import { Spinner } from "../ui/spinner";
 
 export interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<TableFeatures, TData>[];
@@ -45,6 +46,7 @@ export interface DataTableProps<TData extends RowData> {
   currPageNo?: number;
   setPageNo?: React.Dispatch<React.SetStateAction<number>>;
   lastPageNo?: number;
+  isFetching?: boolean;
 
   tableOptionsLeft?: React.ReactNode;
   tableOptionsRight?: React.ReactNode;
@@ -71,6 +73,7 @@ function CustomTable<TData extends RowData>({
   currPageNo,
   setPageNo,
   lastPageNo,
+  isFetching,
 
   tableOptionsLeft,
   tableOptionsRight,
@@ -234,70 +237,78 @@ function CustomTable<TData extends RowData>({
                 </tr>
               ))}
             </thead>
-            <tbody>
-              {table.getRowModel().rows.length === 0 ? (
-                <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td
-                    colSpan={table.getVisibleLeafColumns().length}
-                    className="py-4 text-sm font-normal text-slate-600 whitespace-nowrap text-center"
-                  >
-                    <div className="flex flex-col gap-4.5">
-                      <Separator className={`bg-separator`} />
-                      No results found
-                      <Separator className={`bg-separator`} />
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
-                      >
-                        {<table.FlexRender cell={cell} />}
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              )}
-            </tbody>
 
-            {/* Table Footer */}
-            <tfoot>
-              {withFooterBorder && (
-                <tr className="h-4 pointer-events-none select-none">
-                  <td colSpan={table.getVisibleFlatColumns().length}>
-                    {" "}
-                    <Separator className={`bg-separator`} />{" "}
-                  </td>
-                </tr>
-              )}
-              {table.getFooterGroups().map((footerGroup) => (
-                <tr
-                  key={footerGroup.id}
-                  className="hover:bg-slate-50/50 transition-colors"
-                >
-                  {footerGroup.headers.map((header) => (
-                    <td
-                      key={header.id}
-                      className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+            {isFetching ? (
+              <div className="flex w-screen items-center justify-center ">
+                <Spinner className="text-brand-dark w-15 h-15 aspect-square" />
+              </div>
+            ) : (
+              <>
+                <tbody>
+                  {table.getRowModel().rows.length === 0 ? (
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td
+                        colSpan={table.getVisibleLeafColumns().length}
+                        className="py-4 text-sm font-normal text-slate-600 whitespace-nowrap text-center"
+                      >
+                        <div className="flex flex-col gap-4.5">
+                          <Separator className={`bg-separator`} />
+                          No results found
+                          <Separator className={`bg-separator`} />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className="hover:bg-slate-50/50 transition-colors"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                          >
+                            {<table.FlexRender cell={cell} />}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+
+                <tfoot>
+                  {withFooterBorder && (
+                    <tr className="h-4 pointer-events-none select-none">
+                      <td colSpan={table.getVisibleFlatColumns().length}>
+                        {" "}
+                        <Separator className={`bg-separator`} />{" "}
+                      </td>
+                    </tr>
+                  )}
+                  {table.getFooterGroups().map((footerGroup) => (
+                    <tr
+                      key={footerGroup.id}
+                      className="hover:bg-slate-50/50 transition-colors"
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.footer,
-                            header.getContext(),
-                          )}
-                    </td>
+                      {footerGroup.headers.map((header) => (
+                        <td
+                          key={header.id}
+                          className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.footer,
+                                header.getContext(),
+                              )}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
-              ))}
-            </tfoot>
+                </tfoot>
+              </>
+            )}
           </table>
         </div>
 

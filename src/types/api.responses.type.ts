@@ -202,24 +202,24 @@ export interface Quote {
   is_editable: boolean;
 }
 
-export interface QuoteListLinks {
+export interface Links {
   first: string;
   last: string;
   prev: string | null;
   next: string | null;
 }
 
-export interface QuoteListMetaLink {
+export interface MetaBtn {
   url: string | null;
   label: string;
   active: boolean;
 }
 
-export interface QuoteListMeta {
+export interface ApiResponseMeta {
   current_page: number;
   from: number;
   last_page: number;
-  links: QuoteListMetaLink[];
+  links: MetaBtn[];
   path: string;
   per_page: number;
   to: number;
@@ -234,6 +234,6 @@ export interface QuoteListResponse {
     pending_count: number;
   };
   data: Quote[];
-  links: QuoteListLinks;
-  meta: QuoteListMeta;
+  links: Links;
+  meta: ApiResponseMeta;
 }
