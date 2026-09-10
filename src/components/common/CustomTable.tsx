@@ -239,9 +239,13 @@ function CustomTable<TData extends RowData>({
             </thead>
 
             {isFetching ? (
-              <div className="flex w-screen items-center justify-center ">
-                <Spinner className="text-brand-dark w-15 h-15 aspect-square" />
-              </div>
+              <tr className="w-full">
+                <td colSpan={table.getVisibleLeafColumns().length}>
+                  <div className="flex items-center justify-center p-2">
+                    <Spinner className="text-brand-dark w-15 h-15 aspect-square" />
+                  </div>
+                </td>
+              </tr>
             ) : (
               <>
                 <tbody>
