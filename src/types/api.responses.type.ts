@@ -132,6 +132,7 @@ export enum QuoteStatus {
   approved = "approved",
   sent = "sent",
   draft = "draft",
+  accepted = "accepted",
 }
 
 export interface QuoteActivity extends BaseActivity {

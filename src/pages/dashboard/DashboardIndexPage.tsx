@@ -175,7 +175,6 @@ export function DashboardIndexPage() {
         company_name: client.companyName,
         address: client.street,
         postcode: client.postCode,
-        phone: `+44${client.phone}`,
       });
       toast.success(response.message);
     } catch (err) {
