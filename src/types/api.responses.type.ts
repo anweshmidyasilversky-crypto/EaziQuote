@@ -202,14 +202,14 @@ export interface Quote {
   is_editable: boolean;
 }
 
-export interface Links {
+export interface PaginationLinks {
   first: string;
   last: string;
   prev: string | null;
   next: string | null;
 }
 
-export interface MetaBtn {
+export interface PaginationBtnMeta {
   url: string | null;
   label: string;
   active: boolean;
@@ -219,7 +219,7 @@ export interface ApiResponseMeta {
   current_page: number;
   from: number;
   last_page: number;
-  links: MetaBtn[];
+  links: PaginationBtnMeta[];
   path: string;
   per_page: number;
   to: number;
@@ -234,6 +234,32 @@ export interface QuoteListResponse {
     pending_count: number;
   };
   data: Quote[];
-  links: Links;
+  links: PaginationLinks;
   meta: ApiResponseMeta;
+}
+
+export interface Notification {
+  id: null | string;
+  title: string;
+  message: string;
+  type: string;
+  landing_screen: string;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  data: Notification[];
+  links: PaginationLinks;
+  meta: ApiResponseMeta;
+}
+
+export interface Client {
+  id: number;
+  name: string;
+  company_name: string;
+  phone: string;
+  email: string;
+  address: string;
+  created_at: string;
+  updated_at: string;
 }

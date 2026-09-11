@@ -1,3 +1,5 @@
+import type { Method } from "axios";
+
 export enum deviceType {
   android = "android",
   ios = "ios",
@@ -36,4 +38,20 @@ export interface PageFilters {
   status?: string[];
   start_date?: string;
   end_date?: string;
+}
+
+export interface ClientCreateApiPayload {
+  email?: string;
+  phone: string;
+  name: string;
+  company_name: string;
+  address: string;
+  brand_color?: string;
+  city: string;
+  postcode: string;
+  country: string;
+}
+
+export interface UpdateClientApiPayload extends Partial<ClientCreateApiPayload> {
+  _method: Method;
 }

@@ -24,7 +24,7 @@ axiosInstance.interceptors.response.use((response) => {
 
 export const showErrorToast = (error: unknown) => {
   if (isAxiosError(error)) {
-    toast.error(error.response?.data.message);
+    toast.error(error.response?.data.message ?? error.message);
   } else {
     toast.error((error as Error).message ?? `Something went wrong`);
   }

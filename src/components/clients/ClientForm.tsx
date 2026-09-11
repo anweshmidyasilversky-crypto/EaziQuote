@@ -4,20 +4,21 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { clientCreationSchema } from "../../validation/clientCreation.payload.schema";
 import { CustomInput } from "../common/customInput";
 import { Separator } from "../ui/separator";
-import { getAddress } from "../../lib/utils";
-import { postalCodes, type AddressDetail } from "../../constants/dummyData";
 import { PostCodeSelectComboBox } from "../common/PostCodeSelectComboBox";
 import React, { useState } from "react";
 import { FormLayout } from "../common/FormLayout";
 import { type ClientEditPayload } from "../../types/clientEdit.payload.type";
+import type { AddressDetails } from "@/types/api.responses.type";
+import { showErrorToast } from "@/api/axiosInstance";
+import { toast } from "react-toastify";
 
 export type ClientFormProps = {
   isFormOpen: boolean;
   toggleFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
   children?: React.ReactNode;
   mode: "creation" | "updation";
-  clientCreatFn?: (data: ClientCreationPayload) => void;
-  clientEditFn?: (data: ClientEditPayload) => void;
+  clientCreatFn?: (data: ClientCreationPayload) => void | Promise<void>;
+  clientEditFn?: (data: ClientEditPayload) => void | Promise<void>;
   defaultValues?: DefaultValues<ClientCreationPayload | ClientEditPayload>;
 };
 
@@ -52,30 +53,32 @@ export function ClientForm({
   if (defaultValues) {
     setValues(defaultValues);
   }
-  const [postCode, selectPostCode] = useState<string | null>(null);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const setAddress = (postCode: string) => {
-    const address = getAddress(postCode);
-    if (address) {
-      Object.keys(address).forEach((addressKey) => {
-        const key = addressKey as keyof AddressDetail;
-        setValue(key, address[key]);
-        clearErrors(key);
-      });
-    }
+  const setAddress = (address: AddressDetails) => {
+    setValue("street", address.address_line_1);
+    setValue("city", address.city);
+    setValue("postCode", address.postcode);
+    setValue("country", address.country);
+    clearErrors(["street", "city", "postCode", "country"]);
   };
 
-  const submitHandler = (data: ClientCreationPayload | ClientEditPayload) => {
+  const submitHandler = async (
+    data: ClientCreationPayload | ClientEditPayload,
+  ) => {
     toggleIsSubmitting(true);
-    if (mode === "creation") {
-      clientCreatFn?.(data as ClientCreationPayload);
-    } else {
-      clientEditFn?.(data as ClientEditPayload);
+    try {
+      if (mode === "creation") {
+        await clientCreatFn?.(data as ClientCreationPayload);
+      } else {
+        await clientEditFn?.(data as ClientEditPayload);
+      }
+      reset();
+      toggleFormOpen(false);
+    } catch (err) {
+      showErrorToast(err);
+    } finally {
+      toggleIsSubmitting(false);
     }
-    toggleIsSubmitting(false);
-    reset();
-    selectPostCode("");
-    toggleFormOpen(false);
   };
 
   return (
@@ -131,10 +134,7 @@ export function ClientForm({
             <Separator className={`bg-client-creation-secondary`} />
 
             <PostCodeSelectComboBox
-              postCode={postCode}
-              postalCodes={postalCodes}
-              selectPostCode={selectPostCode}
-              addressSetter={setAddress}
+              addressSetter={(address) => setAddress(address)}
             />
 
             <CustomInput

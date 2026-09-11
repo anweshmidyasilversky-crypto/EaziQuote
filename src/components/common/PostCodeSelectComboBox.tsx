@@ -1,50 +1,41 @@
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxEmpty,
-  ComboboxList,
-  ComboboxContent,
-  ComboboxItem,
-} from "../ui/combobox";
+import { useState } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useQuery } from "@tanstack/react-query";
+import { getAddressList } from "@/api/address.api";
+import { CustomCombobox } from "./CustomCombobox";
+import type { AddressDetails } from "@/types/api.responses.type";
+import { showErrorToast } from "@/api/axiosInstance";
 
-export type PostCodeSelectComboBoxProps<T> = {
-  postalCodes: string[];
-  postCode: T;
-  selectPostCode: React.Dispatch<React.SetStateAction<T>>;
-  addressSetter: (postCode: string) => void;
+export type PostCodeSelectComboBoxProps = {
+  addressSetter?: (address: AddressDetails) => void;
 };
 
-export function PostCodeSelectComboBox<T>({
-  postalCodes,
-  postCode,
-  selectPostCode,
+export function PostCodeSelectComboBox({
   addressSetter,
-}: PostCodeSelectComboBoxProps<T>) {
+}: PostCodeSelectComboBoxProps) {
+  const [searchTerm, setSearchTerm] = useState("M11AE");
+  const debouncedSearchTerm = useDebounce({ value: searchTerm });
+
+  const { data: addressList, error } = useQuery({
+    queryKey: ["address", debouncedSearchTerm],
+    queryFn: () => getAddressList(debouncedSearchTerm),
+  });
+
+  if (error) {
+    showErrorToast(error);
+  }
+
   return (
-    <Combobox
-      items={postalCodes}
-      value={postCode}
-      onValueChange={(value) => {
-        selectPostCode(value as T);
-        addressSetter(value as string);
+    <CustomCombobox
+      items={addressList?.payload ?? []}
+      getItemLabel={(addressDetail) => addressDetail?.formatted_address}
+      onValueChange={(addressDetail) => {
+        if (addressDetail) {
+          addressSetter?.(addressDetail);
+        }
       }}
-    >
-      <ComboboxInput
-        placeholder="Search postcode"
-        className={`w-full flex flex-row items-center p-3 gap-3 h-11 bg-white border border-[#CED1DA] rounded-[7px] self-stretch flex-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60`}
-      />
-      <ComboboxContent className={`w-full`}>
-        <div className={"bg-white z-100 w-full"}>
-          <ComboboxEmpty>No postcodes matched</ComboboxEmpty>
-          <ComboboxList className={`w-full`}>
-            {(item) => (
-              <ComboboxItem key={item} value={item}>
-                {item}
-              </ComboboxItem>
-            )}
-          </ComboboxList>
-        </div>
-      </ComboboxContent>
-    </Combobox>
+      inptFieldValue={searchTerm}
+      inptFieldChange={(postCode) => setSearchTerm(postCode)}
+    />
   );
 }

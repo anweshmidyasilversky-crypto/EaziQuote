@@ -210,3 +210,19 @@ export const getSubCategory = (subCatId: string) => {
 export function getRandomNumber(lb: number, ub: number): number {
   return Math.floor(Math.random() * (ub - lb + 1)) + lb;
 }
+
+export function ObjToFormData<T extends Object>(data: T) {
+  const formData = new FormData();
+  Object.keys(data).forEach((objKey) => {
+    const key = objKey as keyof T;
+    if (data[key] instanceof File) {
+      formData.append(
+        key as string,
+        new Blob([data[key]], { type: data[key].type }),
+      );
+    } else {
+      formData.append(key as string, (data[key] ?? "") as string);
+    }
+  });
+  return formData;
+}

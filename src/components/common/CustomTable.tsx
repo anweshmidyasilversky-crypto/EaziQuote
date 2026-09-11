@@ -23,7 +23,7 @@ import { assets } from "../../assets/icons";
 import { memo, useEffect, useState } from "react";
 import { Separator } from "../ui/separator";
 import React from "react";
-import type { MetaBtn } from "@/types/api.responses.type";
+import type { PaginationBtnMeta } from "@/types/api.responses.type";
 import { CustomBtn } from "./CustomBtn";
 import { cn } from "@/lib/utils";
 import { Spinner } from "../ui/spinner";
@@ -39,7 +39,7 @@ export interface DataTableProps<TData extends RowData> {
   localFilters?: ColumnFiltersState;
   showPaginated?: boolean;
 
-  paginationBtns?: MetaBtn[];
+  paginationBtns?: PaginationBtnMeta[];
   totalRecords?: number;
   startItemNo?: number;
   endItemNo?: number;
@@ -239,13 +239,15 @@ function CustomTable<TData extends RowData>({
             </thead>
 
             {isFetching ? (
-              <tr className="w-full">
-                <td colSpan={table.getVisibleLeafColumns().length}>
-                  <div className="flex items-center justify-center p-2">
-                    <Spinner className="text-brand-dark w-15 h-15 aspect-square" />
-                  </div>
-                </td>
-              </tr>
+              <tbody>
+                <tr className="w-full">
+                  <td colSpan={table.getVisibleLeafColumns().length}>
+                    <div className="flex items-center justify-center p-2">
+                      <Spinner className="text-brand-dark w-15 h-15 aspect-square" />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
             ) : (
               <>
                 <tbody>

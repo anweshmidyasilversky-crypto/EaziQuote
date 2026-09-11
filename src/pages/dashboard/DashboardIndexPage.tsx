@@ -7,16 +7,21 @@ import { CustomDataTable } from "../../components/common/CustomTable";
 import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { NotificationCard } from "../../components/dashboard/notification.card";
-import { notifications, type TransactionItem } from "../../constants/dummyData";
-import { formatOrdinalDate } from "../../lib/utils";
+import { type TransactionItem } from "../../constants/dummyData";
+import { formatDisplayDate, formatOrdinalDate } from "../../lib/utils";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getHomePage } from "@/api/auth.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import type { DashboardActivityItem } from "@/types/api.responses.type";
+import { getNotificationList } from "@/api/notifications.api";
+import type { ClientCreateApiPayload } from "@/types/api.requests.type";
+import { createClient } from "@/api/clients.api";
+import type { ClientCreationPayload } from "@/types/clientCreation.payload.type";
+import { toast } from "react-toastify";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
@@ -24,16 +29,34 @@ export function DashboardIndexPage() {
 
   const {
     data: homePage,
-    isError,
-    error,
+    error: recentActivityFetchErr,
+    isFetching: isRecentActivityFetching,
   } = useQuery({
     queryKey: ["dashboard"],
     queryFn: getHomePage,
   });
 
-  if (isError) {
-    showErrorToast(error);
+  if (recentActivityFetchErr) {
+    showErrorToast(recentActivityFetchErr);
   }
+
+  const {
+    data: notificationResponse,
+    isFetching: isNotificationFetching,
+    error: notificationErr,
+  } = useQuery({
+    queryKey: ["dashboard", "notification"],
+    queryFn: () => getNotificationList(),
+  });
+
+  if (notificationErr) {
+    showErrorToast(notificationErr);
+  }
+
+  const { mutateAsync: createClientAsync } = useMutation({
+    mutationKey: ["dashboard", "client", "create"],
+    mutationFn: (data: ClientCreateApiPayload) => createClient(data),
+  });
 
   const columns: ColumnDef<TableFeatures, DashboardActivityItem>[] = [
     {
@@ -42,18 +65,18 @@ export function DashboardIndexPage() {
       enableSorting: false,
     },
     {
-      accessorKey: "quoteInvoice",
+      accessorKey: "reference_number",
       header: "QUOTE/INVOICE",
       enableSorting: false,
     },
     {
-      accessorKey: "client",
+      accessorKey: "name",
       header: "CLIENT",
       enableSorting: false,
       cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
     },
     {
-      accessorKey: "amount",
+      accessorKey: "price",
       header: "AMOUNT",
       enableSorting: false,
     },
@@ -67,14 +90,26 @@ export function DashboardIndexPage() {
       },
     },
     {
-      accessorKey: "creationDate",
+      accessorKey: "created_at",
       header: "CREATION DATE",
       enableSorting: false,
+      cell: (info) => {
+        const date = info.getValue<string | undefined>();
+        if (date) {
+          return formatDisplayDate(date);
+        }
+      },
     },
     {
-      accessorKey: "expiryDueDate",
+      accessorKey: "expiry_date",
       header: "EXPIRY/DUE DATE",
       enableSorting: false,
+      cell: (info) => {
+        const date = info.getValue<string | undefined>();
+        if (date) {
+          return formatDisplayDate(date);
+        }
+      },
     },
     {
       id: "actions",
@@ -133,6 +168,21 @@ export function DashboardIndexPage() {
     },
   ];
 
+  const addClientFn = async (client: ClientCreationPayload) => {
+    try {
+      const response = await createClientAsync({
+        ...client,
+        company_name: client.companyName,
+        address: client.street,
+        postcode: client.postCode,
+        phone: `+44${client.phone}`,
+      });
+      toast.success(response.message);
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return (
     <div className="h-full w-full">
       {/* Main container */}
@@ -169,9 +219,9 @@ export function DashboardIndexPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-x-6">
           {/* KPI cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 ">
             {kpiCardConfig.map((kpiConfig) => {
               return (
                 <KpiCard
@@ -184,7 +234,15 @@ export function DashboardIndexPage() {
               );
             })}
           </div>
-          <NotificationCard notifications={notifications} />
+          {(isNotificationFetching ||
+            (notificationResponse?.payload.data.length ?? 0) > 0) && (
+            <NotificationCard
+              notifications={
+                notificationResponse?.payload.data.slice(0, 5) ?? []
+              }
+              isFetching={isNotificationFetching}
+            />
+          )}
         </div>
 
         <div className="flex flex-col py-4.5 gap-4.5 bg-table dashboard-card-theme rounded-[10px]">
@@ -195,6 +253,7 @@ export function DashboardIndexPage() {
           <CustomDataTable
             columns={columns}
             data={homePage?.payload.recentActivities ?? []}
+            isFetching={isRecentActivityFetching}
           />
         </div>
       </div>
@@ -203,6 +262,7 @@ export function DashboardIndexPage() {
         isFormOpen={clientFormOpen}
         toggleFormOpen={toggleClientFormOpen}
         mode="creation"
+        clientCreatFn={addClientFn}
       />
     </div>
   );
