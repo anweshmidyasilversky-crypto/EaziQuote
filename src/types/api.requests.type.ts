@@ -38,6 +38,8 @@ export interface PageFilters {
   status?: string[];
   start_date?: string;
   end_date?: string;
+  search?: string;
+  sort_by?: string | null;
 }
 
 export interface ClientCreateApiPayload {

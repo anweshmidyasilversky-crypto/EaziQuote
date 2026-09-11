@@ -1,6 +1,5 @@
 import { XIcon } from "lucide-react";
 import { assets } from "../../assets/icons";
-import type { ClientDataWithFilters } from "../../constants/dummyData";
 import { getInitials } from "../../lib/utils";
 import {
   Dialog,
@@ -8,9 +7,10 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "../ui/dialog";
+import type { Client } from "@/types/api.responses.type";
 
 export type ClientDetailsPopupProps = {
-  currClient: ClientDataWithFilters;
+  currClient: Client | undefined;
   isOpen: boolean;
   toggleOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -44,16 +44,16 @@ export function ClientDetailsPopup({
           {/* Client icon */}
           <div className="min-h-12 min-w-12 rounded-[7px] flex items-center justify-center bg-transparent-royal-blue">
             <span className="text-royal-blue">
-              {getInitials(currClient.client)}
+              {getInitials(currClient?.name ?? "A")}
             </span>
           </div>
 
           {/* Client & company name */}
           <div className="flex flex-col gap-1">
-            <span> {currClient.client} </span>
+            <span> {currClient?.name ?? "A"} </span>
             <span className="text-nowrap text-placeholder-text">
               {" "}
-              {currClient.company}{" "}
+              {currClient?.company_name ?? "C"}{" "}
             </span>
           </div>
         </div>
@@ -62,17 +62,21 @@ export function ClientDetailsPopup({
         <div className="px-5 flex flex-col gap-6 py-6">
           <span className="flex gap-2">
             <img src={assets.emailIcon} className="h-4 aspect-auto" />
-            <p> {currClient.email} </p>
+            <p> {currClient?.email ?? "dummy@example.com"} </p>
           </span>
 
           <span className="flex gap-2">
             <img src={assets.phoneIcon} className="h-4 aspect-auto" />
-            <p> {currClient.phone} </p>
+            <p> {currClient?.phone ?? "+441234567891"} </p>
           </span>
 
           <span className="flex gap-2">
             <img src={assets.locationIcon} className="h-4 aspect-auto" />
-            <p> {"1600 Amphitheatre Driveway Sandra, CA 94043"} </p>
+            <p>
+              {" "}
+              {currClient?.address ??
+                "1600 Amphitheatre Driveway Sandra, CA 94043"}{" "}
+            </p>
           </span>
         </div>
 

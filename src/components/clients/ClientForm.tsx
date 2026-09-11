@@ -5,12 +5,11 @@ import { clientCreationSchema } from "../../validation/clientCreation.payload.sc
 import { CustomInput } from "../common/customInput";
 import { Separator } from "../ui/separator";
 import { PostCodeSelectComboBox } from "../common/PostCodeSelectComboBox";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FormLayout } from "../common/FormLayout";
 import { type ClientEditPayload } from "../../types/clientEdit.payload.type";
 import type { AddressDetails } from "@/types/api.responses.type";
 import { showErrorToast } from "@/api/axiosInstance";
-import { toast } from "react-toastify";
 
 export type ClientFormProps = {
   isFormOpen: boolean;
@@ -41,18 +40,26 @@ export function ClientForm({
     country: "",
   };
 
-  const { control, setValue, setValues, clearErrors, handleSubmit, reset } =
-    useForm<ClientCreationPayload | ClientEditPayload>({
-      defaultValues: defaultValues ?? initialValue,
-      resolver: yupResolver(
-        mode === "creation"
-          ? clientCreationSchema
-          : clientCreationSchema.deepPartial(),
-      ),
-    });
-  if (defaultValues) {
-    setValues(defaultValues);
-  }
+  const { control, setValue, clearErrors, handleSubmit, reset } = useForm<
+    ClientCreationPayload | ClientEditPayload
+  >({
+    defaultValues: initialValue,
+    resolver: yupResolver(
+      mode === "creation"
+        ? clientCreationSchema
+        : clientCreationSchema.deepPartial(),
+    ),
+  });
+
+  useEffect(() => {
+    if (defaultValues) {
+      Object.keys(defaultValues).map((objkey) => {
+        const key = objkey as keyof ClientCreationPayload;
+        setValue(key, defaultValues[key]);
+      });
+    }
+  }, [defaultValues]);
+
   const [isSubmitting, toggleIsSubmitting] = useState(false);
   const setAddress = (address: AddressDetails) => {
     setValue("street", address.address_line_1);

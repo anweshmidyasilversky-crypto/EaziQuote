@@ -17,8 +17,9 @@ import { updateQuote } from "../../redux/slices/quotes.slice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
-import { nanoid } from "@reduxjs/toolkit";
-import { addClient } from "../../redux/slices/clients.slice";
+import { useMutation } from "@tanstack/react-query";
+import type { ClientCreateApiPayload } from "@/types/api.requests.type";
+import { createClient } from "@/api/clients.api";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
@@ -31,6 +32,10 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
   const clients = useAppSelector((state) => state.clients);
   const currClient = getClient(currQuote?.clientId);
   const navigate = useNavigate();
+  const { mutateAsync: createClientAsync } = useMutation({
+    mutationKey: ["quote-summary", "client", "creation"],
+    mutationFn: (data: ClientCreateApiPayload) => createClient(data),
+  });
   const {
     control,
     watch,
@@ -73,16 +78,19 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
       attachments?.filter((attachment) => attachment.name !== fileName),
     );
   };
-  const clientCreateAction = (data: ClientCreationPayload) => {
-    const newClientId = nanoid();
-    // Dispatch to Redux store
-    dispatch(
-      addClient({
-        id: newClientId,
+  const clientCreateAction = async (data: ClientCreationPayload) => {
+    try {
+      const response = await createClientAsync({
         ...data,
-        createdAt: new Date().toISOString(),
-      }),
-    );
+        phone: `+44${data.phone}`,
+        company_name: data.companyName,
+        postcode: data.postCode,
+        address: data.street,
+      });
+      toast.success(response.message);
+    } catch (err) {
+      throw err;
+    }
   };
 
   const submitHandler = (data: QuoteSummary) => {

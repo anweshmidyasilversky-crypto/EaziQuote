@@ -6,11 +6,8 @@ import {
 } from "../../components/clients/ActivitySummary";
 import {
   ClientActivityStatus,
-  mockClientActivity,
   PaymentActivityStatus,
   paymentData,
-  type ClientActivity,
-  type ClientDataWithFilters,
   type PaymentData,
 } from "../../constants/dummyData";
 import {
@@ -28,15 +25,9 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { Separator } from "../../components/ui/separator";
 import MoreOptionsPopup from "../../components/clients/MoreOptionsPopup";
 import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
-import {
-  formatCurrency,
-  getInitials,
-  getQuoteAmount,
-  formatDisplayDate,
-} from "../../lib/utils";
+import { formatCurrency, getInitials } from "../../lib/utils";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
 import type { DefaultValues } from "react-hook-form";
-import { useAppSelector } from "../../redux/store";
 import { ClientForm } from "../../components/clients/ClientForm";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
@@ -54,53 +45,51 @@ import {
   CustomToggleGroup,
   type CustomToggleGroupProps,
 } from "../../components/common/CustomToggleGroup";
+import { toast } from "react-toastify";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getClientDetails, updateClient } from "@/api/clients.api";
+import type {
+  ClientDetails,
+  InvoiceActivity,
+  QuoteActivity,
+} from "@/types/api.responses.type";
+import type { UpdateClientApiPayload } from "@/types/api.requests.type";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
   const param = useParams<{ id: string }>();
-  const user = useAppSelector((state) => state.user);
-  const reduxClients = useAppSelector((state) => state.clients);
-  const reduxQuotes = useAppSelector((state) => state.quotes);
 
-  // Find client from Redux by route param ID, fallback to first client
-  const foundClient =
-    reduxClients.find((c) => c.id === param.id) ?? reduxClients[0];
+  const {
+    data: clientDetailsResponse,
+    isFetching: isRecentActivityFetching,
+    error: recentActivityError,
+  } = useQuery({
+    queryKey: ["clientDetails", param.id],
+    queryFn: () => getClientDetails(param.id as string),
+  });
 
-  // Derive client quotes as ClientActivity objects
-  const clientActivities: ClientActivity[] = useMemo(() => {
-    const matchingQuotes = reduxQuotes.filter(
-      (q) => q.clientId === foundClient?.id,
-    );
-    if (matchingQuotes.length === 0) return mockClientActivity;
-    return matchingQuotes.map((q) => ({
-      id: q.id,
-      title: q.title,
-      quoteInvoice: q.referenceNumber,
-      amount: getQuoteAmount(q),
-      status: q.status as ClientActivityStatus,
-      creationDate: formatDisplayDate(q.quoteDate),
-      expiryDueDate: formatDisplayDate(q.expiryDate),
-    }));
-  }, [reduxQuotes, foundClient]);
+  if (recentActivityError) {
+    showErrorToast(recentActivityError);
+  }
 
-  const [clientCredential, setclientCredential] =
-    useState<ClientDataWithFilters>({
-      client: foundClient.name ?? "Emma",
-      company: foundClient.companyName ?? "Company",
-      activityCount: reduxQuotes.filter((q) => q.clientId === foundClient?.id)
-        .length,
-      createdAt: foundClient?.createdAt ?? new Date().toISOString(),
-      ...foundClient,
-    });
+  const { mutateAsync: updateClientAsync } = useMutation({
+    mutationKey: ["clientDetails", "update", param.id],
+    mutationFn: (data: UpdateClientApiPayload) =>
+      updateClient(param.id as string, data),
+  });
+
+  const client = clientDetailsResponse?.payload;
+
   const [currTable, toggleCurrTable] = useState<string>("activity");
   const [searchTearm, setSearchTerm] = useState<string>("");
   const debouncedVal = useDebounce({ value: searchTearm, delay: 500 });
   const [shownMoreOptions, toggleMoreOptions] = useState<boolean>(false);
   const [editPopupOpen, toggleEditPopupOpen] = useState<boolean>(false);
   const [contactInfoOpen, toggleContactInfoOpen] = useState<boolean>(false);
-  const [tableData, setTableData] = useState<ClientActivity[] | PaymentData[]>(
-    clientActivities,
-  );
+  const [tableData, setTableData] = useState<
+    ClientDetails["recent_activities"] | PaymentData[]
+  >(client?.recent_activities ?? []);
   const [filterOpen, toggleFilterOpen] = useState<boolean>(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: undefined,
@@ -166,8 +155,12 @@ export function ClientDetailsPage() {
     /* Toggle tables based on which data is shown */
   }
   useEffect(() => {
-    setTableData(currTable === "activity" ? clientActivities : paymentData);
-  }, [currTable, clientActivities]);
+    setTableData(
+      currTable === "activity"
+        ? (client?.recent_activities ?? [])
+        : paymentData,
+    );
+  }, [currTable, client]);
 
   const localFilters: ColumnFiltersState = useMemo(
     () => [
@@ -180,68 +173,68 @@ export function ClientDetailsPage() {
   );
 
   let initial = "AC";
-  if (clientCredential) {
-    initial = getInitials(clientCredential.client);
+  if (client) {
+    initial = getInitials(client.name);
   }
 
-  const activityTableColums: ColumnDef<TableFeatures, ClientActivity>[] =
-    useMemo(
-      () => [
-        {
-          accessorKey: "title",
-          header: "TITLE",
-          enableSorting: false,
-          filterFn: filterFn_includesString,
+  const activityTableColums: ColumnDef<
+    TableFeatures,
+    QuoteActivity | InvoiceActivity
+  >[] = useMemo(
+    () => [
+      {
+        accessorKey: "title",
+        header: "TITLE",
+        enableSorting: false,
+        filterFn: filterFn_includesString,
+      },
+      {
+        accessorKey: "reference_number",
+        header: "QUOTE/INVOICE",
+        enableSorting: false,
+      },
+      {
+        accessorKey: "price",
+        header: "AMOUNT",
+        cell: (info) => formatCurrency(info.getValue<number>()),
+      },
+      {
+        accessorKey: "status",
+        header: "STATUS",
+        cell: (info) => {
+          const status = info.getValue<ClientActivityStatus>();
+          return <StatusBadge status={status} />;
         },
-        {
-          accessorKey: "quoteInvoice",
-          header: "QUOTE/INVOICE",
-          enableSorting: false,
-        },
-        {
-          accessorKey: "amount",
-          header: "AMOUNT",
-          cell: (info) => formatCurrency(info.getValue<number>()),
-        },
-        {
-          accessorKey: "status",
-          header: "STATUS",
-          cell: (info) => {
-            const status = info.getValue<ClientActivityStatus>();
-            return <StatusBadge status={status} />;
-          },
-          enableSorting: false,
-        },
-        {
-          accessorKey: "creationDate",
-          header: "CREATION DATE",
-          enableSorting: false,
-        },
-        {
-          accessorKey: "expiryDueDate",
-          header: "EXPIRY/DUE DATE",
-          enableSorting: false,
-        },
-        {
-          id: "actions",
-          header: "ACTION",
-          cell: ({ row }) => {
-            const activity = row.original;
+        enableSorting: false,
+      },
+      {
+        accessorKey: "created_at",
+        header: "CREATION DATE",
+        enableSorting: false,
+      },
+      {
+        accessorKey: "expiry_date",
+        header: "EXPIRY/DUE DATE",
+        enableSorting: false,
+      },
+      {
+        id: "actions",
+        header: "ACTION",
+        cell: ({ row }) => {
+          const activity = row.original;
 
-            return (
-              <CustomActionGroup
-                openFn={() => navigate(`/quotes/${activity.quoteInvoice}`)}
-                editFn={() =>
-                  navigate(`/quotes/manage-quotes/${activity.quoteInvoice}`)
-                }
-              />
-            );
-          },
-          enableSorting: false,
+          return (
+            <CustomActionGroup
+              openFn={() => navigate(`/quotes/${activity.id}`)}
+              editFn={() => navigate(`/quotes/manage-quotes/${activity.id}`)}
+            />
+          );
         },
-      ],
-      [],
-    );
+        enableSorting: false,
+      },
+    ],
+    [],
+  );
 
   const paymentColumns: ColumnDef<TableFeatures, PaymentData>[] = useMemo(
     () => [
@@ -312,67 +305,62 @@ export function ClientDetailsPage() {
     [],
   );
 
-  const clientActivitySummary: ActivitySummaryProps["summaryConfig"] =
-    useMemo(() => {
-      const matchingQuotes = reduxQuotes.filter(
-        (q) => q.clientId === foundClient?.id,
-      );
-      const acceptedQuotes = matchingQuotes.filter(
-        (q) => q.status === "Accepted",
-      );
-      const outstanding = matchingQuotes
-        .filter((q) => q.status === "Sent")
-        .reduce((sum, q) => sum + getQuoteAmount(q), 0);
+  const clientActivitySummary: ActivitySummaryProps["summaryConfig"] = [
+    {
+      summaryTitle: "Total quotes",
+      summaryIcon: assets.invoiceColored,
+      summary: client?.total_quotes,
+    },
+    {
+      summaryTitle: "quotes accepted",
+      summaryIcon: assets.greenTickIcon,
+      summary: client?.quote_accepted_count,
+    },
+    {
+      summaryTitle: "total invoices",
+      summaryIcon: assets.invoiceColored,
+      summary: client?.total_invoices,
+    },
+    {
+      summaryTitle: "outstanding balance",
+      summaryIcon: assets.redPoundIcon,
+      summary: formatCurrency(client?.total_invoices_amount ?? 0),
+    },
+    {
+      summaryTitle: "available credit",
+      summaryIcon: assets.greenPoundIcon,
+      summary: formatCurrency(client?.available_credit ?? 0),
+    },
+  ];
 
-      return [
-        {
-          summaryTitle: "Total quotes",
-          summaryIcon: assets.invoiceColored,
-          summary: matchingQuotes.length,
-        },
-        {
-          summaryTitle: "quotes accepted",
-          summaryIcon: assets.greenTickIcon,
-          summary: acceptedQuotes.length,
-        },
-        {
-          summaryTitle: "total invoices",
-          summaryIcon: assets.invoiceColored,
-          summary: matchingQuotes.length > 0 ? matchingQuotes.length : 12,
-        },
-        {
-          summaryTitle: "outstanding balance",
-          summaryIcon: assets.redPoundIcon,
-          summary: formatCurrency(outstanding),
-        },
-        {
-          summaryTitle: "available credit",
-          summaryIcon: assets.greenPoundIcon,
-          summary: "£5,000.00",
-        },
-      ];
-    }, [reduxQuotes, foundClient]);
-
-  const updateClient = (data: ClientEditPayload) => {
-    const { name: client, companyName: company } = data;
-    setclientCredential({
-      ...clientCredential,
-      ...data,
-      client: client as string,
-      company: company as string,
-    });
-    toggleEditPopupOpen(false);
+  const handleClientEdit = async (data: ClientEditPayload) => {
+    if (data.phone) {
+      data.phone = `+44${data.phone}`;
+    }
+    try {
+      const response = await updateClientAsync({
+        _method: "put",
+        ...data,
+        phone: data.phone,
+        company_name: data.companyName,
+        address: data.street,
+        postcode: data.postCode,
+      });
+      toast.success(response.message);
+    } catch (err) {
+      throw err;
+    }
   };
 
   const clientEditDefaultValues: DefaultValues<ClientEditPayload> = {
-    name: clientCredential.client,
-    companyName: clientCredential.company,
-    phone: clientCredential.phone,
-    email: clientCredential.email,
-    street: user.street,
-    city: user.city,
-    postCode: user.postCode,
-    country: user.country,
+    name: client?.name,
+    companyName: client?.company_name,
+    phone: client?.phone?.slice(5),
+    email: client?.email,
+    street: client?.address,
+    city: client?.city,
+    postCode: client?.postcode,
+    country: client?.country,
   };
 
   const isActivityTable = currTable === "activity";
@@ -408,11 +396,11 @@ export function ClientDetailsPage() {
               <div className="flex flex-1 flex-col items-center">
                 <span className="font-semibold text-lg md:text-xl text-nowrap">
                   {" "}
-                  {clientCredential?.client ?? "Alexander Christopher"}{" "}
+                  {client?.name ?? "Alexander Christopher"}{" "}
                 </span>
                 <span className="text-[14px] text-placeholder-text text-nowrap">
                   {" "}
-                  {clientCredential?.company ?? "Greek Builders"}{" "}
+                  {client?.company_name ?? "Greek Builders"}{" "}
                 </span>
               </div>
             </div>
@@ -469,7 +457,7 @@ export function ClientDetailsPage() {
             <>
               <CustomDataTable
                 columns={activityTableColums}
-                data={tableData as ClientActivity[]}
+                data={client?.recent_activities ?? []}
                 localFilters={localFilters}
                 showPaginated={true}
                 tableOptionsLeft={SearchInputGruop({
@@ -480,6 +468,7 @@ export function ClientDetailsPage() {
                 tableOptionsRight={FilterBtn({
                   toggleFilterSheetOpen: toggleFilterOpen,
                 })}
+                isFetching={isRecentActivityFetching}
               />
             </>
           )}
@@ -497,7 +486,7 @@ export function ClientDetailsPage() {
       <ClientForm
         isFormOpen={editPopupOpen}
         mode="updation"
-        clientEditFn={updateClient}
+        clientEditFn={handleClientEdit}
         defaultValues={clientEditDefaultValues}
         toggleFormOpen={toggleEditPopupOpen}
       />
@@ -505,7 +494,7 @@ export function ClientDetailsPage() {
       <ClientDetailsPopup
         isOpen={contactInfoOpen}
         toggleOpen={toggleContactInfoOpen}
-        currClient={clientCredential}
+        currClient={client}
       />
 
       <CustomSheet

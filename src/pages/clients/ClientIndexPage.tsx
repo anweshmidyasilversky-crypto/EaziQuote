@@ -3,89 +3,122 @@ import { type CustomBtnProps } from "../../components/common/CustomBtn";
 import {
   filterFn_includesString,
   type ColumnDef,
-  type ColumnFiltersState,
-  type ColumnVisibilityState,
   type TableFeatures,
 } from "@tanstack/react-table";
-import { type ClientDataWithFilters } from "../../constants/dummyData";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useDebounce } from "../../hooks/useDebounce";
 
-import { ClientForm } from "../../components/clients/ClientForm";
+import {
+  ClientForm,
+  type ClientFormProps,
+} from "../../components/clients/ClientForm";
 import { CustomSheet } from "../../components/common/CustomSheet";
 import { useNavigate } from "react-router";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
-import { nanoid } from "@reduxjs/toolkit";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
 import { CustomHeader } from "../../components/common/CustomHeader";
-import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { addClient, updateClient } from "../../redux/slices/clients.slice";
-import { clientToDisplayData } from "../../lib/utils";
 import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
-import type { Client } from "../../types/client.type";
+import { type ClientDetails } from "@/types/api.responses.type";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type {
+  ClientCreateApiPayload,
+  UpdateClientApiPayload,
+} from "@/types/api.requests.type";
+import {
+  createClient,
+  deleteClient,
+  getClientList,
+  updateClient,
+} from "@/api/clients.api";
+import { toast } from "react-toastify";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const [activeFilter, toggleActiveFilter] = useState<string>("recent");
   const [isFilterOpen, toggleFilterOpen] = useState(false);
-  const [clientEditModal, toggleClientEditModal] = useState(false);
-  const [targetClient, setTargetClient] = useState<Client>();
+  const [clientModalOpen, toggleClientModal] = useState(false);
+  const targetClient = useRef<
+    ClientCreationPayload | ClientEditPayload | undefined
+  >(undefined);
+  const targetClientId = useRef<number>(0);
+  const clientFormMode = useRef<ClientFormProps["mode"]>("creation");
   const [searchParam, setSearchParam] = useState("");
+  const debouncedSearchParam = useDebounce({ value: searchParam, delay: 500 });
+  const sortBy = useRef<string | null>(null);
+  const mutated = useRef<number>(0);
 
-  const [isPopoverOpen, toggleIsPopoverOpen] = useState(false);
+  const {
+    data: clientListResponse,
+    isFetching,
+    error,
+  } = useQuery({
+    queryKey: [
+      "clientIndex",
+      "clients",
+      debouncedSearchParam,
+      sortBy.current,
+      mutated.current,
+    ],
+    queryFn: () =>
+      getClientList({
+        search: debouncedSearchParam,
+        sort_by: sortBy.current,
+      }),
+  });
 
-  // ── Redux state ─────────────────────────────────────────────────────────────
-  const reduxClients = useAppSelector((state) => state.clients);
-  const reduxQuotes = useAppSelector((state) => state.quotes);
+  if (error) {
+    showErrorToast(error);
+  }
 
-  // Map Client[] → ClientDataWithFilters[] (activityCount from quote count)
-  const baseClientData: ClientDataWithFilters[] = useMemo(
-    () => reduxClients.map((c) => clientToDisplayData(c, reduxQuotes)),
-    [reduxClients, reduxQuotes],
-  );
-  const [clientData, setClientData] = useState<ClientDataWithFilters[]>([]);
-  useEffect(() => {
-    setClientData(
-      baseClientData.toSorted(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      ),
-    );
-  }, [baseClientData]);
+  const clientList = clientListResponse?.payload.data;
+  const clientListMeta = clientListResponse?.payload.meta;
+  const itemStartNo = clientListMeta
+    ? clientListMeta.last_page * clientListMeta.per_page + 1
+    : 0;
+  const itemEndNo = itemStartNo + (clientList?.length ?? 0);
+
+  const { mutateAsync: createClientAsync } = useMutation({
+    mutationKey: ["clientIndex", "creation"],
+    mutationFn: (data: ClientCreateApiPayload) => createClient(data),
+  });
+
+  const { mutateAsync: updateClientAsync } = useMutation({
+    mutationKey: ["clientIndex", "updation"],
+    mutationFn: (data: UpdateClientApiPayload) => {
+      return updateClient(targetClientId.current.toString(), data);
+    },
+  });
+
+  const { mutateAsync: deleteClientAsync } = useMutation({
+    mutationKey: ["clientIndex", "client", "delete"],
+    mutationFn: () => deleteClient(targetClientId.current.toString()),
+  });
 
   const columns = useMemo(
     () =>
       [
         {
-          accessorKey: "client",
+          accessorKey: "name",
           header: "CLIENT",
           filterFn: filterFn_includesString,
           cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
         },
         {
-          accessorKey: "company",
+          accessorKey: "company_name",
           header: "COMPANY",
         },
         {
           accessorKey: "phone",
-          header: "PHONE",
           enableSorting: false,
         },
         {
           accessorKey: "email",
-          header: "EMAIL",
           enableSorting: false,
-        },
-        {
-          accessorKey: "activityCount",
-        },
-        {
-          accessorKey: "createdAt",
         },
         {
           id: "actions",
@@ -97,30 +130,27 @@ export function ClientIndexPage() {
               <CustomActionGroup
                 openFn={() => navigate(`/clients/${client.id}`)}
                 editFn={() => {
-                  setTargetClient({
+                  targetClient.current = {
+                    companyName: client.company_name,
+                    street: client.address,
+                    postCode: client.postcode,
                     ...client,
-                    street: "1600 Amphitheatre Driveway Sandra",
-                    postCode: "CA 94043",
-                    city: "Queens",
-                    name: client.client,
-                    companyName: client.company,
-                    country: "USA",
-                  });
-                  toggleClientEditModal((curr) => !curr);
+                    phone: client.phone.slice(6).replaceAll(" ", ""),
+                  };
+                  targetClientId.current = client.id;
+                  clientFormMode.current = "updation";
+                  toggleClientModal((curr) => !curr);
+                }}
+                withDelete={true}
+                deleteFn={async () => {
+                  targetClientId.current = client.id;
+                  await handleDelete();
                 }}
               />
             );
           },
         },
-      ] as ColumnDef<TableFeatures, ClientDataWithFilters>[],
-    [],
-  );
-
-  const hiddenCols: ColumnVisibilityState = useMemo(
-    () => ({
-      activityCount: false,
-      createdAt: false,
-    }),
+      ] as ColumnDef<TableFeatures, ClientDetails>[],
     [],
   );
 
@@ -129,87 +159,63 @@ export function ClientIndexPage() {
       { value: "asc", label: "A-Z" },
       { value: "desc", label: "Z-A" },
       { value: "recent", label: "Recently Added" },
-      { value: "active", label: "Most Active" },
+      { value: "ma", label: "Most Active" },
     ],
     [],
   );
 
-  const getFilteredData = (filter: string) => {
-    switch (filter) {
-      case "asc":
-        return clientData.toSorted((a, b) => a.client.localeCompare(b.client));
-      case "desc":
-        return clientData.toSorted((a, b) => b.client.localeCompare(a.client));
-      case "recent":
-        return clientData.toSorted(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-      case "active":
-        return clientData.toSorted((a, b) => b.activityCount - a.activityCount);
-      default:
-        return clientData;
+  const clientCreatFn = async (data: ClientCreationPayload) => {
+    try {
+      const response = createClientAsync({
+        ...data,
+        postcode: data.postCode,
+        company_name: data.companyName,
+        address: data.street,
+      });
+      toast.success((await response).message);
+      mutated.current ^= 1;
+    } catch (err) {
+      throw err;
     }
   };
 
-  const applyFilter = () => setClientData(getFilteredData(activeFilter));
-  const clearFilter = () => {
-    toggleActiveFilter("recent");
-    setClientData(getFilteredData("recent"));
-  };
-
-  const debouncedSearchParam = useDebounce({ value: searchParam, delay: 500 });
-  const localFilter: ColumnFiltersState = useMemo(
-    () => [{ id: "client", value: debouncedSearchParam }],
-    [debouncedSearchParam],
-  );
-
-  const clientCreatFn = (data: ClientCreationPayload) => {
-    const newClientId = nanoid();
-    const { name: client, companyName: company } = data;
-
-    // Dispatch to Redux store
-    dispatch(
-      addClient({
-        id: newClientId,
+  const clientEditFn = async (data: ClientEditPayload) => {
+    try {
+      const response = await updateClientAsync({
         ...data,
-        createdAt: new Date().toISOString(),
-      }),
-    );
-
-    // Also update local display state immediately
-    const newDisplayClient: ClientDataWithFilters = {
-      id: newClientId,
-      ...data,
-      client,
-      company,
-      createdAt: new Date().toISOString(),
-      activityCount: 0,
-    };
-    setClientData((curr) =>
-      [...curr, newDisplayClient].toSorted(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      ),
-    );
-  };
-
-  const clientEditFn = (data: ClientEditPayload) => {
-    dispatch(
-      updateClient({
-        id: targetClient?.id ?? "",
-        ...data,
-      }),
-    );
+        postcode: data.postCode,
+        company_name: data.companyName,
+        address: data.street,
+        _method: "put",
+      });
+      toast.success(response.message);
+      mutated.current ^= 1;
+    } catch (err) {
+      throw err;
+    }
   };
 
   const btnConfigList: CustomBtnProps[] = [
     {
       leftIcon: assets.plusIcon,
       buttonLabel: "Add Client",
-      onClick: () => toggleIsPopoverOpen((curr) => !curr),
+      onClick: () => {
+        targetClient.current = undefined;
+        ((clientFormMode.current = "creation"),
+          toggleClientModal((curr) => !curr));
+      },
     },
   ];
+
+  const handleDelete = async () => {
+    try {
+      const res = await deleteClientAsync();
+      toast.success(res.message);
+      mutated.current ^= 1;
+    } catch (err) {
+      showErrorToast(err);
+    }
+  };
 
   return (
     <>
@@ -221,26 +227,18 @@ export function ClientIndexPage() {
           btnConfigList={btnConfigList}
         />
         <ClientForm
-          isFormOpen={isPopoverOpen}
-          toggleFormOpen={toggleIsPopoverOpen}
-          mode="creation"
+          isFormOpen={clientModalOpen}
+          toggleFormOpen={toggleClientModal}
+          mode={clientFormMode.current}
           clientCreatFn={clientCreatFn}
-        />
-
-        <ClientForm
-          isFormOpen={clientEditModal}
-          toggleFormOpen={toggleClientEditModal}
-          mode="updation"
           clientEditFn={clientEditFn}
-          defaultValues={targetClient}
+          defaultValues={targetClient.current}
         />
 
         <div className="flex flex-col bg-table rounded-[10px] dashboard-card-theme gap-4.5 py-4.5">
           <CustomDataTable
             columns={columns}
-            data={clientData}
-            hiddenCols={hiddenCols}
-            localFilters={localFilter}
+            data={clientList ?? []}
             showPaginated={true}
             tableOptionsLeft={SearchInputGruop({
               searchTerm: searchParam,
@@ -249,6 +247,11 @@ export function ClientIndexPage() {
             tableOptionsRight={FilterBtn({
               toggleFilterSheetOpen: toggleFilterOpen,
             })}
+            totalRecords={clientListMeta?.total}
+            startItemNo={itemStartNo}
+            endItemNo={itemEndNo}
+            paginationBtns={clientListMeta?.links}
+            isFetching={isFetching}
           />
         </div>
 
@@ -256,8 +259,13 @@ export function ClientIndexPage() {
           isOpen={isFilterOpen}
           toggleIsOpen={toggleFilterOpen}
           withClearOption
-          submitFn={applyFilter}
-          clearFn={clearFilter}
+          clearFn={() => {
+            toggleActiveFilter("recent");
+            sortBy.current = null;
+          }}
+          submitFn={() =>
+            (sortBy.current = activeFilter === "recent" ? null : activeFilter)
+          }
         >
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
             <span className="text-placeholder-text text-sm font-semibold">

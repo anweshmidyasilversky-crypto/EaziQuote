@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import CustomDialog from "./CustomDialog";
 import { cn } from "@/lib/utils";
 import { Trash2Icon } from "lucide-react";
@@ -7,10 +7,23 @@ import { CustomBtn } from "./CustomBtn";
 export type DeleteDialogProps = {
   isOpen: boolean;
   toggleOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  deleteAction?: () => void;
+  deleteAction?: () => void | Promise<void>;
 };
 
 function DeleteDialog({ isOpen, toggleOpen, deleteAction }: DeleteDialogProps) {
+  const [isDeleting, toggleIsDeleting] = useState(false);
+  const handleDelete = async () => {
+    toggleIsDeleting(true);
+    try {
+      await deleteAction?.();
+    } catch (err) {
+      throw err;
+    } finally {
+      toggleOpen(false);
+      toggleIsDeleting(false);
+    }
+  };
+
   return (
     <CustomDialog
       dialogOpen={isOpen}
@@ -44,10 +57,8 @@ function DeleteDialog({ isOpen, toggleOpen, deleteAction }: DeleteDialogProps) {
             btncls={cn(
               `bg-danger hover:bg-danger text-custom-dialog-secondary`,
             )}
-            onClick={() => {
-              deleteAction?.();
-              toggleOpen(false);
-            }}
+            onClick={handleDelete}
+            isSubmitting={isDeleting}
           />
         </div>
       </div>

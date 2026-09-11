@@ -9,7 +9,6 @@ import {
 } from "../constants/dummyData";
 import { useAppSelector } from "../redux/store";
 import type { Quote } from "../types/quote.type";
-import type { Client } from "../types/client.type";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -160,6 +159,9 @@ export function getAddress(postCode: string): AddressDetail | undefined {
 }
 
 export const getInitials = (fullName: string) => {
+  if (!fullName) {
+    return "user";
+  }
   const [fname, lname] = fullName.split(" ");
   return fname[0].toUpperCase() + (lname ? lname[0].toUpperCase() : "");
 };
@@ -221,7 +223,11 @@ export function ObjToFormData<T extends Object>(data: T) {
         new Blob([data[key]], { type: data[key].type }),
       );
     } else {
-      formData.append(key as string, (data[key] ?? "") as string);
+      if (["phone", "phone_number"].includes(objKey)) {
+        formData.append(key as string, data[key] ? `+44${data[key]}` : "");
+      } else {
+        formData.append(key as string, (data[key] ?? "") as string);
+      }
     }
   });
   return formData;

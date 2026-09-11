@@ -105,10 +105,16 @@ interface BaseActivity {
   created_at: string;
 }
 
+export enum InvoiceStatus {
+  paid = "paid",
+  unpaid = "unpaid",
+  overdue = "overdue",
+}
+
 export interface InvoiceActivity extends BaseActivity {
   type: ActivityType.INVOICE;
   quote_reference_number: string | null;
-  status: "paid" | "unpaid" | "overdue" | string;
+  status: InvoiceStatus;
   total_due: number;
   deposit_required: boolean;
   deposit_type: string | null;
@@ -116,14 +122,26 @@ export interface InvoiceActivity extends BaseActivity {
   deposit_available: number;
 }
 
+export enum QuoteTemplate {
+  classic = "classic",
+  modern = "modern",
+  elegant = "elegant",
+}
+
+export enum QuoteStatus {
+  approved = "approved",
+  sent = "sent",
+  draft = "draft",
+}
+
 export interface QuoteActivity extends BaseActivity {
   type: ActivityType.QUOTE;
   vat_setting_id: string;
   vat: number;
   discount: number | null;
-  status: "approved" | "sent" | "draft" | string;
+  status: QuoteStatus;
   categorised: "by-item" | string;
-  template: "classic" | string;
+  template: QuoteTemplate;
 }
 
 // Discriminated union for the array
@@ -151,13 +169,6 @@ export interface DashboardResponse {
   quoteDetails: QuoteSummary;
   financialSummary: FinancialSummary;
   recentActivities: DashboardActivityItem[];
-}
-
-export interface QuoteStatus {
-  id: number;
-  status: string;
-  display_name: string;
-  color: string | null;
 }
 
 export interface QuoteClient {
@@ -195,7 +206,12 @@ export interface Quote {
   quote_date: string;
   expiry_date: string;
   url: string | null;
-  status: QuoteStatus;
+  status: {
+    id: number;
+    status: string;
+    display_name: string;
+    color: string | null;
+  };
   client: QuoteClient;
   items: Record<string, QuoteItem[]> | QuoteItem[];
   attachments: QuoteAttachment[];
@@ -224,6 +240,12 @@ export interface ApiResponseMeta {
   per_page: number;
   to: number;
   total: number;
+}
+
+export interface ListResponse<T> {
+  data: T[];
+  links: PaginationLinks;
+  meta: ApiResponseMeta;
 }
 
 export interface QuoteListResponse {
@@ -262,4 +284,17 @@ export interface Client {
   address: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface ClientDetails extends Client {
+  city: string;
+  postcode: string;
+  country: string;
+  total_invoices: number;
+  total_quotes: number;
+  quote_accepted_count: number;
+  total_invoices_amount: number;
+  total_quotes_amount: number;
+  available_credit: number;
+  recent_activities: (QuoteActivity | InvoiceActivity)[];
 }

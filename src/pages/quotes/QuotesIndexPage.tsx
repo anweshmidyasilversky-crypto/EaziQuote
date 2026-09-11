@@ -127,7 +127,7 @@ export function QuotesIndexPage() {
         filterFn: filterFn_includesString,
       },
       {
-        accessorKey: "quote",
+        accessorKey: "reference_number",
         header: "QUOTE",
         enableSorting: false,
         filterFn: filterFn_includesString,
