@@ -1,6 +1,5 @@
 import {
   filterFn_includesString,
-  type PaginationState,
   type ColumnDef,
   type TableFeatures,
 } from "@tanstack/react-table";
@@ -10,20 +9,8 @@ import {
   type ActivitySummaryProps,
 } from "../../components/clients/ActivitySummary";
 import { type CustomBtnProps } from "../../components/common/CustomBtn";
-import {
-  presetQuoteData,
-  type PresetQuote,
-  type QuoteActivityStatus,
-  type QuoteData,
-} from "../../constants/dummyData";
-import { useMemo, useState } from "react";
-import {
-  cn,
-  formatCurrency,
-  formatDisplayDate,
-  formatOrdinalDate,
-  quoteToDisplayData,
-} from "../../lib/utils";
+import { useMemo, useRef, useState } from "react";
+import { cn, formatCurrency, formatDisplayDate } from "../../lib/utils";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
@@ -45,9 +32,14 @@ import { useNavigate } from "react-router";
 import React from "react";
 import CustomDialog from "../../components/common/CustomDialog";
 import { useQuery } from "@tanstack/react-query";
-import { getQuoteList } from "@/api/auth.api";
+import { getPresetQuoteList, getQuoteList } from "@/api/auth.api";
 import { showErrorToast } from "@/api/axiosInstance";
-import type { Quote } from "@/types/api.responses.type";
+import type {
+  PresetQuoteListing,
+  Quote,
+  QuoteStatus,
+} from "@/types/api.responses.type";
+import type { PageFilters } from "@/types/api.requests.type";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
@@ -66,6 +58,7 @@ export function QuotesIndexPage() {
     value: presetSearchTerm,
     delay: 500,
   });
+  const pageFilters = useRef<PageFilters>({});
 
   const [pageNo, setPageNo] = useState(1);
 
@@ -75,23 +68,38 @@ export function QuotesIndexPage() {
     error,
     isFetching,
   } = useQuery({
-    queryKey: ["quotes", pageNo, filters, dateRange],
+    queryKey: ["quotes", pageNo, pageFilters, debouncedSearchTerm],
     queryFn: () =>
-      getQuoteList({
-        page: pageNo,
-        status: filters,
-        start_date: dateRange.startDate?.toDateString(),
-        end_date: dateRange.endDate?.toDateString(),
-      }),
+      getQuoteList({ ...pageFilters.current, search: debouncedSearchTerm }),
   });
-  const quoteItemStartNo =
-    (pageNo - 1) * (quotes?.payload.meta.per_page ?? 0) + 1;
-  const quoteItemEndNo = quoteItemStartNo + (quotes?.payload.data?.length ?? 0);
+  const quoteItemStartNo = quotes
+    ? (pageNo - 1) * (quotes.payload.meta.per_page ?? 0) + 1
+    : 0;
+  const quoteItemEndNo =
+    quoteItemStartNo + (quotes?.payload.data?.length ?? 1) - 1;
 
   if (isError) {
     showErrorToast(error);
   }
   const QuoteSummmary = quotes?.payload.summary;
+
+  const {
+    data: presetQuoteListResponse,
+    isFetching: isPresetQuoteFetching,
+    error: presetQuoteFetchErr,
+  } = useQuery({
+    queryKey: ["quoteIndex", "presetQuotes", debouncedPresetSearchTerm],
+    queryFn: () =>
+      getPresetQuoteList({
+        search: debouncedPresetSearchTerm,
+      }),
+  });
+
+  if (presetQuoteFetchErr) {
+    showErrorToast(presetQuoteFetchErr);
+  }
+
+  const presetQuotes = presetQuoteListResponse?.payload.data ?? [];
 
   const summary: ActivitySummaryProps["summaryConfig"] = useMemo(() => {
     return [
@@ -136,7 +144,7 @@ export function QuotesIndexPage() {
         accessorKey: "name",
         header: "CLIENT",
         cell: (info) => {
-          const client = info.getValue<QuoteData["client"]>();
+          const client = info.getValue<string>();
           return <ClientNameBadge name={client} />;
         },
         enableSorting: false,
@@ -147,13 +155,12 @@ export function QuotesIndexPage() {
         header: "AMOUNT",
         cell: (info) => formatCurrency(info.getValue<number>()),
         enableGlobalFilters: false,
-        // Sorting intentionally enabled for amount
       },
       {
         accessorKey: "status",
         header: "STATUS",
         cell: (info) => {
-          const status = info.getValue<QuoteActivityStatus>();
+          const status = info.getValue<QuoteStatus>();
           return <StatusBadge status={status} />;
         },
         enableSorting: false,
@@ -172,7 +179,7 @@ export function QuotesIndexPage() {
         enableGlobalFilters: false,
       },
       {
-        accessorKey: "expiry_at",
+        accessorKey: "expiry_date",
         header: "EXPIRY DATE",
         cell: (info) => {
           const date = info.getValue<string | undefined>();
@@ -193,6 +200,7 @@ export function QuotesIndexPage() {
               openFn={() => navigate(`/quotes/${quote.id}`)}
               editFn={() => navigate(`/quotes/manage-quotes/${quote.id}`)}
               withEdit={row.original.is_editable}
+              withDelete={row.original.is_editable}
             />
           );
         },
@@ -203,7 +211,7 @@ export function QuotesIndexPage() {
     [],
   );
 
-  const [selectedPreset, setSelectedPreset] = useState<string>("");
+  const [selectedPreset, setSelectedPreset] = useState<number>();
 
   const presetQuotesColumns = useMemo(
     () =>
@@ -218,7 +226,7 @@ export function QuotesIndexPage() {
               value={info.row.original.id}
               checked={info.row.original.id === selectedPreset}
               onChange={(e) => {
-                setSelectedPreset(e.target.value);
+                setSelectedPreset(Number(e.target.value));
               }}
             />
           ),
@@ -226,13 +234,13 @@ export function QuotesIndexPage() {
         },
 
         {
-          accessorKey: "templateName",
+          accessorKey: "name",
           header: "TEMPLATE NAME",
           enableSorting: false,
         },
 
         {
-          accessorKey: "items",
+          accessorKey: "items_count",
           header: "ITEMS",
           enableSorting: false,
         },
@@ -246,7 +254,7 @@ export function QuotesIndexPage() {
           },
           enableSorting: false,
         },
-      ] as ColumnDef<TableFeatures, PresetQuote>[],
+      ] as ColumnDef<TableFeatures, PresetQuoteListing>[],
     [selectedPreset],
   );
 
@@ -299,7 +307,6 @@ export function QuotesIndexPage() {
             tableOptionsRight={
               <FilterBtn toggleFilterSheetOpen={toggleFilterOpen} />
             }
-            globalFilterTerm={debouncedSearchTerm}
             showPaginated={true}
             paginationBtns={quotes?.payload.meta.links}
             currPageNo={pageNo}
@@ -315,6 +322,21 @@ export function QuotesIndexPage() {
           isOpen={filerOpen}
           toggleIsOpen={toggleFilterOpen}
           withClearOption
+          submitFn={() => {
+            pageFilters.current = {
+              start_date: dateRange.startDate,
+              end_date: dateRange.endDate,
+              status: filters,
+            };
+          }}
+          clearFn={() => {
+            setDateRange({
+              startDate: undefined,
+              endDate: undefined,
+            });
+            setFilters([]);
+            pageFilters.current = {};
+          }}
         >
           <div className="flex flex-col gap-6 mt-6 px-5">
             <div className="min-h-25.5 flex flex-col gap-4">
@@ -399,9 +421,12 @@ export function QuotesIndexPage() {
           </div>
           <CustomDataTable
             columns={presetQuotesColumns}
-            data={presetQuoteData}
+            data={presetQuotes}
             showPaginated
-            globalFilterTerm={debouncedPresetSearchTerm}
+            paginationMeta={presetQuoteListResponse?.payload.meta}
+            paginationBtns={presetQuoteListResponse?.payload.meta.links}
+            setPageNo={setPageNo}
+            isFetching={isPresetQuoteFetching}
           />
         </div>
       </CustomDialog>

@@ -1,4 +1,10 @@
 import type { Method } from "axios";
+import type {
+  QuoteCategories,
+  QuoteDetails,
+  QuoteItem,
+  QuoteTemplate,
+} from "./api.responses.type";
 
 export enum deviceType {
   android = "android",
@@ -36,8 +42,8 @@ export interface BusinessAddressApiPayload {
 export interface PageFilters {
   page?: Number;
   status?: string[];
-  start_date?: string;
-  end_date?: string;
+  start_date?: string | Date;
+  end_date?: string | Date;
   search?: string;
   sort_by?: string | null;
 }
@@ -56,4 +62,21 @@ export interface ClientCreateApiPayload {
 
 export interface UpdateClientApiPayload extends Partial<ClientCreateApiPayload> {
   _method: Method;
+}
+
+export interface CreateQuoteApiPayload {
+  title: string;
+  description: string;
+  quote_date: Date;
+  expiry_date: Date;
+  client_id: number;
+  attachments?: File[];
+  notes: string;
+}
+
+export interface UpdateQuoteApiPayload extends Partial<CreateQuoteApiPayload> {
+  _method: Method;
+  items?: QuoteItem[];
+  template?: QuoteTemplate;
+  categorised?: QuoteCategories;
 }

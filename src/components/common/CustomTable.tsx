@@ -23,7 +23,10 @@ import { assets } from "../../assets/icons";
 import { memo, useEffect, useState } from "react";
 import { Separator } from "../ui/separator";
 import React from "react";
-import type { PaginationBtnMeta } from "@/types/api.responses.type";
+import type {
+  ApiResponseMeta,
+  PaginationBtnMeta,
+} from "@/types/api.responses.type";
 import { CustomBtn } from "./CustomBtn";
 import { cn } from "@/lib/utils";
 import { Spinner } from "../ui/spinner";
@@ -47,6 +50,7 @@ export interface DataTableProps<TData extends RowData> {
   setPageNo?: React.Dispatch<React.SetStateAction<number>>;
   lastPageNo?: number;
   isFetching?: boolean;
+  paginationMeta?: ApiResponseMeta;
 
   tableOptionsLeft?: React.ReactNode;
   tableOptionsRight?: React.ReactNode;
@@ -69,6 +73,7 @@ function CustomTable<TData extends RowData>({
   paginationBtns,
   startItemNo,
   endItemNo,
+  paginationMeta,
 
   currPageNo,
   setPageNo,
@@ -83,25 +88,18 @@ function CustomTable<TData extends RowData>({
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 5,
+    pageSize: paginationMeta ? paginationMeta.per_page : 5,
   });
   const [rowSelection, setRowSelection] = useState({});
   const data = renderData ?? [];
   const totalRecords = data?.length ?? 0;
-  if (pagination) {
-    startItemNo =
-      pagination && data.length > 0
-        ? pagination.pageIndex * pagination.pageSize + 1
-        : 0;
-
-    endItemNo =
-      pagination && data.length > 0
-        ? Math.min(
-            (pagination.pageIndex + 1) * pagination.pageSize,
-            totalRecords ?? data.length,
-          )
-        : 0;
-  }
+  const itemStartNo = paginationMeta
+    ? (paginationMeta.current_page - 1) * paginationMeta.per_page +
+      (data.length > 0 ? 1 : 0)
+    : 0;
+  const itemLastNo = paginationMeta
+    ? Math.max(0, itemStartNo + data.length - 1)
+    : 0;
 
   useEffect(() => {
     setPagination?.((curr) => ({ ...curr, pageIndex: 0 }));
@@ -161,11 +159,6 @@ function CustomTable<TData extends RowData>({
     endPage = pageCount - 1;
     startPage = Math.max(0, endPage - visiblePages + 1);
   }
-
-  const pageNumbers = Array.from(
-    { length: Math.max(0, endPage - startPage + 1) },
-    (_, i) => startPage + i,
-  );
 
   return (
     <>
@@ -428,7 +421,7 @@ function CustomTable<TData extends RowData>({
           <div className="flex justify-between items-center gap-2 px-6 pt-6">
             <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
               {" "}
-              Showing <b> {startItemNo} </b> to <b> {endItemNo} </b> of{" "}
+              Showing <b> {itemStartNo} </b> to <b> {itemLastNo} </b> of{" "}
               {totalRecords} items{" "}
             </span>
 

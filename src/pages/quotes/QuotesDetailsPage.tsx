@@ -34,7 +34,6 @@ import { invoiceData, QuoteActivityStatus } from "../../constants/dummyData";
 import { PaymentMethods } from "@/types/addDeposite.payload.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
 import DeleteDialog from "@/components/common/DeleteDialog";
-import { addQuote } from "@/redux/slices/quotes.slice";
 import { toast } from "react-toastify";
 
 export function QuotesDetailsPage() {
@@ -42,38 +41,31 @@ export function QuotesDetailsPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   // ── Read from Redux ─────────────────────────────────────────────────────────
-  const quote = useAppSelector((state) =>
-    state.quotes.find((q) => q.id === params.id),
-  );
+  // const quote = useAppSelector((state) =>
+  //   state.quotes.find((q) => q.id === params.id),
+  // );
 
-  const allClients = useAppSelector((state) => state.clients);
-  const quotes = useAppSelector((state) => state.quotes);
+  // const allClients = useAppSelector((state) => state.clients);
+  // const quotes = useAppSelector((state) => state.quotes);
 
-  // Fallback to first quote if ID not found (graceful degradation)
-  const activeQuote = useAppSelector((state) => quote ?? state.quotes[0]);
+  // // Fallback to first quote if ID not found (graceful degradation)
+  // const activeQuote = useAppSelector((state) => quote ?? state.quotes[0]);
 
   const [globalFilter, setGlobalFilter] = useState("");
   const deboucedFilter = useDebounce({ value: globalFilter, delay: 500 });
   const [activeTable, toggleActiveTable] = useState("summary");
-  const [quoteCurrStatus, toggleQuoteCurrStatus] =
-    useState<QuoteActivityStatus>(
-      (activeQuote?.status ?? "Draft") as QuoteActivityStatus,
-    );
+  // const [quoteCurrStatus, toggleQuoteCurrStatus] =
+  //   useState<QuoteActivityStatus>(
+  //     (activeQuote?.status ?? "Draft") as QuoteActivityStatus,
+  //   );
   const [clientDetailOpen, toggleClientDetailOpen] = useState(false);
   const [shareBoxOpen, toggleShareBoxOpen] = useState(false);
   const [moreOptionsOpen, toggleMoreOptionsOpen] = useState(false);
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
 
-  const client = allClients.find((c) => c.id === activeQuote?.clientId);
+  //const client = allClients.find((c) => c.id === activeQuote?.clientId);
 
-  const nextId = quotes.reduce((prev, quote) => {
-    const currYear = new Date().getFullYear();
-    const [_, quoteYear, num] = quote.referenceNumber.split("-");
-    if (Number(quoteYear) === currYear) {
-      return Math.max(Number(num) + 1, prev);
-    }
-    return prev;
-  }, 1);
+  const nextId = 1;
   const nextRefNo = `QT-${new Date().getFullYear()}-${nextId}`;
 
   // ── Items table columns ─────────────────────────────────────────────────────
@@ -151,13 +143,13 @@ export function QuotesDetailsPage() {
         navigate(`/quotes/manage-quotes/${params.id ?? "QT-2025-101"}`)
       }
       copyAction={() => {
-        dispatch(
-          addQuote({
-            ...quote,
-            id: nextRefNo,
-            title: quote?.title + "-(Copy)",
-          }),
-        );
+        // dispatch(
+        //   addQuote({
+        //     ...quote,
+        //     id: nextRefNo,
+        //     title: quote?.title + "-(Copy)",
+        //   }),
+        // );
         toast.success("Successfully copied the quote");
         navigate(`/quotes`);
       }}
@@ -181,19 +173,19 @@ export function QuotesDetailsPage() {
   ];
 
   // Build a ClientDataWithFilters-compatible object for the popup
-  const clientDisplayData: ClientDataWithFilters = {
-    id: client?.id ?? "",
-    client: client?.name ?? "Unknown Client",
-    company: client?.companyName ?? "",
-    phone: client?.phone ?? "",
-    email: client?.email ?? "",
-    createdAt: client?.createdAt ?? new Date().toISOString(),
-    activityCount: 0,
-  };
+  // const clientDisplayData: ClientDataWithFilters = {
+  //   id: client?.id ?? "",
+  //   client: client?.name ?? "Unknown Client",
+  //   company: client?.companyName ?? "",
+  //   phone: client?.phone ?? "",
+  //   email: client?.email ?? "",
+  //   createdAt: client?.createdAt ?? new Date().toISOString(),
+  //   activityCount: 0,
+  // };
 
-  if (!activeQuote) {
-    return <div className="p-6 text-placeholder-text">No quote found.</div>;
-  }
+  // if (!activeQuote) {
+  //   return <div className="p-6 text-placeholder-text">No quote found.</div>;
+  // }
 
   return (
     <>
@@ -201,8 +193,8 @@ export function QuotesDetailsPage() {
         <HeaderBreadCrumb pageName="Quote Detail" />
         <div className="flex flex-col gap-6 px-6 pt-6 pb-8.5">
           <CustomHeader
-            header={activeQuote.title}
-            headerInfo={activeQuote.id}
+            header={"activeQuote.title"}
+            headerInfo={"activeQuote.id"}
             btnConfigList={btnConfigList}
           />
 
@@ -218,7 +210,7 @@ export function QuotesDetailsPage() {
               <div className="table-theme! overflow-hidden grow">
                 <CustomDataTable
                   columns={itemColumns}
-                  data={activeQuote.items}
+                  data={[]}
                   globalFilterTerm={deboucedFilter}
                   showPaginated
                   tableOptionsLeft={
@@ -248,7 +240,7 @@ export function QuotesDetailsPage() {
                       discountPercentage={10}
                       reqDeposite={1500}
                       paymentMethod={PaymentMethods.cash}
-                      items={activeQuote.items}
+                      items={[]}
                     />
                   </div>
                 </div>
@@ -262,7 +254,7 @@ export function QuotesDetailsPage() {
                       <span className="text-sm"> Created on </span>
                       <span className="text-placeholder-text">
                         {" "}
-                        {formatDisplayDate(activeQuote.quoteDate)}{" "}
+                        {formatDisplayDate("activeQuote.quoteDate")}{" "}
                       </span>
                     </div>
 
@@ -270,15 +262,15 @@ export function QuotesDetailsPage() {
                       <span className="text-sm"> Expiry Date </span>
                       <span className="text-placeholder-text">
                         {" "}
-                        {formatDisplayDate(activeQuote.expiryDate)}{" "}
+                        {formatDisplayDate("activeQuote.expiryDate")}{" "}
                       </span>
                     </div>
 
                     <div>
                       <span className="text-sm"> Status </span>
                       <StatusDropDown
-                        currStatus={quoteCurrStatus}
-                        toggleStatus={toggleQuoteCurrStatus}
+                        currStatus={"quoteCurrStatus"}
+                        toggleStatus={"toggleQuoteCurrStatus"}
                       />
                     </div>
                   </div>

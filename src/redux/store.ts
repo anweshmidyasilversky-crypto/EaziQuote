@@ -38,7 +38,7 @@ const rootReduces = combineReducers({
   categories: categoriesReducer,
   subCategories: subCategoriesReducer,
   items: itemsReducer,
-  quotes: quotesReducer,
+  quote: quotesReducer,
   auth: authReducer,
 });
 

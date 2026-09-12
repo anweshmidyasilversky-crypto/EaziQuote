@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/combobox";
 import { useEffect, useRef, useState } from "react";
 import { Input as InputPrimitive } from "@base-ui/react";
+import { Spinner } from "../ui/spinner";
 
 interface CustomComboboxProps<T, V = T> {
   items: T[];
@@ -22,6 +23,7 @@ interface CustomComboboxProps<T, V = T> {
   inputRightNode?: React.ReactNode;
   inptFieldValue?: string;
   inptFieldChange?: (data: string) => void;
+  isFetching?: boolean;
 }
 
 export function CustomCombobox<T, V = T>({
@@ -37,6 +39,7 @@ export function CustomCombobox<T, V = T>({
   inputRightNode,
   inptFieldValue,
   inptFieldChange,
+  isFetching,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(
     selected ? getItemLabel(selected) : null,
@@ -107,7 +110,11 @@ export function CustomCombobox<T, V = T>({
         alignOffset={20}
       >
         <ComboboxEmpty className="px-4 py-3 text-sm text-gray-400">
-          {emptyMessage}
+          {isFetching ? (
+            <Spinner className="text-brand-dark w-4 h-4" />
+          ) : (
+            emptyMessage
+          )}
         </ComboboxEmpty>
 
         <ComboboxList className="max-h-64 overflow-y-auto py-1">

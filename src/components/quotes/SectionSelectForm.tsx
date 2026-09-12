@@ -17,7 +17,6 @@ import QuoteSectionForm, {
 } from "./QuoteSectionForm";
 import { type DefaultValues } from "react-hook-form";
 import { useAppDispatch } from "@/redux/store";
-import { updateQuoteSections } from "@/redux/slices/quotes.slice";
 import { toast } from "react-toastify";
 
 export type SectionSelectFormProps = {
@@ -125,15 +124,15 @@ function SectionSelectForm({
   const handleSubmit = () => {
     const table = tableRef.current;
 
-    dispatch(
-      updateQuoteSections({
-        quoteId: refNo,
-        sections:
-          table
-            ?.getSelectedRowIds()
-            .map((rowId) => table.getRow(rowId).original) ?? [],
-      }),
-    );
+    // dispatch(
+    //   updateQuoteSections({
+    //     quoteId: refNo,
+    //     sections:
+    //       table
+    //         ?.getSelectedRowIds()
+    //         .map((rowId) => table.getRow(rowId).original) ?? [],
+    //   }),
+    // );
 
     toast.success(`Sucessfully added sections`);
 

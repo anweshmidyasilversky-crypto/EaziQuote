@@ -104,7 +104,8 @@ export function DashboardLayout() {
               <span className="max-h-4.75 w-auto max-w-53 font-sans text-xs md:text-sm text-placeholder-text">
                 {user.is_trial_period &&
                   `Free trial ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
-                {`Plan ${user.is_subscription_active ? "ends" : "ended"} on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
+                {!user.is_trial_period &&
+                  `Plan ${user.is_subscription_active ? "ends" : "ended"} on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
               </span>
 
               <button

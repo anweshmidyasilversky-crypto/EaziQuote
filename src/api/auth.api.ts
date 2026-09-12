@@ -5,6 +5,8 @@ import {
   type User,
   type DashboardResponse,
   type QuoteListResponse,
+  type ListResponse,
+  type PresetQuoteListing,
 } from "@/types/api.responses.type";
 
 export const signup = async (payload: SignupPayload) => {
@@ -45,7 +47,7 @@ export const getHomePage = async () => {
   }
 };
 
-export const getQuoteList = async (filters: PageFilters) => {
+export const getQuoteList = async (filters?: PageFilters) => {
   try {
     const quoteList = await axiosInstance.get<ApiResponse<QuoteListResponse>>(
       `/quotes`,
@@ -53,6 +55,19 @@ export const getQuoteList = async (filters: PageFilters) => {
         params: { ...filters },
       },
     );
+    return quoteList.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getPresetQuoteList = async (filters?: PageFilters) => {
+  try {
+    const quoteList = await axiosInstance.get<
+      ApiResponse<ListResponse<PresetQuoteListing>>
+    >(`/quote-templates`, {
+      params: filters,
+    });
     return quoteList.data;
   } catch (err) {
     throw err;

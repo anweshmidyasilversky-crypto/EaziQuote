@@ -12,6 +12,9 @@ import ItemSelectForm from "../../components/quotes/ItemSelectForm";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { useAppSelector } from "../../redux/store";
 import SectionSelectForm from "@/components/quotes/SectionSelectForm";
+import { useQuery } from "@tanstack/react-query";
+import { getQuoteDetails } from "@/api/quotes.api";
+import { showErrorToast } from "@/api/axiosInstance";
 
 enum toggleId {
   Summary = "summary",
@@ -25,26 +28,24 @@ export function CreateQuotePage() {
     toggleId.Summary,
   );
   const params = useParams<{ id: string }>();
-  const location = useLocation();
-  const quotes = useAppSelector((state) => state.quotes);
-  const currQuote = quotes.find((quote) => quote.referenceNumber === params.id);
-  const nextId = quotes.reduce((prev, quote) => {
-    const currYear = new Date().getFullYear();
-    const [_, quoteYear, num] = quote.referenceNumber.split("-");
-    if (Number(quoteYear) === currYear) {
-      return Math.max(Number(num) + 1, prev);
-    }
-    return prev;
-  }, 1);
-  const nextRefNo = `QT-${new Date().getFullYear()}-${nextId}`;
-  const refNo = params.id ?? nextRefNo;
-  const isEditing = location.pathname.split("/").includes("manage-quotes");
-  let preSelectedItems: Record<string, number> = {};
-  if (isEditing) {
-    currQuote?.items.forEach((item) => {
-      preSelectedItems[item.itemId ?? ""] = item.quantity;
-    });
+
+  const { data: quoteDetailsResponse, error: quoteFetchError } = useQuery({
+    queryKey: ["createQuote", "client", params.id],
+    queryFn: () => getQuoteDetails(params.id as string),
+  });
+
+  // Only if we are sending request with valid id and request fails then show error toast
+  // To avoid showing not found error while creating new quote
+  if (params.id && quoteFetchError) {
+    showErrorToast(quoteFetchError);
   }
+  const quote = quoteDetailsResponse?.payload;
+  const currQuote = useAppSelector((state) => state.quote);
+  const dummyRefNo = `QT-${new Date().getFullYear()}-1`;
+  const refNo =
+    currQuote.reference_number.trim().length > 0
+      ? currQuote.reference_number
+      : dummyRefNo;
 
   const btnConfigList: CustomBtnProps[] = [
     {
@@ -66,12 +67,12 @@ export function CreateQuotePage() {
     {
       btnId: toggleId.Items,
       btnLabel: "Items",
-      disabled: !(currQuote?.hasCompletedSummary ?? false),
+      disabled: dummyRefNo === refNo,
     },
     {
       btnId: toggleId.Sections,
       btnLabel: "Sections",
-      disabled: !(currQuote?.isItemsSelected ?? false),
+      disabled: currQuote.items.length <= 0,
     },
   ];
 
@@ -95,24 +96,25 @@ export function CreateQuotePage() {
                 <QuoteSummaryForm
                   refNo={refNo}
                   submitAction={() => changeFormCurrSection(toggleId.Items)}
+                  currQuote={quote}
                 />
               )}
-              {formCurrSection === toggleId.Items && (
+              {/* {formCurrSection === toggleId.Items && (
                 <ItemSelectForm
                   refNo={refNo}
                   submitAction={() => changeFormCurrSection(toggleId.Sections)}
                   preSelectedItems={preSelectedItems}
                 />
-              )}
+              )} */}
 
-              {formCurrSection === toggleId.Sections && (
+              {/* {formCurrSection === toggleId.Sections && (
                 <SectionSelectForm
                   refNo={refNo}
                   submitAction={() =>
                     navigate(`/quotes/${refNo}`, { replace: true })
                   }
                 />
-              )}
+              )} */}
             </div>
           </div>
         </div>

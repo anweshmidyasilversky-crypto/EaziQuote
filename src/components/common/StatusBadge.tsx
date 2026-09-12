@@ -6,6 +6,7 @@ import type {
 } from "../../constants/dummyData";
 import type { InvoiceStatus } from "@/types/invoice.type";
 import type { PaymentStatus } from "@/types/paymentRecord.type";
+import type { QuoteStatus } from "@/types/api.responses.type";
 
 export type StatusBadgeProps = {
   status:
@@ -17,7 +18,8 @@ export type StatusBadgeProps = {
     | PaymentActivityStatus
     | QuoteActivityStatus
     | InvoiceStatus
-    | PaymentStatus;
+    | PaymentStatus
+    | QuoteStatus;
 
   ChevronIcon?: LucideIcon;
 };
@@ -43,6 +45,21 @@ const statusColorMap: Record<StatusBadgeProps["status"], string> = {
   failed: "bg-overdue-badge",
   received: "bg-paid-badge",
   pending: "bg-draft-badge",
+  sent: "bg-sent-badge",
+  //paid: "bg-paid-badge",
+  //overdue: "bg-overdue-badge",
+  draft: "bg-draft-badge",
+  //rejected: "bg-overdue-badge",
+  //due: "bg-draft-badge",
+  approved: "bg-paid-badge",
+  //completed: "bg-paid-badge",
+  // cancelled: "bg-paid-badge",
+  // received: "bg-paid-badge",
+  // pending: "bg-draft-badge",
+  // failed: "bg-overdue-badge",
+  //refunded: "bg-paid-badge",
+  accepted: "bg-paid-badge",
+  //expired: "bg-overdue-badge"
 };
 
 const textColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -68,6 +85,21 @@ const textColorMap: Record<StatusBadgeProps["status"], string> = {
   failed: "text-overdue-text",
   received: "text-paid-text",
   pending: "text-draft-text",
+  sent: "text-sent-text",
+  // paid: "text-paid-text",
+  // overdue: "text-overdue-text",
+  draft: "text-draft-text",
+  // rejected: "text-overdue-text",
+  // due: "text-draft-text",
+  approved: "text-paid-text",
+  // completed: "text-paid-text",
+  // cancelled: "text-paid-text",
+  // received: "text-paid-text",
+  // pending: "text-draft-text",
+  // failed: "text-overdue-text",
+  // refunded: "text-paid-text",
+  accepted: "text-paid-text",
+  // expired: "text-overdue-text",
 };
 
 function StatusBadge({ status, ChevronIcon }: StatusBadgeProps) {

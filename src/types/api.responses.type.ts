@@ -172,7 +172,7 @@ export interface DashboardResponse {
   recentActivities: DashboardActivityItem[];
 }
 
-export interface QuoteClient {
+export interface Client {
   id: number;
   name: string;
   company_name: string;
@@ -183,7 +183,7 @@ export interface QuoteClient {
   updated_at: string;
 }
 
-export interface QuoteItem {
+export interface Item {
   id: number;
   name: string;
   description: string | null;
@@ -193,7 +193,7 @@ export interface QuoteItem {
   category_name: string;
 }
 
-export interface QuoteAttachment {
+export interface Attachment {
   id: number;
   url: string;
   type: string;
@@ -209,13 +209,13 @@ export interface Quote {
   url: string | null;
   status: {
     id: number;
-    status: string;
+    status: QuoteStatus;
     display_name: string;
     color: string | null;
   };
-  client: QuoteClient;
-  items: Record<string, QuoteItem[]> | QuoteItem[];
-  attachments: QuoteAttachment[];
+  client: Client;
+  items: Item[];
+  attachments: Attachment[];
   is_editable: boolean;
 }
 
@@ -276,17 +276,6 @@ export interface NotificationListResponse {
   meta: ApiResponseMeta;
 }
 
-export interface Client {
-  id: number;
-  name: string;
-  company_name: string;
-  phone: string;
-  email: string;
-  address: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface ClientDetails extends Client {
   city: string;
   postcode: string;
@@ -329,4 +318,73 @@ export interface Payment {
   client_name: string;
   client_email: string;
   payment_link_url: string;
+}
+
+export interface QuoteItem extends Item {
+  id: number;
+  type: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  price: number;
+  total_price: number;
+  cost: number;
+  total_cost: number;
+  is_added: boolean;
+  category_id: number;
+  category_name: string;
+  subcategory_id: null | number;
+  subcategory_name: null | string;
+}
+
+export interface PresetQuoteListing {
+  id: number;
+  name: string;
+  description: string;
+  quote_description: null | string;
+  active: number;
+  created_at: string;
+  updated_at: string;
+  items_count: number;
+}
+
+export interface PresetQuote extends PresetQuoteListing {
+  items: Item[];
+}
+
+export enum QuoteCategories {
+  byItem = "by-item",
+  byCat = "by-category",
+  bySubCat = "by-subcategory",
+  all = "by-category-subcategory-item",
+}
+
+export interface QuoteDetails extends Omit<Quote, "status"> {
+  notes: string;
+  url: string;
+  status: QuoteStatus;
+  deposit_required: boolean;
+  deposit_type: null | string;
+  deposit_amount: null | number;
+  deposit_percentage: null | number;
+  categorised: QuoteCategories;
+  template: QuoteTemplate;
+  client: ClientDetails;
+  items: QuoteItem[];
+  is_editable: boolean;
+  vat_setting_id: number;
+  vat: number;
+  is_company_phone_number_show: boolean;
+  discount: null | number;
+  financial_summary: {
+    total_cost: number;
+    sub_total: number;
+    tax: number;
+    discount: number;
+    grand_total: number;
+  };
+  created_at: string;
+  updated_at: string;
+  route_url: string;
+  deposit_payment: null | string;
 }
