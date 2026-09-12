@@ -299,3 +299,34 @@ export interface ClientDetails extends Client {
   available_credit: number;
   recent_activities: (QuoteActivity | InvoiceActivity)[];
 }
+
+export enum PaymentMethods {
+  stripe = "stripe",
+  cash = "cash",
+}
+export enum PaymentAmountType {
+  invoice = "invoice",
+  deposit = "deposit",
+}
+export enum PaymentStatus {
+  Received = "received",
+  Failed = "failed",
+  Pending = "pending",
+}
+
+export interface Payment {
+  id: number;
+  payment_method: PaymentMethods;
+  amount_type: PaymentAmountType;
+  status: PaymentStatus;
+  amount: number;
+  amount_formatted: string;
+  allocated: string;
+  credit: string;
+  currency: string;
+  payment_date: string;
+  stripe_payment_link_url: null | string;
+  client_name: string;
+  client_email: string;
+  payment_link_url: string;
+}
