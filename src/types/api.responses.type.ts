@@ -320,7 +320,7 @@ export interface Payment {
   payment_link_url: string;
 }
 
-export interface QuoteItem extends Item {
+export interface ItemDetails extends Item {
   id: number;
   type: string;
   name: string;
@@ -362,7 +362,12 @@ export enum QuoteCategories {
 export interface QuoteDetails extends Omit<Quote, "status"> {
   notes: string;
   url: string;
-  status: QuoteStatus;
+  status: {
+    id: number;
+    status: QuoteStatus;
+    display_name: string;
+    color: null | string;
+  };
   deposit_required: boolean;
   deposit_type: null | string;
   deposit_amount: null | number;
@@ -370,7 +375,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   categorised: QuoteCategories;
   template: QuoteTemplate;
   client: ClientDetails;
-  items: QuoteItem[];
+  items: ItemDetails[];
   is_editable: boolean;
   vat_setting_id: number;
   vat: number;

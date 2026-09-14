@@ -12,17 +12,21 @@ import { type QuoteSummary } from "../../types/quoteCreation.payload.type";
 import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { useAppDispatch } from "../../redux/store";
-import { cn, getQuote } from "../../lib/utils";
-import { updateQuote } from "../../redux/slices/quotes.slice";
+import { cn } from "../../lib/utils";
+import { updateQuote as updateQuoteRedux } from "../../redux/slices/quotes.slice";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { ClientCreateApiPayload } from "@/types/api.requests.type";
+import type {
+  ClientCreateApiPayload,
+  CreateQuoteApiPayload,
+  UpdateQuoteApiPayload,
+} from "@/types/api.requests.type";
 import { createClient, getClientList } from "@/api/clients.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { QuoteDetails } from "@/types/api.responses.type";
+import { createQuote, deleteAttachemnt, updateQuote } from "@/api/quotes.api";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
@@ -36,10 +40,20 @@ function QuoteSummaryForm({
   currQuote,
 }: QuoteSummaryFormProps) {
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const [clientSearchTerm, setClientSearchTerm] = useState(
+    currQuote?.client.name ?? "",
+  );
+  useEffect(() => {
+    setClientSearchTerm(currQuote?.client.name ?? "");
+  }, [currQuote]);
   const deboucedClientSearch = useDebounce({ value: clientSearchTerm });
+  const dispatch = useAppDispatch();
+
+  const { mutateAsync: createQuoteAsync } = useMutation({
+    mutationKey: ["quoteSummay", "quote", "create"],
+    mutationFn: (payload: CreateQuoteApiPayload) => createQuote(payload),
+  });
 
   const {
     data: clientListResponse,
@@ -62,6 +76,17 @@ function QuoteSummaryForm({
   const { mutateAsync: createClientAsync } = useMutation({
     mutationKey: ["quote-summary", "client", "creation"],
     mutationFn: (data: ClientCreateApiPayload) => createClient(data),
+  });
+
+  const { mutateAsync: updateQuoteAsync } = useMutation({
+    mutationFn: (data: UpdateQuoteApiPayload) => updateQuote(data),
+  });
+
+  const { mutateAsync: deleteAttachmentAsync } = useMutation({
+    mutationFn: (data: {
+      quote_id: string | number;
+      attachment_id: string | number;
+    }) => deleteAttachemnt(data),
   });
 
   const initialValue: QuoteSummary = {
@@ -104,7 +129,16 @@ function QuoteSummaryForm({
       const attachmentList: File[] = [];
       currQuote.attachments.forEach((attachment) => {
         attachmentList.push(
-          new File([], attachment.id.toString() + " " + attachment.type),
+          new File(
+            [],
+            `attachment_${attachment.id.toString()}.${attachment.type}`,
+            {
+              type:
+                attachment.type === "pdf"
+                  ? `application/pdf`
+                  : `image/${attachment.type}`,
+            },
+          ),
         );
       });
       setValue("attachments", attachmentList);
@@ -127,7 +161,7 @@ function QuoteSummaryForm({
 
   const attachments = watch().attachments;
 
-  const deleteAttachment = (fileName: string) => {
+  const removeAttachment = (fileName: string) => {
     setValue(
       "attachments",
       attachments?.filter((attachment) => attachment.name !== fileName),
@@ -148,22 +182,60 @@ function QuoteSummaryForm({
     }
   };
 
-  const submitHandler = (data: QuoteSummary) => {
-    // dispatch(
-    //   updateQuote({
-    //     id: refNo,
-    //     title: data.quoteTitle,
-    //     ...data,
-    //     hasCompletedSummary: true,
-    //     status: "Draft",
-    //     items: [],
-    //   }),
-    // );
-    toast.success(`Updated quote summary`);
-    submitAction?.();
-    navigate(`/quotes/manage-quotes/${refNo}`, {
-      replace: true,
-    });
+  const handleAttachmentDelete = async (
+    quote_id: string | number,
+    attachment_id: string | number,
+    fileName: string,
+  ) => {
+    try {
+      const response = await deleteAttachmentAsync({
+        quote_id,
+        attachment_id,
+      });
+      removeAttachment(fileName);
+      toast.success(response.message);
+    } catch (error) {
+      showErrorToast(error);
+    }
+  };
+
+  const submitHandler = async (data: QuoteSummary) => {
+    toggleIsSubmitting(true);
+    try {
+      if (currQuote) {
+        const updatedQuote = await updateQuoteAsync({
+          _method: "put",
+          quote_id: currQuote.id,
+          ...data,
+          title: data.quoteTitle,
+          description: data.jobDescription,
+          quote_date: data.quoteDate,
+          expiry_date: data.expiryDate,
+          client_id: Number(data.clientId),
+          notes: data.notes ?? "",
+          attachments: data.attachments?.slice(currQuote?.attachments.length),
+        });
+        toast.success(updatedQuote.message);
+        dispatch(updateQuoteRedux(updatedQuote.payload));
+      } else {
+        const quote = await createQuoteAsync({
+          ...data,
+          title: data.quoteTitle,
+          description: data.jobDescription,
+          quote_date: data.quoteDate,
+          expiry_date: data.expiryDate,
+          client_id: Number(data.clientId),
+          notes: data.notes ?? "",
+        });
+        dispatch(updateQuoteRedux(quote.payload));
+        toast.success(quote.message);
+      }
+      submitAction?.();
+    } catch (err) {
+      showErrorToast(err);
+    } finally {
+      toggleIsSubmitting(false);
+    }
   };
 
   return (
@@ -287,10 +359,24 @@ function QuoteSummaryForm({
         />
         {attachments && (
           <div className="attachment-layout">
-            {attachments.map((attachment) => (
+            {attachments.map((attachment, index) => (
               <StyledAttachments
+                key={attachment.name}
                 fileName={attachment.name}
-                deleteAction={() => deleteAttachment(attachment.name)}
+                deleteAction={() => {
+                  if (
+                    currQuote &&
+                    index < (currQuote.attachments.length ?? 0)
+                  ) {
+                    handleAttachmentDelete(
+                      currQuote.id,
+                      currQuote.attachments[index].id,
+                      attachment.name,
+                    );
+                  } else {
+                    removeAttachment(attachment.name);
+                  }
+                }}
               />
             ))}
           </div>
@@ -300,6 +386,7 @@ function QuoteSummaryForm({
           buttonLabel="Save"
           onClick={handleSubmit(submitHandler)}
           type="submit"
+          isSubmitting={isSubmitting}
         />
       </div>
 

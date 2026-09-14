@@ -222,6 +222,10 @@ export function ObjToFormData<T extends Object>(data: T) {
         key as string,
         new Blob([data[key]], { type: data[key].type }),
       );
+    } else if (Array.isArray(data[key])) {
+      data[key].forEach((val) => {
+        formData.append(`${String(key)}[]`, val);
+      });
     } else {
       if (["phone", "phone_number"].includes(objKey)) {
         formData.append(key as string, data[key] ? `+44${data[key]}` : "");

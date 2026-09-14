@@ -99,13 +99,12 @@ export function CreateQuotePage() {
                   currQuote={quote}
                 />
               )}
-              {/* {formCurrSection === toggleId.Items && (
+              {formCurrSection === toggleId.Items && (
                 <ItemSelectForm
-                  refNo={refNo}
+                  currQuote={currQuote}
                   submitAction={() => changeFormCurrSection(toggleId.Sections)}
-                  preSelectedItems={preSelectedItems}
                 />
-              )} */}
+              )}
 
               {/* {formCurrSection === toggleId.Sections && (
                 <SectionSelectForm

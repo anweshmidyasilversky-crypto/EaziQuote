@@ -25,6 +25,14 @@ import { PaymentMethods } from "@/types/addDeposite.payload.type";
 import { toast } from "react-toastify";
 import { updateQuote } from "@/redux/slices/quotes.slice";
 import type { QuoteLineItem } from "@/types/quoteLineItem.type";
+import type {
+  ItemDetails,
+  Quote,
+  QuoteDetails,
+} from "@/types/api.responses.type";
+import { useQuery } from "@tanstack/react-query";
+import { getItemList } from "@/api/items.api";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export type DisplayCatalogItem = {
   id: string;
@@ -37,18 +45,14 @@ export type DisplayCatalogItem = {
 };
 
 export type ItemSelectFormProps = {
-  refNo: string;
+  currQuote?: QuoteDetails;
   submitAction: () => void;
-  preSelectedItems?: Record<string, number>;
 };
 
-function ItemSelectForm({
-  refNo,
-  submitAction,
-  preSelectedItems,
-}: ItemSelectFormProps) {
+function ItemSelectForm({ currQuote, submitAction }: ItemSelectFormProps) {
   const dispatch = useAppDispatch();
-  const items = useAppSelector((state) => state.items);
+  const [pageNo, setPageNo] = useState(1);
+
   const categories = useAppSelector((state) => state.categories);
   const subCategories = useAppSelector((state) => state.subCategories);
   const [filterCategory, setFilterCategory] = useState("");
@@ -57,25 +61,40 @@ function ItemSelectForm({
   const [filters, setFilters] = useState<string[]>([]);
   const [createItemModal, toggleCreateItemModal] = useState(false);
   const [editItemModal, toggleEditItemModal] = useState(false);
-  const [itemQty, setItemQty] = useState<Record<string, number>>(
-    preSelectedItems ?? {},
-  );
+  const [itemQty, setItemQty] = useState<Record<string, number>>({});
+  // useEffect(() => {
+  //   const itemsByQuantity: Record<string, number> = {};
+  //   currQuote?.items.forEach(item => {
+  //     itemsByQuantity[item.id] = item.quantity
+  //   });
+  //   setItemQty(itemsByQuantity);
+  // }, [currQuote]);
+  const [state, updateState] = useState(0);
+
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
   const [editingItem, setEditingItem] = useState<
     ItemEditPayload & Pick<Item, "id">
   >();
 
-  const getCategory = (catId: string) => {
-    console.log(catId);
-    return categories.find((category) => category.id === catId);
-  };
-  const getSubCategory = (subCatId: string) => {
-    return subCategories.find((subCategory) => subCategory.id === subCatId);
-  };
-  const getItem = (itemId: string) => {
-    return items.find((item) => item.id === itemId);
-  };
+  const {
+    data: itemsListResponse,
+    isFetching: isItemsFetching,
+    error: itemsFetchingError,
+  } = useQuery({
+    queryKey: ["itemSelect", "items", currQuote?.id, debouncedSearchTerm],
+    queryFn: () =>
+      getItemList({
+        quote_id: currQuote?.id,
+        page: pageNo,
+        search: debouncedSearchTerm,
+      }),
+  });
+  const itemListMeta = itemsListResponse?.payload.meta;
+
+  if (itemsFetchingError) {
+    showErrorToast(itemsFetchingError);
+  }
 
   const itemAddHandler = (item: ItemCreationPayload) => {
     dispatch(addItem({ ...item, id: item.name.toLowerCase() }));
@@ -85,36 +104,20 @@ function ItemSelectForm({
     dispatch(updateItem(Object.assign(patch, { id: editingItem?.id ?? "" })));
   };
 
-  const convertToQuoteLineItem = (
-    itemId: string,
-    qty: number,
-  ): QuoteLineItem => {
-    const item = getItem(itemId) as Item;
-    const { id: i, ...patch } = item;
-    return {
-      id: nanoid(),
-      itemId: itemId,
-      quantity: qty,
-      ...patch,
-      unitCost: patch.unitPrice,
-      total: patch.pricePerUnit * qty,
-    };
-  };
-
   const addQuoteLineItem = () => {
     if (Object.keys(itemQty).length == 0) {
       toast.error("Please add an item to continue");
       return;
     }
-    dispatch(
-      updateQuote({
-        id: refNo,
-        items: Object.keys(itemQty).map((itemId) =>
-          convertToQuoteLineItem(itemId, itemQty[itemId]),
-        ),
-        isItemsSelected: true,
-      }),
-    );
+    // dispatch(
+    //   updateQuote({
+    //     id: refNo,
+    //     items: Object.keys(itemQty).map((itemId) =>
+    //       convertToQuoteLineItem(itemId, itemQty[itemId]),
+    //     ),
+    //     isItemsSelected: true,
+    //   }),
+    // );
     toast.success("Added selected items");
     submitAction();
   };
@@ -123,80 +126,75 @@ function ItemSelectForm({
     () =>
       [
         {
-          id: "itemName",
-          accessorFn: (item) => item.name,
+          accessorKey: "name",
           header: "ITEM NAME",
           enableSorting: false,
         },
         {
-          id: "category",
-          accessorFn: (item) => getCategory(item.catId)?.name ?? "category",
+          accessorKey: "category_name",
           header: "CATEGORY",
           enableSorting: false,
         },
         {
-          id: "subcategory",
-          accessorFn: (item) =>
-            getSubCategory(item.subCatId)?.name ?? "sub category",
+          accessorKey: "subcategory_name",
           header: "SUBCATEGORY",
           enableSorting: false,
+          cell: (info) => {
+            const subCatName = info.getValue<string | null>();
+            return subCatName ?? "-";
+          },
         },
         {
           accessorKey: "unit",
-          header: "UNIT",
           enableSorting: false,
         },
         {
-          accessorKey: "pricePerUnit",
+          accessorKey: "price",
           header: "PRICE/UNIT",
           cell: (info) => formatCurrency(info.getValue<number>()),
           enableSorting: false,
         },
         {
-          id: "qty",
-          header: "QUANTITY",
+          accessorKey: "quantity",
           cell: (cell) => {
-            const itemId = cell.row.original.id;
-            const qty = itemQty[itemId] ?? 0;
+            const {
+              id: itemId,
+              is_added: isAdded,
+              quantity: qty,
+            } = cell.row.original;
             return (
               <CustomBtn
                 className="bg-transparent! btn-auth border border-brand-dark text-black-text w-25!"
-                buttonLabel={qty.toString()}
+                buttonLabel={isAdded ? qty.toString() : "0"}
                 leftIcon={assets.minusIconBlue}
                 leftAction={() => {
                   if (itemQty[itemId] == 1) {
-                    setItemQty((curr) => {
-                      const { [itemId]: _, ...rest } = curr;
-                      return rest;
-                    });
+                    cell.row.original.is_added = false;
+                    cell.row.original.quantity = 1;
                   } else {
-                    setItemQty((curr) => ({
-                      ...curr,
-                      [itemId]: qty - 1,
-                    }));
+                    cell.row.original.quantity += 1;
                   }
                 }}
                 leftCls={cn("h-0.5!")}
                 rightIcon={assets.plusIconBlue}
-                rightAction={() =>
-                  setItemQty((curr) => ({
-                    ...curr,
-                    [itemId]: qty + 1,
-                  }))
-                }
+                rightAction={() => {
+                  cell.row.original.quantity += 1;
+                  updateState((curr) => curr ^ 1);
+                }}
               />
             );
           },
         },
         {
           id: "total",
-          header: "TOTAL",
-          size: 100,
+          header: "Total",
           cell: (cell) => {
             const item = cell.row.original;
             return (
               <span className="w-25!">
-                {formatCurrency((itemQty[item.id] ?? 0) * item.pricePerUnit)}
+                {item.is_added
+                  ? formatCurrency(item.quantity * item.price)
+                  : "0"}
               </span>
             );
           },
@@ -211,19 +209,19 @@ function ItemSelectForm({
               <CustomActionGroup
                 withOpen={false}
                 editFn={() => {
-                  setEditingItem({
-                    ...item,
-                    name: item.name,
-                    unit: item.unit,
-                    pricePerUnit: item.pricePerUnit,
-                  });
+                  // setEditingItem({
+                  //   ...item,
+                  //   name: item.name,
+                  //   unit: item.unit,
+                  //   pricePerUnit: item.pricePerUnit,
+                  // });
                   toggleEditItemModal((curr) => !curr);
                 }}
               />
             );
           },
         },
-      ] as ColumnDef<TableFeatures, Item>[],
+      ] as ColumnDef<TableFeatures, ItemDetails>[],
     [itemQty],
   );
 
@@ -242,8 +240,11 @@ function ItemSelectForm({
     <>
       <CustomDataTable
         columns={itemSelectColumns}
-        data={items}
+        data={itemsListResponse?.payload.data ?? []}
         showPaginated
+        paginationMeta={itemListMeta}
+        setPageNo={setPageNo}
+        paginationBtns={itemListMeta?.links}
         tableOptionsLeft={
           <SearchInputGruop
             searchTerm={searchTerm}
@@ -269,7 +270,7 @@ function ItemSelectForm({
             />
           </div>
         }
-        globalFilterTerm={debouncedSearchTerm}
+        isFetching={isItemsFetching}
       />
       <div className="dashed-y-separators" />
 

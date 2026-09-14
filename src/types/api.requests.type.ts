@@ -2,7 +2,7 @@ import type { Method } from "axios";
 import type {
   QuoteCategories,
   QuoteDetails,
-  QuoteItem,
+  ItemDetails,
   QuoteTemplate,
 } from "./api.responses.type";
 
@@ -46,6 +46,9 @@ export interface PageFilters {
   end_date?: string | Date;
   search?: string;
   sort_by?: string | null;
+  quote_id?: string | number;
+  invoice_id?: string | number;
+  category_id?: string | number;
 }
 
 export interface ClientCreateApiPayload {
@@ -67,8 +70,8 @@ export interface UpdateClientApiPayload extends Partial<ClientCreateApiPayload> 
 export interface CreateQuoteApiPayload {
   title: string;
   description: string;
-  quote_date: Date;
-  expiry_date: Date;
+  quote_date: Date | string;
+  expiry_date: Date | string;
   client_id: number;
   attachments?: File[];
   notes: string;
@@ -76,7 +79,8 @@ export interface CreateQuoteApiPayload {
 
 export interface UpdateQuoteApiPayload extends Partial<CreateQuoteApiPayload> {
   _method: Method;
-  items?: QuoteItem[];
+  quote_id: string | number;
+  items?: ItemDetails[];
   template?: QuoteTemplate;
   categorised?: QuoteCategories;
 }

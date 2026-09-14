@@ -19,6 +19,7 @@ export type MoreOptionsPopupProps = {
   align?: Align;
   side?: Side;
   popoverTarget?: string;
+  withEdit?: boolean;
 };
 
 function MoreOptionsPopup({
@@ -34,6 +35,7 @@ function MoreOptionsPopup({
   align,
   side,
   popoverTarget,
+  withEdit = true,
 }: MoreOptionsPopupProps) {
   const closePopup = () => togglePopupOpen(false);
   return (
@@ -55,14 +57,16 @@ function MoreOptionsPopup({
             }}
           />
         )}
-        <CustomBtn
-          leftIcon={assets.pencilIcon}
-          buttonLabel="Edit"
-          onClick={() => {
-            editAction?.();
-            closePopup();
-          }}
-        />
+        {withEdit && (
+          <CustomBtn
+            leftIcon={assets.pencilIcon}
+            buttonLabel="Edit"
+            onClick={() => {
+              editAction?.();
+              closePopup();
+            }}
+          />
+        )}
 
         {withCopyOption && (
           <CustomBtn

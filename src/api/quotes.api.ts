@@ -34,12 +34,27 @@ export const createQuote = async (payload: CreateQuoteApiPayload) => {
 
 export const updateQuote = async (payload: UpdateQuoteApiPayload) => {
   try {
+    const { quote_id, ...patch } = payload;
     const updatedQuote = await axiosInstance.post<ApiResponse<QuoteDetails>>(
-      `/quotes`,
-      ObjToFormData(payload),
+      `/quotes/${quote_id}`,
+      ObjToFormData(patch),
     );
     return updatedQuote.data;
   } catch (error) {
     throw error;
+  }
+};
+
+export const deleteAttachemnt = async (payload: {
+  quote_id: string | number;
+  attachment_id: string | number;
+}) => {
+  try {
+    const response = await axiosInstance.delete<ApiResponse<null>>(
+      `/quotes/${payload.quote_id}/attachments/${payload.attachment_id}`,
+    );
+    return response.data;
+  } catch (err) {
+    throw err;
   }
 };

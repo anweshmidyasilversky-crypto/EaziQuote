@@ -23,7 +23,12 @@ const initialState: QuoteDetails = {
   quote_date: "",
   expiry_date: "",
   url: "",
-  status: QuoteStatus.draft,
+  status: {
+    id: 0,
+    status: QuoteStatus.draft,
+    display_name: "",
+    color: null,
+  },
   client: {} as ClientDetails,
   items: [],
   is_editable: true,
