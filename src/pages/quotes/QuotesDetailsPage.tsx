@@ -31,7 +31,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import type { QuoteLineItem } from "../../types/quoteLineItem.type";
 import type { ClientDataWithFilters } from "../../constants/dummyData";
 import { invoiceData, QuoteActivityStatus } from "../../constants/dummyData";
-import { PaymentMethods } from "@/types/addDeposite.payload.type";
+import { PaymentMethods } from "@/types/api.responses.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import { toast } from "react-toastify";

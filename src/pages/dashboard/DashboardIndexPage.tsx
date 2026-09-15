@@ -12,19 +12,22 @@ import { formatDisplayDate, formatOrdinalDate } from "../../lib/utils";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getHomePage } from "@/api/auth.api";
+import { getAppConfig, getHomePage } from "@/api/auth.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import type { DashboardActivityItem } from "@/types/api.responses.type";
 import { getNotificationList } from "@/api/notifications.api";
 import type { ClientCreateApiPayload } from "@/types/api.requests.type";
-import { createClient } from "@/api/clients.api";
+import { createClient } from "@/api/services/clients.api";
 import type { ClientCreationPayload } from "@/types/clientCreation.payload.type";
 import { toast } from "react-toastify";
+import { useAppDispatch } from "@/redux/store";
+import { updateConfig } from "@/redux/slices/settings.slice";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
 
   const {
@@ -52,6 +55,21 @@ export function DashboardIndexPage() {
   if (notificationErr) {
     showErrorToast(notificationErr);
   }
+
+  const { data: appConfig, error: configFetchError } = useQuery({
+    queryKey: ["dashboard", "appConfig"],
+    queryFn: getAppConfig,
+  });
+
+  if (configFetchError) {
+    showErrorToast(configFetchError);
+  }
+
+  useEffect(() => {
+    if (appConfig) {
+      dispatch(updateConfig(appConfig.payload));
+    }
+  }, [appConfig]);
 
   const { mutateAsync: createClientAsync } = useMutation({
     mutationKey: ["dashboard", "client", "create"],

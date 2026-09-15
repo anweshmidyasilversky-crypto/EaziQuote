@@ -61,6 +61,7 @@ export function BusinessProfileForm() {
       formData.append("name", data.businessName);
       formData.append("phone", `+44${data.businessPhoneNo}`);
       formData.append("address", "dummyAddress");
+      formData.append("vertical_market_id", data.trade);
       formData.append("_method", "put");
       if (data.vatNumber) {
         formData.append("vat_number", data.vatNumber);

@@ -1,4 +1,4 @@
-import { useForm, type DefaultValues } from "react-hook-form";
+import { useForm, useWatch, type DefaultValues } from "react-hook-form";
 import { type ItemCreationPayload } from "../../types/itemCreation.payload.type";
 import { type ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -13,16 +13,22 @@ import { assets } from "../../assets/icons";
 import { cn } from "../../lib/utils";
 import AddCategoryForm from "./AddCategoryForm";
 import SubCategoryForm from "./SubCategoryForm";
+import { showErrorToast } from "@/api/axiosInstance";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/useDebounce";
+import { subCategoryByCategory } from "@/api/subCategories.api";
+import type { ItemDetails } from "@/types/api.responses.type";
 
 export type ItemFormProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   mode: "creation" | "updation";
-  creationFn?: (data: ItemCreationPayload) => void;
-  editFn?: (data: ItemEditPayload) => void;
+  creationFn?: (data: ItemCreationPayload) => void | Promise<void>;
+  editFn?: (data: ItemEditPayload) => void | Promise<void>;
   defaultValues?: DefaultValues<ItemEditPayload | ItemCreationPayload>;
   withAddCategory?: boolean;
   withAddSubCategory?: boolean;
+  currItem?: ItemDetails;
 };
 
 function ItemForm({
@@ -34,26 +40,22 @@ function ItemForm({
   editFn,
   withAddCategory = true,
   withAddSubCategory = true,
+  currItem,
 }: ItemFormProps) {
   const [categoryForm, toggleCategoryForm] = useState(false);
   const [subCategoryForm, toggleSubCategoryForm] = useState(false);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const categories = useAppSelector((state) => state.categories);
-  const subCategories = useAppSelector((state) => state.subCategories);
-  const getCategory = (catId: string) => {
-    return categories.find((category) => category.id === catId);
-  };
-  const getSubCategory = (subCatId: string) => {
-    return subCategories.find((subCategory) => subCategory.id === subCatId);
-  };
-
-  console.log(defaultValues);
+  const [catSearchTerm, setCatSearchTerm] = useState("");
+  const [subCatSearchTerm, setSubcatSearchTerm] = useState("");
+  const subCatDebounceSearch = useDebounce({ value: subCatSearchTerm });
+  const appConfig = useAppSelector((state) => state.appConfig);
+  const [unitSearchTerm, setUnitSearchTerm] = useState("");
+  const categories = appConfig.quote_categories;
 
   const {
     control,
     setValue,
     handleSubmit,
-    watch,
     reset,
     formState: { errors },
     clearErrors,
@@ -70,16 +72,59 @@ function ItemForm({
         : itemCreationSchema.deepPartial(),
     ),
   });
-  const submitHandler = (data: ItemCreationPayload | ItemEditPayload) => {
-    toggleIsSubmitting(true);
-    if (mode === "creation") {
-      creationFn?.(data as ItemCreationPayload);
-    } else {
-      editFn?.(data);
+
+  useEffect(() => {
+    if (currItem) {
+      setValue("catId", currItem.category_id);
+      setValue("subCatId", currItem.subcategory_id?.toString());
+      setValue("name", currItem.name);
+      setValue("unit", currItem.unit);
+      setValue("unitPrice", currItem.cost);
+      setValue("pricePerUnit", currItem.price);
+
+      setCatSearchTerm(currItem.category_name);
+      setSubcatSearchTerm(currItem.subcategory_name ?? "");
+      setUnitSearchTerm(currItem.unit ?? "");
     }
-    reset();
-    toggleIsSubmitting(false);
-    toggleIsOpen(false);
+  }, [currItem]);
+
+  const [catId] = useWatch({
+    control,
+    name: ["catId"],
+  });
+
+  const {
+    data: subCatResponse,
+    isFetching: isSubcatFetching,
+    error: subCatError,
+  } = useQuery({
+    queryKey: ["itemForm", "subCategory", catId, subCatDebounceSearch],
+    queryFn: () =>
+      subCategoryByCategory(catId ?? "", {
+        search: subCatDebounceSearch,
+      }),
+  });
+
+  if (subCatError) {
+    showErrorToast(subCatError);
+  }
+  const subCategories = subCatResponse?.payload;
+
+  const submitHandler = async (data: ItemCreationPayload | ItemEditPayload) => {
+    toggleIsSubmitting(true);
+    try {
+      if (mode === "creation") {
+        await creationFn?.(data as ItemCreationPayload);
+      } else {
+        await editFn?.(data);
+      }
+      reset();
+      toggleIsOpen(false);
+    } catch (error) {
+      showErrorToast(error);
+    } finally {
+      toggleIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -113,11 +158,17 @@ function ItemForm({
         <div className="input-non-oriented flex-col gap-2">
           <span> Category </span>
           <CustomCombobox
-            items={categories}
+            items={categories ?? []}
             getItemLabel={(category) => category?.name ?? ""}
             onValueChange={(category) => {
-              category ? setValue("catId", category.id) : undefined;
-              clearErrors("catId");
+              if (category) {
+                setCatSearchTerm(category.name);
+                setValue("catId", category.id);
+
+                setValue("subCatId", undefined);
+                setSubcatSearchTerm("");
+                clearErrors("catId");
+              }
             }}
             placeholder="Search or select a category"
             className={errors.catId ? `input-error` : ``}
@@ -133,7 +184,11 @@ function ItemForm({
                 />
               ) : undefined
             }
-            selected={getCategory(defaultValues?.catId ?? "") ?? null}
+            inptFieldValue={catSearchTerm}
+            inptFieldChange={setCatSearchTerm}
+            filterFn={(category, query) =>
+              category.name.toLocaleLowerCase().includes(query)
+            }
           />
           {errors.catId && (
             <span className="error-text"> {errors.catId.message} </span>
@@ -143,13 +198,14 @@ function ItemForm({
         <div className="input-non-oriented flex-col gap-2">
           <span> Subcategory </span>
           <CustomCombobox
-            items={subCategories.filter(
-              (subCategory) => subCategory.catId === watch().catId,
-            )}
+            items={subCategories ?? []}
             getItemLabel={(subCategory) => subCategory?.name ?? ""}
             onValueChange={(subCategory) => {
-              subCategory ? setValue("subCatId", subCategory.id) : undefined;
-              clearErrors("subCatId");
+              if (subCategory) {
+                setValue("subCatId", subCategory.id);
+                setSubcatSearchTerm(subCategory.name);
+                clearErrors("subCatId");
+              }
             }}
             className={errors.subCatId ? `input-error` : ``}
             placeholder="Search or select a subcategory"
@@ -165,7 +221,9 @@ function ItemForm({
                 />
               ) : undefined
             }
-            selected={getSubCategory(defaultValues?.subCatId ?? "") ?? null}
+            inptFieldValue={subCatSearchTerm}
+            inptFieldChange={setSubcatSearchTerm}
+            isFetching={isSubcatFetching}
           />
           {errors.subCatId && (
             <span className="error-text"> {errors.subCatId.message} </span>
@@ -179,12 +237,25 @@ function ItemForm({
           placeholder="Item name"
         />
 
-        <CustomInput
-          control={control}
-          name="unit"
-          fieldName="Unit"
-          placeholder="Unit"
-        />
+        <div className="flex flex-col gap-2 w-full">
+          <span className="input-label self-start"> {"Unit"} </span>
+          <CustomCombobox
+            items={appConfig.measurement_units}
+            getItemLabel={(unit) => unit.description}
+            placeholder="Select a Unit"
+            filterFn={(item, query) => {
+              return item.description.toLocaleLowerCase().includes(query);
+            }}
+            onValueChange={(unit) => {
+              if (unit) {
+                setValue("unit", unit.id);
+                setUnitSearchTerm(unit.description);
+              }
+            }}
+            inptFieldValue={unitSearchTerm}
+            inptFieldChange={(unit) => setUnitSearchTerm(unit)}
+          />
+        </div>
 
         <CustomInput
           control={control}

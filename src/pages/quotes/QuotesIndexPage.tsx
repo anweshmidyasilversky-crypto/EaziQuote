@@ -82,6 +82,7 @@ export function QuotesIndexPage() {
     showErrorToast(error);
   }
   const QuoteSummmary = quotes?.payload.summary;
+  const quoteListMeta = quotes?.payload.meta;
 
   const {
     data: presetQuoteListResponse,
@@ -315,6 +316,7 @@ export function QuotesIndexPage() {
             endItemNo={quoteItemEndNo}
             setPageNo={setPageNo}
             isFetching={isFetching}
+            paginationMeta={quoteListMeta}
           />
         </div>
 

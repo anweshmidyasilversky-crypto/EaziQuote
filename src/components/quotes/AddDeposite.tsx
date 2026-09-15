@@ -6,10 +6,7 @@ import {
 } from "../common/CustomToggleGroup";
 import { CustomInput } from "../common/customInput";
 import { useForm, type DefaultValues } from "react-hook-form";
-import {
-  PaymentMethods,
-  type AddDepositePayload,
-} from "../../types/addDeposite.payload.type";
+import { type AddDepositePayload } from "../../types/addDeposite.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {
@@ -20,6 +17,7 @@ import {
 import { cn, formatCurrency } from "../../lib/utils";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomBtn } from "../common/CustomBtn";
+import { PaymentMethods } from "@/types/api.responses.type";
 
 export type AddDepositeProps = {
   isOpen: boolean;

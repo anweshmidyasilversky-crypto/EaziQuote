@@ -54,7 +54,7 @@ import {
   deleteClient,
   getClientDetails,
   updateClient,
-} from "@/api/clients.api";
+} from "@/api/services/clients.api";
 import {
   PaymentStatus,
   type InvoiceActivity,

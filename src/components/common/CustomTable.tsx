@@ -88,7 +88,7 @@ function CustomTable<TData extends RowData>({
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: paginationMeta ? paginationMeta.per_page : 5,
+    pageSize: paginationMeta ? paginationMeta.per_page : 100,
   });
   const [rowSelection, setRowSelection] = useState({});
   const data = renderData ?? [];

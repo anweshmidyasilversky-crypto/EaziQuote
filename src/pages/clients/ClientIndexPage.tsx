@@ -33,7 +33,7 @@ import {
   deleteClient,
   getClientList,
   updateClient,
-} from "@/api/clients.api";
+} from "@/api/services/clients.api";
 import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
 
@@ -132,7 +132,7 @@ export function ClientIndexPage() {
                 editFn={() => {
                   targetClient.current = {
                     companyName: client.company_name,
-                    street: client.address,
+                    street: client.address ?? "",
                     postCode: client.postcode,
                     ...client,
                     phone: client.phone.slice(6).replaceAll(" ", ""),
@@ -252,6 +252,7 @@ export function ClientIndexPage() {
             endItemNo={itemEndNo}
             paginationBtns={clientListMeta?.links}
             isFetching={isFetching}
+            paginationMeta={clientListMeta}
           />
         </div>
 

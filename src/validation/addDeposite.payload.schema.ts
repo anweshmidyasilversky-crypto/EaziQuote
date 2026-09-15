@@ -1,8 +1,5 @@
 import * as yup from "yup";
-import {
-  PaymentMethods,
-  type AddDepositePayload,
-} from "../types/addDeposite.payload.type";
+import { PaymentMethods } from "@/types/api.responses.type";
 import { emptyMsg, invalidMsg, notSelectedMsg } from "../constants/messages";
 
 export const amountSchema = yup

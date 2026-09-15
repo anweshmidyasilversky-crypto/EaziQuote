@@ -352,7 +352,7 @@ export interface PresetQuote extends PresetQuoteListing {
   items: Item[];
 }
 
-export enum QuoteCategories {
+export enum DocumentCategories {
   byItem = "by-item",
   byCat = "by-category",
   bySubCat = "by-subcategory",
@@ -372,7 +372,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   deposit_type: null | string;
   deposit_amount: null | number;
   deposit_percentage: null | number;
-  categorised: QuoteCategories;
+  categorised: DocumentCategories;
   template: QuoteTemplate;
   client: ClientDetails;
   items: ItemDetails[];
@@ -392,4 +392,67 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   updated_at: string;
   route_url: string;
   deposit_payment: null | string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  subcategories_count: number;
+  items_count: number;
+}
+
+export interface Subcategory {
+  id: number;
+  name: string;
+  products_count: number;
+}
+
+export interface MeasurementUnit {
+  id: string;
+  description: string;
+}
+
+export interface QuoteInvoiceSetting {
+  terms_and_conditions: string;
+  footer_message: string;
+  signature: null | string;
+}
+
+export interface Vat {
+  id: number;
+  name: string;
+  description: string;
+  value: string;
+}
+
+export interface BillingPreference {
+  vat: Vat;
+  quote_expiration: number;
+  payment_expiration: number;
+}
+
+export interface NotificationSettings {
+  email_notification_enabled: boolean;
+  push_notification_enabled: boolean;
+}
+
+export interface Trade {
+  id: number | string;
+  title: string;
+  icon: string;
+}
+
+export interface AppConfig {
+  measurement_units: MeasurementUnit[];
+  quote_categories: Pick<Category, "id" | "name">[];
+  quote_invoice_settings: QuoteInvoiceSetting;
+  billing_preferences: BillingPreference;
+  notification_settings: NotificationSettings;
+  vat_settings: Vat[];
+  vertical_markets: Trade[];
+  support_ticket_areas: [];
+  document_setting: {
+    categories: Record<string, string>;
+    templates: Record<string, string>;
+  };
 }

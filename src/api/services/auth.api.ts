@@ -7,6 +7,7 @@ import {
   type QuoteListResponse,
   type ListResponse,
   type PresetQuoteListing,
+  type AppConfig,
 } from "@/types/api.responses.type";
 
 export const signup = async (payload: SignupPayload) => {
@@ -71,5 +72,15 @@ export const getPresetQuoteList = async (filters?: PageFilters) => {
     return quoteList.data;
   } catch (err) {
     throw err;
+  }
+};
+
+export const getAppConfig = async () => {
+  try {
+    const appConfigResponse =
+      await axiosInstance.get<ApiResponse<AppConfig>>(`/auth/config`);
+    return appConfigResponse.data;
+  } catch (error) {
+    throw error;
   }
 };

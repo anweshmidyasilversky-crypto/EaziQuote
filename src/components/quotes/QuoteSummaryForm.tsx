@@ -11,7 +11,7 @@ import { ClientForm } from "../clients/ClientForm";
 import { type QuoteSummary } from "../../types/quoteCreation.payload.type";
 import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { cn } from "../../lib/utils";
 import { updateQuote as updateQuoteRedux } from "../../redux/slices/quotes.slice";
 import { toast } from "react-toastify";
@@ -22,25 +22,20 @@ import type {
   CreateQuoteApiPayload,
   UpdateQuoteApiPayload,
 } from "@/types/api.requests.type";
-import { createClient, getClientList } from "@/api/clients.api";
+import { createClient, getClientList } from "@/api/services/clients.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import { useDebounce } from "@/hooks/useDebounce";
-import type { QuoteDetails } from "@/types/api.responses.type";
 import { createQuote, deleteAttachemnt, updateQuote } from "@/api/quotes.api";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
   submitAction?: () => void;
-  currQuote?: QuoteDetails;
 };
 
-function QuoteSummaryForm({
-  refNo,
-  submitAction,
-  currQuote,
-}: QuoteSummaryFormProps) {
+function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const currQuote = useAppSelector((state) => state.quote);
   const [clientSearchTerm, setClientSearchTerm] = useState(
     currQuote?.client.name ?? "",
   );

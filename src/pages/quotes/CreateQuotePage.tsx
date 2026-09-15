@@ -96,12 +96,10 @@ export function CreateQuotePage() {
                 <QuoteSummaryForm
                   refNo={refNo}
                   submitAction={() => changeFormCurrSection(toggleId.Items)}
-                  currQuote={quote}
                 />
               )}
               {formCurrSection === toggleId.Items && (
                 <ItemSelectForm
-                  currQuote={currQuote}
                   submitAction={() => changeFormCurrSection(toggleId.Sections)}
                 />
               )}

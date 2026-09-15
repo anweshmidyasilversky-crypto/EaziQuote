@@ -4,20 +4,25 @@ import type {
   TableFeatures,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
-import type { QuoteLineItem } from "../../types/quoteLineItem.type";
 import { formatCurrency } from "../../lib/utils";
 import { useMemo, useState } from "react";
 import CustomDialog from "../common/CustomDialog";
 import { CustomDataTable } from "../common/CustomTable";
 import AddDeposite from "./AddDeposite";
-import { PaymentMethods } from "@/types/addDeposite.payload.type";
 import { useLocation } from "react-router";
 import { CustomActionGroup } from "../common/CustomActionGroup";
 import AddDiscount from "./AddDiscount";
+import { PaymentMethods } from "@/types/api.responses.type";
 
 export type SubtotalBreakDownProps = {
   paymentMethod: PaymentMethods;
-  items: QuoteLineItem[];
+  items: {
+    quantity: number;
+    type: string;
+    price: number;
+    cost: number;
+    name: string;
+  }[];
   taxPercentage: number;
   discountPercentage?: number;
   reqDeposite?: number;
@@ -49,12 +54,11 @@ export function SubtotalBreakDown({
   const isEditPage = location.pathname.split("/").includes("manage-quotes");
 
   const subtotal = useMemo(
-    () =>
-      items.reduce((acc, prev) => acc + prev.pricePerUnit * prev.quantity, 0),
+    () => items.reduce((acc, prev) => acc + prev.price * prev.quantity, 0),
     [items],
   );
   const overallCost = useMemo(
-    () => items.reduce((acc, prev) => acc + prev.quantity * prev.unitCost, 0),
+    () => items.reduce((acc, prev) => acc + prev.quantity * prev.cost, 0),
     [items],
   );
   const marginPercentage = useMemo(() => {
@@ -125,8 +129,8 @@ export function SubtotalBreakDown({
 
   // Build margin data from QuoteLineItem — use unitCost to derive margin %
   const marginData: MarginSplit[] = items.map((item) => {
-    const revenue = item.total; // pricePerUnit × quantity
-    const cost = item.unitCost * item.quantity;
+    const revenue = item.price * item.quantity; // pricePerUnit × quantity
+    const cost = (item.cost ?? 0) * item.quantity;
     const margin =
       revenue > 0 ? Math.round(((revenue - cost) / revenue) * 100) : 0;
     return { itemName: item.name, revenew: revenue, margin, costs: cost };

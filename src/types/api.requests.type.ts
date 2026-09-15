@@ -1,7 +1,6 @@
 import type { Method } from "axios";
 import type {
-  QuoteCategories,
-  QuoteDetails,
+  DocumentCategories,
   ItemDetails,
   QuoteTemplate,
 } from "./api.responses.type";
@@ -49,6 +48,7 @@ export interface PageFilters {
   quote_id?: string | number;
   invoice_id?: string | number;
   category_id?: string | number;
+  subcategory_ids?: (string | number)[];
 }
 
 export interface ClientCreateApiPayload {
@@ -82,5 +82,26 @@ export interface UpdateQuoteApiPayload extends Partial<CreateQuoteApiPayload> {
   quote_id: string | number;
   items?: ItemDetails[];
   template?: QuoteTemplate;
-  categorised?: QuoteCategories;
+  categorised?: DocumentCategories;
+}
+
+export interface ItemCreateApiPayload {
+  name: string;
+  type: string;
+  unit: string;
+  price: number;
+  cost: number;
+  category_id: number;
+  subcategory_id?: number;
+  quote_id?: number;
+  invoice_id?: number;
+}
+
+export interface SubCategoryCreateApiPayload {
+  category_id: number | string;
+  name: string;
+}
+
+export interface subCategoryUpdateApiPayload extends Partial<SubCategoryCreateApiPayload> {
+  id: number | string;
 }

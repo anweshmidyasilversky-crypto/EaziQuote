@@ -4,7 +4,7 @@ import type {
   ClientDetails,
   ListResponse,
 } from "@/types/api.responses.type";
-import { axiosInstance } from "./axiosInstance";
+import { axiosInstance } from "../axiosInstance";
 import type {
   ClientCreateApiPayload,
   PageFilters,

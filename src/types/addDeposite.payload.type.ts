@@ -1,7 +1,4 @@
-export enum PaymentMethods {
-  cash = "Cash",
-  stripe = "Stripe",
-}
+import type { PaymentMethods } from "./api.responses.type";
 
 export interface AddDepositePayload {
   deposite: number;

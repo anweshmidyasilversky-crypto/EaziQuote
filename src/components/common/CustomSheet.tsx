@@ -15,6 +15,7 @@ export interface CustomSheetProps {
   closeOnApply?: boolean;
   closeAction?: () => void;
   header?: string;
+  isSubmitting?: boolean;
 }
 
 export function CustomSheet({
@@ -29,6 +30,7 @@ export function CustomSheet({
   closeAction,
   closeOnApply = true,
   header,
+  isSubmitting,
 }: CustomSheetProps) {
   return (
     <Sheet open={isOpen} onOpenChange={toggleIsOpen} modal={false}>
@@ -80,6 +82,7 @@ export function CustomSheet({
                   }
                   submitFn?.();
                 }}
+                isSubmitting={isSubmitting}
               />
             </div>
           </SheetFooter>

@@ -24,6 +24,12 @@ interface CustomComboboxProps<T, V = T> {
   inptFieldValue?: string;
   inptFieldChange?: (data: string) => void;
   isFetching?: boolean;
+  contentBoxCls?: string;
+  filterFn?: (
+    itemValue: T,
+    query: string,
+    itemToString?: (itemValue: T) => string,
+  ) => boolean;
 }
 
 export function CustomCombobox<T, V = T>({
@@ -40,6 +46,8 @@ export function CustomCombobox<T, V = T>({
   inptFieldValue,
   inptFieldChange,
   isFetching,
+  contentBoxCls,
+  filterFn,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(
     selected ? getItemLabel(selected) : null,
@@ -47,16 +55,24 @@ export function CustomCombobox<T, V = T>({
 
   // Measure the trigger row's actual width so the popover can match it exactly,
   // regardless of whether the underlying Popover exposes an anchor-width CSS var.
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const [triggerWidth, setTriggerWidth] = useState<number>();
+  const inputAnchorRef = useRef<HTMLDivElement>(null);
+
+  const [inputWidth, setInputWidth] = useState<number>(0);
 
   useEffect(() => {
-    if (!triggerRef.current) return;
-    const el = triggerRef.current;
-    const update = () => setTriggerWidth(el.getBoundingClientRect().width);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
+    if (!inputAnchorRef.current) return;
+
+    const element = inputAnchorRef.current;
+
+    const updateWidth = () => {
+      setInputWidth(element.getBoundingClientRect().width);
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+
     return () => observer.disconnect();
   }, []);
 
@@ -73,41 +89,44 @@ export function CustomCombobox<T, V = T>({
       itemToStringValue={(item) => {
         return getItemLabel(item);
       }}
-      filter={null}
+      filter={filterFn ?? null}
     >
-      <div
-        ref={triggerRef}
-        className="relative flex gap-2 h-11 items-center w-full"
-      >
+      <div className="relative flex gap-2 h-11 items-center w-full">
         {inputLeftNode}
-        <ComboboxInput
-          placeholder={placeholder}
-          className={`
-            input-field h-full max-h-11 grow
-            rounded-lg border border-gray-300
-            px-3.5 text-[15px] text-gray-900 placeholder:text-gray-400
-            outline-none transition-colors
-            focus:border-blue-600 focus:ring-2 focus:ring-blue-100
-            ${className}
+        <div ref={inputAnchorRef} className="min-w-0 grow">
+          <ComboboxInput
+            placeholder={placeholder}
+            className={`
+            input-field h-full max-h-11 w-full!
+        rounded-lg border border-gray-300
+        px-3.5 text-[15px] text-gray-900 placeholder:text-gray-400
+        outline-none transition-colors
+        focus:border-blue-600 focus:ring-2 focus:ring-blue-100
+        ${className ?? ""}
           `}
-          value={inptFieldValue}
-          onChange={(e) => inptFieldChange?.(e.target.value)}
-        />
+            value={inptFieldValue}
+            onChange={(e) => inptFieldChange?.(e.target.value)}
+          />
+        </div>
         {inputRightNode}
       </div>
 
       <ComboboxContent
-        style={triggerWidth ? { width: triggerWidth } : undefined}
-        className="
+        className={`
+          w-(--anchor-width)
           z-100 bg-white
           rounded-lg border border-gray-200
           shadow-lg shadow-black/10
           overflow-hidden
           ring-0!
           dashboard-card-theme
-        "
+          ${contentBoxCls}
+        `}
         align="center"
         alignOffset={20}
+        style={{
+          width: inputWidth > 0 ? `${inputWidth}px` : undefined,
+        }}
       >
         <ComboboxEmpty className="px-4 py-3 text-sm text-gray-400">
           {isFetching ? (

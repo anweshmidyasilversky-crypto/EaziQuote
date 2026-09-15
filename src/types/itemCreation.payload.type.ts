@@ -1,6 +1,6 @@
 export interface ItemCreationPayload {
-  catId: string;
-  subCatId: string;
+  catId: string | number;
+  subCatId: string | number;
   name: string;
   unit: string;
   pricePerUnit: number;

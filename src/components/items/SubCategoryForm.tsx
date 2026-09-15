@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { type SubcategoryPayload } from "../../types/subCategory.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { subCategorySchema } from "../../validation/itemCreation.payload.schema";
 import { CustomSheet } from "../common/CustomSheet";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppSelector } from "../../redux/store";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/customInput";
-import { addSubCategory } from "../../redux/slices/subCategories.slice";
 import { cn } from "../../lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { createSubCategory } from "@/api/subCategories.api";
+import type { SubCategoryCreateApiPayload } from "@/types/api.requests.type";
+import { toast } from "react-toastify";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export type SubCategoryFormProps = {
   isOpen: boolean;
@@ -16,8 +20,11 @@ export type SubCategoryFormProps = {
 };
 
 function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
-  const dispath = useAppDispatch();
-  const categories = useAppSelector((state) => state.categories);
+  const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const { quote_categories: categories } = useAppSelector(
+    (state) => state.appConfig,
+  );
+  const [catSearchTerm, setCatSearchTerm] = useState("");
   const {
     control,
     formState: { errors },
@@ -33,16 +40,26 @@ function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
     resolver: yupResolver(subCategorySchema),
   });
 
-  const submitHandler = (data: SubcategoryPayload) => {
-    dispath(
-      addSubCategory({
-        id: data.subCategory.toLocaleLowerCase(),
-        catId: data.catId,
+  const { mutateAsync: createSubCategoryAsync } = useMutation({
+    mutationFn: (payload: SubCategoryCreateApiPayload) =>
+      createSubCategory(payload),
+  });
+
+  const submitHandler = async (data: SubcategoryPayload) => {
+    toggleIsSubmitting(true);
+    try {
+      const newsubCategory = await createSubCategoryAsync({
+        category_id: data.catId,
         name: data.subCategory,
-      }),
-    );
-    reset();
-    toggleIsOpen(false);
+      });
+      toast.success(newsubCategory.message);
+      reset();
+      toggleIsOpen(false);
+    } catch (error) {
+      showErrorToast(error);
+    } finally {
+      toggleIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,6 +71,7 @@ function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
       closeOnApply={false}
       applyBtnCls={cn(`max-w-full!`)}
       header="Add Subcategory"
+      isSubmitting={isSubmitting}
     >
       <div className="p-5 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
@@ -64,11 +82,17 @@ function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
             className={errors.catId ? `input-error` : ``}
             onValueChange={(category) => {
               if (category) {
-                setValue("catId", category?.id);
+                setCatSearchTerm(category.name);
+                setValue("catId", category.id.toString());
                 clearErrors("catId");
               }
             }}
             placeholder="Search or select a category"
+            filterFn={(category, query) =>
+              category.name.toLocaleLowerCase().includes(query)
+            }
+            inptFieldValue={catSearchTerm}
+            inptFieldChange={setCatSearchTerm}
           />
           {errors.catId && (
             <span className="error-text"> {errors.catId.message} </span>

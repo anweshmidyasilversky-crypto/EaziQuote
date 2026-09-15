@@ -1,11 +1,16 @@
 import { useForm } from "react-hook-form";
 import { CustomSheet } from "../common/CustomSheet";
-import { useAppDispatch } from "../../redux/store";
-import { addCategory } from "../../redux/slices/categories.slice";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { CustomInput } from "../common/customInput";
 import { cn } from "../../lib/utils";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { categorySchema } from "../../validation/itemCreation.payload.schema";
+import { useMutation } from "@tanstack/react-query";
+import { createCategory } from "@/api/categories.api";
+import { showErrorToast } from "@/api/axiosInstance";
+import { toast } from "react-toastify";
+import { updateConfig } from "@/redux/slices/settings.slice";
+import { useState } from "react";
 
 export type AddCategoryFormProps = {
   isOpen: boolean;
@@ -14,6 +19,8 @@ export type AddCategoryFormProps = {
 
 function AddCategoryForm({ isOpen, toggleIsOpen }: AddCategoryFormProps) {
   const dispath = useAppDispatch();
+  const appConfig = useAppSelector((state) => state.appConfig);
+  const [isSubmitting, toggleIsSubmitting] = useState(false);
   const { control, handleSubmit, reset, clearErrors } = useForm<{
     category: string;
   }>({
@@ -22,15 +29,31 @@ function AddCategoryForm({ isOpen, toggleIsOpen }: AddCategoryFormProps) {
     },
     resolver: yupResolver(categorySchema),
   });
-  const submitHandler = (data: { category: string }) => {
-    dispath(
-      addCategory({
-        id: data.category.toLocaleLowerCase(),
-        name: data.category,
-      }),
-    );
-    reset();
-    toggleIsOpen(false);
+
+  const { mutateAsync: createCategoryAsync } = useMutation({
+    mutationFn: (name: string) => createCategory(name),
+  });
+
+  const submitHandler = async (data: { category: string }) => {
+    toggleIsSubmitting(true);
+    try {
+      const newCategory = await createCategoryAsync(data.category);
+      toast.success(newCategory.message);
+      dispath(
+        updateConfig({
+          quote_categories: [
+            ...(appConfig?.quote_categories ?? []),
+            newCategory.payload,
+          ],
+        }),
+      );
+      reset();
+      toggleIsOpen(false);
+    } catch (error) {
+      showErrorToast(error);
+    } finally {
+      toggleIsSubmitting(false);
+    }
   };
   return (
     <CustomSheet
@@ -42,6 +65,7 @@ function AddCategoryForm({ isOpen, toggleIsOpen }: AddCategoryFormProps) {
       closeOnApply={false}
       closeAction={() => clearErrors()}
       header="Add Category"
+      isSubmitting={isSubmitting}
     >
       <div className="p-5">
         <CustomInput
