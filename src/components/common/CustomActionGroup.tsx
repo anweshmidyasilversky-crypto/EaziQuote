@@ -101,7 +101,7 @@ export function CustomActionGroup({
           );
         })}
 
-        {paymentActionGroup && paymentPending && (
+        {((paymentActionGroup && paymentPending) || withShare) && (
           <button
             onClick={shareAction}
             className="flex w-4 shrink-0 items-center justify-center"

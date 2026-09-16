@@ -12,7 +12,7 @@ export type usePaymentsByClientProps = {
 function usePaymentsByClient({ client_id, filters }: usePaymentsByClientProps) {
   const [pageNo, setPageNo] = useState(1);
   const { data, isFetching, error } = useQuery({
-    queryKey: ["payments", client_id],
+    queryKey: ["payments", client_id, pageNo],
     queryFn: () =>
       getPaymentListByClient(client_id, {
         ...filters,

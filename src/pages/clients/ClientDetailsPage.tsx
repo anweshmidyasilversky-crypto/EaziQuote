@@ -59,6 +59,7 @@ import DeleteDialog from "@/components/common/DeleteDialog";
 import useClientDetails from "@/hooks/apis/clients/useClientDetails";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
 import usePaymentsByClient from "@/hooks/apis/payments/usePaymentsByClient";
+import { ShareOptions } from "@/components/common/ShareOptions";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export function ClientDetailsPage() {
     startDate: undefined,
     endDate: undefined,
   });
+  const [shareModalOpen, toggleShareModalOpen] = useState(false);
 
   const [filters, setFilters] = useState<string[]>([]);
   const activityTableFilters = useRef<ColumnFiltersState>([]);
@@ -250,6 +252,7 @@ export function ClientDetailsPage() {
                 openFn={() => navigate(`/quotes/${activity.id}`)}
                 editFn={() => navigate(`/quotes/manage-quotes/${activity.id}`)}
                 withEdit={activity.is_editable}
+                withDelete={activity.is_editable}
               />
             </div>
           );
@@ -317,6 +320,10 @@ export function ClientDetailsPage() {
             <CustomActionGroup
               paymentActionGroup={true}
               paymentPending={payment.status !== PaymentStatus.Received}
+              withShare={true}
+              shareAction={() => {
+                toggleShareModalOpen((curr) => !curr);
+              }}
             />
           );
         },
@@ -609,6 +616,12 @@ export function ClientDetailsPage() {
         toggleOpen={toggleDeleteModalOpen}
         deleteAction={handleClientDelete}
         isPending={clientDeleteMutation.isPending}
+      />
+
+      <ShareOptions
+        isOpen={shareModalOpen}
+        toggleIsOpen={toggleShareModalOpen}
+        clientEmail={client?.email ?? "dummy@gmail.com"}
       />
     </div>
   );
