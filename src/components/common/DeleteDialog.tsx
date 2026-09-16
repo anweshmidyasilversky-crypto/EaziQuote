@@ -8,9 +8,15 @@ export type DeleteDialogProps = {
   isOpen: boolean;
   toggleOpen: React.Dispatch<React.SetStateAction<boolean>>;
   deleteAction?: () => void | Promise<void>;
+  isPending?: boolean;
 };
 
-function DeleteDialog({ isOpen, toggleOpen, deleteAction }: DeleteDialogProps) {
+function DeleteDialog({
+  isOpen,
+  toggleOpen,
+  deleteAction,
+  isPending = false,
+}: DeleteDialogProps) {
   const [isDeleting, toggleIsDeleting] = useState(false);
   const handleDelete = async () => {
     toggleIsDeleting(true);
@@ -19,7 +25,6 @@ function DeleteDialog({ isOpen, toggleOpen, deleteAction }: DeleteDialogProps) {
     } catch (err) {
       throw err;
     } finally {
-      toggleOpen(false);
       toggleIsDeleting(false);
     }
   };
@@ -58,7 +63,7 @@ function DeleteDialog({ isOpen, toggleOpen, deleteAction }: DeleteDialogProps) {
               `bg-danger hover:bg-danger text-custom-dialog-secondary`,
             )}
             onClick={handleDelete}
-            isSubmitting={isDeleting}
+            isSubmitting={isDeleting || isPending}
           />
         </div>
       </div>

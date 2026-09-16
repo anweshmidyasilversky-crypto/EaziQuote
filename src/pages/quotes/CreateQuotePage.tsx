@@ -13,7 +13,7 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import { useAppSelector } from "../../redux/store";
 import SectionSelectForm from "@/components/quotes/SectionSelectForm";
 import { useQuery } from "@tanstack/react-query";
-import { getQuoteDetails } from "@/api/quotes.api";
+import { getQuoteDetails } from "@/api/services/quotes.api";
 import { showErrorToast } from "@/api/axiosInstance";
 
 enum toggleId {

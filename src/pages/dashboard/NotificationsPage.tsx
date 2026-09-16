@@ -1,5 +1,5 @@
 import { showErrorToast } from "@/api/axiosInstance";
-import { getNotificationList } from "@/api/notifications.api";
+import { getNotificationList } from "@/api/services/notifications.api";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { Separator } from "@/components/ui/separator";

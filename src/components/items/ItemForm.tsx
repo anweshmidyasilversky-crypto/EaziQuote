@@ -16,7 +16,7 @@ import SubCategoryForm from "./SubCategoryForm";
 import { showErrorToast } from "@/api/axiosInstance";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";
-import { subCategoryByCategory } from "@/api/subCategories.api";
+import { subCategoryByCategory } from "@/api/services/subCategories.api";
 import type { ItemDetails } from "@/types/api.responses.type";
 
 export type ItemFormProps = {

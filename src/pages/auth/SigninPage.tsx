@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
 import { Card, CardContent } from "../../components/ui/card";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { login } from "@/api/auth.api";
+import { login } from "@/api/services/auth.api";
 import { deviceType } from "@/types/api.requests.type";
 import { setToken } from "@/redux/slices/auth.slice";
 import { isAxiosError } from "axios";

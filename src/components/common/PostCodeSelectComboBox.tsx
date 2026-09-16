@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
-import { getAddressList } from "@/api/address.api";
+import { getAddressList } from "@/api/services/address.api";
 import { CustomCombobox } from "./CustomCombobox";
 import type { AddressDetails } from "@/types/api.responses.type";
 import { showErrorToast } from "@/api/axiosInstance";

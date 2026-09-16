@@ -5,7 +5,7 @@ import { clientCreationSchema } from "../../validation/clientCreation.payload.sc
 import { CustomInput } from "../common/customInput";
 import { Separator } from "../ui/separator";
 import { PostCodeSelectComboBox } from "../common/PostCodeSelectComboBox";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { FormLayout } from "../common/FormLayout";
 import { type ClientEditPayload } from "../../types/clientEdit.payload.type";
 import type { AddressDetails } from "@/types/api.responses.type";
@@ -19,6 +19,7 @@ export type ClientFormProps = {
   clientCreatFn?: (data: ClientCreationPayload) => void | Promise<void>;
   clientEditFn?: (data: ClientEditPayload) => void | Promise<void>;
   defaultValues?: DefaultValues<ClientCreationPayload | ClientEditPayload>;
+  isSubmitting?: boolean;
 };
 
 export function ClientForm({
@@ -28,6 +29,7 @@ export function ClientForm({
   defaultValues,
   clientCreatFn,
   clientEditFn,
+  isSubmitting,
 }: ClientFormProps) {
   const initialValue: ClientCreationPayload = {
     name: "",
@@ -60,7 +62,6 @@ export function ClientForm({
     }
   }, [defaultValues]);
 
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
   const setAddress = (address: AddressDetails) => {
     setValue("street", address.address_line_1);
     setValue("city", address.city);
@@ -72,21 +73,22 @@ export function ClientForm({
   const submitHandler = async (
     data: ClientCreationPayload | ClientEditPayload,
   ) => {
-    toggleIsSubmitting(true);
     try {
       if (mode === "creation") {
         await clientCreatFn?.(data as ClientCreationPayload);
       } else {
         await clientEditFn?.(data as ClientEditPayload);
       }
-      reset();
-      toggleFormOpen(false);
     } catch (err) {
       showErrorToast(err);
-    } finally {
-      toggleIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!defaultValues) {
+      reset();
+    }
+  }, [isFormOpen, defaultValues]);
 
   return (
     <>

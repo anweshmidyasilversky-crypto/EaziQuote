@@ -14,12 +14,12 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { addBusinessAddress } from "@/api/user.api";
+import { addBusinessAddress } from "@/api/services/user.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";
-import { getAddressList } from "@/api/address.api";
+import { getAddressList } from "@/api/services/address.api";
 import { CustomCombobox } from "@/components/common/CustomCombobox";
 import type { AddressDetails } from "@/types/api.responses.type";
 

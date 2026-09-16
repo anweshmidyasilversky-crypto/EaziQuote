@@ -13,57 +13,28 @@ import { formatDisplayDate, formatOrdinalDate } from "../../lib/utils";
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getAppConfig, getHomePage } from "@/api/auth.api";
-import { showErrorToast } from "@/api/axiosInstance";
 import type { DashboardActivityItem } from "@/types/api.responses.type";
-import { getNotificationList } from "@/api/notifications.api";
-import type { ClientCreateApiPayload } from "@/types/api.requests.type";
-import { createClient } from "@/api/services/clients.api";
 import type { ClientCreationPayload } from "@/types/clientCreation.payload.type";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/redux/store";
 import { updateConfig } from "@/redux/slices/settings.slice";
+import useAppConfig from "@/hooks/apis/appConfig/useAppConfig";
+import useNotifications from "@/hooks/apis/notifications/useNotifications";
+import useHome from "@/hooks/apis/home/useHome";
+import { showErrorToast } from "@/api/axiosInstance";
+import useClientMutations from "@/hooks/apis/clients/useClientMutations";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
 
-  const {
-    data: homePage,
-    error: recentActivityFetchErr,
-    isFetching: isRecentActivityFetching,
-  } = useQuery({
-    queryKey: ["dashboard"],
-    queryFn: getHomePage,
-  });
+  const { data: homePage, isFetching: isRecentActivityFetching } = useHome();
 
-  if (recentActivityFetchErr) {
-    showErrorToast(recentActivityFetchErr);
-  }
+  const { data: notificationList, isFetching: isNotificationFetching } =
+    useNotifications();
 
-  const {
-    data: notificationResponse,
-    isFetching: isNotificationFetching,
-    error: notificationErr,
-  } = useQuery({
-    queryKey: ["dashboard", "notification"],
-    queryFn: () => getNotificationList(),
-  });
-
-  if (notificationErr) {
-    showErrorToast(notificationErr);
-  }
-
-  const { data: appConfig, error: configFetchError } = useQuery({
-    queryKey: ["dashboard", "appConfig"],
-    queryFn: getAppConfig,
-  });
-
-  if (configFetchError) {
-    showErrorToast(configFetchError);
-  }
+  const appConfig = useAppConfig();
 
   useEffect(() => {
     if (appConfig) {
@@ -71,10 +42,7 @@ export function DashboardIndexPage() {
     }
   }, [appConfig]);
 
-  const { mutateAsync: createClientAsync } = useMutation({
-    mutationKey: ["dashboard", "client", "create"],
-    mutationFn: (data: ClientCreateApiPayload) => createClient(data),
-  });
+  const { clientCreatMutation: clientMutation } = useClientMutations();
 
   const columns: ColumnDef<TableFeatures, DashboardActivityItem>[] = [
     {
@@ -187,17 +155,23 @@ export function DashboardIndexPage() {
   ];
 
   const addClientFn = async (client: ClientCreationPayload) => {
-    try {
-      const response = await createClientAsync({
+    clientMutation.mutate(
+      {
         ...client,
         company_name: client.companyName,
         address: client.street,
         postcode: client.postCode,
-      });
-      toast.success(response.message);
-    } catch (err) {
-      throw err;
-    }
+      },
+      {
+        onSuccess: (newClient) => {
+          toast.success(newClient.message);
+          toggleClientFormOpen(false);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   return (
@@ -251,12 +225,9 @@ export function DashboardIndexPage() {
               );
             })}
           </div>
-          {(isNotificationFetching ||
-            (notificationResponse?.payload.data.length ?? 0) > 0) && (
+          {(isNotificationFetching || (notificationList.length ?? 0) > 0) && (
             <NotificationCard
-              notifications={
-                notificationResponse?.payload.data.slice(0, 5) ?? []
-              }
+              notifications={notificationList.slice(0, 5) ?? []}
               isFetching={isNotificationFetching}
             />
           )}
@@ -280,6 +251,7 @@ export function DashboardIndexPage() {
         toggleFormOpen={toggleClientFormOpen}
         mode="creation"
         clientCreatFn={addClientFn}
+        isSubmitting={clientMutation.isPending}
       />
     </div>
   );

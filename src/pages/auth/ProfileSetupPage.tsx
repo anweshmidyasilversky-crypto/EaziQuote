@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { assets } from "../../assets/icons";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { profileSetup } from "@/api/user.api";
+import { profileSetup } from "@/api/services/user.api";
 import { useState } from "react";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { showErrorToast } from "@/api/axiosInstance";

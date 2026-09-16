@@ -1,11 +1,12 @@
 import { CustomBtn } from "./CustomBtn";
 import { assets } from "../../assets/icons";
+import { memo } from "react";
 
 export type FilterBtnProps = {
   toggleFilterSheetOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function FilterBtn({ toggleFilterSheetOpen }: FilterBtnProps) {
+const FilterBtn = memo(({ toggleFilterSheetOpen }: FilterBtnProps) => {
   return (
     <CustomBtn
       leftIcon={assets.filterIcon}
@@ -14,6 +15,6 @@ function FilterBtn({ toggleFilterSheetOpen }: FilterBtnProps) {
       onClick={() => toggleFilterSheetOpen?.((curr) => !curr)}
     />
   );
-}
+});
 
 export default FilterBtn;

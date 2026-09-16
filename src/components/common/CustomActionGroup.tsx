@@ -85,7 +85,7 @@ export function CustomActionGroup({
   }
   return (
     <>
-      <div className="flex gap-2 min-h-6 min-w-6 w-fit shrik-0">
+      <div className="flex gap-2 min-h-6 min-w-6 w-fit items-center shrik-0">
         {btnList.map((btn) => {
           if (paymentActionGroup && btn.id !== "openEye") {
             return <></>;

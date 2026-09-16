@@ -15,12 +15,11 @@ import {
   type ColumnFiltersState,
   createPaginatedRowModel,
   rowPaginationFeature,
-  type PaginationState,
   flexRender,
   rowSelectionFeature,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
-import { memo, useEffect, useState } from "react";
+import { memo, useState } from "react";
 import { Separator } from "../ui/separator";
 import React from "react";
 import type {
@@ -71,13 +70,9 @@ function CustomTable<TData extends RowData>({
   showPaginated,
 
   paginationBtns,
-  startItemNo,
-  endItemNo,
   paginationMeta,
 
-  currPageNo,
   setPageNo,
-  lastPageNo,
   isFetching,
 
   tableOptionsLeft,
@@ -86,24 +81,12 @@ function CustomTable<TData extends RowData>({
   rowIdSelector,
   withSelectionToggle = false,
 }: DataTableProps<TData>) {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: paginationMeta ? paginationMeta.per_page : 100,
-  });
+  const currPageNo = paginationMeta?.current_page;
+  console.log(
+    `currPage: ${currPageNo}, nextPage: ${Number(currPageNo ?? 0) + 1}`,
+  );
   const [rowSelection, setRowSelection] = useState({});
   const data = renderData ?? [];
-  const totalRecords = data?.length ?? 0;
-  const itemStartNo = paginationMeta
-    ? (paginationMeta.current_page - 1) * paginationMeta.per_page +
-      (data.length > 0 ? 1 : 0)
-    : 0;
-  const itemLastNo = paginationMeta
-    ? Math.max(0, itemStartNo + data.length - 1)
-    : 0;
-
-  useEffect(() => {
-    setPagination?.((curr) => ({ ...curr, pageIndex: 0 }));
-  }, [localFilters, globalFilterTerm]);
 
   const table = useTable({
     features: tableFeatures({
@@ -129,8 +112,6 @@ function CustomTable<TData extends RowData>({
     data,
     autoResetPageIndex: showPaginated ? false : undefined,
 
-    onPaginationChange: showPaginated ? setPagination : undefined,
-
     initialState: {
       columnVisibility: hiddenCols,
     },
@@ -138,7 +119,6 @@ function CustomTable<TData extends RowData>({
     state: {
       columnFilters: localFilters,
       globalFilter: globalFilterTerm,
-      pagination: showPaginated ? pagination : undefined,
       rowSelection: withSelectionToggle ? rowSelection : undefined,
     },
 
@@ -147,18 +127,6 @@ function CustomTable<TData extends RowData>({
 
     getRowId: rowIdSelector ? rowIdSelector : undefined,
   });
-
-  const pageCount = table.getPageCount();
-  const currentPage = pagination.pageIndex;
-  const visiblePages = 3;
-
-  let startPage = Math.max(0, currentPage - 1);
-  let endPage = startPage + visiblePages - 1;
-
-  if (endPage >= pageCount) {
-    endPage = pageCount - 1;
-    startPage = Math.max(0, endPage - visiblePages + 1);
-  }
 
   return (
     <>
@@ -268,7 +236,9 @@ function CustomTable<TData extends RowData>({
                             key={cell.id}
                             className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
                           >
-                            {<table.FlexRender cell={cell} />}
+                            <div className="flex items-center">
+                              {<table.FlexRender cell={cell} />}
+                            </div>
                           </td>
                         ))}
                       </tr>
@@ -421,8 +391,9 @@ function CustomTable<TData extends RowData>({
           <div className="flex justify-between items-center gap-2 px-6 pt-6">
             <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
               {" "}
-              Showing <b> {itemStartNo} </b> to <b> {itemLastNo} </b> of{" "}
-              {totalRecords} items{" "}
+              Showing <b> {paginationMeta?.from ?? 0} </b> to{" "}
+              <b> {paginationMeta?.to ?? 0} </b> of {paginationMeta?.total ?? 0}{" "}
+              items{" "}
             </span>
 
             <div className="w-fit flex justify-between gap-2 min-h-8 items-center">
@@ -437,19 +408,20 @@ function CustomTable<TData extends RowData>({
                   <CustomBtn
                     key={label}
                     buttonLabel={label}
-                    disabled={!paginationBtn.active}
                     onClick={() => {
                       if (index === 0) {
-                        setPageNo?.(Math.max(1, (currPageNo as number) - 1));
+                        setPageNo?.((curr) => Math.max(1, curr - 1));
                       } else if (index === paginationBtns?.length - 1) {
-                        setPageNo?.(
+                        setPageNo?.((curr) =>
                           Math.min(
-                            lastPageNo as number,
-                            (currPageNo as number) + 1,
+                            Number(paginationMeta?.last_page ?? 1),
+                            curr + 1,
                           ),
                         );
                       } else {
-                        setPageNo?.(Number(label));
+                        if (!Number.isNaN(Number(label))) {
+                          setPageNo?.(Number(label));
+                        }
                       }
                     }}
                     btncls={cn(

@@ -270,12 +270,6 @@ export interface Notification {
   created_at: string;
 }
 
-export interface NotificationListResponse {
-  data: Notification[];
-  links: PaginationLinks;
-  meta: ApiResponseMeta;
-}
-
 export interface ClientDetails extends Client {
   city: string;
   postcode: string;

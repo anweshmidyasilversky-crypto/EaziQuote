@@ -9,7 +9,6 @@ import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { useMemo, useRef, useState } from "react";
-import { useDebounce } from "../../hooks/useDebounce";
 
 import {
   ClientForm,
@@ -23,136 +22,96 @@ import FilterBtn from "../../components/common/FilterBtn";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
 import { type ClientDetails } from "@/types/api.responses.type";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type {
-  ClientCreateApiPayload,
-  UpdateClientApiPayload,
-} from "@/types/api.requests.type";
-import {
-  createClient,
-  deleteClient,
-  getClientList,
-  updateClient,
-} from "@/api/services/clients.api";
 import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
+import useClients from "@/hooks/apis/clients/useClients";
+import type { PageFilters } from "@/types/api.requests.type";
+import useClientMutations from "@/hooks/apis/clients/useClientMutations";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
   const [activeFilter, toggleActiveFilter] = useState<string>("recent");
   const [isFilterOpen, toggleFilterOpen] = useState(false);
   const [clientModalOpen, toggleClientModal] = useState(false);
+  // targetClient to be passed to the client editing form
   const targetClient = useRef<
     ClientCreationPayload | ClientEditPayload | undefined
   >(undefined);
   const targetClientId = useRef<number>(0);
   const clientFormMode = useRef<ClientFormProps["mode"]>("creation");
-  const [searchParam, setSearchParam] = useState("");
-  const debouncedSearchParam = useDebounce({ value: searchParam, delay: 500 });
   const sortBy = useRef<string | null>(null);
-  const mutated = useRef<number>(0);
+
+  const tableFilters = useMemo(
+    () =>
+      ({
+        sort_by: sortBy.current,
+      }) as PageFilters,
+    [sortBy.current],
+  );
 
   const {
-    data: clientListResponse,
-    isFetching,
-    error,
-  } = useQuery({
-    queryKey: [
-      "clientIndex",
-      "clients",
-      debouncedSearchParam,
-      sortBy.current,
-      mutated.current,
-    ],
-    queryFn: () =>
-      getClientList({
-        search: debouncedSearchParam,
-        sort_by: sortBy.current,
-      }),
-  });
+    clientList,
+    searchTerm,
+    setSearchTerm,
+    isFetching: isClientListFetching,
+    clientListMeta,
+    refetch: refetchClients,
+    setPageNo,
+  } = useClients({ filters: tableFilters });
 
-  if (error) {
-    showErrorToast(error);
-  }
+  const { clientCreatMutation, clientUpdateMutation, clientDeleteMutation } =
+    useClientMutations();
 
-  const clientList = clientListResponse?.payload.data;
-  const clientListMeta = clientListResponse?.payload.meta;
-  const itemStartNo = clientListMeta
-    ? clientListMeta.last_page * clientListMeta.per_page + 1
-    : 0;
-  const itemEndNo = itemStartNo + (clientList?.length ?? 0);
-
-  const { mutateAsync: createClientAsync } = useMutation({
-    mutationKey: ["clientIndex", "creation"],
-    mutationFn: (data: ClientCreateApiPayload) => createClient(data),
-  });
-
-  const { mutateAsync: updateClientAsync } = useMutation({
-    mutationKey: ["clientIndex", "updation"],
-    mutationFn: (data: UpdateClientApiPayload) => {
-      return updateClient(targetClientId.current.toString(), data);
+  const columns = [
+    {
+      accessorKey: "name",
+      header: "CLIENT",
+      filterFn: filterFn_includesString,
+      cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
     },
-  });
-
-  const { mutateAsync: deleteClientAsync } = useMutation({
-    mutationKey: ["clientIndex", "client", "delete"],
-    mutationFn: () => deleteClient(targetClientId.current.toString()),
-  });
-
-  const columns = useMemo(
-    () =>
-      [
-        {
-          accessorKey: "name",
-          header: "CLIENT",
-          filterFn: filterFn_includesString,
-          cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
-        },
-        {
-          accessorKey: "company_name",
-          header: "COMPANY",
-        },
-        {
-          accessorKey: "phone",
-          enableSorting: false,
-        },
-        {
-          accessorKey: "email",
-          enableSorting: false,
-        },
-        {
-          id: "actions",
-          header: "ACTION",
-          enableSorting: false,
-          cell: (info) => {
-            const client = info.row.original;
-            return (
-              <CustomActionGroup
-                openFn={() => navigate(`/clients/${client.id}`)}
-                editFn={() => {
-                  targetClient.current = {
-                    companyName: client.company_name,
-                    street: client.address ?? "",
-                    postCode: client.postcode,
-                    ...client,
-                    phone: client.phone.slice(6).replaceAll(" ", ""),
-                  };
-                  targetClientId.current = client.id;
-                  clientFormMode.current = "updation";
-                  toggleClientModal((curr) => !curr);
-                }}
-                withDelete={true}
-                deleteFn={async () => {
-                  targetClientId.current = client.id;
-                  await handleDelete();
-                }}
-              />
-            );
-          },
-        },
-      ] as ColumnDef<TableFeatures, ClientDetails>[],
-    [],
-  );
+    {
+      accessorKey: "company_name",
+      header: "COMPANY",
+    },
+    {
+      accessorKey: "phone",
+      enableSorting: false,
+    },
+    {
+      accessorKey: "email",
+      enableSorting: false,
+    },
+    {
+      id: "actions",
+      header: "ACTION",
+      enableSorting: false,
+      cell: (info) => {
+        const client = info.row.original;
+        return (
+          <CustomActionGroup
+            openFn={() => navigate(`/clients/${client.id}`)}
+            editFn={() => {
+              targetClient.current = {
+                companyName: client.company_name,
+                street: client.address ?? "",
+                postCode: client.postcode,
+                ...client,
+                phone: client.phone.slice(6).replaceAll(" ", ""),
+              };
+              targetClientId.current = client.id;
+              clientFormMode.current = "updation";
+              toggleClientModal((curr) => !curr);
+            }}
+            withDelete={true}
+            deleteFn={async () => {
+              targetClientId.current = client.id;
+              await handleDelete();
+            }}
+          />
+        );
+      },
+    },
+  ] as ColumnDef<TableFeatures, ClientDetails>[];
 
   const filters: { label: string; value: string }[] = useMemo(
     () => [
@@ -165,34 +124,63 @@ export function ClientIndexPage() {
   );
 
   const clientCreatFn = async (data: ClientCreationPayload) => {
-    try {
-      const response = createClientAsync({
+    clientCreatMutation.mutate(
+      {
         ...data,
         postcode: data.postCode,
         company_name: data.companyName,
         address: data.street,
-      });
-      toast.success((await response).message);
-      mutated.current ^= 1;
-    } catch (err) {
-      throw err;
-    }
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          toggleClientModal(false);
+          refetchClients();
+          setPageNo(1);
+          setSearchTerm("");
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   const clientEditFn = async (data: ClientEditPayload) => {
-    try {
-      const response = await updateClientAsync({
+    clientUpdateMutation.mutate(
+      {
+        client_id: targetClientId.current.toString(),
         ...data,
         postcode: data.postCode,
         company_name: data.companyName,
         address: data.street,
         _method: "put",
-      });
-      toast.success(response.message);
-      mutated.current ^= 1;
-    } catch (err) {
-      throw err;
-    }
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          toggleClientModal(false);
+          refetchClients();
+        },
+
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
+  };
+
+  const handleDelete = async () => {
+    clientDeleteMutation.mutate(targetClientId.current.toString(), {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        toggleClientModal(false);
+        refetchClients();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   const btnConfigList: CustomBtnProps[] = [
@@ -206,16 +194,6 @@ export function ClientIndexPage() {
       },
     },
   ];
-
-  const handleDelete = async () => {
-    try {
-      const res = await deleteClientAsync();
-      toast.success(res.message);
-      mutated.current ^= 1;
-    } catch (err) {
-      showErrorToast(err);
-    }
-  };
 
   return (
     <>
@@ -233,26 +211,30 @@ export function ClientIndexPage() {
           clientCreatFn={clientCreatFn}
           clientEditFn={clientEditFn}
           defaultValues={targetClient.current}
+          isSubmitting={
+            clientCreatMutation.isPending || clientUpdateMutation.isPending
+          }
         />
 
         <div className="flex flex-col bg-table rounded-[10px] dashboard-card-theme gap-4.5 py-4.5">
           <CustomDataTable
             columns={columns}
-            data={clientList ?? []}
+            data={clientList}
             showPaginated={true}
-            tableOptionsLeft={SearchInputGruop({
-              searchTerm: searchParam,
-              setSearchTerm: setSearchParam,
-            })}
-            tableOptionsRight={FilterBtn({
-              toggleFilterSheetOpen: toggleFilterOpen,
-            })}
+            tableOptionsLeft={
+              <SearchInputGruop
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+              />
+            }
+            tableOptionsRight={
+              <FilterBtn toggleFilterSheetOpen={toggleFilterOpen} />
+            }
             totalRecords={clientListMeta?.total}
-            startItemNo={itemStartNo}
-            endItemNo={itemEndNo}
             paginationBtns={clientListMeta?.links}
-            isFetching={isFetching}
+            isFetching={isClientListFetching}
             paginationMeta={clientListMeta}
+            setPageNo={setPageNo}
           />
         </div>
 

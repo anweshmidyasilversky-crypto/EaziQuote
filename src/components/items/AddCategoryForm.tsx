@@ -6,7 +6,7 @@ import { cn } from "../../lib/utils";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { categorySchema } from "../../validation/itemCreation.payload.schema";
 import { useMutation } from "@tanstack/react-query";
-import { createCategory } from "@/api/categories.api";
+import { createCategory } from "@/api/services/categories.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import { toast } from "react-toastify";
 import { updateConfig } from "@/redux/slices/settings.slice";

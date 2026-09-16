@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { Spinner } from "../../components/ui/spinner";
 import { useAppSelector } from "@/redux/store";
-import { sendEmailVerification } from "@/api/auth.api";
+import { sendEmailVerification } from "@/api/services/auth.api";
 import { isAxiosError } from "axios";
 import { useNavigate } from "react-router";
 export function UnverifiedEmail() {

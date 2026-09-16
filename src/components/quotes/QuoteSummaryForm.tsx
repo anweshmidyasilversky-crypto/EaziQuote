@@ -25,7 +25,11 @@ import type {
 import { createClient, getClientList } from "@/api/services/clients.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import { useDebounce } from "@/hooks/useDebounce";
-import { createQuote, deleteAttachemnt, updateQuote } from "@/api/quotes.api";
+import {
+  createQuote,
+  deleteAttachemnt,
+  updateQuote,
+} from "@/api/services/quotes.api";
 
 export type QuoteSummaryFormProps = {
   refNo: string;

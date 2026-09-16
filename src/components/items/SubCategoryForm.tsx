@@ -9,7 +9,7 @@ import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/customInput";
 import { cn } from "../../lib/utils";
 import { useMutation } from "@tanstack/react-query";
-import { createSubCategory } from "@/api/subCategories.api";
+import { createSubCategory } from "@/api/services/subCategories.api";
 import type { SubCategoryCreateApiPayload } from "@/types/api.requests.type";
 import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";

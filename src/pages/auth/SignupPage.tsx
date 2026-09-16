@@ -7,7 +7,7 @@ import { CustomInput } from "../../components/common/customInput";
 import { Spinner } from "../../components/ui/spinner";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
-import { signup } from "@/api/auth.api";
+import { signup } from "@/api/services/auth.api";
 import { deviceType } from "@/types/api.requests.type";
 import { isAxiosError } from "axios";
 

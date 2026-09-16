@@ -32,7 +32,7 @@ import { useNavigate } from "react-router";
 import React from "react";
 import CustomDialog from "../../components/common/CustomDialog";
 import { useQuery } from "@tanstack/react-query";
-import { getPresetQuoteList, getQuoteList } from "@/api/auth.api";
+import { getPresetQuoteList, getQuoteList } from "@/api/services/auth.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import type {
   PresetQuoteListing,

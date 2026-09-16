@@ -10,7 +10,6 @@ import {
 } from "../../constants/dummyData";
 import {
   filterFn_includesString,
-  filterFn_inDateRange,
   type ColumnDef,
   type ColumnFiltersState,
   type TableFeatures,
@@ -49,22 +48,17 @@ import {
   type CustomToggleGroupProps,
 } from "../../components/common/CustomToggleGroup";
 import { toast } from "react-toastify";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  deleteClient,
-  getClientDetails,
-  updateClient,
-} from "@/api/services/clients.api";
 import {
   PaymentStatus,
   type InvoiceActivity,
   type Payment,
   type QuoteActivity,
 } from "@/types/api.responses.type";
-import type { UpdateClientApiPayload } from "@/types/api.requests.type";
 import { showErrorToast } from "@/api/axiosInstance";
-import { getPaymentListByClient } from "@/api/payments.api";
 import DeleteDialog from "@/components/common/DeleteDialog";
+import useClientDetails from "@/hooks/apis/clients/useClientDetails";
+import useClientMutations from "@/hooks/apis/clients/useClientMutations";
+import usePaymentsByClient from "@/hooks/apis/payments/usePaymentsByClient";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
@@ -84,62 +78,25 @@ export function ClientDetailsPage() {
 
   const [filters, setFilters] = useState<string[]>([]);
   const activityTableFilters = useRef<ColumnFiltersState>([]);
-  const [pageNo, setPageNo] = useState(1);
 
   const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
 
   const {
-    data: clientDetailsResponse,
+    clientDetails: client,
     isFetching: isRecentActivityFetching,
-    error: recentActivityError,
-  } = useQuery({
-    queryKey: ["clientDetails", param.id],
-    queryFn: () => getClientDetails(param.id as string),
+    refetch: refetchClientDetails,
+  } = useClientDetails({
+    client_id: param.id ?? "",
   });
 
-  if (recentActivityError) {
-    showErrorToast(recentActivityError);
-  }
-
-  const { mutateAsync: updateClientAsync } = useMutation({
-    mutationKey: ["clientDetails", "update", param.id],
-    mutationFn: (data: UpdateClientApiPayload) =>
-      updateClient(param.id as string, data),
-  });
-
-  const client = clientDetailsResponse?.payload;
-
-  const { mutateAsync: deleteClientAsync } = useMutation({
-    mutationKey: ["clientDetails", "client", "delete"],
-    mutationFn: () => deleteClient(param.id as string),
-  });
+  const { clientUpdateMutation, clientDeleteMutation } = useClientMutations();
 
   const {
-    data: paymentListResponse,
+    paymentList,
+    setPageNo,
+    paymentPaginationMeta,
     isFetching: isPaymentListFetching,
-    error: PaymentsFetchError,
-  } = useQuery({
-    queryKey: ["clientDetails", "payments", param.id, pageNo],
-    queryFn: () =>
-      getPaymentListByClient(param.id as string, {
-        page: pageNo,
-      }),
-  });
-  if (PaymentsFetchError) {
-    showErrorToast(PaymentsFetchError);
-  }
-  const paymentList = paymentListResponse?.payload.data;
-  const paymentListStartNo = paymentListResponse
-    ? (paymentListResponse.payload.meta.current_page - 1) *
-        paymentListResponse.payload.meta.per_page +
-      1
-    : 0;
-  const paymentListEndNo = paymentListResponse
-    ? Math.min(
-        paymentListStartNo + paymentListResponse.payload.meta.per_page - 1,
-        paymentListStartNo + (paymentList?.length ?? 0) - 1,
-      )
-    : 0;
+  } = usePaymentsByClient({ client_id: param.id as string, filters: {} });
 
   useEffect(() => {
     setPageNo(1);
@@ -237,25 +194,48 @@ export function ClientDetailsPage() {
           return <StatusBadge status={status} />;
         },
         enableSorting: false,
-        filterFn: filterFn_includesString,
+        filterFn: (row, _, filterVal: string[] | undefined) => {
+          if (!filterVal) {
+            return true;
+          }
+          return filterVal.some(
+            (filter) =>
+              filter.toLocaleLowerCase() ===
+              row.original.status.toLocaleLowerCase(),
+          );
+        },
       },
       {
         accessorKey: "created_at",
         header: "CREATION DATE",
         enableSorting: false,
         cell: (info) => formatDisplayDate(info.getValue<string>()),
-        filterFn: (row, _, filterVal: Date) => {
-          return (
-            formatDisplayDate(row.original.created_at) ===
-            formatDisplayDate(filterVal.toDateString())
-          );
+        filterFn: (row, _, filterVal: Date | undefined) => {
+          if (!filterVal) {
+            return true;
+          }
+          const quote_date = new Date(row.original.created_at);
+          // Reset both to local midnight (00:00:00.000)
+          quote_date.setHours(0, 0, 0, 0);
+          filterVal.setHours(0, 0, 0, 0);
+          return quote_date >= filterVal;
         },
       },
       {
         accessorKey: "expiry_date",
         header: "EXPIRY/DUE DATE",
         enableSorting: false,
-        filterFn: filterFn_inDateRange,
+        filterFn: (row, _, filterVal: Date | undefined) => {
+          if (!filterVal) {
+            return true;
+          }
+          const expiryDate = new Date(row.original.expiry_date);
+          // Reset both to local midnight (00:00:00.000)
+          expiryDate.setHours(0, 0, 0, 0);
+          filterVal.setHours(0, 0, 0, 0);
+
+          return expiryDate <= filterVal;
+        },
         cell: (info) => formatDisplayDate(info.getValue<string>()),
       },
       {
@@ -291,6 +271,7 @@ export function ClientDetailsPage() {
         accessorKey: "payment_date",
         header: "DATE",
         enableSorting: false,
+        cell: (info) => formatDisplayDate(info.getValue<string>()),
       },
       {
         accessorKey: "amount_type",
@@ -374,19 +355,27 @@ export function ClientDetailsPage() {
   ];
 
   const handleClientEdit = async (data: ClientEditPayload) => {
-    try {
-      const response = await updateClientAsync({
+    clientUpdateMutation.mutate(
+      {
+        client_id: param.id ?? "",
         _method: "put",
         ...data,
         phone: data.phone,
         company_name: data.companyName,
         address: data.street,
         postcode: data.postCode,
-      });
-      toast.success(response.message);
-    } catch (err) {
-      throw err;
-    }
+      },
+      {
+        onSuccess: (editedClient) => {
+          toggleEditPopupOpen(false);
+          refetchClientDetails();
+          toast.success(editedClient.message);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   const clientEditDefaultValues: DefaultValues<ClientEditPayload> = {
@@ -394,7 +383,7 @@ export function ClientDetailsPage() {
     companyName: client?.company_name,
     phone: client?.phone?.slice(5).replaceAll(" ", ""),
     email: client?.email,
-    street: client?.address,
+    street: client?.address ?? "",
     city: client?.city,
     postCode: client?.postcode,
     country: client?.country,
@@ -414,13 +403,16 @@ export function ClientDetailsPage() {
   ];
 
   const handleClientDelete = async () => {
-    try {
-      const res = await deleteClientAsync();
-      toast.success(res.message);
-      navigate("/clients");
-    } catch (err) {
-      throw err;
-    }
+    clientDeleteMutation.mutate(param.id ?? "", {
+      onSuccess: (response) => {
+        toggleDeleteModalOpen(false);
+        toast.success(response.message);
+        navigate("/clients");
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   return (
@@ -513,14 +505,16 @@ export function ClientDetailsPage() {
                   },
                   ...activityTableFilters.current,
                 ]}
-                tableOptionsLeft={SearchInputGruop({
-                  searchTerm: searchTearm,
-                  setSearchTerm: setSearchTerm,
-                  searchPlaceHolder: "Search quotes & invoices",
-                })}
-                tableOptionsRight={FilterBtn({
-                  toggleFilterSheetOpen: toggleFilterOpen,
-                })}
+                tableOptionsLeft={
+                  <SearchInputGruop
+                    searchTerm={searchTearm}
+                    setSearchTerm={setSearchTerm}
+                    searchPlaceHolder={"Search quotes & invoices"}
+                  />
+                }
+                tableOptionsRight={
+                  <FilterBtn toggleFilterSheetOpen={toggleFilterOpen} />
+                }
                 isFetching={isRecentActivityFetching}
               />
             </>
@@ -533,9 +527,8 @@ export function ClientDetailsPage() {
               isFetching={isPaymentListFetching}
               showPaginated={true}
               setPageNo={setPageNo}
-              paginationBtns={paymentListResponse?.payload.meta.links}
-              startItemNo={paymentListStartNo}
-              endItemNo={paymentListEndNo}
+              paginationBtns={paymentPaginationMeta?.links}
+              paginationMeta={paymentPaginationMeta}
             />
           )}
         </div>
@@ -547,6 +540,7 @@ export function ClientDetailsPage() {
         clientEditFn={handleClientEdit}
         defaultValues={clientEditDefaultValues}
         toggleFormOpen={toggleEditPopupOpen}
+        isSubmitting={clientUpdateMutation.isPending}
       />
 
       <ClientDetailsPopup
@@ -567,7 +561,7 @@ export function ClientDetailsPage() {
             },
             {
               id: "expiry_date",
-              value: [dateRange.startDate, dateRange.endDate],
+              value: dateRange.endDate,
             },
             {
               id: "status",
@@ -614,6 +608,7 @@ export function ClientDetailsPage() {
         isOpen={deleteModalOpen}
         toggleOpen={toggleDeleteModalOpen}
         deleteAction={handleClientDelete}
+        isPending={clientDeleteMutation.isPending}
       />
     </div>
   );

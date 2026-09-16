@@ -3,17 +3,18 @@ import type {
   ListResponse,
   Payment,
 } from "@/types/api.responses.type";
-import { axiosInstance } from "./axiosInstance";
+import { axiosInstance } from "../axiosInstance";
 import type { PageFilters } from "@/types/api.requests.type";
+import { API_ENDPOINTS } from "@/constants/endPoints";
 
 export const getPaymentListByClient = async (
-  client_id: string,
+  client_id: string | number,
   filters?: PageFilters,
 ) => {
   try {
     const paymentListResponse = await axiosInstance.get<
       ApiResponse<ListResponse<Payment>>
-    >(`/payments`, {
+    >(API_ENDPOINTS.payments.getPaymentList, {
       params: {
         client_id,
         ...filters,

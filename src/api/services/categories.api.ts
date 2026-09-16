@@ -3,15 +3,16 @@ import type {
   Category,
   ListResponse,
 } from "@/types/api.responses.type";
-import { axiosInstance } from "./axiosInstance";
+import { axiosInstance } from "../axiosInstance";
 import type { PageFilters } from "@/types/api.requests.type";
 import { ObjToFormData } from "@/lib/utils";
+import { API_ENDPOINTS } from "@/constants/endPoints";
 
 export const getCategoryList = async (filters: PageFilters) => {
   try {
     const catListResponse = await axiosInstance.get<
       ApiResponse<ListResponse<Category>>
-    >(`/categories`, {
+    >(API_ENDPOINTS.categories.getCategoryList, {
       params: filters,
     });
     return catListResponse.data;
@@ -23,7 +24,7 @@ export const getCategoryList = async (filters: PageFilters) => {
 export const createCategory = async (name: string) => {
   try {
     const newCategory = await axiosInstance.post<ApiResponse<Category>>(
-      `/categories`,
+      API_ENDPOINTS.categories.createCategory,
       ObjToFormData({ name }),
     );
     return newCategory.data;
@@ -35,7 +36,7 @@ export const createCategory = async (name: string) => {
 export const updateCategory = async (payload: { id: number; name: string }) => {
   try {
     const updatedCategory = await axiosInstance.post<ApiResponse<Category>>(
-      `/categories`,
+      API_ENDPOINTS.categories.updateCategory,
       ObjToFormData(payload),
     );
     return updatedCategory.data;
@@ -47,7 +48,7 @@ export const updateCategory = async (payload: { id: number; name: string }) => {
 export const deleteCategory = async (id: number | string) => {
   try {
     const response = await axiosInstance.delete<ApiResponse<null>>(
-      `/categories/${id}`,
+      API_ENDPOINTS.categories.deleteCategory(id),
     );
     return response.data;
   } catch (error) {

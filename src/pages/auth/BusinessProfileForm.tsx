@@ -26,7 +26,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { businessProfileSetup } from "@/api/user.api";
+import { businessProfileSetup } from "@/api/services/user.api";
 import { isAxiosError } from "axios";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { useMutation } from "@tanstack/react-query";

@@ -24,9 +24,12 @@ import {
   type ListResponse,
 } from "@/types/api.responses.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createItem, getItemList, updateItem } from "@/api/items.api";
+import { createItem, getItemList, updateItem } from "@/api/services/items.api";
 import { showErrorToast } from "@/api/axiosInstance";
-import { getSubCatList, subCategoryByCategory } from "@/api/subCategories.api";
+import {
+  getSubCatList,
+  subCategoryByCategory,
+} from "@/api/services/subCategories.api";
 import { SubtotalBreakDown } from "./SubtotalBreakDown";
 
 export type ItemSelectFormProps = {

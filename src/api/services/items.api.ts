@@ -2,12 +2,13 @@ import type {
   ItemCreateApiPayload,
   PageFilters,
 } from "@/types/api.requests.type";
-import { axiosInstance } from "./axiosInstance";
+import { axiosInstance } from "../axiosInstance";
 import type {
   ApiResponse,
   ItemDetails,
   ListResponse,
 } from "@/types/api.responses.type";
+import { API_ENDPOINTS } from "@/constants/endPoints";
 
 export const getItemList = async (filters: PageFilters) => {
   try {
@@ -48,4 +49,13 @@ export const createItem = async (item: ItemCreateApiPayload) => {
   }
 };
 
-export const deleteItem = async (itemId: string | number) => {};
+export const deleteItem = async (itemId: string | number) => {
+  try {
+    const response = await axiosInstance.delete<ApiResponse<null>>(
+      API_ENDPOINTS.items.deleteItem(itemId),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
