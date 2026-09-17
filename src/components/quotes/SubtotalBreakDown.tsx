@@ -5,14 +5,16 @@ import type {
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
 import { formatCurrency } from "../../lib/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomDialog from "../common/CustomDialog";
 import { CustomDataTable } from "../common/CustomTable";
 import AddDeposite from "./AddDeposite";
 import { useLocation } from "react-router";
 import { CustomActionGroup } from "../common/CustomActionGroup";
 import AddDiscount from "./AddDiscount";
-import { PaymentMethods } from "@/types/api.responses.type";
+import { PaymentMethods, type Vat } from "@/types/api.responses.type";
+import AddTax from "./AddTax";
+import type { DepositeTypes } from "@/types/api.requests.type";
 
 export type SubtotalBreakDownProps = {
   paymentMethod: PaymentMethods;
@@ -23,9 +25,17 @@ export type SubtotalBreakDownProps = {
     cost: number;
     name: string;
   }[];
-  taxPercentage: number;
+  taxPercentage?: number;
   discountPercentage?: number;
   reqDeposite?: number;
+  vatSettings?: Vat[];
+
+  taxIdRef?: React.RefObject<number>;
+  discountRef?: React.RefObject<number | null>;
+  depositePaymentMethodRef?: React.RefObject<PaymentMethods>;
+  depositeAmountRef?: React.RefObject<number | null>;
+  depositeTypeRef?: React.RefObject<DepositeTypes | null>;
+  depositePercentageRef?: React.RefObject<number | null>;
 };
 
 type MarginSplit = {
@@ -41,6 +51,14 @@ export function SubtotalBreakDown({
   reqDeposite,
   items: renderItems,
   paymentMethod: paymentMode,
+  vatSettings,
+
+  taxIdRef,
+  discountRef,
+  depositePaymentMethodRef,
+  depositeAmountRef,
+  depositeTypeRef,
+  depositePercentageRef,
 }: SubtotalBreakDownProps) {
   const location = useLocation();
   const items = renderItems ?? [];
@@ -50,6 +68,23 @@ export function SubtotalBreakDown({
   const [discountDialog, toggleDiscountDialog] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(paymentMode);
   const [discountPercentage, setDiscountPercentage] = useState(discount);
+  const [tax, setTax] = useState(taxPercentage);
+  const [taxModalOpen, toggleTaxModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (depositeAmountRef) {
+      depositeAmountRef.current = deposite ?? null;
+    }
+    if (depositePaymentMethodRef) {
+      depositePaymentMethodRef.current = paymentMethod;
+    }
+    if (taxIdRef && tax) {
+      taxIdRef.current = tax;
+    }
+    if (discountRef) {
+      discountRef.current = discount ?? null;
+    }
+  }, [deposite, paymentMethod, tax, discount]);
 
   const isEditPage = location.pathname.split("/").includes("manage-quotes");
 
@@ -142,7 +177,6 @@ export function SubtotalBreakDown({
   const renderProps = {
     subtotal,
     margin: Number.isNaN(marginPercentage) ? 0 : marginPercentage,
-    tax: taxPercentage,
   };
 
   let extraCharges = 0;
@@ -159,7 +193,8 @@ export function SubtotalBreakDown({
             <div className="flex justify-between gap-4" key={field}>
               <span className="subtotal-field">
                 {" "}
-                {field} {field !== "subtotal" && `(${renderProps[key]}%)`}{" "}
+                {field[0].toUpperCase() + field.slice(1)}{" "}
+                {field !== "subtotal" && `(${renderProps[key]}%)`}{" "}
               </span>
               <span className="subtotal-value">
                 {field === "subtotal" && formatCurrency(subtotal)}
@@ -178,13 +213,37 @@ export function SubtotalBreakDown({
             </div>
           );
         })}
+        <div className="flex justify-between items-center gap-4">
+          <span className="subtotal-field"> {`Tax(${tax ?? 0}%)`} </span>
+          <div className="flex gap-2 items-center">
+            {tax ? (
+              <span className="subtotal-value">
+                {" "}
+                {formatCurrency(applyPercentage(subtotal, tax ?? 0))}{" "}
+              </span>
+            ) : (
+              <a
+                className="subtotal-value"
+                onClick={() => toggleTaxModalOpen((curr) => !curr)}
+              >
+                {`+ Select Tax Rate`}
+              </a>
+            )}
+            {isEditPage && tax && (
+              <CustomActionGroup
+                withOpen={false}
+                editFn={() => toggleTaxModalOpen((curr) => !curr)}
+                deleteFn={() => setTax(undefined)}
+              />
+            )}
+          </div>
+        </div>
 
         <div className="mt-4 flex gap-4 items-center justify-between">
           <span className="subtotal-field">
             {" "}
-            {discountPercentage
-              ? `discount(${discountPercentage}%)`
-              : `discount`}{" "}
+            {`Discount` +
+              (discountPercentage ? `(${discountPercentage}%)` : ``)}{" "}
           </span>
 
           <div className="flex gap-2 items-center">
@@ -209,6 +268,7 @@ export function SubtotalBreakDown({
               <CustomActionGroup
                 withOpen={false}
                 editFn={() => toggleDiscountDialog((curr) => !curr)}
+                deleteFn={() => setDiscountPercentage(undefined)}
               />
             )}
           </div>
@@ -222,6 +282,7 @@ export function SubtotalBreakDown({
             <span className="font-bold subtotal-value">
               {formatCurrency(
                 subtotal +
+                  applyPercentage(subtotal, tax ?? 0) +
                   extraCharges -
                   applyPercentage(subtotal, discountPercentage ?? 0),
               )}
@@ -253,6 +314,7 @@ export function SubtotalBreakDown({
                 <CustomActionGroup
                   withOpen={false}
                   editFn={() => toggleDepositeDialog((curr) => !curr)}
+                  deleteFn={() => setDeposite(undefined)}
                 />
               )}
             </div>
@@ -305,12 +367,29 @@ export function SubtotalBreakDown({
           paymentMethod: paymentMethod ?? PaymentMethods.stripe,
           deposite: deposite ?? undefined,
         }}
+        handleDepositeType={(depositeType) => {
+          if (depositeTypeRef) {
+            depositeTypeRef.current = depositeType;
+          }
+        }}
+        handleDepositePercentage={(percentage) => {
+          if (depositePercentageRef) {
+            depositePercentageRef.current = percentage;
+          }
+        }}
       />
 
       <AddDiscount
         isOpen={discountDialog}
         toggleIsOpen={toggleDiscountDialog}
         setDiscount={setDiscountPercentage}
+      />
+
+      <AddTax
+        isOpen={taxModalOpen}
+        toggleIsOpen={toggleTaxModalOpen}
+        vatSettings={vatSettings ?? []}
+        setTaxId={setTax}
       />
     </>
   );

@@ -2,6 +2,7 @@ import type { Method } from "axios";
 import type {
   DocumentCategories,
   ItemDetails,
+  QuoteDetails,
   QuoteTemplate,
 } from "./api.responses.type";
 
@@ -77,12 +78,24 @@ export interface CreateQuoteApiPayload {
   notes: string;
 }
 
-export interface UpdateQuoteApiPayload extends Partial<CreateQuoteApiPayload> {
+export interface UpdateQuoteItems {
+  id: number;
+  quantity: number;
+  type: string;
+  price: number;
+  name: string;
+  cost: number;
+}
+
+export interface UpdateQuoteApiPayload extends Partial<
+  Omit<QuoteDetails, "attachments" | "items">
+> {
   _method: Method;
   quote_id: string | number;
-  items?: ItemDetails[];
-  template?: QuoteTemplate;
-  categorised?: DocumentCategories;
+  attachments?: File[];
+  description?: string;
+  client_id?: number;
+  items: UpdateQuoteItems[];
 }
 
 export interface ItemCreateApiPayload {
@@ -104,4 +117,9 @@ export interface SubCategoryCreateApiPayload {
 
 export interface subCategoryUpdateApiPayload extends Partial<SubCategoryCreateApiPayload> {
   id: number | string;
+}
+
+export enum DepositeTypes {
+  fixed = "fixed",
+  percentage = "percentage",
 }

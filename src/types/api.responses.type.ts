@@ -1,3 +1,5 @@
+import type { DepositeTypes } from "./api.requests.type";
+
 export interface ApiResponse<T> {
   result: boolean;
   requestId: string;
@@ -363,7 +365,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
     color: null | string;
   };
   deposit_required: boolean;
-  deposit_type: null | string;
+  deposit_type: DepositeTypes;
   deposit_amount: null | number;
   deposit_percentage: null | number;
   categorised: DocumentCategories;

@@ -11,27 +11,17 @@ import { ClientForm } from "../clients/ClientForm";
 import { type QuoteSummary } from "../../types/quoteCreation.payload.type";
 import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppDispatch } from "../../redux/store";
 import { cn } from "../../lib/utils";
 import { updateQuote as updateQuoteRedux } from "../../redux/slices/quotes.slice";
 import { toast } from "react-toastify";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type {
-  ClientCreateApiPayload,
-  CreateQuoteApiPayload,
-  UpdateQuoteApiPayload,
-} from "@/types/api.requests.type";
-import { createClient, getClientList } from "@/api/services/clients.api";
 import { showErrorToast } from "@/api/axiosInstance";
-import { useDebounce } from "@/hooks/useDebounce";
-import {
-  createQuote,
-  deleteAttachemnt,
-  updateQuote,
-} from "@/api/services/quotes.api";
 import type { QuoteDetails } from "@/types/api.responses.type";
 import { useNavigate } from "react-router";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import useClientMutations from "@/hooks/apis/clients/useClientMutations";
+import useClients from "@/hooks/apis/clients/useClients";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
@@ -39,59 +29,26 @@ export type QuoteSummaryFormProps = {
   currQuote?: QuoteDetails;
 };
 
-function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
-  const currQuote = useAppSelector((state) => state.quote);
-  console.log(currQuote);
+function QuoteSummaryForm({
+  refNo,
+  submitAction,
+  currQuote,
+}: QuoteSummaryFormProps) {
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const [clientSearchTerm, setClientSearchTerm] = useState(
-    currQuote?.client.name ?? "",
-  );
-  useEffect(() => {
-    setClientSearchTerm(currQuote?.client.name ?? "");
-  }, [currQuote]);
-  const deboucedClientSearch = useDebounce({ value: clientSearchTerm });
   const dispatch = useAppDispatch();
 
-  const { mutateAsync: createQuoteAsync } = useMutation({
-    mutationKey: ["quoteSummay", "quote", "create"],
-    mutationFn: (payload: CreateQuoteApiPayload) => createQuote(payload),
-  });
+  const { quoteCreateMutation, quoteUpdateMutation, attachmentDeleteMutation } =
+    useQuotesMutations();
+
+  const { clientCreatMutation } = useClientMutations();
 
   const {
-    data: clientListResponse,
-    error: clinetFetchErr,
+    clientList,
     isFetching: isClientFetching,
-  } = useQuery({
-    queryKey: ["quoteSummaryForm", "clients", deboucedClientSearch],
-    queryFn: () =>
-      getClientList({
-        search: deboucedClientSearch,
-      }),
-  });
-
-  if (clinetFetchErr) {
-    showErrorToast(clinetFetchErr);
-  }
-
-  const clientList = clientListResponse?.payload.data;
-
-  const { mutateAsync: createClientAsync } = useMutation({
-    mutationKey: ["quote-summary", "client", "creation"],
-    mutationFn: (data: ClientCreateApiPayload) => createClient(data),
-  });
-
-  const { mutateAsync: updateQuoteAsync } = useMutation({
-    mutationFn: (data: UpdateQuoteApiPayload) => updateQuote(data),
-  });
-
-  const { mutateAsync: deleteAttachmentAsync } = useMutation({
-    mutationFn: (data: {
-      quote_id: string | number;
-      attachment_id: string | number;
-    }) => deleteAttachemnt(data),
-  });
+    searchTerm: clientSearchTerm,
+    setSearchTerm: setClientSearchTerm,
+  } = useClients({ initialSearchVal: currQuote?.client.name });
 
   const initialValue: QuoteSummary = {
     quoteTitle: "",
@@ -147,6 +104,7 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
         );
       });
       setValue("attachments", attachmentList);
+      setClientSearchTerm(currQuote.client.name);
     } else {
       reset(initialValue);
     }
@@ -174,43 +132,52 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
       attachments?.filter((attachment) => attachment.name !== fileName),
     );
   };
-  const clientCreateAction = async (data: ClientCreationPayload) => {
-    try {
-      const response = await createClientAsync({
+  const clientCreateAction = (data: ClientCreationPayload) => {
+    clientCreatMutation.mutate(
+      {
         ...data,
         phone: data.phone,
         company_name: data.companyName,
         postcode: data.postCode,
         address: data.street,
-      });
-      toast.success(response.message);
-    } catch (err) {
-      throw err;
-    }
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
-  const handleAttachmentDelete = async (
+  const handleAttachmentDelete = (
     quote_id: string | number,
     attachment_id: string | number,
     fileName: string,
   ) => {
-    try {
-      const response = await deleteAttachmentAsync({
+    attachmentDeleteMutation.mutate(
+      {
         quote_id,
         attachment_id,
-      });
-      removeAttachment(fileName);
-      toast.success(response.message);
-    } catch (error) {
-      showErrorToast(error);
-    }
+      },
+      {
+        onSuccess: (response) => {
+          removeAttachment(fileName);
+          toast.success(response.message);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
-  const submitHandler = async (data: QuoteSummary) => {
-    toggleIsSubmitting(true);
-    try {
-      if (currQuote) {
-        const updatedQuote = await updateQuoteAsync({
+  const submitHandler = (data: QuoteSummary) => {
+    if (currQuote) {
+      quoteUpdateMutation.mutate(
+        {
           _method: "put",
           quote_id: currQuote.id,
           ...data,
@@ -221,11 +188,21 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
           client_id: Number(data.clientId),
           notes: data.notes ?? "",
           attachments: data.attachments?.slice(currQuote?.attachments.length),
-        });
-        toast.success(updatedQuote.message);
-        dispatch(updateQuoteRedux(updatedQuote.payload));
-      } else {
-        const quote = await createQuoteAsync({
+        },
+        {
+          onSuccess: (response) => {
+            dispatch(updateQuoteRedux(response.payload));
+            submitAction?.();
+            toast.success(response.message);
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        },
+      );
+    } else {
+      quoteCreateMutation.mutate(
+        {
           ...data,
           title: data.quoteTitle,
           description: data.jobDescription,
@@ -233,18 +210,20 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
           expiry_date: data.expiryDate,
           client_id: Number(data.clientId),
           notes: data.notes ?? "",
-        });
-        dispatch(updateQuoteRedux(quote.payload));
-        // navigate(`/quotes/manage-quotes/${quote.payload.id}`, {
-        //   replace: true,
-        // });
-        toast.success(quote.message);
-      }
-      submitAction?.();
-    } catch (err) {
-      showErrorToast(err);
-    } finally {
-      toggleIsSubmitting(false);
+        },
+
+        {
+          onSuccess: (response) => {
+            dispatch(updateQuoteRedux(response.payload));
+            submitAction?.();
+            navigate(`/quotes/manage-quotes/${response.payload.id}`);
+            toast.success(response.message);
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        },
+      );
     }
   };
 
@@ -396,7 +375,9 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
           buttonLabel="Save"
           onClick={handleSubmit(submitHandler)}
           type="submit"
-          isSubmitting={isSubmitting}
+          isSubmitting={
+            quoteCreateMutation.isPending || quoteUpdateMutation.isPending
+          }
         />
       </div>
 
@@ -405,6 +386,7 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
         toggleFormOpen={toggleClientFormOpen}
         mode="creation"
         clientCreatFn={clientCreateAction}
+        isSubmitting={clientCreatMutation.isPending}
       />
     </React.Fragment>
   );

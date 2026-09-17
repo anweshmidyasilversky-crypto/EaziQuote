@@ -4,14 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useDebounce } from "../../useDebounce";
 import { showErrorToast } from "@/api/axiosInstance";
-import usePaginationReset from "../usePaginationReset";
 
 export type useClientsProps = {
   filters?: PageFilters;
+  initialSearchVal?: string;
+  enabled?: boolean;
 };
 
-function useClients({ filters }: useClientsProps) {
-  const [searchTerm, setSearchTerm] = useState("");
+function useClients({
+  filters,
+  initialSearchVal,
+  enabled = true,
+}: useClientsProps) {
+  const [searchTerm, setSearchTerm] = useState(initialSearchVal ?? "");
   const debouncedSearchTerm = useDebounce({ value: searchTerm });
   const [pageNo, setPageNo] = useState(1);
 
@@ -24,14 +29,10 @@ function useClients({ filters }: useClientsProps) {
         ...filters,
         page: pageNo,
       }),
+    enabled,
   });
 
   useMemo(() => setPageNo(1), [debouncedSearchTerm, filters]);
-
-  // usePaginationReset({
-  //   setPageNo,
-  //   filters: pageFilters,
-  // });
 
   if (error) {
     showErrorToast(error);

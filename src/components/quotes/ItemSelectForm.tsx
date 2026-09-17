@@ -22,6 +22,7 @@ import {
   PaymentMethods,
   type ItemDetails,
   type ListResponse,
+  type QuoteDetails,
 } from "@/types/api.responses.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createItem, getItemList, updateItem } from "@/api/services/items.api";
@@ -31,19 +32,25 @@ import {
   subCategoryByCategory,
 } from "@/api/services/subCategories.api";
 import { SubtotalBreakDown } from "./SubtotalBreakDown";
+import {
+  DepositeTypes,
+  type UpdateQuoteApiPayload,
+  type UpdateQuoteItems,
+} from "@/types/api.requests.type";
 
 export type ItemSelectFormProps = {
   submitAction: () => void;
 };
 
 function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
-  const currQuote = useAppSelector((state) => state.quote);
   const dispatch = useAppDispatch();
+  const currQuote = useAppSelector((state) => state.quote);
   const [pageNo, setPageNo] = useState(1);
 
-  const { quote_categories: categories } = useAppSelector(
+  const { quote_categories: categories, vat_settings } = useAppSelector(
     (state) => state.appConfig,
   );
+
   const [categorySearch, setCategorySearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterOpen, toggleFilterOpen] = useState(false);
@@ -62,22 +69,11 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
 
   const [createItemModal, toggleCreateItemModal] = useState(false);
   const [editItemModal, toggleEditItemModal] = useState(false);
-  const [itemQty, setItemQty] = useState<
-    Record<
-      string,
-      {
-        id: number;
-        quantity: number;
-        type: string;
-        price: number;
-        name: string;
-        cost: number;
-      }
-    >
-  >({});
+
+  const [itemQty, setItemQty] = useState<Record<string, UpdateQuoteItems>>({});
   // console.log(itemQty);
   useEffect(() => {
-    currQuote.items.forEach((item) => {
+    currQuote?.items.forEach((item) => {
       if (item.is_added) {
         setItemQty((curr) => ({
           ...curr,
@@ -91,6 +87,15 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
   const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
   const editingItem = useRef<ItemDetails | undefined>(undefined);
   const [isMutated, toggleIsMutated] = useState<number>(0);
+
+  const vatSettingsId = useRef<number>(currQuote.vat_setting_id);
+  const discount = useRef<number | null>(currQuote.discount);
+  const depositePaymentMethod = useRef<PaymentMethods>(PaymentMethods.cash);
+  const depositePercentageRef = useRef<number | null>(
+    currQuote.deposit_percentage,
+  );
+  const depositeAmount = useRef<number | null>(currQuote.deposit_amount);
+  const depositeTypeRef = useRef<DepositeTypes>(currQuote.deposit_type);
 
   const {
     data: itemsListResponse,
@@ -331,7 +336,19 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
           <SubtotalBreakDown
             items={Object.values(itemQty)}
             paymentMethod={PaymentMethods.stripe}
-            taxPercentage={currQuote.vat}
+            vatSettings={vat_settings}
+            discountPercentage={discount.current ?? 0}
+            taxPercentage={Number(
+              vat_settings.find(
+                (vatSetting) => vatSetting.id === vatSettingsId.current,
+              )?.value ?? 0,
+            )}
+            reqDeposite={currQuote?.deposit_amount ?? undefined}
+            taxIdRef={vatSettingsId}
+            discountRef={discount}
+            depositePaymentMethodRef={depositePaymentMethod}
+            depositeAmountRef={depositeAmount}
+            depositeTypeRef={depositeTypeRef}
           />
         </div>
       </div>

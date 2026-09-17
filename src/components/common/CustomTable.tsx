@@ -139,7 +139,7 @@ function CustomTable<TData extends RowData>({
       )}
 
       {/* Table */}
-      <div className="w-full h-fit">
+      <div className="w-full h-fit overflow-x-auto">
         {(title || headerSlot) && (
           <div className="p-4 flex items-center justify-between">
             {title ? (

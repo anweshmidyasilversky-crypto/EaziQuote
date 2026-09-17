@@ -18,6 +18,7 @@ import { cn, formatCurrency } from "../../lib/utils";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomBtn } from "../common/CustomBtn";
 import { PaymentMethods } from "@/types/api.responses.type";
+import { DepositeTypes } from "@/types/api.requests.type";
 
 export type AddDepositeProps = {
   isOpen: boolean;
@@ -26,6 +27,8 @@ export type AddDepositeProps = {
   setDeposite: React.Dispatch<React.SetStateAction<number | undefined>>;
   setPaymentMode: React.Dispatch<React.SetStateAction<PaymentMethods>>;
   defaultValues: DefaultValues<AddDepositePayload>;
+  handleDepositeType?: (depositeType: DepositeTypes) => void;
+  handleDepositePercentage?: (depositePercentage: number) => void;
 };
 
 function AddDeposite({
@@ -35,22 +38,23 @@ function AddDeposite({
   setDeposite,
   setPaymentMode,
   defaultValues,
+  handleDepositeType,
+  handleDepositePercentage,
 }: AddDepositeProps) {
-  enum toggleBtn {
-    fixed = "fixed",
-    percentage = "percentage",
-  }
-  const toggleBtnConfig: CustomToggleGroupProps["toggleConfig"] = [
+  const DepositeTypesConfig: CustomToggleGroupProps["toggleConfig"] = [
     {
-      btnId: toggleBtn.fixed,
+      btnId: DepositeTypes.fixed,
       btnLabel: "Fixed (£)",
     },
     {
-      btnId: toggleBtn.percentage,
+      btnId: DepositeTypes.percentage,
       btnLabel: "Percentage (%)",
     },
   ];
-  const [activeToggle, toggleActive] = useState(toggleBtn.fixed);
+  const [activeToggle, toggleActive] = useState(DepositeTypes.fixed);
+  const [selectedMethod, setSelectedMethod] = useState(
+    defaultValues.paymentMethod ?? "",
+  );
 
   const {
     control,
@@ -64,21 +68,25 @@ function AddDeposite({
     resolver: yupResolver(
       yup.object({
         deposite:
-          activeToggle === toggleBtn.fixed ? amountSchema : percentageSchema,
+          activeToggle === DepositeTypes.fixed
+            ? amountSchema
+            : percentageSchema,
         paymentMethod: paymentMethodSchema,
       }),
     ),
   });
 
   const submitHanler = (data: AddDepositePayload) => {
-    if (activeToggle === toggleBtn.percentage) {
+    handleDepositeType?.(activeToggle);
+    if (activeToggle === DepositeTypes.percentage) {
+      handleDepositePercentage?.(data.deposite);
       setDeposite((totalAmount * data.deposite) / 100);
     } else {
       setDeposite(data.deposite);
     }
     setPaymentMode(data.paymentMethod);
     reset();
-    toggleActive(toggleBtn.fixed);
+    toggleActive(DepositeTypes.fixed);
     toggleOpen(false);
   };
 
@@ -111,7 +119,7 @@ function AddDeposite({
                 toggleActive as React.Dispatch<React.SetStateAction<string>>
               }
               activeId={activeToggle}
-              toggleConfig={toggleBtnConfig}
+              toggleConfig={DepositeTypesConfig}
               containerCls={cn(`border-0! `)}
               btnCls={cn(`rounded-[5px]! grow`)}
               className={cn(`items-center`)}
@@ -126,11 +134,13 @@ function AddDeposite({
             inptType="number"
             name="deposite"
             fieldName={
-              activeToggle === toggleBtn.fixed ? "Amount" : "Percentage"
+              activeToggle === DepositeTypes.fixed ? "Amount" : "Percentage"
             }
-            placeholder={activeToggle === toggleBtn.fixed ? "£ 0.00" : "% 0.00"}
+            placeholder={
+              activeToggle === DepositeTypes.fixed ? "£ 0.00" : "% 0.00"
+            }
           />
-          {activeToggle === toggleBtn.percentage &&
+          {activeToggle === DepositeTypes.percentage &&
             errors.deposite === undefined && (
               <span className="text-xs text-placeholder-text">
                 {" "}
@@ -143,9 +153,15 @@ function AddDeposite({
           <CustomCombobox
             items={Object.values(PaymentMethods)}
             selected={PaymentMethods.stripe}
-            onValueChange={(method) =>
-              method ? setValue("paymentMethod", method) : undefined
-            }
+            onValueChange={(method) => {
+              method ? setValue("paymentMethod", method) : undefined;
+              setSelectedMethod(method ?? "");
+            }}
+            inptFieldValue={selectedMethod}
+            inptFieldChange={(val) => {
+              setValue("paymentMethod", val as PaymentMethods);
+              setSelectedMethod(val);
+            }}
           />
           {watch().paymentMethod === PaymentMethods.cash && (
             <span className="text-warning-text text-wrap wrap-break-word text-xs">

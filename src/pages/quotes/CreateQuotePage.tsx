@@ -18,6 +18,7 @@ import { showErrorToast } from "@/api/axiosInstance";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
 import { removeQuote, updateQuote } from "@/redux/slices/quotes.slice";
 import type { QuoteDetails } from "@/types/api.responses.type";
+import { Spinner } from "@/components/ui/spinner";
 
 enum toggleId {
   Summary = "summary",
@@ -31,14 +32,16 @@ export function CreateQuotePage() {
     toggleId.Summary,
   );
   const params = useParams<{ id: string | undefined }>();
-  let currQuote: QuoteDetails | undefined = useAppSelector(
-    (state) => state.quote,
-  );
+
+  const { quote, isFetching: isQuoteFetching } = useQuoteDetails({
+    quote_id: params.id as string,
+    enabled: params.id ? true : false,
+  });
 
   const dummyRefNo = `QT-${new Date().getFullYear()}-1`;
   const refNo =
-    (currQuote?.reference_number ?? "").trim().length > 0
-      ? (currQuote?.reference_number as string)
+    (quote?.reference_number ?? "").trim().length > 0
+      ? (quote?.reference_number as string)
       : dummyRefNo;
 
   const btnConfigList: CustomBtnProps[] = [
@@ -66,7 +69,7 @@ export function CreateQuotePage() {
     {
       btnId: toggleId.Sections,
       btnLabel: "Sections",
-      disabled: (currQuote?.items.length ?? 0) <= 0,
+      disabled: (quote?.items.length ?? 0) <= 0,
     },
   ];
 
@@ -74,32 +77,39 @@ export function CreateQuotePage() {
     <React.Fragment>
       <HeaderBreadCrumb pageName="New Quote" />
 
-      <div className="p-5 flex flex-col gap-6">
-        <CustomHeader header="New Quote" btnConfigList={btnConfigList} />
+      {isQuoteFetching ? (
+        <div className="flex w-full h-full items-center justify-center">
+          <Spinner className="text-brand-dark w-1/10 h-1/10" />
+        </div>
+      ) : (
+        <div className="p-5 flex flex-col gap-6">
+          <CustomHeader header="New Quote" btnConfigList={btnConfigList} />
 
-        <div className="flex gap-6 overflow-x-auto rounded-[7px]">
-          <div className="bg-white rounded-[7px] grow">
-            <div className="flex flex-col gap-5 py-5">
-              <CustomToggleGroup
-                toggleConfig={toggleConfig}
-                activeId={formCurrSection}
-                toggleActive={changeFormCurrSection}
-                className={`bg-transparent! text-black-text [&_button]:disabled:text-muted create-quote-toggle [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark [&_.btnActive]:text-brand-dark [&_.btnActive]:bg-transparent [&_button]:max-w-22.75! px-2`}
-              />
-              {formCurrSection === toggleId.Summary && (
-                <QuoteSummaryForm
-                  refNo={refNo}
-                  currQuote={currQuote}
-                  submitAction={() => changeFormCurrSection(toggleId.Items)}
+          <div className="flex gap-6 overflow-x-auto rounded-[7px]">
+            <div className="bg-white rounded-[7px] grow">
+              <div className="flex flex-col gap-5 py-5">
+                <CustomToggleGroup
+                  toggleConfig={toggleConfig}
+                  activeId={formCurrSection}
+                  toggleActive={changeFormCurrSection}
+                  className={`bg-transparent! text-black-text [&_button]:disabled:text-muted create-quote-toggle [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark [&_.btnActive]:text-brand-dark [&_.btnActive]:bg-transparent [&_button]:max-w-22.75! px-2`}
                 />
-              )}
-              {formCurrSection === toggleId.Items && (
-                <ItemSelectForm
-                  submitAction={() => changeFormCurrSection(toggleId.Sections)}
-                />
-              )}
+                {formCurrSection === toggleId.Summary && (
+                  <QuoteSummaryForm
+                    refNo={refNo}
+                    currQuote={quote}
+                    submitAction={() => changeFormCurrSection(toggleId.Items)}
+                  />
+                )}
+                {formCurrSection === toggleId.Items && (
+                  <ItemSelectForm
+                    submitAction={() =>
+                      changeFormCurrSection(toggleId.Sections)
+                    }
+                  />
+                )}
 
-              {/* {formCurrSection === toggleId.Sections && (
+                {/* {formCurrSection === toggleId.Sections && (
                 <SectionSelectForm
                   refNo={refNo}
                   submitAction={() =>
@@ -107,10 +117,11 @@ export function CreateQuotePage() {
                   }
                 />
               )} */}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </React.Fragment>
   );
 }
