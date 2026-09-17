@@ -1,9 +1,10 @@
 import { getClientList } from "@/api/services/clients.api";
 import type { PageFilters } from "@/types/api.requests.type";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDebounce } from "../../useDebounce";
 import { showErrorToast } from "@/api/axiosInstance";
+import usePaginationReset from "../usePaginationReset";
 
 export type useClientsProps = {
   filters?: PageFilters;
@@ -24,22 +25,13 @@ function useClients({ filters }: useClientsProps) {
         page: pageNo,
       }),
   });
-  const [committed, setCommitted] = useState({
-    search: debouncedSearchTerm,
-    filters,
-  });
 
-  if (
-    committed.search !== debouncedSearchTerm ||
-    committed.filters !== filters
-  ) {
-    setCommitted({ search: debouncedSearchTerm, filters });
-    setPageNo(1);
-  }
+  useMemo(() => setPageNo(1), [debouncedSearchTerm, filters]);
 
-  // useEffect(() => {
-  //   setPageNo(1);
-  // }, [debouncedSearchTerm, filters]);
+  // usePaginationReset({
+  //   setPageNo,
+  //   filters: pageFilters,
+  // });
 
   if (error) {
     showErrorToast(error);

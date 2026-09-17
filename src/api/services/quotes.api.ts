@@ -62,3 +62,14 @@ export const deleteAttachemnt = async (payload: {
     throw err;
   }
 };
+
+export const deleteQuote = async (quote_id: string | number) => {
+  try {
+    const response = await axiosInstance.delete<ApiResponse<null>>(
+      API_ENDPOINTS.quotes.deleteQuote(quote_id),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

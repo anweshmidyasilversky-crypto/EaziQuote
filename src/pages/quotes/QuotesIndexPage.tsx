@@ -15,7 +15,6 @@ import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { ClientNameBadge } from "../../components/common/ClientNameBadge";
-import { useDebounce } from "../../hooks/useDebounce";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import FilterBtn from "../../components/common/FilterBtn";
 import { CustomSheet } from "../../components/common/CustomSheet";
@@ -31,20 +30,17 @@ import { CustomHeader } from "../../components/common/CustomHeader";
 import { useNavigate } from "react-router";
 import React from "react";
 import CustomDialog from "../../components/common/CustomDialog";
-import { useQuery } from "@tanstack/react-query";
-import { getPresetQuoteList, getQuoteList } from "@/api/services/auth.api";
-import { showErrorToast } from "@/api/axiosInstance";
 import type {
   PresetQuoteListing,
   Quote,
   QuoteStatus,
 } from "@/types/api.responses.type";
 import type { PageFilters } from "@/types/api.requests.type";
+import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
+import usePresetQuotesList from "@/hooks/apis/quotes/usePresetQuotesList";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
-  const [searchParam, setSearchParam] = useState("");
-  const debouncedSearchTerm = useDebounce({ value: searchParam, delay: 500 });
   const [filerOpen, toggleFilterOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: undefined,
@@ -53,79 +49,53 @@ export function QuotesIndexPage() {
   const [filters, setFilters] = useState<string[]>([]);
   const [quoteDialogOpen, toggleQuoteDialogOpen] = useState(false);
   const [presetSelectionOpen, togglePresetSelectionOpen] = useState(false);
-  const [presetSearchTerm, setPresetSearchTerm] = useState("");
-  const debouncedPresetSearchTerm = useDebounce({
-    value: presetSearchTerm,
-    delay: 500,
-  });
   const pageFilters = useRef<PageFilters>({});
 
-  const [pageNo, setPageNo] = useState(1);
-
   const {
-    data: quotes,
-    isError,
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["quotes", pageNo, pageFilters, debouncedSearchTerm],
-    queryFn: () =>
-      getQuoteList({ ...pageFilters.current, search: debouncedSearchTerm }),
+    quoteList,
+    quoteSummary,
+    isFetching: isQuoteListFetching,
+    searchTerm: quoteSearchTerm,
+    setSearchTerm: setQuoteSearchTerm,
+    setPageNo,
+    paginationMeta: quotePaginationMeta,
+  } = useQuoteList({
+    filters: pageFilters.current,
   });
-  const quoteItemStartNo = quotes
-    ? (pageNo - 1) * (quotes.payload.meta.per_page ?? 0) + 1
-    : 0;
-  const quoteItemEndNo =
-    quoteItemStartNo + (quotes?.payload.data?.length ?? 1) - 1;
-
-  if (isError) {
-    showErrorToast(error);
-  }
-  const QuoteSummmary = quotes?.payload.summary;
-  const quoteListMeta = quotes?.payload.meta;
 
   const {
-    data: presetQuoteListResponse,
+    presetQuoteList: presetQuotes,
     isFetching: isPresetQuoteFetching,
-    error: presetQuoteFetchErr,
-  } = useQuery({
-    queryKey: ["quoteIndex", "presetQuotes", debouncedPresetSearchTerm],
-    queryFn: () =>
-      getPresetQuoteList({
-        search: debouncedPresetSearchTerm,
-      }),
-  });
-
-  if (presetQuoteFetchErr) {
-    showErrorToast(presetQuoteFetchErr);
-  }
-
-  const presetQuotes = presetQuoteListResponse?.payload.data ?? [];
+    setPageNo: setPresetPageNo,
+    searchTerm: presetSearchTerm,
+    setSearchTerm: setPresetSearchTerm,
+    paginationMeta: presetQuotePaginationMeta,
+  } = usePresetQuotesList();
 
   const summary: ActivitySummaryProps["summaryConfig"] = useMemo(() => {
     return [
       {
         summaryTitle: "Total Quotes",
-        summary: QuoteSummmary?.total_count,
+        summary: quoteSummary?.total_count,
         summaryIcon: assets.invoiceColored,
       },
       {
         summaryTitle: "Accepted",
-        summary: QuoteSummmary?.accepted_count,
+        summary: quoteSummary?.accepted_count,
         summaryIcon: assets.greenTickIcon,
       },
       {
         summaryTitle: "Pending",
-        summary: QuoteSummmary?.pending_count,
+        summary: quoteSummary?.pending_count,
         summaryIcon: assets.orangeClockIcon,
       },
       {
         summaryTitle: "Expired",
-        summary: QuoteSummmary?.expired_count,
+        summary: quoteSummary?.expired_count,
         summaryIcon: assets.OrangeHourGlassIcon,
       },
     ];
-  }, [quotes]);
+  }, [quoteList]);
 
   const quoteColumns: ColumnDef<TableFeatures, Quote>[] = useMemo(
     () => [
@@ -297,11 +267,11 @@ export function QuotesIndexPage() {
         <div className="table-theme">
           <CustomDataTable
             columns={quoteColumns}
-            data={quotes?.payload.data ?? []}
+            data={quoteList}
             tableOptionsLeft={
               <SearchInputGruop
-                searchTerm={searchParam}
-                setSearchTerm={setSearchParam}
+                searchTerm={quoteSearchTerm}
+                setSearchTerm={setQuoteSearchTerm}
                 searchPlaceHolder="Search quotes & clients"
               />
             }
@@ -309,14 +279,10 @@ export function QuotesIndexPage() {
               <FilterBtn toggleFilterSheetOpen={toggleFilterOpen} />
             }
             showPaginated={true}
-            paginationBtns={quotes?.payload.meta.links}
-            currPageNo={pageNo}
-            lastPageNo={quotes?.payload.meta.last_page}
-            startItemNo={quoteItemStartNo}
-            endItemNo={quoteItemEndNo}
+            paginationBtns={quotePaginationMeta?.links}
             setPageNo={setPageNo}
-            isFetching={isFetching}
-            paginationMeta={quoteListMeta}
+            isFetching={isQuoteListFetching}
+            paginationMeta={quotePaginationMeta}
           />
         </div>
 
@@ -425,9 +391,9 @@ export function QuotesIndexPage() {
             columns={presetQuotesColumns}
             data={presetQuotes}
             showPaginated
-            paginationMeta={presetQuoteListResponse?.payload.meta}
-            paginationBtns={presetQuoteListResponse?.payload.meta.links}
-            setPageNo={setPageNo}
+            paginationMeta={presetQuotePaginationMeta}
+            paginationBtns={presetQuotePaginationMeta?.links}
+            setPageNo={setPresetPageNo}
             isFetching={isPresetQuoteFetching}
           />
         </div>

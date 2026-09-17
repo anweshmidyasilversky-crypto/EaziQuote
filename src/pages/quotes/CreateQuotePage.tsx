@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import type { CustomBtnProps } from "../../components/common/CustomBtn";
@@ -10,11 +10,14 @@ import {
 import QuoteSummaryForm from "../../components/quotes/QuoteSummaryForm";
 import ItemSelectForm from "../../components/quotes/ItemSelectForm";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { useAppSelector } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import SectionSelectForm from "@/components/quotes/SectionSelectForm";
 import { useQuery } from "@tanstack/react-query";
 import { getQuoteDetails } from "@/api/services/quotes.api";
 import { showErrorToast } from "@/api/axiosInstance";
+import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
+import { removeQuote, updateQuote } from "@/redux/slices/quotes.slice";
+import type { QuoteDetails } from "@/types/api.responses.type";
 
 enum toggleId {
   Summary = "summary",
@@ -27,24 +30,15 @@ export function CreateQuotePage() {
   const [formCurrSection, changeFormCurrSection] = useState<string>(
     toggleId.Summary,
   );
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ id: string | undefined }>();
+  let currQuote: QuoteDetails | undefined = useAppSelector(
+    (state) => state.quote,
+  );
 
-  const { data: quoteDetailsResponse, error: quoteFetchError } = useQuery({
-    queryKey: ["createQuote", "client", params.id],
-    queryFn: () => getQuoteDetails(params.id as string),
-  });
-
-  // Only if we are sending request with valid id and request fails then show error toast
-  // To avoid showing not found error while creating new quote
-  if (params.id && quoteFetchError) {
-    showErrorToast(quoteFetchError);
-  }
-  const quote = quoteDetailsResponse?.payload;
-  const currQuote = useAppSelector((state) => state.quote);
   const dummyRefNo = `QT-${new Date().getFullYear()}-1`;
   const refNo =
-    currQuote.reference_number.trim().length > 0
-      ? currQuote.reference_number
+    (currQuote?.reference_number ?? "").trim().length > 0
+      ? (currQuote?.reference_number as string)
       : dummyRefNo;
 
   const btnConfigList: CustomBtnProps[] = [
@@ -72,7 +66,7 @@ export function CreateQuotePage() {
     {
       btnId: toggleId.Sections,
       btnLabel: "Sections",
-      disabled: currQuote.items.length <= 0,
+      disabled: (currQuote?.items.length ?? 0) <= 0,
     },
   ];
 
@@ -83,7 +77,7 @@ export function CreateQuotePage() {
       <div className="p-5 flex flex-col gap-6">
         <CustomHeader header="New Quote" btnConfigList={btnConfigList} />
 
-        <div className="flex gap-6">
+        <div className="flex gap-6 overflow-x-auto rounded-[7px]">
           <div className="bg-white rounded-[7px] grow">
             <div className="flex flex-col gap-5 py-5">
               <CustomToggleGroup
@@ -95,6 +89,7 @@ export function CreateQuotePage() {
               {formCurrSection === toggleId.Summary && (
                 <QuoteSummaryForm
                   refNo={refNo}
+                  currQuote={currQuote}
                   submitAction={() => changeFormCurrSection(toggleId.Items)}
                 />
               )}

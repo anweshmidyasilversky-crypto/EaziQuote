@@ -96,12 +96,12 @@ export function DashboardLayout() {
       </div>
 
       <div className="flex flex-col w-full h-ull overflow-y-auto">
-        <div className="w-full border-b-sidebar-border border-b-[0.5px] h-17.5 flex items-center px-6">
+        <div className="w-full border-b-sidebar-border border-b-[0.5px] min-h-17.5 flex items-center px-6">
           {/* Header content spaced between */}
-          <div className="w-full flex justify-between items-center">
+          <div className="w-full flex justify-between gap-2 items-center">
             {/* Subscription end detail */}
             <div className="w-80.25 min-h-8 flex gap-3 items-center">
-              <span className="max-h-4.75 w-auto max-w-53 font-sans text-xs md:text-sm text-placeholder-text">
+              <span className="max-h-4.75 w-auto max-w-53 font-sans text-xs md:text-sm text-placeholder-text flex items-center min-w-20 py-2">
                 {user.is_trial_period &&
                   `Free trial ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
                 {!user.is_trial_period &&
@@ -109,7 +109,7 @@ export function DashboardLayout() {
               </span>
 
               <button
-                className="btn-auth flex items-center justify-center h-full min-h-8 md:min-w-24.25 md:max-w-24.25 py-2 px-3 gap-2 rounded-0.5 bg-sidebar-btn"
+                className="btn-auth flex items-center justify-center h-full min-h-8 w-fit md:min-w-24.25 md:max-w-24.25 py-2 px-3 gap-2 rounded-0.5 bg-sidebar-btn"
                 onClick={() => navigate(`/subscribe-plan`)}
               >
                 <span className="font-sans text-sm">Subscribe</span>

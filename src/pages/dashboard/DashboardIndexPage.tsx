@@ -179,21 +179,21 @@ export function DashboardIndexPage() {
       {/* Main container */}
       <div className="px-6 pt-6 flex pb-5 flex-col gap-6">
         {/* Heading */}
-        <div className="flex w-full h-13.5 justify-between">
+        <div className="flex w-full min-h-13.5 justify-between">
           {/* Date and greeting */}
           <div className="flex flex-col gap-2">
             <span className="text-placeholder-text">
               {" "}
               {formatOrdinalDate(new Date())}{" "}
             </span>
-            <span className="font-sans font-bold text-2xl">
+            <span className="font-sans font-bold text-2xl text-nowrap">
               {" "}
               Welcome back, Matt! 👋{" "}
             </span>
           </div>
 
           {/* Button Group */}
-          <div className="flex justify-between min-w-fit w-full max-w-99.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 [&_button]:w-full">
             <CustomBtn
               buttonLabel="New Quote"
               leftIcon={assets.plusIcon}
@@ -210,9 +210,9 @@ export function DashboardIndexPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-x-6">
+        <div className="flex gap-2">
           {/* KPI cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 ">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grow">
             {kpiCardConfig.map((kpiConfig) => {
               return (
                 <KpiCard

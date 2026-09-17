@@ -30,16 +30,21 @@ import {
   deleteAttachemnt,
   updateQuote,
 } from "@/api/services/quotes.api";
+import type { QuoteDetails } from "@/types/api.responses.type";
+import { useNavigate } from "react-router";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
   submitAction?: () => void;
+  currQuote?: QuoteDetails;
 };
 
 function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
+  const currQuote = useAppSelector((state) => state.quote);
+  console.log(currQuote);
+  const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const currQuote = useAppSelector((state) => state.quote);
   const [clientSearchTerm, setClientSearchTerm] = useState(
     currQuote?.client.name ?? "",
   );
@@ -106,6 +111,7 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
     handleSubmit,
     formState: { errors },
     clearErrors,
+    reset,
   } = useForm<QuoteSummary>({
     defaultValues: initialValue,
     resolver: yupResolver(quoteSummarySchema),
@@ -141,6 +147,8 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
         );
       });
       setValue("attachments", attachmentList);
+    } else {
+      reset(initialValue);
     }
   }, [currQuote]);
 
@@ -227,6 +235,9 @@ function QuoteSummaryForm({ refNo, submitAction }: QuoteSummaryFormProps) {
           notes: data.notes ?? "",
         });
         dispatch(updateQuoteRedux(quote.payload));
+        // navigate(`/quotes/manage-quotes/${quote.payload.id}`, {
+        //   replace: true,
+        // });
         toast.success(quote.message);
       }
       submitAction?.();

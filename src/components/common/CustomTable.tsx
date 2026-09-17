@@ -425,7 +425,13 @@ function CustomTable<TData extends RowData>({
                       }
                     }}
                     btncls={cn(
-                      `table-pagination-btn-common translate-y-0 ${paginationBtn.active ? `` : `table-pagination-btn-inactive hover:bg-transparent hover:text-black-text`}`,
+                      `table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text
+                      ${paginationBtn.active ? `bg-brand-dark! text-white! max-w-8.5!` : ``}
+                       ${
+                         ["Previous", "Next"].includes(label)
+                           ? `table-pagination-btn-common!`
+                           : ``
+                       } `,
                     )}
                   />
                 );

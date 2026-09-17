@@ -178,7 +178,7 @@
 }
 
 @utility table-pagination-btn-common {
-  @apply btn-auth rounded font-normal text-[14px] max-w-8.5 max-h-8;
+  @apply bg-transparent hover:bg-transparent text-black-text hover:text-black-text rounded font-normal text-[14px] max-w-8.5 max-h-8;
 }
 
 @utility table-pagination-btn-inactive {
