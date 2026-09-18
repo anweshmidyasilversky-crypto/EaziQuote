@@ -48,6 +48,9 @@ function QuoteSummaryForm({
     isFetching: isClientFetching,
     searchTerm: clientSearchTerm,
     setSearchTerm: setClientSearchTerm,
+    fetchNextPage: fetchNextClients,
+    isFetchingNextPage: isFetchingNextClients,
+    clientListMeta,
   } = useClients({ initialSearchVal: currQuote?.client.name });
 
   const initialValue: QuoteSummary = {
@@ -144,6 +147,9 @@ function QuoteSummaryForm({
       {
         onSuccess: (response) => {
           toast.success(response.message);
+          setValue("clientId", response.payload.id.toString());
+          setClientSearchTerm(response.payload.name);
+          toggleClientFormOpen(false);
         },
         onError: (error) => {
           showErrorToast(error);
@@ -316,6 +322,9 @@ function QuoteSummaryForm({
                 inptFieldValue={clientSearchTerm}
                 inptFieldChange={(val) => setClientSearchTerm(val)}
                 isFetching={isClientFetching}
+                paginationMeta={clientListMeta}
+                fetchNextPage={fetchNextClients}
+                isFetchingNextPage={isFetchingNextClients}
               />
               {errors.clientId && (
                 <span className="error-text"> {errors.clientId.message} </span>

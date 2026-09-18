@@ -81,6 +81,7 @@ function CustomTable<TData extends RowData>({
   rowIdSelector,
   withSelectionToggle = false,
 }: DataTableProps<TData>) {
+  console.log(renderData);
   const currPageNo = paginationMeta?.current_page;
   console.log(
     `currPage: ${currPageNo}, nextPage: ${Number(currPageNo ?? 0) + 1}`,
@@ -100,9 +101,6 @@ function CustomTable<TData extends RowData>({
       columnFilteringFeature,
       filteredRowModel: createFilteredRowModel(),
 
-      rowPaginationFeature,
-      paginatedRowModel: createPaginatedRowModel(),
-
       rowSelectionFeature,
 
       ...customFeatures,
@@ -110,7 +108,6 @@ function CustomTable<TData extends RowData>({
 
     columns,
     data,
-    autoResetPageIndex: showPaginated ? false : undefined,
 
     initialState: {
       columnVisibility: hiddenCols,
@@ -388,7 +385,7 @@ function CustomTable<TData extends RowData>({
         )} */}
 
         {showPaginated && (
-          <div className="flex justify-between items-center gap-2 px-6 pt-6">
+          <div className="flex justify-between items-center gap-2 px-6 py-5 pt-6">
             <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
               {" "}
               Showing <b> {paginationMeta?.from ?? 0} </b> to{" "}

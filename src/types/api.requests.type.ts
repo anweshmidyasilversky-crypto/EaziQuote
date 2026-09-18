@@ -95,7 +95,7 @@ export interface UpdateQuoteApiPayload extends Partial<
   attachments?: File[];
   description?: string;
   client_id?: number;
-  items: UpdateQuoteItems[];
+  items?: UpdateQuoteItems[];
 }
 
 export interface ItemCreateApiPayload {

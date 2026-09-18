@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Input as InputPrimitive } from "@base-ui/react";
 import { Spinner } from "../ui/spinner";
+import type { ApiResponseMeta } from "../../types/api.responses.type";
 
 interface CustomComboboxProps<T, V = T> {
   items: T[];
@@ -30,6 +31,10 @@ interface CustomComboboxProps<T, V = T> {
     query: string,
     itemToString?: (itemValue: T) => string,
   ) => boolean;
+
+  paginationMeta?: ApiResponseMeta;
+  fetchNextPage?: () => void;
+  isFetchingNextPage?: boolean;
 }
 
 export function CustomCombobox<T, V = T>({
@@ -48,6 +53,9 @@ export function CustomCombobox<T, V = T>({
   isFetching,
   contentBoxCls,
   filterFn,
+  paginationMeta,
+  fetchNextPage,
+  isFetchingNextPage,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(
     selected ? getItemLabel(selected) : null,
@@ -76,6 +84,21 @@ export function CustomCombobox<T, V = T>({
     return () => observer.disconnect();
   }, []);
 
+  // For infiniteScroll
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const nearPageEnd =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 40;
+    if (paginationMeta) {
+      if (
+        nearPageEnd &&
+        paginationMeta.current_page < paginationMeta.last_page
+      ) {
+        fetchNextPage?.();
+      }
+    }
+  };
+
   const handleValueChange = (item: T | null) => {
     onValueChange?.(item === null ? null : getItemValue(item));
     setValue(getItemLabel(item as T));
@@ -97,7 +120,7 @@ export function CustomCombobox<T, V = T>({
           <ComboboxInput
             placeholder={placeholder}
             className={`
-            input-field h-full max-h-11 w-full!
+            input-field! pl-0! h-full max-h-11 w-full!
         rounded-lg border border-gray-300
         px-3.5 text-[15px] text-gray-900 placeholder:text-gray-400
         outline-none transition-colors
@@ -136,7 +159,10 @@ export function CustomCombobox<T, V = T>({
           )}
         </ComboboxEmpty>
 
-        <ComboboxList className="max-h-64 overflow-y-auto py-1">
+        <ComboboxList
+          className="max-h-64 overflow-y-auto py-1"
+          onScroll={handleScroll}
+        >
           {(item) => (
             <ComboboxItem
               key={String(getItemLabel(item))}
@@ -154,6 +180,11 @@ export function CustomCombobox<T, V = T>({
             </ComboboxItem>
           )}
         </ComboboxList>
+        <div className="flex items-center justify-center">
+          {isFetchingNextPage && (
+            <Spinner className="text-brand-dark h-1/25 w-1/25 py-2" />
+          )}
+        </div>
       </ComboboxContent>
     </Combobox>
   );

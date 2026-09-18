@@ -216,7 +216,7 @@ export function ClientIndexPage() {
           }
         />
 
-        <div className="flex flex-col bg-table rounded-[10px] dashboard-card-theme gap-4.5 py-4.5">
+        <div className="flex flex-col bg-table rounded-[10px] dashboard-card-theme gap-4.5 py-5">
           <CustomDataTable
             columns={columns}
             data={clientList}

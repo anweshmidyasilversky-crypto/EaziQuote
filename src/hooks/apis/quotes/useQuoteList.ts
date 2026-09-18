@@ -23,7 +23,9 @@ function useQuoteList({ filters }: useQuoteListProps) {
       getQuoteList({
         ...filters,
         search:
-          debouncedSearchTerm.trim.length > 0 ? debouncedSearchTerm : undefined,
+          debouncedSearchTerm.trim().length > 0
+            ? debouncedSearchTerm
+            : undefined,
         page: pageNo,
       }),
   });

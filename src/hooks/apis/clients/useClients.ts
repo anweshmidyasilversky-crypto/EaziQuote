@@ -1,8 +1,13 @@
 import { getClientList } from "@/api/services/clients.api";
+
 import type { PageFilters } from "@/types/api.requests.type";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+
+import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
+
+import { useEffect, useMemo, useState } from "react";
+
 import { useDebounce } from "../../useDebounce";
+
 import { showErrorToast } from "@/api/axiosInstance";
 
 export type useClientsProps = {
@@ -11,42 +16,88 @@ export type useClientsProps = {
   enabled?: boolean;
 };
 
-function useClients({
-  filters,
-  initialSearchVal,
-  enabled = true,
-}: useClientsProps) {
-  const [searchTerm, setSearchTerm] = useState(initialSearchVal ?? "");
-  const debouncedSearchTerm = useDebounce({ value: searchTerm });
+function useClients({ filters, enabled = true }: useClientsProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const debouncedSearchTerm = useDebounce({
+    value: searchTerm,
+  });
+
   const [pageNo, setPageNo] = useState(1);
 
-  const { data, isFetching, error, refetch } = useQuery({
+  const {
+    data,
+    isFetching,
+    isFetchingNextPage,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
     queryKey: ["clients", filters, debouncedSearchTerm, pageNo],
-    queryFn: () =>
+
+    initialPageParam: pageNo,
+
+    queryFn: ({ pageParam }) =>
       getClientList({
+        ...filters,
         search:
           debouncedSearchTerm.length > 0 ? debouncedSearchTerm : undefined,
-        ...filters,
-        page: pageNo,
+        page: pageParam,
       }),
+
+    getNextPageParam: (lastPage) => {
+      const meta = lastPage.payload.meta;
+
+      // Adjust these fields according to your actual API response.
+      if (meta.current_page < meta.last_page) {
+        return meta.current_page + 1;
+      }
+
+      return undefined;
+    },
+
     enabled,
   });
 
   useMemo(() => setPageNo(1), [debouncedSearchTerm, filters]);
 
-  if (error) {
-    showErrorToast(error);
-  }
+  // Flatten all fetched pages into one client list.
+  const clientList = useMemo(
+    () => data?.pages.flatMap((page) => page.payload.data) ?? [],
+    [data],
+  );
+
+  // Meta of the latest fetched page.
+  const clientListMeta = data
+    ? data.pages[data.pages.length - 1].payload.meta
+    : undefined;
+
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   return {
-    clientList: data?.payload.data ?? [],
-    clientListMeta: data ? data.payload.meta : undefined,
+    clientList,
+    clientListMeta,
+
     isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+
+    fetchNextPage,
     refetch,
+
     searchTerm,
     setSearchTerm,
+
     setPageNo,
-    pageNo,
+
+    // Keep pageNo if your existing components use it.
+    // For infinite scroll, fetchNextPage is preferred.
+    pageNo: data?.pages.length ?? 1,
   };
 }
 
