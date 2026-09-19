@@ -6,90 +6,81 @@ import { cn, formatCurrency } from "../../lib/utils";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { CustomBtn } from "../common/CustomBtn";
 import { assets } from "../../assets/icons";
-import { useDebounce } from "../../hooks/useDebounce";
 import SearchInputGruop from "../common/SearchInputGruop";
 import { CustomSheet } from "../common/CustomSheet";
 import { CustomCombobox } from "../common/CustomCombobox";
-import {
-  RenderMultiSelectCheckbox,
-  type CheckboxConfig,
-} from "../common/RenderMultiSelectCheckbox";
+import { RenderMultiSelectCheckbox } from "../common/RenderMultiSelectCheckbox";
 import ItemForm from "../items/ItemForm";
 import type { ItemCreationPayload } from "../../types/itemCreation.payload.type";
 import type { ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { toast } from "react-toastify";
 import {
   PaymentMethods,
+  type Category,
   type ItemDetails,
-  type ListResponse,
-  type QuoteDetails,
 } from "@/types/api.responses.type";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createItem, getItemList, updateItem } from "@/api/services/items.api";
 import { showErrorToast } from "@/api/axiosInstance";
-import {
-  getSubCatList,
-  subCategoryByCategory,
-} from "@/api/services/subCategories.api";
 import { SubtotalBreakDown } from "./SubtotalBreakDown";
 import {
   DepositeTypes,
-  type UpdateQuoteApiPayload,
+  type PageFilters,
   type UpdateQuoteItems,
 } from "@/types/api.requests.type";
+import useItemsList from "@/hooks/apis/items/useItemsList";
+import useItemsMutations from "@/hooks/apis/items/useItemsMutations";
+import useCategoriesList from "@/hooks/apis/categories/useCategoriesList";
+import useSubcategoryByCategory from "@/hooks/apis/subcategories/useSubcategoryByCategory";
+import { Spinner } from "../ui/spinner";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 
 export type ItemSelectFormProps = {
   submitAction: () => void;
 };
 
 function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
-  const dispatch = useAppDispatch();
   const currQuote = useAppSelector((state) => state.quote);
-  const [pageNo, setPageNo] = useState(1);
-
-  const { quote_categories: categories, vat_settings } = useAppSelector(
-    (state) => state.appConfig,
-  );
-
-  const [categorySearch, setCategorySearch] = useState("");
+  const user = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+  const {
+    searchTerm: categorySearch,
+    setSearchTerm: setCategorySearch,
+    categoryList: categories,
+    isFetching: isCategoryListFetching,
+    isFetchingNextPage: isFetchingNextCategories,
+    fetchNextPage: fetchNextCategories,
+    paginationMeta: categoryPaginationMeta,
+  } = useCategoriesList({});
+  const { vat_settings } = useAppSelector((state) => state.appConfig);
   const [filterCategory, setFilterCategory] = useState("");
   const [filterOpen, toggleFilterOpen] = useState(false);
   const [filters, setFilters] = useState<string[]>([]);
   const targetSubCategory = useRef<string[] | undefined>(undefined);
 
-  const { data: subCatListResponse, isError: subCatFetchError } = useQuery({
-    queryKey: ["itemSelection", "subCategory", filterCategory],
-    queryFn: () => subCategoryByCategory(filterCategory),
-  });
-
-  if (subCatFetchError) {
-    showErrorToast(subCatFetchError);
-  }
-  const subCategories = subCatListResponse?.payload ?? [];
+  const { subCategories, isFetching: isFetchingSubCategories } =
+    useSubcategoryByCategory({
+      catId: filterCategory,
+      enabled: filterCategory !== "",
+    });
 
   const [createItemModal, toggleCreateItemModal] = useState(false);
   const [editItemModal, toggleEditItemModal] = useState(false);
 
   const [itemQty, setItemQty] = useState<Record<string, UpdateQuoteItems>>({});
-  // console.log(itemQty);
+  console.log(itemQty);
+  console.log(currQuote);
   useEffect(() => {
     currQuote?.items.forEach((item) => {
-      if (item.is_added) {
-        setItemQty((curr) => ({
-          ...curr,
-          [item.id]: item,
-        }));
-      }
+      setItemQty((curr) => ({
+        ...curr,
+        [item.id]: item,
+      }));
     });
   }, [currQuote]);
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
   const editingItem = useRef<ItemDetails | undefined>(undefined);
-  const [isMutated, toggleIsMutated] = useState<number>(0);
 
-  const vatSettingsId = useRef<number>(currQuote.vat_setting_id);
-  const discount = useRef<number | null>(currQuote.discount);
+  const vatSettingsId = useRef<number | undefined>(currQuote.vat_setting_id);
+  const discount = useRef<number | null>(Number(currQuote.discount.amount));
   const depositePaymentMethod = useRef<PaymentMethods>(PaymentMethods.cash);
   const depositePercentageRef = useRef<number | null>(
     currQuote.deposit_percentage,
@@ -97,51 +88,32 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
   const depositeAmount = useRef<number | null>(currQuote.deposit_amount);
   const depositeTypeRef = useRef<DepositeTypes>(currQuote.deposit_type);
 
-  const {
-    data: itemsListResponse,
-    isFetching: isItemsFetching,
-    error: itemsFetchingError,
-  } = useQuery({
-    queryKey: [
-      "itemSelect",
-      "items",
-      currQuote?.id,
-      debouncedSearchTerm,
-      targetSubCategory.current,
-      isMutated,
-    ],
-    queryFn: () =>
-      getItemList({
+  const itemsFilter = useMemo(
+    () =>
+      ({
         quote_id: currQuote?.id,
-        page: pageNo,
-        search: debouncedSearchTerm,
         subcategory_ids: targetSubCategory.current,
-      }),
-  });
-  const itemListMeta = itemsListResponse?.payload.meta;
-  // console.log(itemsListResponse?.payload.data);
-
-  if (itemsFetchingError) {
-    showErrorToast(itemsFetchingError);
-  }
-
-  const { mutateAsync: updateItemAsync } = useMutation({
-    mutationFn: (data: ItemEditPayload & { id: number }) =>
-      updateItem({
-        id: data.id,
-        name: data.name,
-        category_id: data.catId ? Number(data.catId) : undefined,
-        subcategory_id: data.subCatId ? Number(data.subCatId) : undefined,
-        cost: data.unitPrice,
-        price: data.pricePerUnit,
-        unit: data.unit,
-        type: "product",
-      }),
+      }) as PageFilters,
+    [currQuote, targetSubCategory.current],
+  );
+  const {
+    itemsList,
+    isFetching: isItemsFetching,
+    searchTerm,
+    setSearchTerm,
+    setPageNo,
+    paginationMeta: itemListMeta,
+    refetch: refetchItemsList,
+  } = useItemsList({
+    filters: itemsFilter,
   });
 
-  const { mutateAsync: createItemAsync } = useMutation({
-    mutationFn: (data: ItemCreationPayload) =>
-      createItem({
+  const { createItemMutation, updateItemMutation, deleteItemMutation } =
+    useItemsMutations();
+
+  const itemAddHandler = (data: ItemCreationPayload) => {
+    createItemMutation.mutate(
+      {
         name: data.name,
         category_id: Number(data.catId),
         subcategory_id: Number(data.subCatId),
@@ -149,29 +121,60 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
         price: data.pricePerUnit,
         cost: data.unitPrice,
         type: "product",
-      }),
-  });
-
-  const itemAddHandler = async (item: ItemCreationPayload) => {
-    try {
-      const newItem = await createItemAsync(item);
-      toast.success(newItem.message);
-      toggleIsMutated((curr) => curr ^ 1);
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          refetchItemsList();
+          setPageNo(1);
+          toggleCreateItemModal(false);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
-  const itemEditHandler = async (patch: ItemEditPayload) => {
-    try {
-      const updatedItem = await updateItemAsync(
-        Object.assign(patch, { id: editingItem.current?.id ?? 0 }),
-      );
-      toast.success(updatedItem.message);
-      toggleIsMutated((curr) => curr ^ 1);
-    } catch (error) {
-      throw error;
-    }
+  const itemEditHandler = (data: ItemEditPayload) => {
+    updateItemMutation.mutate(
+      {
+        id: Number(editingItem.current?.id ?? "0"),
+        name: data.name,
+        category_id: data.catId ? Number(data.catId) : undefined,
+        subcategory_id: data.subCatId ? Number(data.subCatId) : undefined,
+        cost: data.unitPrice,
+        price: data.pricePerUnit,
+        unit: data.unit,
+        type: "product",
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          refetchItemsList();
+          toggleEditItemModal(false);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
+  };
+
+  const itemDeleteHandler = (itemId: string | number) => {
+    deleteItemMutation.mutate(itemId, {
+      onSuccess: (response) => {
+        if (Object.hasOwn(itemQty, itemId)) {
+          const { [itemId]: _, ...rest } = itemQty;
+          setItemQty(rest);
+        }
+        toast.success(response.message);
+        refetchItemsList();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   const itemSelectColumns = [
@@ -220,7 +223,6 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
             leftAction={() => {
               if (Object.hasOwn(itemQty, itemId)) {
                 if (itemQty[itemId].quantity === 1) {
-                  console.log(`removing`);
                   setItemQty((curr) => {
                     const { [itemId]: _, ...rest } = curr;
                     return rest;
@@ -285,6 +287,10 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
                 editingItem.current = item;
                 toggleEditItemModal((curr) => !curr);
               }}
+              deleteFn={() => {
+                itemDeleteHandler(item.id);
+              }}
+              isDeletePending={deleteItemMutation.isPending}
             />
           </div>
         );
@@ -292,11 +298,45 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
     },
   ] as ColumnDef<TableFeatures, ItemDetails>[];
 
+  const { quoteUpdateMutation } = useQuotesMutations();
+
+  const handleSave = () => {
+    const itemPatches = Object.values(itemQty);
+    if (itemPatches.length <= 0) {
+      toast.error(`Select at least one item to continue`);
+      return;
+    }
+    const amount = Number(depositeAmount.current);
+    quoteUpdateMutation.mutate(
+      {
+        _method: "put",
+        quote_id: currQuote.id,
+        items: itemPatches,
+        vat_setting_id: vatSettingsId.current,
+        deposit_required: !Number.isNaN(amount),
+        deposit_type: depositeTypeRef.current,
+        deposit_amount: Number.isNaN(amount) ? undefined : amount,
+        deposit_payment_method: depositePaymentMethod.current,
+        discount: discount.current,
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          dispatch(updateQuoteRedux(response.payload));
+          submitAction();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
+  };
+
   return (
     <>
       <CustomDataTable
         columns={itemSelectColumns}
-        data={itemsListResponse?.payload.data ?? []}
+        data={itemsList}
         showPaginated
         paginationMeta={itemListMeta}
         setPageNo={setPageNo}
@@ -331,24 +371,29 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
       <div className="dashed-y-separators" />
 
       <div className="flex w-full px-5 justify-between">
-        <CustomBtn buttonLabel="Save Items" onClick={() => {}} />
+        <CustomBtn
+          buttonLabel="Save Items"
+          onClick={handleSave}
+          isSubmitting={quoteUpdateMutation.isPending}
+        />
         <div className="max-w-75">
           <SubtotalBreakDown
             items={Object.values(itemQty)}
-            paymentMethod={PaymentMethods.stripe}
+            paymentMethod={
+              user.stripe_connected
+                ? PaymentMethods.stripe
+                : PaymentMethods.cash
+            }
             vatSettings={vat_settings}
             discountPercentage={discount.current ?? 0}
-            taxPercentage={Number(
-              vat_settings.find(
-                (vatSetting) => vatSetting.id === vatSettingsId.current,
-              )?.value ?? 0,
-            )}
+            taxPercentage={currQuote.vat}
             reqDeposite={currQuote?.deposit_amount ?? undefined}
             taxIdRef={vatSettingsId}
             discountRef={discount}
             depositePaymentMethodRef={depositePaymentMethod}
             depositeAmountRef={depositeAmount}
             depositeTypeRef={depositeTypeRef}
+            depositePercentageRef={depositePercentageRef}
           />
         </div>
       </div>
@@ -375,9 +420,13 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
                   if (category) {
                     setCategorySearch(category.name);
                     setFilterCategory(category.id.toString());
+                  } else {
+                    setFilterCategory("");
                   }
                 }}
-                getItemLabel={(category) => category.name}
+                getItemLabel={(category: Category | null) =>
+                  category?.name ?? ""
+                }
                 placeholder="Select category"
                 inptFieldValue={categorySearch}
                 inptFieldChange={setCategorySearch}
@@ -386,20 +435,46 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
                     .toLocaleLowerCase()
                     .includes(query.toLocaleLowerCase())
                 }
+                isFetching={isCategoryListFetching}
+                isFetchingNextPage={isFetchingNextCategories}
+                fetchNextPage={fetchNextCategories}
+                getItemId={(category) => category.id}
+                paginationMeta={categoryPaginationMeta}
               />
             </div>
             {/* subcategory selection */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col w-full">
               <span> Subcategory </span>
-              <RenderMultiSelectCheckbox
-                checkboxconfig={subCategories.map((subCategory) => ({
-                  id: subCategory.id.toString(),
-                  label: subCategory.name,
-                  value: subCategory.id.toString(),
-                }))}
-                selectedFilters={filters}
-                toggleSelectedFilters={setFilters}
-              />
+              {subCategories &&
+                !isFetchingSubCategories &&
+                subCategories.length > 0 && (
+                  <RenderMultiSelectCheckbox
+                    checkboxconfig={subCategories.map((subCategory) => ({
+                      id: subCategory.id.toString(),
+                      label: subCategory.name,
+                      value: subCategory.id.toString(),
+                    }))}
+                    selectedFilters={filters}
+                    toggleSelectedFilters={setFilters}
+                  />
+                )}
+              {isFetchingSubCategories && (
+                <Spinner className="mt-4 text-brand-dark h-1/20 w-1/20 self-center" />
+              )}
+              {filterCategory !== "" &&
+                !isFetchingSubCategories &&
+                subCategories.length === 0 && (
+                  <span className="text-placeholder-text">
+                    {" "}
+                    No Results Found{" "}
+                  </span>
+                )}
+              {filterCategory === "" && !isFetchingSubCategories && (
+                <span className="text-placeholder-text">
+                  {" "}
+                  Please select a category{" "}
+                </span>
+              )}
             </div>
           </div>
         </div>

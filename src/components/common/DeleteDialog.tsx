@@ -22,6 +22,7 @@ function DeleteDialog({
     toggleIsDeleting(true);
     try {
       await deleteAction?.();
+      toggleOpen(false);
     } catch (err) {
       throw err;
     } finally {

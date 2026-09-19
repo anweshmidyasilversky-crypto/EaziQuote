@@ -7,16 +7,16 @@ export type AddTaxProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   vatSettings: Vat[];
-  setTaxId: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setTaxId: (num: Vat | undefined) => void;
 };
 
 function AddTax({ isOpen, toggleIsOpen, vatSettings, setTaxId }: AddTaxProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const selectedTaxRate = useRef<number | undefined>(undefined);
+  const selectedTaxRate = useRef<Vat | undefined>(undefined);
 
-  const handleTax = (taxRate: number | undefined) => {
-    if (taxRate) {
-      setTaxId(taxRate);
+  const handleTax = (vat: Vat | undefined) => {
+    if (vat) {
+      setTaxId(vat);
     }
   };
 
@@ -50,7 +50,7 @@ function AddTax({ isOpen, toggleIsOpen, vatSettings, setTaxId }: AddTaxProps) {
           placeholder="Select a taxrate option"
           onValueChange={(vat) => {
             if (vat) {
-              selectedTaxRate.current = vat.id;
+              selectedTaxRate.current = vat;
               setSearchTerm(vat.name);
             }
           }}

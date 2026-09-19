@@ -365,7 +365,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
     color: null | string;
   };
   deposit_required: boolean;
-  deposit_type: DepositeTypes;
+  deposit_type: DepositeTypes | null;
   deposit_amount: null | number;
   deposit_percentage: null | number;
   categorised: DocumentCategories;
@@ -376,7 +376,12 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   vat_setting_id: number;
   vat: number;
   is_company_phone_number_show: boolean;
-  discount: null | number;
+  discount: {
+    id: number;
+    order_id: number;
+    type: string;
+    amount: string;
+  };
   financial_summary: {
     total_cost: number;
     sub_total: number;

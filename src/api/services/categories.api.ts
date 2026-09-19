@@ -33,7 +33,10 @@ export const createCategory = async (name: string) => {
   }
 };
 
-export const updateCategory = async (payload: { id: number; name: string }) => {
+export const updateCategory = async (payload: {
+  id: number | string;
+  name: string;
+}) => {
   try {
     const updatedCategory = await axiosInstance.post<ApiResponse<Category>>(
       API_ENDPOINTS.categories.updateCategory,

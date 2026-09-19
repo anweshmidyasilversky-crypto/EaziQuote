@@ -226,6 +226,8 @@ export function ObjToFormData<T extends Object>(data: T) {
       data[key].forEach((val) => {
         formData.append(`${String(key)}[]`, val);
       });
+    } else if (objKey === "deposit_required") {
+      formData.append("deposit_required", data[key] ? "1" : "0");
     } else {
       if (["phone", "phone_number"].includes(objKey)) {
         formData.append(key as string, data[key] ? `+44${data[key]}` : "");

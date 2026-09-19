@@ -16,6 +16,7 @@ export type CustomActionGroupProps = {
   paymentPending?: boolean;
   shareAction?: () => void;
   downloadOnly?: boolean;
+  isDeletePending?: boolean;
 };
 
 export type ActionBtnList = Array<{
@@ -37,6 +38,7 @@ export function CustomActionGroup({
   withDelete = true,
   withShare = false,
   withEdit = true,
+  isDeletePending = false,
 }: CustomActionGroupProps) {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const btnList: ActionBtnList = [

@@ -1,30 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { type SubcategoryPayload } from "../../types/subCategory.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { subCategorySchema } from "../../validation/itemCreation.payload.schema";
 import { CustomSheet } from "../common/CustomSheet";
-import { useAppSelector } from "../../redux/store";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/customInput";
 import { cn } from "../../lib/utils";
-import { useMutation } from "@tanstack/react-query";
-import { createSubCategory } from "@/api/services/subCategories.api";
 import type { SubCategoryCreateApiPayload } from "@/types/api.requests.type";
-import { toast } from "react-toastify";
-import { showErrorToast } from "@/api/axiosInstance";
+import useCategoriesList from "@/hooks/apis/categories/useCategoriesList";
 
 export type SubCategoryFormProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  createFn?: (payload: SubCategoryCreateApiPayload) => void;
+  isSubmitting?: boolean;
 };
 
-function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const { quote_categories: categories } = useAppSelector(
-    (state) => state.appConfig,
-  );
-  const [catSearchTerm, setCatSearchTerm] = useState("");
+function SubCategoryForm({
+  isOpen,
+  toggleIsOpen,
+  createFn,
+  isSubmitting,
+}: SubCategoryFormProps) {
+  const {
+    categoryList: categories,
+    searchTerm: catSearchTerm,
+    setSearchTerm: setCatSearchTerm,
+    isFetching: isCategoryListFetching,
+    fetchNextPage: fetchNextCategories,
+    isFetchingNextPage: isFetchingNextCategories,
+    paginationMeta: categoryPaginationMeta,
+  } = useCategoriesList({});
+
   const {
     control,
     formState: { errors },
@@ -40,26 +48,11 @@ function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
     resolver: yupResolver(subCategorySchema),
   });
 
-  const { mutateAsync: createSubCategoryAsync } = useMutation({
-    mutationFn: (payload: SubCategoryCreateApiPayload) =>
-      createSubCategory(payload),
-  });
-
-  const submitHandler = async (data: SubcategoryPayload) => {
-    toggleIsSubmitting(true);
-    try {
-      const newsubCategory = await createSubCategoryAsync({
-        category_id: data.catId,
-        name: data.subCategory,
-      });
-      toast.success(newsubCategory.message);
-      reset();
-      toggleIsOpen(false);
-    } catch (error) {
-      showErrorToast(error);
-    } finally {
-      toggleIsSubmitting(false);
-    }
+  const submitHandler = (data: SubcategoryPayload) => {
+    createFn?.({
+      category_id: data.catId,
+      name: data.subCategory,
+    });
   };
 
   return (
@@ -72,6 +65,10 @@ function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
       applyBtnCls={cn(`max-w-full!`)}
       header="Add Subcategory"
       isSubmitting={isSubmitting}
+      closeAction={() => {
+        clearErrors();
+        reset();
+      }}
     >
       <div className="p-5 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
@@ -91,8 +88,13 @@ function SubCategoryForm({ isOpen, toggleIsOpen }: SubCategoryFormProps) {
             filterFn={(category, query) =>
               category.name.toLocaleLowerCase().includes(query)
             }
+            getItemId={(category) => category.id}
             inptFieldValue={catSearchTerm}
             inptFieldChange={setCatSearchTerm}
+            isFetching={isCategoryListFetching}
+            paginationMeta={categoryPaginationMeta}
+            fetchNextPage={fetchNextCategories}
+            isFetchingNextPage={isFetchingNextCategories}
           />
           {errors.catId && (
             <span className="error-text"> {errors.catId.message} </span>

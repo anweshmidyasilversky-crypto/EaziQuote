@@ -38,7 +38,7 @@ export const updateQuote = async (payload: UpdateQuoteApiPayload) => {
     const { quote_id, ...patch } = payload;
     const updatedQuote = await axiosInstance.post<ApiResponse<QuoteDetails>>(
       API_ENDPOINTS.quotes.updateQuote(quote_id),
-      ObjToFormData(patch),
+      patch,
     );
     return updatedQuote.data;
   } catch (error) {

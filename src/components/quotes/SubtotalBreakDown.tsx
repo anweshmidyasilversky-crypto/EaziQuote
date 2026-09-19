@@ -15,6 +15,8 @@ import AddDiscount from "./AddDiscount";
 import { PaymentMethods, type Vat } from "@/types/api.responses.type";
 import AddTax from "./AddTax";
 import type { DepositeTypes } from "@/types/api.requests.type";
+import { useAppSelector } from "@/redux/store";
+import StripeAdvisoryDialog from "@/pages/settings/StripeAdvisoryDialog";
 
 export type SubtotalBreakDownProps = {
   paymentMethod: PaymentMethods;
@@ -30,7 +32,7 @@ export type SubtotalBreakDownProps = {
   reqDeposite?: number;
   vatSettings?: Vat[];
 
-  taxIdRef?: React.RefObject<number>;
+  taxIdRef?: React.RefObject<number | undefined>;
   discountRef?: React.RefObject<number | null>;
   depositePaymentMethodRef?: React.RefObject<PaymentMethods>;
   depositeAmountRef?: React.RefObject<number | null>;
@@ -47,7 +49,7 @@ type MarginSplit = {
 
 export function SubtotalBreakDown({
   taxPercentage,
-  discountPercentage: discount,
+  discountPercentage: initialDiscountPercentage,
   reqDeposite,
   items: renderItems,
   paymentMethod: paymentMode,
@@ -64,13 +66,25 @@ export function SubtotalBreakDown({
   const items = renderItems ?? [];
   const [tableOpen, toggleTableOpen] = useState(false);
   const [depositeDialog, toggleDepositeDialog] = useState(false);
+  // Source of truth is the prop the parent computes from the quote — this
+  // component doesn't reach into redux itself, so there's only ever one
+  // place that derives these values.
   const [deposite, setDeposite] = useState(reqDeposite);
   const [discountDialog, toggleDiscountDialog] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(paymentMode);
-  const [discountPercentage, setDiscountPercentage] = useState(discount);
+  const [discountPercentage, setDiscountPercentage] = useState(
+    initialDiscountPercentage,
+  );
   const [tax, setTax] = useState(taxPercentage);
+  const [stripConnectPopupOpen, toggleStripConnectPopup] = useState(false);
   const [taxModalOpen, toggleTaxModalOpen] = useState(false);
+  const user = useAppSelector((state) => state.user);
 
+  // One-time sync on mount: the parent creates these refs with their own
+  // defaults/derived values, which may not match this component's actual
+  // first-render state. After mount, each ref is kept in sync directly at
+  // the point where its own modal changes its value (see handlers below) —
+  // not through a shared effect keyed on multiple unrelated values.
   useEffect(() => {
     if (depositeAmountRef) {
       depositeAmountRef.current = deposite ?? null;
@@ -78,13 +92,10 @@ export function SubtotalBreakDown({
     if (depositePaymentMethodRef) {
       depositePaymentMethodRef.current = paymentMethod;
     }
-    if (taxIdRef && tax) {
-      taxIdRef.current = tax;
-    }
     if (discountRef) {
-      discountRef.current = discount ?? null;
+      discountRef.current = discountPercentage ?? null;
     }
-  }, [deposite, paymentMethod, tax, discount]);
+  }, []);
 
   const isEditPage = location.pathname.split("/").includes("manage-quotes");
 
@@ -97,10 +108,11 @@ export function SubtotalBreakDown({
     [items],
   );
   const marginPercentage = useMemo(() => {
-    const ret = Math.round(((subtotal - overallCost) / subtotal) * 10000) / 100;
-    console.log(ret);
-    return ret;
-  }, [items]);
+    if (subtotal === 0) {
+      return 0;
+    }
+    return Math.round(((subtotal - overallCost) / subtotal) * 10000) / 100;
+  }, [subtotal, overallCost]);
 
   const getSum = (
     info: HeaderContext<TableFeatures, MarginSplit>,
@@ -137,13 +149,18 @@ export function SubtotalBreakDown({
         {
           id: "margin",
           header: "MARGIN",
-          accessorFn: (row) => ((row.revenew - row.costs) / row.revenew) * 100,
+          accessorFn: (row) =>
+            row.revenew > 0
+              ? ((row.revenew - row.costs) / row.revenew) * 100
+              : 0,
           cell: (info) => {
             const row = info.row;
             const margin =
-              ((row.original.revenew - row.original.costs) /
-                row.original.revenew) *
-              100;
+              row.original.revenew > 0
+                ? ((row.original.revenew - row.original.costs) /
+                    row.original.revenew) *
+                  100
+                : 0;
             return (
               formatCurrency(row.original.revenew - row.original.costs) +
               ` (${Math.round(margin * 10) / 10}%)`
@@ -181,6 +198,74 @@ export function SubtotalBreakDown({
 
   let extraCharges = 0;
 
+  // --- Deposit: ref writes happen where the deposit modal actually
+  // changes the value, instead of via a shared effect. ---
+  const handleSetDeposite = (amount: number | undefined) => {
+    setDeposite(amount);
+    if (depositeAmountRef) {
+      depositeAmountRef.current = amount ?? null;
+    }
+  };
+
+  const handleSetPaymentMethod = (method: PaymentMethods) => {
+    setPaymentMethod(method);
+    if (depositePaymentMethodRef) {
+      depositePaymentMethodRef.current = method;
+    }
+  };
+
+  const handleRemoveDeposite = () => {
+    setDeposite(undefined);
+    if (depositeAmountRef) {
+      depositeAmountRef.current = null;
+    }
+    if (depositeTypeRef) {
+      depositeTypeRef.current = null;
+    }
+    if (depositePercentageRef) {
+      depositePercentageRef.current = null;
+    }
+  };
+
+  const handleDepositeType = (depositeType: DepositeTypes) => {
+    if (depositeTypeRef) {
+      depositeTypeRef.current = depositeType;
+    }
+  };
+
+  const handleDepositePercentage = (percentage: number | null) => {
+    if (depositePercentageRef) {
+      depositePercentageRef.current = percentage;
+    }
+  };
+
+  // --- Discount: same pattern. ---
+  const handleSetDiscount = (percentage: number | undefined) => {
+    setDiscountPercentage(percentage);
+    if (discountRef) {
+      discountRef.current = percentage ?? 0;
+    }
+  };
+
+  // --- Tax: same pattern. Ref only tracks an actively-selected tax id,
+  // consistent with how it's looked up upstream (find-by-id with a
+  // fallback), so removing the tax clears local state but intentionally
+  // leaves the last known id ref alone. ---
+  const handleSetTax = (vat: Vat | undefined) => {
+    if (vat) {
+      setTax(Number(vat.value));
+      if (taxIdRef) {
+        taxIdRef.current = vat.id;
+      }
+    } else {
+      if (taxIdRef) {
+        setTax(0);
+        taxIdRef.current = undefined;
+      }
+    }
+    console.log(`Deletion completed`);
+  };
+
   return (
     <>
       <div className="flex flex-col p-5 gap-4">
@@ -216,7 +301,7 @@ export function SubtotalBreakDown({
         <div className="flex justify-between items-center gap-4">
           <span className="subtotal-field"> {`Tax(${tax ?? 0}%)`} </span>
           <div className="flex gap-2 items-center">
-            {tax ? (
+            {tax !== undefined ? (
               <span className="subtotal-value">
                 {" "}
                 {formatCurrency(applyPercentage(subtotal, tax ?? 0))}{" "}
@@ -229,11 +314,11 @@ export function SubtotalBreakDown({
                 {`+ Select Tax Rate`}
               </a>
             )}
-            {isEditPage && tax && (
+            {isEditPage && tax !== undefined && (
               <CustomActionGroup
                 withOpen={false}
                 editFn={() => toggleTaxModalOpen((curr) => !curr)}
-                deleteFn={() => setTax(undefined)}
+                deleteFn={() => handleSetTax(undefined)}
               />
             )}
           </div>
@@ -247,7 +332,7 @@ export function SubtotalBreakDown({
           </span>
 
           <div className="flex gap-2 items-center">
-            {discountPercentage ? (
+            {discountPercentage !== undefined ? (
               <span className="subtotal-value">
                 {" "}
                 {formatCurrency(
@@ -264,11 +349,11 @@ export function SubtotalBreakDown({
               </a>
             )}
 
-            {isEditPage && discountPercentage && (
+            {isEditPage && discountPercentage !== undefined && (
               <CustomActionGroup
                 withOpen={false}
                 editFn={() => toggleDiscountDialog((curr) => !curr)}
-                deleteFn={() => setDiscountPercentage(undefined)}
+                deleteFn={() => handleSetDiscount(undefined)}
               />
             )}
           </div>
@@ -314,7 +399,7 @@ export function SubtotalBreakDown({
                 <CustomActionGroup
                   withOpen={false}
                   editFn={() => toggleDepositeDialog((curr) => !curr)}
-                  deleteFn={() => setDeposite(undefined)}
+                  deleteFn={handleRemoveDeposite}
                 />
               )}
             </div>
@@ -323,7 +408,12 @@ export function SubtotalBreakDown({
           {deposite && (
             <div>
               <span className="subtotal-field"> Payment Method </span>
-              <span className="subtotal-value"> {paymentMethod} </span>
+              <span className="subtotal-value">
+                {" "}
+                {user.stripe_connected
+                  ? PaymentMethods.stripe
+                  : PaymentMethods.cash}{" "}
+              </span>
             </div>
           )}
         </div>
@@ -361,35 +451,38 @@ export function SubtotalBreakDown({
         isOpen={depositeDialog}
         toggleOpen={toggleDepositeDialog}
         totalAmount={subtotal}
-        setDeposite={setDeposite}
-        setPaymentMode={setPaymentMethod}
+        setDeposite={handleSetDeposite}
+        setPaymentMode={handleSetPaymentMethod}
         defaultValues={{
-          paymentMethod: paymentMethod ?? PaymentMethods.stripe,
+          paymentMethod:
+            paymentMethod ??
+            (user.stripe_connected
+              ? PaymentMethods.stripe
+              : PaymentMethods.cash),
           deposite: deposite ?? undefined,
         }}
-        handleDepositeType={(depositeType) => {
-          if (depositeTypeRef) {
-            depositeTypeRef.current = depositeType;
-          }
-        }}
-        handleDepositePercentage={(percentage) => {
-          if (depositePercentageRef) {
-            depositePercentageRef.current = percentage;
-          }
-        }}
+        handleDepositeType={handleDepositeType}
+        handleDepositePercentage={handleDepositePercentage}
+        toggleStripPopup={toggleStripConnectPopup}
       />
 
       <AddDiscount
         isOpen={discountDialog}
         toggleIsOpen={toggleDiscountDialog}
-        setDiscount={setDiscountPercentage}
+        setDiscount={handleSetDiscount}
       />
 
       <AddTax
         isOpen={taxModalOpen}
         toggleIsOpen={toggleTaxModalOpen}
         vatSettings={vatSettings ?? []}
-        setTaxId={setTax}
+        setTaxId={handleSetTax}
+      />
+
+      <StripeAdvisoryDialog
+        isOpen={stripConnectPopupOpen}
+        toggleIsOpen={toggleStripConnectPopup}
+        type="connect"
       />
     </>
   );

@@ -35,7 +35,12 @@ const initialState: QuoteDetails = {
   vat_setting_id: 14,
   vat: 0,
   is_company_phone_number_show: true,
-  discount: null,
+  discount: {
+    id: 0,
+    order_id: 0,
+    type: "",
+    amount: "0",
+  },
   financial_summary: {
     total_cost: 0,
     sub_total: 0,
@@ -55,6 +60,8 @@ export const quotesSlice = createSlice({
   name: "quote",
   reducers: {
     updateQuote(state, action: PayloadAction<Partial<Quote>>) {
+      console.log(`in redux`);
+      console.log(`Received quote items for updation: `, action.payload.items);
       Object.assign(state, action.payload);
     },
     removeQuote(state) {

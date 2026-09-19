@@ -26,6 +26,7 @@ interface CustomComboboxProps<T, V = T> {
   inptFieldChange?: (data: string) => void;
   isFetching?: boolean;
   contentBoxCls?: string;
+  getItemId?: (item: T) => string | number;
   filterFn?: (
     itemValue: T,
     query: string,
@@ -56,6 +57,7 @@ export function CustomCombobox<T, V = T>({
   paginationMeta,
   fetchNextPage,
   isFetchingNextPage,
+  getItemId,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(
     selected ? getItemLabel(selected) : null,
@@ -165,7 +167,9 @@ export function CustomCombobox<T, V = T>({
         >
           {(item) => (
             <ComboboxItem
-              key={String(getItemLabel(item))}
+              key={
+                getItemId ? String(getItemId(item)) : String(getItemLabel(item))
+              }
               value={item}
               className="
                 px-4 py-3 text-[15px] leading-snug text-gray-800

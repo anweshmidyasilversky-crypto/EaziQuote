@@ -2,6 +2,7 @@ import type { Method } from "axios";
 import type {
   DocumentCategories,
   ItemDetails,
+  PaymentMethods,
   QuoteDetails,
   QuoteTemplate,
 } from "./api.responses.type";
@@ -88,7 +89,7 @@ export interface UpdateQuoteItems {
 }
 
 export interface UpdateQuoteApiPayload extends Partial<
-  Omit<QuoteDetails, "attachments" | "items">
+  Omit<QuoteDetails, "attachments" | "items" | "discount">
 > {
   _method: Method;
   quote_id: string | number;
@@ -96,6 +97,8 @@ export interface UpdateQuoteApiPayload extends Partial<
   description?: string;
   client_id?: number;
   items?: UpdateQuoteItems[];
+  deposit_payment_method?: PaymentMethods;
+  discount?: number | undefined | null;
 }
 
 export interface ItemCreateApiPayload {

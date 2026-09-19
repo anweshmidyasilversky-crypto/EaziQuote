@@ -24,7 +24,7 @@ export function RenderMultiSelectCheckbox({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-4 mt-4">
       {checkboxconfig.map((checkbox) => (
         <div key={checkbox.id} className="flex gap-2 min-h-5">
           <input

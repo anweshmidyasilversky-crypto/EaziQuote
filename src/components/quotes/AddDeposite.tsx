@@ -19,16 +19,23 @@ import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomBtn } from "../common/CustomBtn";
 import { PaymentMethods } from "@/types/api.responses.type";
 import { DepositeTypes } from "@/types/api.requests.type";
+import { useAppSelector } from "@/redux/store";
 
 export type AddDepositeProps = {
   isOpen: boolean;
   toggleOpen: React.Dispatch<React.SetStateAction<boolean>>;
   totalAmount: number;
-  setDeposite: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setPaymentMode: React.Dispatch<React.SetStateAction<PaymentMethods>>;
+  setDeposite:
+    | React.Dispatch<React.SetStateAction<number | undefined>>
+    | ((deposite: number | undefined) => void);
+  setPaymentMode:
+    | React.Dispatch<React.SetStateAction<PaymentMethods>>
+    | ((method: PaymentMethods) => void);
   defaultValues: DefaultValues<AddDepositePayload>;
   handleDepositeType?: (depositeType: DepositeTypes) => void;
   handleDepositePercentage?: (depositePercentage: number) => void;
+
+  toggleStripPopup: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function AddDeposite({
@@ -40,7 +47,10 @@ function AddDeposite({
   defaultValues,
   handleDepositeType,
   handleDepositePercentage,
+
+  toggleStripPopup,
 }: AddDepositeProps) {
+  const user = useAppSelector((state) => state.user);
   const DepositeTypesConfig: CustomToggleGroupProps["toggleConfig"] = [
     {
       btnId: DepositeTypes.fixed,
@@ -77,17 +87,25 @@ function AddDeposite({
   });
 
   const submitHanler = (data: AddDepositePayload) => {
-    handleDepositeType?.(activeToggle);
-    if (activeToggle === DepositeTypes.percentage) {
-      handleDepositePercentage?.(data.deposite);
-      setDeposite((totalAmount * data.deposite) / 100);
+    if (
+      data.paymentMethod === PaymentMethods.stripe &&
+      !user.stripe_connected
+    ) {
+      toggleStripPopup(true);
+      toggleOpen(false);
     } else {
-      setDeposite(data.deposite);
+      handleDepositeType?.(activeToggle);
+      if (activeToggle === DepositeTypes.percentage) {
+        handleDepositePercentage?.(data.deposite);
+        setDeposite((totalAmount * data.deposite) / 100);
+      } else {
+        setDeposite(data.deposite);
+      }
+      setPaymentMode(data.paymentMethod);
+      reset();
+      toggleActive(DepositeTypes.fixed);
+      toggleOpen(false);
     }
-    setPaymentMode(data.paymentMethod);
-    reset();
-    toggleActive(DepositeTypes.fixed);
-    toggleOpen(false);
   };
 
   return (

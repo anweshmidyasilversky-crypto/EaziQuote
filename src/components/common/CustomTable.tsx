@@ -13,8 +13,6 @@ import {
   columnFilteringFeature,
   createFilteredRowModel,
   type ColumnFiltersState,
-  createPaginatedRowModel,
-  rowPaginationFeature,
   flexRender,
   rowSelectionFeature,
 } from "@tanstack/react-table";
@@ -81,11 +79,11 @@ function CustomTable<TData extends RowData>({
   rowIdSelector,
   withSelectionToggle = false,
 }: DataTableProps<TData>) {
-  console.log(renderData);
-  const currPageNo = paginationMeta?.current_page;
-  console.log(
-    `currPage: ${currPageNo}, nextPage: ${Number(currPageNo ?? 0) + 1}`,
-  );
+  // console.log(renderData);
+  // const currPageNo = paginationMeta?.current_page;
+  // console.log(
+  //   `currPage: ${currPageNo}, nextPage: ${Number(currPageNo ?? 0) + 1}`,
+  // );
   const [rowSelection, setRowSelection] = useState({});
   const data = renderData ?? [];
 

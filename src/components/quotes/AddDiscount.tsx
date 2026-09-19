@@ -12,7 +12,9 @@ import { cn } from "@/lib/utils";
 export type AddDiscountProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setDiscount: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setDiscount:
+    | React.Dispatch<React.SetStateAction<number | undefined>>
+    | ((discount: number | undefined) => void);
   defaultValues?: DefaultValues<AddDiscountPayload>;
 };
 

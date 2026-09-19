@@ -14,10 +14,13 @@ import { cn } from "../../lib/utils";
 import AddCategoryForm from "./AddCategoryForm";
 import SubCategoryForm from "./SubCategoryForm";
 import { showErrorToast } from "@/api/axiosInstance";
-import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@/hooks/useDebounce";
-import { subCategoryByCategory } from "@/api/services/subCategories.api";
 import type { ItemDetails } from "@/types/api.responses.type";
+import useCategoriesList from "@/hooks/apis/categories/useCategoriesList";
+import useCategoryMutations from "@/hooks/apis/categories/useCategoryMutations";
+import { toast } from "react-toastify";
+import useSubcategoryByCategory from "@/hooks/apis/subcategories/useSubcategoryByCategory";
+import useSubCategoryMutations from "@/hooks/apis/subcategories/useSubCategoryMutations";
+import type { SubCategoryCreateApiPayload } from "@/types/api.requests.type";
 
 export type ItemFormProps = {
   isOpen: boolean;
@@ -45,12 +48,21 @@ function ItemForm({
   const [categoryForm, toggleCategoryForm] = useState(false);
   const [subCategoryForm, toggleSubCategoryForm] = useState(false);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const [catSearchTerm, setCatSearchTerm] = useState("");
-  const [subCatSearchTerm, setSubcatSearchTerm] = useState("");
-  const subCatDebounceSearch = useDebounce({ value: subCatSearchTerm });
   const appConfig = useAppSelector((state) => state.appConfig);
   const [unitSearchTerm, setUnitSearchTerm] = useState("");
-  const categories = appConfig.quote_categories;
+
+  const {
+    categoryList: categories,
+    fetchNextPage: fetchNextCategories,
+    paginationMeta: categoriesPaginationMeta,
+    isFetchingNextPage: fetchingNextCategories,
+    searchTerm: catSearchTerm,
+    setSearchTerm: setCatSearchTerm,
+    isFetching: isFetchingCategories,
+    refetch: refetchCategories,
+  } = useCategoriesList({});
+
+  const { createCategoryMutation } = useCategoryMutations();
 
   const {
     control,
@@ -73,6 +85,24 @@ function ItemForm({
     ),
   });
 
+  const [catId] = useWatch({
+    control,
+    name: ["catId"],
+  });
+
+  const {
+    subCategories,
+    isFetching: isSubcatFetching,
+    searchTerm: subCatSearchTerm,
+    setSearchTerm: setSubcatSearchTerm,
+    refetch: refetchSubCategories,
+  } = useSubcategoryByCategory({
+    catId: catId ?? "",
+    enabled: catId !== undefined,
+  });
+
+  const { createSubCategoryMutation } = useSubCategoryMutations();
+
   useEffect(() => {
     if (currItem) {
       setValue("catId", currItem.category_id);
@@ -87,28 +117,6 @@ function ItemForm({
       setUnitSearchTerm(currItem.unit ?? "");
     }
   }, [currItem]);
-
-  const [catId] = useWatch({
-    control,
-    name: ["catId"],
-  });
-
-  const {
-    data: subCatResponse,
-    isFetching: isSubcatFetching,
-    error: subCatError,
-  } = useQuery({
-    queryKey: ["itemForm", "subCategory", catId, subCatDebounceSearch],
-    queryFn: () =>
-      subCategoryByCategory(catId ?? "", {
-        search: subCatDebounceSearch,
-      }),
-  });
-
-  if (subCatError) {
-    showErrorToast(subCatError);
-  }
-  const subCategories = subCatResponse?.payload;
 
   const submitHandler = async (data: ItemCreationPayload | ItemEditPayload) => {
     toggleIsSubmitting(true);
@@ -140,6 +148,36 @@ function ItemForm({
       });
     }
   }, [defaultValues]);
+
+  const handleCategoryCreation = (name: string) => {
+    createCategoryMutation.mutate(name, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        refetchCategories();
+        setValue("catId", response.payload.id);
+        setCatSearchTerm(response.payload.name);
+        toggleCategoryForm(false);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const handleSubCategoryCreation = (payload: SubCategoryCreateApiPayload) => {
+    createSubCategoryMutation.mutate(payload, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        setValue("subCatId", response.payload.id);
+        setSubcatSearchTerm(response.payload.name);
+        toggleSubCategoryForm(false);
+        refetchSubCategories();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
 
   return (
     <>
@@ -189,6 +227,11 @@ function ItemForm({
             filterFn={(category, query) =>
               category.name.toLocaleLowerCase().includes(query)
             }
+            getItemId={(category) => category.id}
+            paginationMeta={categoriesPaginationMeta}
+            isFetchingNextPage={fetchingNextCategories}
+            fetchNextPage={fetchNextCategories}
+            isFetching={isFetchingCategories}
           />
           {errors.catId && (
             <span className="error-text"> {errors.catId.message} </span>
@@ -275,11 +318,15 @@ function ItemForm({
       <AddCategoryForm
         isOpen={categoryForm}
         toggleIsOpen={toggleCategoryForm}
+        createFn={handleCategoryCreation}
+        isSubmitting={createCategoryMutation.isPending}
       />
 
       <SubCategoryForm
         isOpen={subCategoryForm}
         toggleIsOpen={toggleSubCategoryForm}
+        createFn={handleSubCategoryCreation}
+        isSubmitting={createSubCategoryMutation.isPending}
       />
     </>
   );
