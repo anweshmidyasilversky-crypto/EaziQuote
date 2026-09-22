@@ -59,4 +59,18 @@ export const API_ENDPOINTS = {
     businessProfileSetup: `/company`,
     addBusinessAddress: `/company`,
   },
+  proposalDocuments: {
+    getProposalDocumentList: `/proposal-document/sections`,
+    createOrUpdateProposalDocument: `/proposal-document/sections`,
+    deleteProposalDocument: (section_id: string | number) =>
+      `proposal-document/sections/${section_id}`,
+    getProposalDocForQuote: (quote_id: string | number) =>
+      `quotes/${quote_id}/sections`,
+    createOrUpdateProposalDocForQuote: (quote_id: string | number) =>
+      `quotes/${quote_id}/sections`,
+    deleteProposalDocumentForQuote: (
+      section_id: string | number,
+      quote_id: string | number,
+    ) => `quotes/${quote_id}/sections/${section_id}`,
+  },
 } as const;

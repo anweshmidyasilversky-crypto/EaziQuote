@@ -1,11 +1,5 @@
 import type { Method } from "axios";
-import type {
-  DocumentCategories,
-  ItemDetails,
-  PaymentMethods,
-  QuoteDetails,
-  QuoteTemplate,
-} from "./api.responses.type";
+import type { PaymentMethods, QuoteDetails } from "./api.responses.type";
 
 export enum deviceType {
   android = "android",
@@ -125,4 +119,29 @@ export interface subCategoryUpdateApiPayload extends Partial<SubCategoryCreateAp
 export enum DepositeTypes {
   fixed = "fixed",
   percentage = "percentage",
+}
+
+export interface ProposalDocumentCreatePayload {
+  title: string;
+  sort?: number;
+  content?: string;
+}
+
+export interface ProposalDocumentUpdatePayload extends ProposalDocumentCreatePayload {
+  title: string;
+}
+
+export interface QuoteSectionCreatePayload {
+  title: string;
+  content?: string;
+  sort?: number | string;
+}
+
+export interface QuoteSectionUpdatePayload extends QuoteSectionCreatePayload {
+  id: string | number;
+}
+
+export interface CreateOrUpdateSectionForQuote {
+  quote_id: string | number;
+  sections: (QuoteSectionCreatePayload | QuoteSectionUpdatePayload)[];
 }

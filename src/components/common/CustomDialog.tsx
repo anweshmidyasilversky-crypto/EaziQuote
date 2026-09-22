@@ -20,6 +20,7 @@ export type CustomDialogProps = {
   contentCls?: string;
   footerCls?: string;
   footerBtnCls?: string;
+  isSubmitting?: boolean;
 };
 
 function CustomDialog({
@@ -39,6 +40,7 @@ function CustomDialog({
   contentCls,
   footerCls,
   footerBtnCls,
+  isSubmitting,
 }: CustomDialogProps) {
   return (
     <Dialog open={dialogOpen} onOpenChange={toggleDialogOpen}>
@@ -77,6 +79,7 @@ function CustomDialog({
                     toggleDialogOpen((curr) => !curr);
                   }
                 }}
+                isSubmitting={isSubmitting}
               />
               {footerRightNode}
             </div>

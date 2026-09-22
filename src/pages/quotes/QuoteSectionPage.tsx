@@ -1,37 +1,33 @@
 import { type TableFeatures, type ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { type QuoteSection } from "../../types/quoteSection.type";
+import { type QuoteSection } from "@/types/api.responses.type";
 import { CustomDataTable } from "../../components/common/CustomTable";
-import { useAppSelector } from "../../redux/store";
 import { useParams } from "react-router";
+import useSectionListByQuote from "@/hooks/apis/quotes/sections/useSectionListByQuote";
 
 export function QuoteSectionPage() {
   const params = useParams<{ id: string }>();
-  // const activeQuote = useAppSelector(
-  //   (state) => state.quotes.find((q) => q.id === params.id) ?? state.quotes[0],
-  // );
 
-  // const sections = useMemo(() => {
-  //   return activeQuote?.sections ?? quotesInitialState[0].sections ?? [];
-  // }, [activeQuote]);
+  const { sectionList, isFetching, paginationMeta, setPageNo } =
+    useSectionListByQuote({
+      quote_id: params.id ?? "",
+      enabled: params?.id ? true : false,
+    });
 
   const quoteSectionColumns = useMemo<ColumnDef<TableFeatures, QuoteSection>[]>(
     () => [
       {
-        id: "order",
-        accessorKey: "order",
+        accessorKey: "sort",
         header: "ORDER",
         enableSorting: false,
       },
       {
-        id: "section",
-        accessorKey: "section",
+        accessorKey: "title",
         header: "SECTION",
         enableSorting: false,
       },
       {
-        id: "description",
-        accessorKey: "description",
+        accessorKey: "content",
         header: "DESCRIPTION",
         enableSorting: false,
       },
@@ -43,8 +39,13 @@ export function QuoteSectionPage() {
     <div className="bg-white rounded-[7px] pt-5">
       <CustomDataTable
         columns={quoteSectionColumns}
-        data={[]}
+        data={sectionList}
         tableOptionsLeft={<span className="header"> Sections </span>}
+        isFetching={isFetching}
+        showPaginated
+        setPageNo={setPageNo}
+        paginationMeta={paginationMeta}
+        paginationBtns={paginationMeta?.links}
       />
     </div>
   );

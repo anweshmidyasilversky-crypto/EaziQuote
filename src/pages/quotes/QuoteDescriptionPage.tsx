@@ -1,27 +1,17 @@
 import StyledAttachments from "../../components/common/StyledAttachments";
-import type { Quote } from "../../types/quote.type";
-import { useAppSelector } from "../../redux/store";
-import { useParams } from "react-router";
+import type { QuoteDetails } from "@/types/api.responses.type";
 
 export type QuoteDescriptionPageProps = {
-  quote?: Quote;
+  quote?: QuoteDetails;
 };
 
-export function QuoteDescriptionPage({ quote: propsQuote }: QuoteDescriptionPageProps = {}) {
-  const params = useParams<{ id: string }>();
-  const reduxQuote = useAppSelector((state) =>
-    state.quotes.find((q) => q.id === params.id) ?? state.quotes[0],
-  );
-
-  const quote = propsQuote ?? reduxQuote;
-
+export function QuoteDescriptionPage({ quote }: QuoteDescriptionPageProps) {
   const jobDescription =
-    quote?.jobDescription ||
+    quote?.job_description ||
     "This quote covers the full renovation and fit-out work, including material supply and installation services.";
 
   const notes =
-    quote?.notes ||
-    "No internal notes have been recorded for this quote.";
+    quote?.notes || "No internal notes have been recorded for this quote.";
 
   const attachments = quote?.attachments ?? [];
 
@@ -51,8 +41,8 @@ export function QuoteDescriptionPage({ quote: propsQuote }: QuoteDescriptionPage
           <div className="attachment-layout">
             {attachments.map((att, idx) => (
               <StyledAttachments
-                key={att.name ?? idx}
-                fileName={att.name}
+                key={att.id ?? idx}
+                fileName={att.id.toString()}
               />
             ))}
           </div>
@@ -65,4 +55,3 @@ export function QuoteDescriptionPage({ quote: propsQuote }: QuoteDescriptionPage
     </div>
   );
 }
-

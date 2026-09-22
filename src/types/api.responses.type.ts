@@ -457,3 +457,13 @@ export interface AppConfig {
     templates: Record<string, string>;
   };
 }
+
+export interface QuoteSection {
+  id: number | string;
+  title: string;
+  content: string;
+  sort: string | number;
+  is_added: boolean;
+  created_at: string;
+  updated_at: string;
+}

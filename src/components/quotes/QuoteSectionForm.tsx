@@ -1,20 +1,30 @@
-import { type QuoteSection } from "@/types/quoteSection.type";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, type DefaultValues } from "react-hook-form";
 import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/customInput";
 import { cn } from "@/lib/utils";
-import { toast } from "react-toastify";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { qouteSectionSchema } from "@/validation/quoteSectionCreation.payload.schema";
+import type {
+  QuoteSectionCreatePayload,
+  QuoteSectionUpdatePayload,
+} from "@/types/api.requests.type";
+import {
+  qouteSectionCreateSchema,
+  QuoteSectionUpdateSchema,
+} from "@/validation/quoteSection.payload.schema";
 
 export type QuoteSectionFormProps = {
   mode: "creation" | "updation";
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  sectionId?: string;
-  defaultValues?: DefaultValues<QuoteSection | Partial<QuoteSection>>;
+  titleId?: string;
+  defaultValues?: DefaultValues<
+    QuoteSectionCreatePayload | QuoteSectionUpdatePayload
+  >;
+  editFn?: (payload: QuoteSectionUpdatePayload) => void;
+  createFn?: (payload: QuoteSectionCreatePayload) => void;
+  isSubmitting?: boolean;
 };
 
 function QuoteSectionForm({
@@ -22,41 +32,50 @@ function QuoteSectionForm({
   toggleIsOpen,
   mode,
   defaultValues,
+  editFn,
+  createFn,
+  isSubmitting,
 }: QuoteSectionFormProps) {
+  const [comboboxSearchTerm, setComboboxSearchTerm] = useState("");
   const {
     setValue,
     control,
     formState: { errors },
-    clearErrors,
     handleSubmit,
     reset,
-  } = useForm<QuoteSection | Partial<QuoteSection>>({
+    clearErrors,
+  } = useForm<QuoteSectionCreatePayload | QuoteSectionUpdatePayload>({
     defaultValues: defaultValues ?? {
-      order: undefined,
-      section: "",
-      description: "",
+      sort: undefined,
+      title: "",
+      content: "",
     },
     resolver: yupResolver(
-      mode === "creation"
-        ? qouteSectionSchema
-        : qouteSectionSchema.deepPartial(),
+      mode === "creation" ? qouteSectionCreateSchema : QuoteSectionUpdateSchema,
     ),
   });
 
   useEffect(() => {
     if (mode === "updation" && defaultValues) {
-      setValue("order", defaultValues.order);
-      setValue("description", defaultValues.description);
-      setValue("section", defaultValues.section);
+      if (defaultValues?.sort) {
+        setValue("sort", defaultValues.sort);
+        setComboboxSearchTerm(defaultValues.sort.toString());
+      }
+      setValue("content", defaultValues.content);
+      if (defaultValues?.title) {
+        setValue("title", defaultValues.title);
+      }
+      setValue("id", (defaultValues as QuoteSectionUpdatePayload).id);
     }
   }, [defaultValues]);
 
-  const submitHandler = (data: QuoteSection | Partial<QuoteSection>) => {
-    console.log(data);
+  const submitHandler = (
+    data: QuoteSectionCreatePayload | QuoteSectionUpdatePayload,
+  ) => {
     if (mode === "creation") {
-      toast.success("Sucessfully added section");
+      createFn?.(data as QuoteSectionCreatePayload);
     } else {
-      toast.success("Sucessfully updated section");
+      editFn?.(data as QuoteSectionUpdatePayload);
     }
     toggleIsOpen(false);
     reset();
@@ -73,32 +92,45 @@ function QuoteSectionForm({
       footerBtnAction={handleSubmit(submitHandler)}
       showFooterSeparator={false}
       xIconAction={reset}
+      isSubmitting={isSubmitting}
     >
       <div className="flex flex-col gap-5 p-5">
         <div className="flex gap-4">
           <div className="flex flex-col gap-2 grow">
-            <label className="input-label justify-start!"> Order </label>
+            <label className="input-label justify-start!"> sort </label>
             <CustomCombobox
               items={Array.from({ length: 10 }, (_, i) => i + 1)}
               onValueChange={(val) => {
                 if (val) {
-                  setValue("order", val);
-                  clearErrors("order");
+                  setComboboxSearchTerm(val.toString());
+                  setValue("sort", val);
                 }
               }}
-              selected={defaultValues?.order}
-              placeholder="Select order"
-              className={cn(`${errors.order ? `input-error` : ``} `)}
+              placeholder="Select sort"
+              className={cn(`${errors.sort ? `input-error` : `input-valid`} `)}
+              getItemLabel={(sort) => sort.toString()}
+              getItemId={(sort) => sort}
+              getItemValue={(sort) => sort}
+              inptFieldChange={(sort) => {
+                if (sort) {
+                  setComboboxSearchTerm(sort);
+                  clearErrors("sort");
+                } else {
+                  setComboboxSearchTerm("");
+                }
+              }}
+              inptFieldValue={comboboxSearchTerm}
+              filterFn={(sort, query) => sort.toString() === query}
             />
-            {errors.order && (
-              <span className="error-text"> {errors.order.message} </span>
+            {errors.sort && (
+              <span className="error-text"> {errors.sort.message} </span>
             )}
           </div>
 
           <CustomInput
             control={control}
-            name="section"
-            fieldName="Section Title"
+            name="title"
+            fieldName="title Title"
             placeholder="Introduction"
             className="grow"
           />
@@ -106,11 +138,11 @@ function QuoteSectionForm({
 
         <CustomInput
           control={control}
-          name="description"
-          fieldName="Description"
+          name="content"
+          fieldName="content"
           className="min-h-80"
           inptType="textarea"
-          placeholder="Enter Description"
+          placeholder="Enter content"
         />
       </div>
     </CustomDialog>

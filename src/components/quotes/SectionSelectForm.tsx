@@ -4,10 +4,7 @@ import {
   type TableFeatures,
 } from "@tanstack/react-table";
 import { CustomDataTable } from "../common/CustomTable";
-import type { QuoteSection } from "@/types/quoteSection.type";
-import { quoteSectionData } from "@/constants/dummyData";
-import { useEffect, useRef, useState } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomActionGroup } from "../common/CustomActionGroup";
 import SearchInputGruop from "../common/SearchInputGruop";
 import { CustomBtn } from "../common/CustomBtn";
@@ -15,35 +12,49 @@ import { assets } from "@/assets/icons";
 import QuoteSectionForm, {
   type QuoteSectionFormProps,
 } from "./QuoteSectionForm";
+import type { QuoteSection } from "@/types/api.responses.type";
 import { type DefaultValues } from "react-hook-form";
-import { useAppDispatch } from "@/redux/store";
+import { useAppSelector } from "@/redux/store";
 import { toast } from "react-toastify";
+import useSectionsList from "@/hooks/apis/quotes/sections/useSectionsList";
+import type {
+  QuoteSectionCreatePayload,
+  QuoteSectionUpdatePayload,
+} from "@/types/api.requests.type";
+import useSectionMutations from "@/hooks/apis/quotes/sections/useSectionMutations";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export type SectionSelectFormProps = {
-  refNo: string;
   submitAction?: () => void;
-  selectedSectionIds?: string[];
 };
 
 /**
- * @param refNo refrence no the Quote
  * @param submitAction action upon submit
- * @param selectedSectionIds Optional, ids of sections that are selected prviously, for prefill
  */
-function SectionSelectForm({
-  refNo,
-  selectedSectionIds,
-  submitAction,
-}: SectionSelectFormProps) {
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
+function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
+  const currQuote = useAppSelector((state) => state.quote);
+  const sectionListFilters = useMemo(
+    () => ({ quote_id: currQuote.id }),
+    [currQuote],
+  );
+
+  const {
+    sectionList,
+    isFetching,
+    searchTerm,
+    setSearchTerm,
+    refetch: refetchSectionsList,
+    setData: setSectionData,
+  } = useSectionsList({
+    filters: sectionListFilters,
+  });
   const [sectionFormOpen, toggleSectionFormOpen] = useState(false);
-  const dispatch = useAppDispatch();
 
   const tableRef = useRef<Table<TableFeatures, QuoteSection> | undefined>(
     undefined,
   );
 
+  const selectedRowIds: string[] = [];
   const defaultValues = useRef<
     DefaultValues<Partial<QuoteSection>> | undefined
   >(undefined);
@@ -63,36 +74,47 @@ function SectionSelectForm({
           />
         );
       },
-      cell: (info) => (
-        <input
-          type="checkbox"
-          className="w-4 aspect-square"
-          checked={info.row.getIsSelected()}
-          onChange={info.row.getToggleSelectedHandler()}
-        />
-      ),
+      cell: (info) => {
+        if (info.row.original.is_added) {
+          selectedRowIds.push(info.row.id);
+        }
+        return (
+          <input
+            type="checkbox"
+            className="w-4 aspect-square"
+            checked={info.row.getIsSelected() || info.row.original.is_added}
+            onChange={info.row.getToggleSelectedHandler()}
+          />
+        );
+      },
       enableSorting: false,
       enableGlobalFilter: false,
     },
     {
-      id: "order",
+      accessorKey: "sort",
       header: "ORDER",
-      cell: (info) => info.row.getDisplayIndex() + 1,
+      cell: (info) => info.getValue<number>(),
     },
     {
-      accessorKey: "section",
+      accessorKey: "title",
       header: "SECTION",
       enableSorting: false,
     },
     {
-      accessorKey: "description",
+      accessorKey: "content",
       header: "DESCRIPTION",
-      cell: (info) => (
-        <span className="max-w-138.5 text-wrap wrap-break-word">
-          {" "}
-          {info.getValue<string>()}{" "}
-        </span>
-      ),
+      cell: (info) => {
+        const content = info.getValue<string>();
+        return (
+          <span className="max-w-138.5 text-wrap wrap-break-word">
+            {content.trim().length <= 0 ? (
+              <div className="w-full justify-center items-center">{"-"}</div>
+            ) : (
+              content
+            )}
+          </span>
+        );
+      },
       enableSorting: false,
     },
     {
@@ -101,13 +123,14 @@ function SectionSelectForm({
       cell: (info) => (
         <CustomActionGroup
           withOpen={false}
-          editFn={() => handleEdit(info.row.original)}
+          withDelete={false}
+          editFn={() => openEditForm(info.row.original)}
         />
       ),
     },
   ];
 
-  const handleEdit = (data: QuoteSection) => {
+  const openEditForm = (data: QuoteSection) => {
     sectionFormAction.current = "updation";
     defaultValues.current = {
       ...data,
@@ -115,38 +138,76 @@ function SectionSelectForm({
     toggleSectionFormOpen(true);
   };
 
-  useEffect(() => {
-    selectedSectionIds?.forEach((rowId) =>
-      tableRef.current?.getRow(rowId)?.toggleSelected(),
-    );
-  }, []);
+  const editFn = (data: QuoteSectionUpdatePayload) => {
+    const idx = sectionList.findIndex((section) => section.id === data.id);
+    if (idx === -1) {
+      toast.error(`Something went wrong`);
+      return;
+    }
+    setSectionData([
+      ...sectionList.slice(0, idx),
+      {
+        ...sectionList[idx],
+        sort: data.sort ?? sectionList[idx].sort,
+        title: data.title,
+        content: data.content ?? sectionList[idx].content,
+      },
+      ...sectionList.slice(idx + 1),
+    ]);
+    toggleSectionFormOpen(false);
+  };
+
+  const { sectionMutationForQuote, createSectionMutation } =
+    useSectionMutations();
 
   const handleSubmit = () => {
     const table = tableRef.current;
-
-    // dispatch(
-    //   updateQuoteSections({
-    //     quoteId: refNo,
-    //     sections:
-    //       table
-    //         ?.getSelectedRowIds()
-    //         .map((rowId) => table.getRow(rowId).original) ?? [],
-    //   }),
-    // );
-
-    toast.success(`Sucessfully added sections`);
-
-    submitAction?.();
+    sectionMutationForQuote.mutate(
+      {
+        quote_id: currQuote.id,
+        sections:
+          table?.getSelectedRowModel().rows.map((row) => {
+            const { id, ...rest } = row.original;
+            return rest;
+          }) ?? [],
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          submitAction?.();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
+
+  const handleSectionCreation = (data: QuoteSectionCreatePayload) => {
+    createSectionMutation.mutate(data, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        setSearchTerm("");
+        refetchSectionsList();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  useEffect(() => {
+    selectedRowIds.forEach((rowId) => {
+      tableRef.current?.getRow(rowId).toggleSelected();
+    });
+  }, [selectedRowIds]);
 
   return (
     <>
       <div className="flex flex-col gap-5">
         <CustomDataTable
           columns={sectionTableColumns}
-          data={quoteSectionData}
-          globalFilterTerm={debouncedSearchTerm}
-          showPaginated={quoteSectionData.length > 5}
+          data={sectionList}
           tableOptionsLeft={
             <SearchInputGruop
               searchTerm={searchTerm}
@@ -166,11 +227,16 @@ function SectionSelectForm({
             />
           }
           withSelectionToggle={true}
-          rowIdSelector={(row) => row.id}
+          rowIdSelector={(row) => row.id.toString()}
+          isFetching={isFetching}
         />
 
         <div className="flex px-5">
-          <CustomBtn buttonLabel="Finalise Quote" onClick={handleSubmit} />
+          <CustomBtn
+            buttonLabel="Finalise Quote"
+            onClick={handleSubmit}
+            isSubmitting={sectionMutationForQuote.isPending}
+          />
         </div>
       </div>
 
@@ -183,6 +249,8 @@ function SectionSelectForm({
             ? defaultValues.current
             : undefined
         }
+        editFn={editFn}
+        createFn={handleSectionCreation}
       />
     </>
   );
