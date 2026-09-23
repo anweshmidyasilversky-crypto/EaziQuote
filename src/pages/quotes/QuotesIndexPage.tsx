@@ -38,6 +38,12 @@ import type {
 import type { PageFilters } from "@/types/api.requests.type";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
 import usePresetQuotesList from "@/hooks/apis/quotes/usePresetQuotesList";
+import usePresetQuoteDetails from "@/hooks/apis/quotes/usePresetQuoteDetails";
+import { useAppDispatch } from "@/redux/store";
+import {
+  removeQuote as removeQuoteRedux,
+  updateQuote as updateQuoteRedux,
+} from "@/redux/slices/quotes.slice";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
@@ -50,6 +56,7 @@ export function QuotesIndexPage() {
   const [quoteDialogOpen, toggleQuoteDialogOpen] = useState(false);
   const [presetSelectionOpen, togglePresetSelectionOpen] = useState(false);
   const pageFilters = useRef<PageFilters>({});
+  const dispatch = useAppDispatch();
 
   const {
     quoteList,
@@ -250,6 +257,35 @@ export function QuotesIndexPage() {
     },
   ];
 
+  const fetchPresetQuote = useRef<boolean>(false);
+  const { presetQuote, isFetching: isPresetQuoteDetailsFetching } =
+    usePresetQuoteDetails({
+      templateId: selectedPreset ?? "",
+      enabled: fetchPresetQuote.current,
+    });
+
+  const handlePresetQuoteSelect = () => {
+    fetchPresetQuote.current = true;
+    if (presetQuote) {
+      dispatch(
+        updateQuoteRedux({
+          ...presetQuote,
+          job_description: presetQuote.quote_description ?? "",
+          quote_date: new Date().toISOString(),
+          expiry_date: new Date(Date.now() + 86400000).toISOString(),
+        }),
+      );
+      console.log({
+        ...presetQuote,
+        job_description: presetQuote.quote_description ?? "",
+        quote_date: new Date().toISOString(),
+        expiry_date: new Date(Date.now() + 86400000).toISOString(),
+      });
+      fetchPresetQuote.current = false;
+      navigate(`/quotes/manage-quotes/`);
+    }
+  };
+
   return (
     <React.Fragment>
       <div className="p-6 pb-7.5 flex flex-col gap-6">
@@ -351,7 +387,10 @@ export function QuotesIndexPage() {
           <div className="flex gap-4 justify-center">
             <div
               className="bg-custom-dialog-primary flex flex-col items-center min-w-55 gap-4 rounded-lg py-4 cursor-pointer"
-              onClick={() => navigate(`/quotes/manage-quotes/`)}
+              onClick={() => {
+                dispatch(removeQuoteRedux());
+                navigate(`/quotes/manage-quotes/`);
+              }}
             >
               <img src={assets.pencilFilledIcon} className="w-8 h-8" />
               <span> {"Start from Scratch"} </span>
@@ -376,8 +415,9 @@ export function QuotesIndexPage() {
         withFooter
         footerBtnLabel="Continue"
         footerBtnAction={() => {
-          navigate(`/quotes/manage-quotes/`);
+          handlePresetQuoteSelect();
         }}
+        isSubmitting={isPresetQuoteDetailsFetching}
       >
         <div className="lg:min-w-250 flex flex-col gap-4.5 mt-6 max-h-120 overflow-y-auto">
           <div className="px-5">

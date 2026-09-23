@@ -20,8 +20,8 @@ const initialState: QuoteDetails = {
   notes: "",
   job_description: "",
   reference_number: "",
-  quote_date: "",
-  expiry_date: "",
+  quote_date: new Date().toISOString(),
+  expiry_date: new Date(Date.now() + 86400000).toISOString(),
   url: "",
   status: {
     id: 0,

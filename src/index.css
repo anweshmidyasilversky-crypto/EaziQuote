@@ -108,6 +108,14 @@
   body {
     font-family: var(--font-sans);
     @apply text-black-text;
+    /* index.css */
+  }
+    iframe {
+    scrollbar-width: none;
+  }
+
+  iframe::-webkit-scrollbar {
+    display: none;
   }
   input[type="radio"] {
     @apply accent-brand-dark h-5 w-5;

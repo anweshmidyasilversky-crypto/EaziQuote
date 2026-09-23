@@ -6,6 +6,8 @@ export const API_ENDPOINTS = {
     home: `/home`,
     quoteList: `/quotes`,
     presetQuotes: `/quote-templates`,
+    presetQuoteDetails: (templateId: string | number) =>
+      `quote-templates/${templateId}`,
     appConfig: `/auth/config`,
   },
   address: {
@@ -43,7 +45,12 @@ export const API_ENDPOINTS = {
       quote_id: string | number,
       attachment_id: string | number,
     ) => `/quotes/${quote_id}/attachments/${attachment_id}`,
-    deleteQuote: (quote_id: string | number) => `quotes/${quote_id}`,
+    deleteQuote: (quote_id: string | number) => `/quotes/${quote_id}`,
+    duplicateQuote: (quote_id: string | number) =>
+      `/quotes/${quote_id}/duplicate`,
+    generatePdf: (quote_id: string | number) => `/quotes/${quote_id}/pdf`,
+    updateStatus: `/update-status`,
+    sendEmail: (quote_id: string | number) => `/quotes/${quote_id}/send-email`,
   },
   subCategories: {
     getSubcategoryList: `/sub-categories`,

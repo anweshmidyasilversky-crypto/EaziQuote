@@ -1,5 +1,5 @@
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   formatCurrency,
   formatDisplayDate,
@@ -28,21 +28,32 @@ import { ShareOptions } from "../../components/common/ShareOptions";
 import { QuoteDescriptionPage } from "./QuoteDescriptionPage";
 import { QuoteSectionPage } from "./QuoteSectionPage";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { invoiceData, QuoteActivityStatus } from "../../constants/dummyData";
-import { PaymentMethods, type ItemDetails } from "@/types/api.responses.type";
+import { invoiceData } from "../../constants/dummyData";
+import {
+  PaymentMethods,
+  QuoteStatus,
+  type ItemDetails,
+} from "@/types/api.responses.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import { toast } from "react-toastify";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
-import type { Quote, QuoteDetails } from "@/types/api.responses.type";
 import { Spinner } from "@/components/ui/spinner";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import { showErrorToast } from "@/api/axiosInstance";
+import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
+import useQuotePreview from "@/hooks/apis/quotes/useQuotePreview";
+import { FormLayout } from "@/components/common/FormLayout";
+import useSendEmail from "@/hooks/apis/quotes/useSendEmail";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
-  const { quote, isFetching } = useQuoteDetails({ quote_id: params.id });
+  const dispatch = useAppDispatch();
+  const { quote, isFetching, refetch } = useQuoteDetails({
+    quote_id: params.id,
+  });
   const [globalFilter, setGlobalFilter] = useState("");
   const deboucedFilter = useDebounce({ value: globalFilter, delay: 500 });
   const [activeTable, toggleActiveTable] = useState("summary");
@@ -50,6 +61,31 @@ export function QuotesDetailsPage() {
   const [shareBoxOpen, toggleShareBoxOpen] = useState(false);
   const [moreOptionsOpen, toggleMoreOptionsOpen] = useState(false);
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
+  const [quotePreviewOpen, toggleQuotePreviewOpen] = useState(false);
+  const [sendEmail, toggleSendEmail] = useState(false);
+
+  const { quoteDuplicateMutation, quoteDeleteMutation, statusUpdateMutation } =
+    useQuotesMutations();
+
+  const { data, isSending } = useSendEmail({
+    quote_id: quote?.id ?? "",
+    enabled: sendEmail,
+  });
+
+  useEffect(() => {
+    if (isSending) {
+      toggleSendEmail(false);
+    } else {
+      if (data) {
+        toast.success(data.message);
+      }
+    }
+  }, [isSending]);
+
+  const { previewHtml, isFetching: isPreviewFetching } = useQuotePreview({
+    quote_id: params.id,
+    enabled: quotePreviewOpen,
+  });
 
   // ── Items table columns ─────────────────────────────────────────────────────
   const itemColumns: ColumnDef<TableFeatures, ItemDetails>[] = useMemo(
@@ -107,6 +143,7 @@ export function QuotesDetailsPage() {
     {
       leftIcon: assets.previewIcon,
       buttonLabel: "Preview",
+      onClick: () => toggleQuotePreviewOpen((curr) => !curr),
     },
 
     <MoreOptionsPopup
@@ -117,15 +154,15 @@ export function QuotesDetailsPage() {
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
       editAction={() => navigate(`/quotes/manage-quotes/${quote?.id}`)}
       copyAction={() => {
-        // dispatch(
-        //   addQuote({
-        //     ...quote,
-        //     id: nextRefNo,
-        //     title: quote?.title + "-(Copy)",
-        //   }),
-        // );
-        toast.success("Successfully copied the quote");
-        navigate(`/quotes`);
+        quoteDuplicateMutation.mutate(quote?.id ?? "", {
+          onSuccess: (response) => {
+            toast.success(response.message);
+            navigate(`/quotes`);
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        });
       }}
     >
       <CustomBtn
@@ -148,6 +185,47 @@ export function QuotesDetailsPage() {
     ],
     [],
   );
+
+  const handleQuoteDelete = () => {
+    quoteDeleteMutation.mutate(quote?.id ?? "", {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        navigate(`/quotes`);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const handleStatusUpdate = (status: QuoteStatus) => {
+    statusUpdateMutation.mutate(
+      {
+        quote_id: quote?.id ?? "",
+        status,
+      },
+      {
+        onSuccess: (response) => {
+          if (!response.result) {
+            toast.error(response.message);
+          } else {
+            toast.success(response.message);
+            refetch();
+          }
+        },
+
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (quote) {
+      dispatch(updateQuoteRedux(quote));
+    }
+  }, [quote]);
 
   return (
     <React.Fragment>
@@ -243,10 +321,12 @@ export function QuotesDetailsPage() {
 
                         <div>
                           <span className="text-sm"> Status </span>
-                          {/* <StatusDropDown
-                        currStatus={"quoteCurrStatus"}
-                        toggleStatus={"toggleQuoteCurrStatus"}
-                      /> */}
+                          <StatusDropDown
+                            currStatus={quote?.status}
+                            statusSelectAction={(status) =>
+                              handleStatusUpdate(status)
+                            }
+                          />
                         </div>
                       </div>
                     </CustomInfoCard>
@@ -325,12 +405,37 @@ export function QuotesDetailsPage() {
             isOpen={shareBoxOpen}
             toggleIsOpen={toggleShareBoxOpen}
             clientEmail={quote?.client?.email ?? ""}
+            sendEmailAction={() => toggleSendEmail((curr) => !curr)}
+            isEmailSending={isSending}
           />
         </div>
         <DeleteDialog
           isOpen={deleteDialogOpen}
           toggleOpen={toggleDeleteDialogOpen}
+          deleteAction={handleQuoteDelete}
+          isPending={quoteDeleteMutation.isPending}
         />
+
+        <FormLayout
+          isFormOpen={quotePreviewOpen}
+          formCloseAction={() => toggleQuotePreviewOpen(false)}
+          formHeading="Preview"
+          withSubmitBtn={false}
+        >
+          <div className="min-h-[80vh] min-w-[30vw] flex justify-center pb-5">
+            {isPreviewFetching ? (
+              <div className="self-center">
+                {" "}
+                <Spinner className="text-brand-dark h-full w-full" />{" "}
+              </div>
+            ) : (
+              <iframe
+                srcDoc={`${previewHtml}`}
+                className="w-full border-0 p-0"
+              />
+            )}
+          </div>
+        </FormLayout>
       </div>
     </React.Fragment>
   );

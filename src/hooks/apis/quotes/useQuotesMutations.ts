@@ -2,12 +2,15 @@ import {
   createQuote,
   deleteAttachemnt,
   deleteQuote,
+  duplicateQuote,
   updateQuote,
+  updateStatus,
 } from "@/api/services/quotes.api";
 import type {
   CreateQuoteApiPayload,
   UpdateQuoteApiPayload,
 } from "@/types/api.requests.type";
+import type { QuoteStatus } from "@/types/api.responses.type";
 import { useMutation } from "@tanstack/react-query";
 
 function useQuotesMutations() {
@@ -34,11 +37,24 @@ function useQuotesMutations() {
     mutationFn: (payload: CreateQuoteApiPayload) => createQuote(payload),
   });
 
+  const quoteDuplicateMutation = useMutation({
+    mutationKey: ["quote_duplicate"],
+    mutationFn: (quote_id: string | number) => duplicateQuote(quote_id),
+  });
+
+  const statusUpdateMutation = useMutation({
+    mutationKey: ["update_status"],
+    mutationFn: (payload: { quote_id: string | number; status: QuoteStatus }) =>
+      updateStatus(payload.quote_id, payload.status),
+  });
+
   return {
     quoteCreateMutation,
     quoteUpdateMutation,
     quoteDeleteMutation,
     attachmentDeleteMutation,
+    quoteDuplicateMutation,
+    statusUpdateMutation,
   };
 }
 

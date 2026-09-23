@@ -80,7 +80,9 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
   const editingItem = useRef<ItemDetails | undefined>(undefined);
 
   const vatSettingsId = useRef<number | undefined>(currQuote.vat_setting_id);
-  const discount = useRef<number | null>(Number(currQuote.discount.amount));
+  const discount = useRef<number | null>(
+    Number(currQuote.discount?.amount ?? "0"),
+  );
   const depositePaymentMethod = useRef<PaymentMethods>(PaymentMethods.cash);
   const depositePercentageRef = useRef<number | null>(
     currQuote.deposit_percentage,

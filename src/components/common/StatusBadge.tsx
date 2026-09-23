@@ -19,7 +19,8 @@ export type StatusBadgeProps = {
     | QuoteActivityStatus
     | InvoiceStatus
     | PaymentStatus
-    | QuoteStatus;
+    | QuoteStatus
+    | string;
 
   ChevronIcon?: LucideIcon;
 };

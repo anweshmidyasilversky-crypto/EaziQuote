@@ -1,4 +1,5 @@
 import {
+  QuoteStatus,
   type ApiResponse,
   type QuoteDetails,
 } from "@/types/api.responses.type";
@@ -67,6 +68,57 @@ export const deleteQuote = async (quote_id: string | number) => {
   try {
     const response = await axiosInstance.delete<ApiResponse<null>>(
       API_ENDPOINTS.quotes.deleteQuote(quote_id),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const duplicateQuote = async (quote_id: string | number) => {
+  try {
+    const response = await axiosInstance.post<ApiResponse<QuoteDetails>>(
+      API_ENDPOINTS.quotes.duplicateQuote(quote_id),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateStatus = async (
+  quote_id: string | number,
+  status: QuoteStatus,
+) => {
+  try {
+    const response = await axiosInstance.patch<ApiResponse<null>>(
+      API_ENDPOINTS.quotes.updateStatus,
+      {
+        quote_id,
+        status,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPreviewPdf = async (quote_id: string | number) => {
+  try {
+    const response = await axiosInstance.get<HTMLDocument>(
+      API_ENDPOINTS.quotes.generatePdf(quote_id),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const sendEmail = async (quote_id: string | number) => {
+  try {
+    const response = await axiosInstance.post<ApiResponse<null>>(
+      API_ENDPOINTS.quotes.sendEmail(quote_id),
     );
     return response.data;
   } catch (error) {

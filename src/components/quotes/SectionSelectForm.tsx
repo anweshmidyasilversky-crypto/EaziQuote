@@ -82,7 +82,7 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
           <input
             type="checkbox"
             className="w-4 aspect-square"
-            checked={info.row.getIsSelected() || info.row.original.is_added}
+            checked={info.row.getIsSelected()}
             onChange={info.row.getToggleSelectedHandler()}
           />
         );

@@ -14,6 +14,8 @@ export type ShareOptionsProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   clientEmail: string;
+  sendEmailAction?: () => void;
+  isEmailSending?: boolean;
 };
 
 type sharOptions = {
@@ -26,6 +28,8 @@ export function ShareOptions({
   isOpen,
   toggleIsOpen,
   clientEmail,
+  sendEmailAction,
+  isEmailSending,
 }: ShareOptionsProps) {
   const options: sharOptions[] = [
     {
@@ -125,7 +129,11 @@ export function ShareOptions({
 
           <div className="min-h-13 rounded-[7px] py-3 px-2 flex gap-3 border border-searchbox-border justify-between items-center">
             <span className="text-base"> {clientEmail} </span>
-            <CustomBtn buttonLabel="Send Email" />
+            <CustomBtn
+              buttonLabel="Send Email"
+              onClick={sendEmailAction}
+              isSubmitting={isEmailSending}
+            />
           </div>
         </div>
       </DialogContent>

@@ -1,22 +1,25 @@
 import { ChevronDown } from "lucide-react";
-import { QuoteActivityStatus, type QuoteData } from "../../constants/dummyData";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import StatusBadge from "../common/StatusBadge";
 import { useState } from "react";
+import { QuoteStatus, type Quote } from "@/types/api.responses.type";
 
 export type StatusDropDownProps = {
-  currStatus: QuoteData["status"];
-  toggleStatus: React.Dispatch<React.SetStateAction<QuoteData["status"]>>;
+  currStatus: Quote["status"] | undefined;
+  statusSelectAction?: (status: QuoteStatus) => void;
 };
 export function StatusDropDown({
   currStatus,
-  toggleStatus,
+  statusSelectAction,
 }: StatusDropDownProps) {
   const [popoverOpen, togglePopoverOpen] = useState(false);
   return (
     <Popover open={popoverOpen} onOpenChange={togglePopoverOpen}>
       <PopoverTrigger>
-        <StatusBadge status={currStatus} ChevronIcon={ChevronDown} />
+        <StatusBadge
+          status={currStatus?.display_name ?? "Draft"}
+          ChevronIcon={ChevronDown}
+        />
       </PopoverTrigger>
 
       <PopoverContent
@@ -24,24 +27,22 @@ export function StatusDropDown({
         side="bottom"
       >
         <div className="flex flex-col">
-          {(
-            Object.keys(QuoteActivityStatus) as Array<
-              keyof typeof QuoteActivityStatus
-            >
-          ).map((key) => {
-            return (
-              <span
-                key={key.toString()}
-                onClick={() => {
-                  toggleStatus?.(QuoteActivityStatus[key]);
-                  togglePopoverOpen(false);
-                }}
-                className={`${key.toString() === currStatus ? "bg-slate-100" : ""} cursor-pointer px-5 py-1 h-fit hover:bg-slate-100`}
-              >
-                {key.toString()}
-              </span>
-            );
-          })}
+          {(Object.keys(QuoteStatus) as Array<keyof typeof QuoteStatus>).map(
+            (key) => {
+              return (
+                <span
+                  key={key.toString()}
+                  onClick={() => {
+                    togglePopoverOpen(false);
+                    statusSelectAction?.(QuoteStatus[key]);
+                  }}
+                  className={`${key === currStatus?.display_name ? "bg-slate-100" : ""} cursor-pointer px-5 py-1 h-fit hover:bg-slate-100`}
+                >
+                  {key[0].toLocaleUpperCase() + key.slice(1)}
+                </span>
+              );
+            },
+          )}
         </div>
       </PopoverContent>
     </Popover>

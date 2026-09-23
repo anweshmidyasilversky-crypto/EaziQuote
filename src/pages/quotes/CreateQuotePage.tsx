@@ -13,7 +13,7 @@ import { useNavigate, useParams } from "react-router";
 import SectionSelectForm from "@/components/quotes/SectionSelectForm";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
 import { Spinner } from "@/components/ui/spinner";
-import { useAppDispatch } from "@/redux/store";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 
 enum toggleId {
@@ -30,7 +30,11 @@ export function CreateQuotePage() {
   );
   const params = useParams<{ id: string | undefined }>();
 
-  const { quote, isFetching: isQuoteFetching } = useQuoteDetails({
+  const {
+    quote,
+    isFetching: isQuoteFetching,
+    isFetched: isClientFetched,
+  } = useQuoteDetails({
     quote_id: params.id as string,
     enabled: params.id ? true : false,
   });
@@ -40,6 +44,8 @@ export function CreateQuotePage() {
       dispatch(updateQuoteRedux(quote));
     }
   }, [quote]);
+
+  const quoteRedux = useAppSelector((state) => state.quote);
 
   const dummyRefNo = `QT-${new Date().getFullYear()}-1`;
   const refNo =
@@ -100,8 +106,9 @@ export function CreateQuotePage() {
                 {formCurrSection === toggleId.Summary && (
                   <QuoteSummaryForm
                     refNo={refNo}
-                    currQuote={quote}
+                    currQuote={quoteRedux}
                     submitAction={() => changeFormCurrSection(toggleId.Items)}
+                    prefillClient={isClientFetched}
                   />
                 )}
                 {formCurrSection === toggleId.Items && (

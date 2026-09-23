@@ -135,6 +135,10 @@ export enum QuoteStatus {
   sent = "sent",
   draft = "draft",
   accepted = "accepted",
+  completed = "completed",
+  paid = "paid",
+  rejected = "rejected",
+  cancelled = "cancelled",
 }
 
 export interface QuoteActivity extends BaseActivity {
@@ -381,7 +385,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
     order_id: number;
     type: string;
     amount: string;
-  };
+  } | null;
   financial_summary: {
     total_cost: number;
     sub_total: number;

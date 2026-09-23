@@ -8,6 +8,7 @@ import {
   type ListResponse,
   type PresetQuoteListing,
   type AppConfig,
+  type PresetQuote,
 } from "@/types/api.responses.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
 
@@ -74,6 +75,17 @@ export const getPresetQuoteList = async (filters?: PageFilters) => {
     return quoteList.data;
   } catch (err) {
     throw err;
+  }
+};
+
+export const getPresetQuoteDetails = async (templateId: string | number) => {
+  try {
+    const quote = await axiosInstance.get<ApiResponse<PresetQuote>>(
+      API_ENDPOINTS.auth.presetQuoteDetails(templateId),
+    );
+    return quote.data;
+  } catch (error) {
+    throw error;
   }
 };
 

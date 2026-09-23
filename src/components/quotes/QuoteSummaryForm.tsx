@@ -27,12 +27,14 @@ export type QuoteSummaryFormProps = {
   refNo: string;
   submitAction?: () => void;
   currQuote?: QuoteDetails;
+  prefillClient: boolean;
 };
 
 function QuoteSummaryForm({
   refNo,
   submitAction,
   currQuote,
+  prefillClient,
 }: QuoteSummaryFormProps) {
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
@@ -89,7 +91,11 @@ function QuoteSummaryForm({
       setValue("quoteDate", currQuote.quote_date);
       setValue("expiryDate", currQuote.expiry_date);
       setValue("hidePhoneNumber", !currQuote.is_company_phone_number_show);
-      setValue("clientId", currQuote.client.id.toString());
+
+      if (prefillClient) {
+        setValue("clientId", currQuote.client.id.toString());
+        setClientSearchTerm(currQuote.client.name);
+      }
       setValue("jobDescription", currQuote.job_description);
       const attachmentList: File[] = [];
       currQuote.attachments.forEach((attachment) => {
@@ -107,7 +113,6 @@ function QuoteSummaryForm({
         );
       });
       setValue("attachments", attachmentList);
-      setClientSearchTerm(currQuote.client.name);
     } else {
       reset(initialValue);
     }
