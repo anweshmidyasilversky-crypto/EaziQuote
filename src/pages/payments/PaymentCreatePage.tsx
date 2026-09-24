@@ -171,7 +171,7 @@ function PaymentCreatePage() {
       } else {
         Object.assign(payload, {
           client_id: clientId ?? 0,
-          quote_id: selectedQuote.id,
+          order_id: selectedQuote.id,
           amount: selectedQuote.deposit_amount,
           amount_type: PaymentAmountType.deposit,
         } as CreatePaymentDeposit);

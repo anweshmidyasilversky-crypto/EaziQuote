@@ -49,6 +49,7 @@ import {
 } from "../../components/common/CustomToggleGroup";
 import { toast } from "react-toastify";
 import {
+  ActivityType,
   PaymentStatus,
   type InvoiceActivity,
   type Payment,
@@ -60,6 +61,9 @@ import useClientDetails from "@/hooks/apis/clients/useClientDetails";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
 import usePaymentsList from "@/hooks/apis/payments/usePaymentsList";
 import { ShareOptions } from "@/components/common/ShareOptions";
+import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
@@ -77,11 +81,16 @@ export function ClientDetailsPage() {
     endDate: undefined,
   });
   const [shareModalOpen, toggleShareModalOpen] = useState(false);
+  const [activityDeleteModal, toggleActivityDelete] = useState(false);
 
   const [filters, setFilters] = useState<string[]>([]);
   const activityTableFilters = useRef<ColumnFiltersState>([]);
 
   const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
+  const targetPaymentId = useRef<number | undefined>(undefined);
+  const targetQuoteId = useRef<number | undefined>(undefined);
+  const targetInvoiceId = useRef<number | undefined>(undefined);
+  const currActivityType = useRef<ActivityType>(ActivityType.QUOTE);
 
   const {
     clientDetails: client,
@@ -92,6 +101,43 @@ export function ClientDetailsPage() {
   });
 
   const { clientUpdateMutation, clientDeleteMutation } = useClientMutations();
+  const { quoteDeleteMutation } = useQuotesMutations();
+  const { invoiceDeleteMutation } = useInvoiceMutations();
+
+  const handleActivityDelete = () => {
+    // Delete activities based on the type if it's quote or invoice
+    if (currActivityType.current === ActivityType.INVOICE) {
+      if (targetInvoiceId.current) {
+        invoiceDeleteMutation.mutate(targetInvoiceId.current, {
+          onSuccess: (response) => {
+            toast.success(response.message);
+            toggleActivityDelete(false);
+            refetchClientDetails();
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        });
+      } else {
+        toast.error(`No Invoice Id found to delete`);
+      }
+    } else {
+      if (targetQuoteId.current) {
+        quoteDeleteMutation.mutate(targetQuoteId.current, {
+          onSuccess: (response) => {
+            toast.success(response.message);
+            toggleActivityDelete(false);
+            refetchClientDetails();
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        });
+      } else {
+        toast.error(`No Quote Id found`);
+      }
+    }
+  };
 
   const paymentFilter = useMemo(
     () => ({
@@ -107,13 +153,26 @@ export function ClientDetailsPage() {
     isFetching: isPaymentListFetching,
   } = usePaymentsList({ filters: paymentFilter });
 
+  const { paymentLinkShareMutation } = usePaymentMutations();
+
+  const handleSharePaymentLink = () => {
+    if (targetPaymentId.current) {
+      paymentLinkShareMutation.mutate(targetPaymentId.current, {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          toggleShareModalOpen(false);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      });
+    }
+  };
+
   useEffect(() => {
     setPageNo(1);
   }, [currTable]);
 
-  {
-    /* Checkbox config */
-  }
   const checkboxConfig: CheckboxConfig = useMemo(
     () => [
       {
@@ -164,10 +223,6 @@ export function ClientDetailsPage() {
     ],
     [],
   );
-
-  {
-    /* Toggle tables based on which data is shown */
-  }
 
   let initial = "AC";
   if (client) {
@@ -260,6 +315,15 @@ export function ClientDetailsPage() {
                 editFn={() => navigate(`/quotes/manage-quotes/${activity.id}`)}
                 withEdit={activity.is_editable}
                 withDelete={activity.is_editable}
+                deleteFn={() => {
+                  currActivityType.current = activity.type;
+                  if (activity.type === ActivityType.QUOTE) {
+                    targetQuoteId.current = activity.id;
+                  } else {
+                    targetInvoiceId.current = activity.id;
+                  }
+                  toggleActivityDelete((curr) => !curr);
+                }}
               />
             </div>
           );
@@ -325,11 +389,14 @@ export function ClientDetailsPage() {
 
           return (
             <CustomActionGroup
-              withShare={payment.status === PaymentStatus.Pending}
+              withShare={payment.status !== PaymentStatus.Received}
+              withDelete={false}
               shareAction={() => {
+                targetPaymentId.current = payment.id;
                 toggleShareModalOpen((curr) => !curr);
               }}
               withEdit={false}
+              openFn={() => navigate(`/payments/${payment.id}`)}
             />
           );
         },
@@ -628,6 +695,17 @@ export function ClientDetailsPage() {
         isOpen={shareModalOpen}
         toggleIsOpen={toggleShareModalOpen}
         clientEmail={client?.email ?? "dummy@gmail.com"}
+        sendEmailAction={handleSharePaymentLink}
+        isEmailSending={paymentLinkShareMutation.isPending}
+      />
+
+      <DeleteDialog
+        isOpen={activityDeleteModal}
+        toggleOpen={toggleActivityDelete}
+        deleteAction={handleActivityDelete}
+        isPending={
+          quoteDeleteMutation.isPending || invoiceDeleteMutation.isPending
+        }
       />
     </div>
   );

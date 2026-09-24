@@ -44,6 +44,10 @@ import {
   removeQuote as removeQuoteRedux,
   updateQuote as updateQuoteRedux,
 } from "@/redux/slices/quotes.slice";
+import DeleteDialog from "@/components/common/DeleteDialog";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import { toast } from "react-toastify";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
@@ -57,6 +61,8 @@ export function QuotesIndexPage() {
   const [presetSelectionOpen, togglePresetSelectionOpen] = useState(false);
   const pageFilters = useRef<PageFilters>({});
   const dispatch = useAppDispatch();
+  const [deleteModalOpen, toggleDeleteModal] = useState(false);
+  const targetQuoteId = useRef<number | undefined>(undefined);
 
   const {
     quoteList,
@@ -66,6 +72,7 @@ export function QuotesIndexPage() {
     setSearchTerm: setQuoteSearchTerm,
     setPageNo,
     paginationMeta: quotePaginationMeta,
+    refetch: refetchQuoteList,
   } = useQuoteList({
     filters: pageFilters.current,
   });
@@ -78,6 +85,8 @@ export function QuotesIndexPage() {
     setSearchTerm: setPresetSearchTerm,
     paginationMeta: presetQuotePaginationMeta,
   } = usePresetQuotesList();
+
+  const { quoteDeleteMutation } = useQuotesMutations();
 
   const summary: ActivitySummaryProps["summaryConfig"] = useMemo(() => {
     return [
@@ -179,6 +188,10 @@ export function QuotesIndexPage() {
               editFn={() => navigate(`/quotes/manage-quotes/${quote.id}`)}
               withEdit={row.original.is_editable}
               withDelete={row.original.is_editable}
+              deleteFn={() => {
+                targetQuoteId.current = quote.id;
+                toggleDeleteModal((curr) => !curr);
+              }}
             />
           );
         },
@@ -257,6 +270,23 @@ export function QuotesIndexPage() {
     },
   ];
 
+  const handleQuoteDelete = () => {
+    if (targetQuoteId.current) {
+      quoteDeleteMutation.mutate(targetQuoteId.current, {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          toggleDeleteModal(false);
+          refetchQuoteList();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      });
+    } else {
+      toast.error(`No Quote Selected to delete`);
+    }
+  };
+
   const fetchPresetQuote = useRef<boolean>(false);
   const { presetQuote, isFetching: isPresetQuoteDetailsFetching } =
     usePresetQuoteDetails({
@@ -275,12 +305,6 @@ export function QuotesIndexPage() {
           expiry_date: new Date(Date.now() + 86400000).toISOString(),
         }),
       );
-      console.log({
-        ...presetQuote,
-        job_description: presetQuote.quote_description ?? "",
-        quote_date: new Date().toISOString(),
-        expiry_date: new Date(Date.now() + 86400000).toISOString(),
-      });
       fetchPresetQuote.current = false;
       navigate(`/quotes/manage-quotes/`);
     }
@@ -438,6 +462,13 @@ export function QuotesIndexPage() {
           />
         </div>
       </CustomDialog>
+
+      <DeleteDialog
+        isOpen={deleteModalOpen}
+        toggleOpen={toggleDeleteModal}
+        deleteAction={handleQuoteDelete}
+        isPending={quoteDeleteMutation.isPending}
+      />
     </React.Fragment>
   );
 }

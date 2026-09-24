@@ -3,7 +3,7 @@ import { getHomePage } from "@/api/services/auth.api";
 import { useQuery } from "@tanstack/react-query";
 
 function useHome() {
-  const { data, isFetching, error } = useQuery({
+  const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["home"],
     queryFn: getHomePage,
   });
@@ -15,6 +15,7 @@ function useHome() {
   return {
     data,
     isFetching,
+    refetch,
   };
 }
 

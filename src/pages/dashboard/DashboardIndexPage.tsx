@@ -12,8 +12,11 @@ import { formatDisplayDate, formatOrdinalDate } from "../../lib/utils";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";
-import { useEffect, useState } from "react";
-import type { DashboardActivityItem } from "@/types/api.responses.type";
+import { useEffect, useRef, useState } from "react";
+import {
+  ActivityType,
+  type DashboardActivityItem,
+} from "@/types/api.responses.type";
 import type { ClientCreationPayload } from "@/types/clientCreation.payload.type";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/redux/store";
@@ -23,13 +26,23 @@ import useNotifications from "@/hooks/apis/notifications/useNotifications";
 import useHome from "@/hooks/apis/home/useHome";
 import { showErrorToast } from "@/api/axiosInstance";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
+import DeleteDialog from "@/components/common/DeleteDialog";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
+  const [deleteModalOpen, toggleDeleteModal] = useState(false);
+  const targetActivityType = useRef<ActivityType>(ActivityType.QUOTE);
+  const targetId = useRef<number | undefined>(undefined);
 
-  const { data: homePage, isFetching: isRecentActivityFetching } = useHome();
+  const {
+    data: homePage,
+    isFetching: isRecentActivityFetching,
+    refetch: refetchHome,
+  } = useHome();
 
   const { data: notificationList, isFetching: isNotificationFetching } =
     useNotifications();
@@ -43,6 +56,8 @@ export function DashboardIndexPage() {
   }, [appConfig]);
 
   const { clientCreatMutation: clientMutation } = useClientMutations();
+  const { quoteDeleteMutation } = useQuotesMutations();
+  const { invoiceDeleteMutation } = useInvoiceMutations();
 
   const columns: ColumnDef<TableFeatures, DashboardActivityItem>[] = [
     {
@@ -107,10 +122,45 @@ export function DashboardIndexPage() {
           editFn={() =>
             navigate(`/quotes/manage-quotes/${info.row.original.id}`)
           }
+          deleteFn={() => {
+            ((targetActivityType.current = info.row.original.type),
+              (targetId.current = info.row.original.id));
+            toggleDeleteModal((curr) => !curr);
+          }}
         />
       ),
     },
   ];
+
+  const handleActivityDelete = () => {
+    if (targetId.current) {
+      if (targetActivityType.current === ActivityType.QUOTE) {
+        quoteDeleteMutation.mutate(targetId.current, {
+          onSuccess: (response) => {
+            toast.success(response.message);
+            toggleDeleteModal(false);
+            refetchHome();
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        });
+      } else {
+        invoiceDeleteMutation.mutate(targetId.current, {
+          onSuccess: (response) => {
+            toast.success(response.message);
+            toggleDeleteModal(false);
+            refetchHome();
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        });
+      }
+    } else {
+      toast.error(`No activity selected for delete`);
+    }
+  };
 
   const kpiCardConfig: KpiCardProps[] = [
     {
@@ -252,6 +302,15 @@ export function DashboardIndexPage() {
         mode="creation"
         clientCreatFn={addClientFn}
         isSubmitting={clientMutation.isPending}
+      />
+
+      <DeleteDialog
+        isOpen={deleteModalOpen}
+        toggleOpen={toggleDeleteModal}
+        deleteAction={handleActivityDelete}
+        isPending={
+          quoteDeleteMutation.isPending || invoiceDeleteMutation.isPending
+        }
       />
     </div>
   );

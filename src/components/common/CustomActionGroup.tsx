@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { assets } from "../../assets/icons";
-import DeleteDialog from "./DeleteDialog";
 
 export type CustomActionGroupProps = {
   openFn?: () => void;
@@ -36,9 +34,7 @@ export function CustomActionGroup({
   withDelete = true,
   withShare = false,
   withEdit = true,
-  isDeletePending,
 }: CustomActionGroupProps) {
-  const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const btnList: ActionBtnList = [
     {
       id: "openEye",
@@ -53,7 +49,7 @@ export function CustomActionGroup({
     {
       id: "deleteBin",
       icon: assets.binIcon,
-      action: () => toggleDeleteDialogOpen((curr) => !curr),
+      action: () => deleteFn?.(),
     },
   ];
 
@@ -83,6 +79,7 @@ export function CustomActionGroup({
       action: shareAction,
     });
   }
+
   return (
     <>
       <div className="flex gap-2 min-h-6 min-w-6 w-fit items-center shrik-0">
@@ -98,13 +95,6 @@ export function CustomActionGroup({
           );
         })}
       </div>
-
-      <DeleteDialog
-        isOpen={deleteDialogOpen}
-        toggleOpen={toggleDeleteDialogOpen}
-        deleteAction={deleteFn}
-        isPending={isDeletePending}
-      />
     </>
   );
 }

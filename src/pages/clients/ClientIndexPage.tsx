@@ -27,6 +27,7 @@ import { showErrorToast } from "@/api/axiosInstance";
 import useClients from "@/hooks/apis/clients/useClients";
 import type { PageFilters } from "@/types/api.requests.type";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
+import DeleteDialog from "@/components/common/DeleteDialog";
 
 export function ClientIndexPage() {
   const navigate = useNavigate();
@@ -40,6 +41,8 @@ export function ClientIndexPage() {
   const targetClientId = useRef<number>(0);
   const clientFormMode = useRef<ClientFormProps["mode"]>("creation");
   const sortBy = useRef<string | null>(null);
+
+  const [deleteModalOpen, toggleDeleteModal] = useState(false);
 
   const tableFilters = useMemo(
     () =>
@@ -103,9 +106,9 @@ export function ClientIndexPage() {
               toggleClientModal((curr) => !curr);
             }}
             withDelete={true}
-            deleteFn={async () => {
+            deleteFn={() => {
               targetClientId.current = client.id;
-              await handleDelete();
+              toggleDeleteModal((curr) => !curr);
             }}
           />
         );
@@ -123,7 +126,7 @@ export function ClientIndexPage() {
     [],
   );
 
-  const clientCreatFn = async (data: ClientCreationPayload) => {
+  const clientCreatFn = (data: ClientCreationPayload) => {
     clientCreatMutation.mutate(
       {
         ...data,
@@ -146,7 +149,7 @@ export function ClientIndexPage() {
     );
   };
 
-  const clientEditFn = async (data: ClientEditPayload) => {
+  const clientEditFn = (data: ClientEditPayload) => {
     clientUpdateMutation.mutate(
       {
         client_id: targetClientId.current.toString(),
@@ -170,11 +173,11 @@ export function ClientIndexPage() {
     );
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     clientDeleteMutation.mutate(targetClientId.current.toString(), {
       onSuccess: (response) => {
         toast.success(response.message);
-        toggleClientModal(false);
+        toggleDeleteModal(false);
         refetchClients();
       },
       onError: (error) => {
@@ -271,6 +274,13 @@ export function ClientIndexPage() {
             ))}
           </div>
         </CustomSheet>
+
+        <DeleteDialog
+          isOpen={deleteModalOpen}
+          toggleOpen={toggleDeleteModal}
+          deleteAction={handleDelete}
+          isPending={clientDeleteMutation.isPending}
+        />
       </div>
     </>
   );

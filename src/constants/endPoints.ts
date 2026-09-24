@@ -87,5 +87,6 @@ export const API_ENDPOINTS = {
   },
   invoices: {
     invoiceList: `/invoices`,
+    deleteInvoice: (id: string | number) => `/invoices/${id}`,
   },
 } as const;

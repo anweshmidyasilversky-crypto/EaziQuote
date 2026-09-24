@@ -161,7 +161,7 @@ export interface CreatePaymentBase {
 
 export interface CreatePaymentDeposit extends CreatePaymentBase {
   client_id: string | number;
-  quote_id: string | number;
+  order_id: string | number;
 }
 
 export interface CreatePaymentInvoice extends CreatePaymentBase {

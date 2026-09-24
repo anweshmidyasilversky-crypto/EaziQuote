@@ -16,3 +16,14 @@ export const getInvoiceList = async (pageFilters?: PageFilters) => {
     throw error;
   }
 };
+
+export const deleteInvoice = async (invoiceId: string | number) => {
+  try {
+    const response = await axiosInstance.delete<ApiResponse<null>>(
+      API_ENDPOINTS.invoices.deleteInvoice(invoiceId),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
