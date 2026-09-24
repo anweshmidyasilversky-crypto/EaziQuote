@@ -5,7 +5,7 @@ import { FormLayout } from "../common/FormLayout";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { memberCreationSchema } from "@/validation/memberCreation.schema";
 import { toast } from "react-toastify";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 
 export type MemberFormProps = {
   isOpen: boolean;

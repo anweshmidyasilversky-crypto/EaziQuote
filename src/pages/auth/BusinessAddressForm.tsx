@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { type BusinessAddressPayload } from "../../types/businessAddress.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { businessAddressSchema } from "../../validation/businessAddress.payload.schema";
-import { CustomInput } from "../../components/common/customInput";
+import { CustomInput } from "../../components/common/CustomInput";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { billingPreferenceSchema } from "@/validation/billingPreference.payload.schema";
 import { cn } from "@/lib/utils";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { CustomBtn } from "../common/CustomBtn";
 import { useAppDispatch } from "@/redux/store";
 import { updateUser } from "@/redux/slices/user.slice";

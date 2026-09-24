@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import CustomDialog from "../common/CustomDialog";
 import { type Card } from "@/types/cardDetails.payload.type";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { countryStates } from "@/constants/dummyData";
 import { cn } from "@/lib/utils";

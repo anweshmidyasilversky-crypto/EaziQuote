@@ -29,8 +29,6 @@ export function CustomActionGroup({
   openFn,
   editFn,
   deleteFn,
-  paymentActionGroup,
-  paymentPending,
   shareAction,
   withOpen = true,
   downloadOnly,
@@ -38,19 +36,19 @@ export function CustomActionGroup({
   withDelete = true,
   withShare = false,
   withEdit = true,
-  isDeletePending = false,
+  isDeletePending,
 }: CustomActionGroupProps) {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const btnList: ActionBtnList = [
     {
       id: "openEye",
       icon: assets.openEyeIcon,
-      action: openFn,
+      action: () => openFn?.(),
     },
     {
       id: "editPencil",
       icon: assets.pencilIcon,
-      action: editFn,
+      action: () => editFn?.(),
     },
     {
       id: "deleteBin",
@@ -89,9 +87,6 @@ export function CustomActionGroup({
     <>
       <div className="flex gap-2 min-h-6 min-w-6 w-fit items-center shrik-0">
         {btnList.map((btn) => {
-          if (paymentActionGroup && btn.id !== "openEye") {
-            return <></>;
-          }
           return (
             <button
               key={btn.id}
@@ -102,21 +97,13 @@ export function CustomActionGroup({
             </button>
           );
         })}
-
-        {((paymentActionGroup && paymentPending) || withShare) && (
-          <button
-            onClick={shareAction}
-            className="flex w-4 shrink-0 items-center justify-center"
-          >
-            <img src={assets.shareIcon} className="w-4 aspect-square" />
-          </button>
-        )}
       </div>
 
       <DeleteDialog
         isOpen={deleteDialogOpen}
         toggleOpen={toggleDeleteDialogOpen}
         deleteAction={deleteFn}
+        isPending={isDeletePending}
       />
     </>
   );

@@ -14,7 +14,7 @@ import { BusinessProfilePayloadSchema } from "../../validation/businessProfile.s
 import {
   CustomInput,
   type SelectOptions,
-} from "../../components/common/customInput";
+} from "../../components/common/CustomInput";
 import { CircleAlertIcon } from "lucide-react";
 import {
   Popover,

@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import { ClientNameBadge } from "@/components/common/ClientNameBadge";
 import { CustomActionGroup } from "@/components/common/CustomActionGroup";
@@ -8,25 +9,48 @@ import {
 import { CustomDataTable } from "@/components/common/CustomTable";
 import SearchInputGruop from "@/components/common/SearchInputGruop";
 import StatusBadge from "@/components/common/StatusBadge";
-import { paymentRecords } from "@/constants/dummyData";
-import { useDebounce } from "@/hooks/useDebounce";
+import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
+import usePaymentsList from "@/hooks/apis/payments/usePaymentsList";
 import { formatCurrency, formatDisplayDate } from "@/lib/utils";
-import type { paymentRecord, PaymentStatus } from "@/types/paymentRecord.type";
+import { PaymentStatus, type Payment } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
-import { useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 function PaymentsIndexPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearch = useDebounce({ value: searchTerm });
+  const {
+    paymentList,
+    searchTerm,
+    setSearchTerm,
+    isFetching,
+    paginationMeta,
+    setPageNo,
+    refetch,
+  } = usePaymentsList({});
+
+  const { paymentDeleteMutation } = usePaymentMutations();
+
+  const handlePaymentDelete = (payment_id: string | number) => {
+    paymentDeleteMutation.mutate(payment_id, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        refetch();
+      },
+      onError: (error) => showErrorToast(error),
+    });
+  };
+
+  const navigate = useNavigate();
 
   const headerBtnConfig: CustomHeaderProps["btnConfigList"] = [
     {
       buttonLabel: "Create Payment Record",
       leftIcon: assets.plusIcon,
+      onClick: () => navigate(`/payments/record-payment`),
     },
   ];
 
-  const paymentsColumns: ColumnDef<TableFeatures, paymentRecord>[] = [
+  const paymentsColumns: ColumnDef<TableFeatures, Payment>[] = [
     {
       accessorKey: "id",
       enableSorting: false,
@@ -83,11 +107,20 @@ function PaymentsIndexPage() {
     {
       id: "action",
       header: () => <div className="w-full flex justify-end">{"ACTION"}</div>,
-      cell: () => (
-        <div className="flex min-w-20 justify-end">
-          <CustomActionGroup withEdit={false} withShare />
-        </div>
-      ),
+      cell: (info) => {
+        const { id, status } = info.row.original;
+        return (
+          <div className="flex min-w-20 justify-end">
+            <CustomActionGroup
+              withEdit={false}
+              withShare
+              deleteFn={() => handlePaymentDelete(id)}
+              openFn={() => navigate(`/payments/${id}`)}
+              isDeletePending={paymentDeleteMutation.isPending}
+            />
+          </div>
+        );
+      },
     },
   ];
 
@@ -102,8 +135,7 @@ function PaymentsIndexPage() {
       <div className="bg-table py-5 flex flex-col gap-5 rounded-[10px]">
         <CustomDataTable
           columns={paymentsColumns}
-          data={paymentRecords}
-          showPaginated
+          data={paymentList}
           tableOptionsRight={
             <SearchInputGruop
               searchTerm={searchTerm}
@@ -111,7 +143,11 @@ function PaymentsIndexPage() {
               searchPlaceHolder="Search payment id or clients"
             />
           }
-          globalFilterTerm={debouncedSearch}
+          showPaginated
+          isFetching={isFetching}
+          setPageNo={setPageNo}
+          paginationMeta={paginationMeta}
+          paginationBtns={paginationMeta?.links}
         />
       </div>
     </div>

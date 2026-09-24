@@ -2,7 +2,7 @@ import type { ClientCreationPayload } from "../../types/clientCreation.payload.t
 import { useForm, type DefaultValues } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { clientCreationSchema } from "../../validation/clientCreation.payload.schema";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { Separator } from "../ui/separator";
 import { PostCodeSelectComboBox } from "../common/PostCodeSelectComboBox";
 import React, { useEffect } from "react";

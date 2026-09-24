@@ -2,7 +2,7 @@ import { assets } from "@/assets/icons";
 import { ImageInput } from "@/components/auth/imageInput";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { CustomBtn } from "@/components/common/CustomBtn";
-import { CustomInput } from "@/components/common/customInput";
+import { CustomInput } from "@/components/common/CustomInput";
 import {
   CustomToggleGroup,
   type CustomToggleGroupProps,

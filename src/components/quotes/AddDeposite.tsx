@@ -4,7 +4,7 @@ import {
   CustomToggleGroup,
   type CustomToggleGroupProps,
 } from "../common/CustomToggleGroup";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { useForm, type DefaultValues } from "react-hook-form";
 import { type AddDepositePayload } from "../../types/addDeposite.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";

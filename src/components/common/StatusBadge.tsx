@@ -47,20 +47,20 @@ const statusColorMap: Record<StatusBadgeProps["status"], string> = {
   received: "bg-paid-badge",
   pending: "bg-draft-badge",
   sent: "bg-sent-badge",
-  //paid: "bg-paid-badge",
-  //overdue: "bg-overdue-badge",
+  paid: "bg-paid-badge",
+  overdue: "bg-overdue-badge",
   draft: "bg-draft-badge",
-  //rejected: "bg-overdue-badge",
-  //due: "bg-draft-badge",
+  rejected: "bg-overdue-badge",
+  due: "bg-draft-badge",
   approved: "bg-paid-badge",
-  //completed: "bg-paid-badge",
-  // cancelled: "bg-paid-badge",
+  completed: "bg-paid-badge",
+  cancelled: "bg-paid-badge",
   // received: "bg-paid-badge",
   // pending: "bg-draft-badge",
   // failed: "bg-overdue-badge",
-  //refunded: "bg-paid-badge",
+  refunded: "bg-paid-badge",
   accepted: "bg-paid-badge",
-  //expired: "bg-overdue-badge"
+  expired: "bg-overdue-badge",
 };
 
 const textColorMap: Record<StatusBadgeProps["status"], string> = {
@@ -87,29 +87,33 @@ const textColorMap: Record<StatusBadgeProps["status"], string> = {
   received: "text-paid-text",
   pending: "text-draft-text",
   sent: "text-sent-text",
-  // paid: "text-paid-text",
-  // overdue: "text-overdue-text",
+  paid: "text-paid-text",
+  overdue: "text-overdue-text",
   draft: "text-draft-text",
-  // rejected: "text-overdue-text",
-  // due: "text-draft-text",
+  rejected: "text-overdue-text",
+  due: "text-draft-text",
   approved: "text-paid-text",
-  // completed: "text-paid-text",
-  // cancelled: "text-paid-text",
+  completed: "text-paid-text",
+  cancelled: "text-paid-text",
   // received: "text-paid-text",
   // pending: "text-draft-text",
   // failed: "text-overdue-text",
-  // refunded: "text-paid-text",
+  refunded: "text-paid-text",
   accepted: "text-paid-text",
-  // expired: "text-overdue-text",
+  expired: "text-overdue-text",
 };
 
 function StatusBadge({ status, ChevronIcon }: StatusBadgeProps) {
-  console.log(statusColorMap[status]);
   return (
     <div
       className={`flex justify-between px-2.5 min-h-6 w-fit rounded items-center ${statusColorMap[status]} ${textColorMap[status]}`}
     >
-      <span> {status} </span>
+      <span>
+        {" "}
+        {status.length >= 1
+          ? status[0].toLocaleUpperCase() + status.slice(1)
+          : status}{" "}
+      </span>
       {ChevronIcon && (
         <div className="p-0.5 ml-1 mix-blend-multiply">
           <ChevronIcon className="w-5 aspect-square" />

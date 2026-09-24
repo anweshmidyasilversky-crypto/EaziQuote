@@ -3,7 +3,7 @@ import { bankInfoSchema } from "@/validation/bankInfo.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { Separator } from "../ui/separator";
 import { CustomBtn } from "../common/CustomBtn";
 import { toast } from "react-toastify";

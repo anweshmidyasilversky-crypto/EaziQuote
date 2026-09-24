@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm, type DefaultValues } from "react-hook-form";
 import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { cn } from "@/lib/utils";
 import { yupResolver } from "@hookform/resolvers/yup";
 import type {

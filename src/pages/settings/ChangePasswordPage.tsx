@@ -1,6 +1,6 @@
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { CustomBtn } from "@/components/common/CustomBtn";
-import { CustomInput } from "@/components/common/customInput";
+import { CustomInput } from "@/components/common/CustomInput";
 import type { PasswordResetPayload } from "@/types/passwordReset.payload.type";
 import { passwordResetSchema } from "@/validation/passwordReset.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";

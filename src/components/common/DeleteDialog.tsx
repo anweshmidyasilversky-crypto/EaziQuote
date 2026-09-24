@@ -22,7 +22,6 @@ function DeleteDialog({
     toggleIsDeleting(true);
     try {
       await deleteAction?.();
-      toggleOpen(false);
     } catch (err) {
       throw err;
     } finally {
@@ -37,6 +36,7 @@ function DeleteDialog({
       headerCls={cn(`bg-custom-dialog-secondary border-0!`)}
       withXIcon={false}
       withFooter={false}
+      closeOnSubmit={false}
     >
       <div className="p-5 flex flex-col items-center gap-8 min-w-125">
         <Trash2Icon className="text-danger w-12 h-12" />

@@ -1,5 +1,5 @@
 import { showErrorToast } from "@/api/axiosInstance";
-import { getQuoteList } from "@/api/services/auth.api";
+import { getInvoiceList } from "@/api/services/invoices.api";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { PageFilters } from "@/types/api.requests.type";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -7,9 +7,10 @@ import { useEffect, useMemo, useState } from "react";
 
 export type useQuoteListProps = {
   filters?: PageFilters;
+  enabled?: boolean;
 };
 
-function useQuoteList({ filters }: useQuoteListProps) {
+function useInvoiceList({ filters, enabled }: useQuoteListProps) {
   const [pageNo, setPageNo] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -31,7 +32,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
     initialPageParam: pageNo,
 
     queryFn: ({ pageParam }) =>
-      getQuoteList({
+      getInvoiceList({
         ...filters,
         search:
           debouncedSearchTerm.trim().length > 0
@@ -49,6 +50,8 @@ function useQuoteList({ filters }: useQuoteListProps) {
 
       return undefined;
     },
+
+    enabled,
   });
 
   /*
@@ -61,7 +64,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
   /*
    * All pages fetched so far.
    */
-  const quoteList = useMemo(
+  const invoiceList = useMemo(
     () => data?.pages.flatMap((page) => page.payload.data) ?? [],
     [data],
   );
@@ -76,7 +79,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
   /*
    * Summary generally belongs to the first response.
    */
-  const quoteSummary = data?.pages[0]?.payload.summary;
+  const InvoiceSummary = data?.pages[0]?.payload.summary;
 
   useEffect(() => {
     if (error) {
@@ -86,7 +89,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
 
   return {
     // Infinite-scroll data
-    quoteList,
+    invoiceList,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -106,8 +109,8 @@ function useQuoteList({ filters }: useQuoteListProps) {
     setSearchTerm,
 
     // Summary
-    quoteSummary,
+    InvoiceSummary,
   };
 }
 
-export default useQuoteList;
+export default useInvoiceList;

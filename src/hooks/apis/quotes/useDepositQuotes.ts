@@ -1,15 +1,16 @@
 import { showErrorToast } from "@/api/axiosInstance";
-import { getQuoteList } from "@/api/services/auth.api";
+import { getDepositeQuotes } from "@/api/services/quotes.api";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { PageFilters } from "@/types/api.requests.type";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
-export type useQuoteListProps = {
+export type useDepositQuotesProps = {
   filters?: PageFilters;
+  enabled?: boolean;
 };
 
-function useQuoteList({ filters }: useQuoteListProps) {
+function useDepositQuotes({ filters, enabled }: useDepositQuotesProps) {
   const [pageNo, setPageNo] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -31,7 +32,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
     initialPageParam: pageNo,
 
     queryFn: ({ pageParam }) =>
-      getQuoteList({
+      getDepositeQuotes({
         ...filters,
         search:
           debouncedSearchTerm.trim().length > 0
@@ -49,6 +50,8 @@ function useQuoteList({ filters }: useQuoteListProps) {
 
       return undefined;
     },
+
+    enabled,
   });
 
   /*
@@ -61,7 +64,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
   /*
    * All pages fetched so far.
    */
-  const quoteList = useMemo(
+  const depositQuotes = useMemo(
     () => data?.pages.flatMap((page) => page.payload.data) ?? [],
     [data],
   );
@@ -73,11 +76,6 @@ function useQuoteList({ filters }: useQuoteListProps) {
     ? data.pages[data.pages.length - 1].payload.meta
     : undefined;
 
-  /*
-   * Summary generally belongs to the first response.
-   */
-  const quoteSummary = data?.pages[0]?.payload.summary;
-
   useEffect(() => {
     if (error) {
       showErrorToast(error);
@@ -86,7 +84,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
 
   return {
     // Infinite-scroll data
-    quoteList,
+    depositQuotes,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -104,10 +102,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
     // Search
     searchTerm,
     setSearchTerm,
-
-    // Summary
-    quoteSummary,
   };
 }
 
-export default useQuoteList;
+export default useDepositQuotes;

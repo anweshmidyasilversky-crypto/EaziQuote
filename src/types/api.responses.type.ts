@@ -471,3 +471,74 @@ export interface QuoteSection {
   created_at: string;
   updated_at: string;
 }
+
+export interface PaymentAllocation {
+  invoice_id: number;
+  reference: string;
+  title: string;
+  status: PaymentStatus;
+  due_date: string;
+  amount: string;
+  currency: string;
+}
+
+export enum PaymentTypes {
+  deposite = "deposit",
+  invoice = "invoice",
+}
+
+export interface PaymentDetails {
+  id: number;
+  reference: string;
+  client_name: string;
+  client_email: string;
+  amount: string;
+  currency: string;
+  date: string;
+  type: PaymentTypes;
+  method: PaymentMethods;
+  status: PaymentStatus;
+  credit_remaining: number;
+  paid_at: string;
+  allocations: PaymentAllocation[];
+}
+
+export interface DepositQuote {
+  id: number;
+  title: string;
+  reference_number: string;
+  deposit_required: boolean;
+  deposit_type: DepositeTypes;
+  deposit_amount: number | null;
+  deposit_percentage: null | number;
+}
+
+export interface Invoice {
+  id: number;
+  type: "invoice";
+  title: string;
+  name: string;
+  reference_number: string;
+  quote_reference_number: string;
+  status: InvoiceStatus;
+  is_editable: boolean;
+  price: number;
+  total_due: number;
+  expiry_date: string;
+  created_at: string;
+  deposit_required: boolean;
+  deposit_type: null | DepositeTypes;
+  deposit_amount: null | number;
+  deposit_available: null | number;
+}
+
+export interface InvoiceSummary {
+  total_count: number;
+  paid_count: number;
+  outstanding_count: number;
+  overdue_count: number;
+}
+
+export interface InvoiceList extends ListResponse<Invoice> {
+  summary: InvoiceSummary;
+}

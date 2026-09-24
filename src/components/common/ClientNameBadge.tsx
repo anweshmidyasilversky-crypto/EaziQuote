@@ -1,4 +1,4 @@
-import { CustomAvatar } from "./customAvatar";
+import { CustomAvatar } from "./CustomAvatar";
 import { colorThemes } from "../../constants/colors";
 import { getRandomIndex } from "../../lib/utils";
 import { useRender } from "@base-ui/react/use-render";

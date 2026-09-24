@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { itemCreationSchema } from "../../validation/itemCreation.payload.schema";
 import { FormLayout } from "../common/FormLayout";
 import { useEffect, useState } from "react";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { useAppSelector } from "../../redux/store";
 import { CustomBtn } from "../common/CustomBtn";

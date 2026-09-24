@@ -54,6 +54,8 @@ export interface DataTableProps<TData extends RowData> {
   withFooterBorder?: boolean;
   withSelectionToggle?: boolean;
   rowIdSelector?: (row: TData) => string;
+
+  tableOptionsCls?: string;
 }
 
 function CustomTable<TData extends RowData>({
@@ -78,6 +80,7 @@ function CustomTable<TData extends RowData>({
   withFooterBorder,
   rowIdSelector,
   withSelectionToggle = false,
+  tableOptionsCls,
 }: DataTableProps<TData>) {
   // console.log(renderData);
   // const currPageNo = paginationMeta?.current_page;
@@ -127,7 +130,9 @@ function CustomTable<TData extends RowData>({
     <>
       {/* Table Options */}
       {(tableOptionsLeft || tableOptionsRight) && (
-        <div className="flex justify-between min-h-9.5 px-5">
+        <div
+          className={`flex justify-between min-h-9.5 px-5 ${tableOptionsCls}`}
+        >
           {tableOptionsLeft}
           {tableOptionsRight}
         </div>

@@ -1,11 +1,15 @@
 import {
+  type ListResponse,
   QuoteStatus,
   type ApiResponse,
+  type Quote,
   type QuoteDetails,
+  type DepositQuote,
 } from "@/types/api.responses.type";
 import { axiosInstance } from "../axiosInstance";
 import type {
   CreateQuoteApiPayload,
+  PageFilters,
   UpdateQuoteApiPayload,
 } from "@/types/api.requests.type";
 import { ObjToFormData } from "@/lib/utils";
@@ -121,6 +125,19 @@ export const sendEmail = async (quote_id: string | number) => {
       API_ENDPOINTS.quotes.sendEmail(quote_id),
     );
     return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getDepositeQuotes = async (filters?: PageFilters) => {
+  try {
+    const listResponse = await axiosInstance.get<
+      ApiResponse<ListResponse<DepositQuote>>
+    >(API_ENDPOINTS.quotes.paymentDepositeQuote, {
+      params: filters,
+    });
+    return listResponse.data;
   } catch (error) {
     throw error;
   }

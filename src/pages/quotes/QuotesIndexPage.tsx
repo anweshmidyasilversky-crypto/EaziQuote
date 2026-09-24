@@ -25,7 +25,7 @@ import {
 import {
   type DateRange,
   DateRangePicker,
-} from "../../components/common/DateRangePicket";
+} from "../../components/common/DateRangePicker";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import { useNavigate } from "react-router";
 import React from "react";

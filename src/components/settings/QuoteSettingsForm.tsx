@@ -3,7 +3,7 @@ import { quoteSettingsSchema } from "@/validation/quoteSettings.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import CustomTooltip from "../common/CustomTooltip";
 import { toast } from "react-toastify";
 import { CustomBtn } from "../common/CustomBtn";

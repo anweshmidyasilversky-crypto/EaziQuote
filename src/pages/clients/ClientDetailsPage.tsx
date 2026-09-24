@@ -41,7 +41,7 @@ import { CustomSheet } from "../../components/common/CustomSheet";
 import {
   DateRangePicker,
   type DateRange,
-} from "../../components/common/DateRangePicket";
+} from "../../components/common/DateRangePicker";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import {
   CustomToggleGroup,
@@ -58,7 +58,7 @@ import { showErrorToast } from "@/api/axiosInstance";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import useClientDetails from "@/hooks/apis/clients/useClientDetails";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
-import usePaymentsByClient from "@/hooks/apis/payments/usePaymentsByClient";
+import usePaymentsList from "@/hooks/apis/payments/usePaymentsList";
 import { ShareOptions } from "@/components/common/ShareOptions";
 
 export function ClientDetailsPage() {
@@ -93,12 +93,19 @@ export function ClientDetailsPage() {
 
   const { clientUpdateMutation, clientDeleteMutation } = useClientMutations();
 
+  const paymentFilter = useMemo(
+    () => ({
+      client_id: param.id ?? "",
+    }),
+    [param.id],
+  );
+
   const {
     paymentList,
     setPageNo,
     paymentPaginationMeta,
     isFetching: isPaymentListFetching,
-  } = usePaymentsByClient({ client_id: param.id as string, filters: {} });
+  } = usePaymentsList({ filters: paymentFilter });
 
   useEffect(() => {
     setPageNo(1);
@@ -318,12 +325,11 @@ export function ClientDetailsPage() {
 
           return (
             <CustomActionGroup
-              paymentActionGroup={true}
-              paymentPending={payment.status !== PaymentStatus.Received}
-              withShare={true}
+              withShare={payment.status === PaymentStatus.Pending}
               shareAction={() => {
                 toggleShareModalOpen((curr) => !curr);
               }}
+              withEdit={false}
             />
           );
         },

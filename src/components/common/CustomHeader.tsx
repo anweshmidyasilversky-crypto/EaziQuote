@@ -18,9 +18,11 @@ export function CustomHeader({
         <span className="min-h-7.25 font-bold text-xl md:text-2xl self-start">
           {header}
         </span>
-        <span className="min-h-4.25 text-placeholder-text text-[14px]">
-          {headerInfo}
-        </span>
+        {headerInfo && (
+          <span className="min-h-4.25 text-placeholder-text text-[14px]">
+            {headerInfo}
+          </span>
+        )}
       </div>
 
       <div className="flex justify-between gap-3">

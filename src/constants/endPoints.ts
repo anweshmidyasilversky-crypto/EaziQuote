@@ -36,6 +36,10 @@ export const API_ENDPOINTS = {
   },
   payments: {
     getPaymentList: `/payments`,
+    deletePayment: (payment_id: string | number) => `/payments/${payment_id}`,
+    paymentsDetails: (id: string | number) => `/payments/deposits/${id}`,
+    createPayment: `/payments`,
+    sendPaymentEmail: (id: string | number) => `/payments/${id}/share`,
   },
   quotes: {
     getQutoeDetails: (quote_id: string | number) => `/quotes/${quote_id}`,
@@ -51,6 +55,7 @@ export const API_ENDPOINTS = {
     generatePdf: (quote_id: string | number) => `/quotes/${quote_id}/pdf`,
     updateStatus: `/update-status`,
     sendEmail: (quote_id: string | number) => `/quotes/${quote_id}/send-email`,
+    paymentDepositeQuote: `/payment-deposit-quotes`,
   },
   subCategories: {
     getSubcategoryList: `/sub-categories`,
@@ -79,5 +84,8 @@ export const API_ENDPOINTS = {
       section_id: string | number,
       quote_id: string | number,
     ) => `quotes/${quote_id}/sections/${section_id}`,
+  },
+  invoices: {
+    invoiceList: `/invoices`,
   },
 } as const;

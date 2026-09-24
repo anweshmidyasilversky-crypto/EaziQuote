@@ -2,7 +2,7 @@ import { assets } from "@/assets/icons";
 import { ImageInput } from "@/components/auth/imageInput";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { CustomCombobox } from "@/components/common/CustomCombobox";
-import { CustomInput } from "@/components/common/customInput";
+import { CustomInput } from "@/components/common/CustomInput";
 import { Separator } from "@/components/ui/separator";
 import { postalCodes, type AddressDetail } from "@/constants/dummyData";
 import { cn, getAddress } from "@/lib/utils";

@@ -33,6 +33,8 @@ import NotificationsPage from "@/pages/dashboard/NotificationsPage";
 import SubscriptionIndexPage from "@/pages/subscription/SubscriptionIndexPage";
 import PaymentsIndexPage from "@/pages/payments/PaymentsIndexPage";
 import InvoiceIndexPage from "@/pages/invoice/InvoiceIndexPage";
+import PaymentsDetailsPage from "@/pages/payments/PaymentsDetailsPage";
+import PaymentCreatePage from "@/pages/payments/PaymentCreatePage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -136,6 +138,14 @@ export const authRoutes: RouteObject[] = [
                   {
                     index: true,
                     Component: PaymentsIndexPage,
+                  },
+                  {
+                    path: ":id",
+                    Component: PaymentsDetailsPage,
+                  },
+                  {
+                    path: "record-payment",
+                    Component: PaymentCreatePage,
                   },
                 ],
               },

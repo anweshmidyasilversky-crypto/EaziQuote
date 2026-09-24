@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import { showFirebaseError } from "../../lib/firebase.errors";
 import { useNavigate } from "react-router";
 import { CustomForm } from "../../components/auth/CustomForm";
-import type { CustomInputProps } from "../../components/common/customInput";
+import type { CustomInputProps } from "../../components/common/CustomInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { emailSchema } from "../../validation/user.signIn.payload.schema";
 

@@ -3,7 +3,7 @@ import { CustomActionGroup } from "@/components/common/CustomActionGroup";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { CustomCombobox } from "@/components/common/CustomCombobox";
-import { CustomInput } from "@/components/common/customInput";
+import { CustomInput } from "@/components/common/CustomInput";
 import { CustomDataTable } from "@/components/common/CustomTable";
 import { FormLayout } from "@/components/common/FormLayout";
 import SearchInputGruop from "@/components/common/SearchInputGruop";

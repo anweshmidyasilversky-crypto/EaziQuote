@@ -1,5 +1,9 @@
 import type { Method } from "axios";
-import type { PaymentMethods, QuoteDetails } from "./api.responses.type";
+import type {
+  PaymentAmountType,
+  PaymentMethods,
+  QuoteDetails,
+} from "./api.responses.type";
 
 export enum deviceType {
   android = "android",
@@ -44,7 +48,9 @@ export interface PageFilters {
   quote_id?: string | number;
   invoice_id?: string | number;
   category_id?: string | number;
+  client_id?: string | number;
   subcategory_ids?: (string | number)[];
+  is_not_paid?: number;
 }
 
 export interface ClientCreateApiPayload {
@@ -144,4 +150,20 @@ export interface QuoteSectionUpdatePayload extends QuoteSectionCreatePayload {
 export interface CreateOrUpdateSectionForQuote {
   quote_id: string | number;
   sections: (QuoteSectionCreatePayload | QuoteSectionUpdatePayload)[];
+}
+
+export interface CreatePaymentBase {
+  amount_type: PaymentAmountType;
+  payment_method: PaymentMethods;
+  amount: number;
+  payment_date: string;
+}
+
+export interface CreatePaymentDeposit extends CreatePaymentBase {
+  client_id: string | number;
+  quote_id: string | number;
+}
+
+export interface CreatePaymentInvoice extends CreatePaymentBase {
+  invoice_id: string | number;
 }

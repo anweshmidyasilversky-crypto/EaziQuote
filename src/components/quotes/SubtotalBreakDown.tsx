@@ -377,7 +377,11 @@ export function SubtotalBreakDown({
           <div className="w-full justify-between gap-4 items-center">
             <span className="subtotal-field">
               {" "}
-              {deposite ? `Deposit Required` : `Deposite`}{" "}
+              {deposite
+                ? `Deposit Required`
+                : isEditPage
+                  ? `Deposite`
+                  : ``}{" "}
             </span>
 
             <div className="flex gap-2 items-center">
@@ -387,12 +391,16 @@ export function SubtotalBreakDown({
                   {formatCurrency(deposite)}{" "}
                 </span>
               ) : (
-                <a
-                  className="cursor-pointer subtotal-value"
-                  onClick={() => toggleDepositeDialog((curr) => !curr)}
-                >
-                  {`+ Add Deposit`}
-                </a>
+                <>
+                  {isEditPage && (
+                    <a
+                      className="cursor-pointer subtotal-value"
+                      onClick={() => toggleDepositeDialog((curr) => !curr)}
+                    >
+                      {`+ Add Deposit`}
+                    </a>
+                  )}
+                </>
               )}
 
               {isEditPage && deposite && (

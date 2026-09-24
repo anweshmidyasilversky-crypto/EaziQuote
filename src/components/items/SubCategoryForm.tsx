@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { subCategorySchema } from "../../validation/itemCreation.payload.schema";
 import { CustomSheet } from "../common/CustomSheet";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { CustomInput } from "../common/customInput";
+import { CustomInput } from "../common/CustomInput";
 import { cn } from "../../lib/utils";
 import type { SubCategoryCreateApiPayload } from "@/types/api.requests.type";
 import useCategoriesList from "@/hooks/apis/categories/useCategoriesList";

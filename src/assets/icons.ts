@@ -109,6 +109,12 @@ import clientGroupIcon from "./icons/clientsGroupIcon.png";
 import brushIcon from "./icons/brushIcon.png";
 import statisticsIcon from "./icons/statisticIcon.png";
 
+import userIconWithGradient from "./icons/userGradientIcon.png";
+import calenderIconBlue from "./icons/calenderIconBlue.png";
+import paymentTypeIcon from "./icons/paymentTypeIcon.png";
+import walletIconOrage from "./icons/walletOrangeIcon.png";
+
+import warningIconBlue from "./icons/warningIconBlue.png";
 export const assets = {
   loginHeader,
   logo,
@@ -217,4 +223,11 @@ export const assets = {
   statisticsIcon,
   brushIcon,
   clientGroupIcon,
+
+  userIconWithGradient,
+  calenderIconBlue,
+  walletIconOrage,
+  paymentTypeIcon,
+
+  warningIconBlue,
 };
