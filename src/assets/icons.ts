@@ -115,6 +115,8 @@ import paymentTypeIcon from "./icons/paymentTypeIcon.png";
 import walletIconOrage from "./icons/walletOrangeIcon.png";
 
 import warningIconBlue from "./icons/warningIconBlue.png";
+import pencilIconWhite from "./icons/pencilIconWhite.png";
+import binIconWhite from "./icons/binIconWhite.png";
 export const assets = {
   loginHeader,
   logo,
@@ -230,4 +232,6 @@ export const assets = {
   paymentTypeIcon,
 
   warningIconBlue,
+  pencilIconWhite,
+  binIconWhite,
 };

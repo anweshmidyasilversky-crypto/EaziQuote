@@ -62,6 +62,7 @@ export function DashboardLayout() {
       label: "Preset Quotes",
       activeBtn: assets.presetQuotesActiveIcon,
       inactiveBtn: assets.presetQuotesIcon,
+      clickHandler: () => navigate("/preset-quotes"),
     },
     {
       id: "settings",

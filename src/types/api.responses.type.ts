@@ -349,7 +349,7 @@ export interface PresetQuoteListing {
 }
 
 export interface PresetQuote extends PresetQuoteListing {
-  items: Item[];
+  items: ItemDetails[];
 }
 
 export enum DocumentCategories {
