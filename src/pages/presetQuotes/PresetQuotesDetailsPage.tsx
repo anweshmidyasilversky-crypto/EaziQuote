@@ -122,7 +122,7 @@ function PresetQuotesDetailsPage() {
 
       <div className="flex flex-col gap-6 p-6">
         <CustomHeader
-          header="Standard Boiler Install"
+          header={presetQuote?.name ?? ""}
           btnConfigList={headerBtnConfig}
         />
 

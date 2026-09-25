@@ -77,6 +77,7 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
       }));
     });
   }, [currQuote]);
+
   const editingItem = useRef<ItemDetails | undefined>(undefined);
 
   const vatSettingsId = useRef<number | undefined>(currQuote.vat_setting_id);
@@ -113,54 +114,36 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
   const { createItemMutation, updateItemMutation, deleteItemMutation } =
     useItemsMutations();
 
-  const itemAddHandler = (data: ItemCreationPayload) => {
-    createItemMutation.mutate(
-      {
-        name: data.name,
-        category_id: Number(data.catId),
-        subcategory_id: Number(data.subCatId),
-        unit: data.unit,
-        price: data.pricePerUnit,
-        cost: data.unitPrice,
-        type: "product",
-      },
-      {
-        onSuccess: (response) => {
-          toast.success(response.message);
-          refetchItemsList();
-          setPageNo(1);
-          toggleCreateItemModal(false);
-        },
-        onError: (error) => {
-          showErrorToast(error);
-        },
-      },
-    );
+  const itemAddHandler = async (data: ItemCreationPayload) => {
+    const response = await createItemMutation.mutateAsync({
+      name: data.name,
+      category_id: Number(data.catId),
+      subcategory_id: Number(data.subCatId),
+      unit: data.unit,
+      price: data.pricePerUnit,
+      cost: data.unitPrice,
+      type: "product",
+    });
+    toast.success(response.message);
+    refetchItemsList();
+    setPageNo(1);
+    toggleCreateItemModal(false);
   };
 
-  const itemEditHandler = (data: ItemEditPayload) => {
-    updateItemMutation.mutate(
-      {
-        id: Number(editingItem.current?.id ?? "0"),
-        name: data.name,
-        category_id: data.catId ? Number(data.catId) : undefined,
-        subcategory_id: data.subCatId ? Number(data.subCatId) : undefined,
-        cost: data.unitPrice,
-        price: data.pricePerUnit,
-        unit: data.unit,
-        type: "product",
-      },
-      {
-        onSuccess: (response) => {
-          toast.success(response.message);
-          refetchItemsList();
-          toggleEditItemModal(false);
-        },
-        onError: (error) => {
-          showErrorToast(error);
-        },
-      },
-    );
+  const itemEditHandler = async (data: ItemEditPayload) => {
+    const response = await updateItemMutation.mutateAsync({
+      id: Number(editingItem.current?.id ?? "0"),
+      name: data.name,
+      category_id: data.catId ? Number(data.catId) : undefined,
+      subcategory_id: data.subCatId ? Number(data.subCatId) : undefined,
+      cost: data.unitPrice,
+      price: data.pricePerUnit,
+      unit: data.unit,
+      type: "product",
+    });
+    toast.success(response.message);
+    refetchItemsList();
+    toggleEditItemModal(false);
   };
 
   const itemDeleteHandler = (itemId: string | number) => {
@@ -364,7 +347,10 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
             <CustomBtn
               leftIcon={assets.plusIcon}
               buttonLabel="New Item"
-              onClick={() => toggleCreateItemModal((curr) => !curr)}
+              onClick={() => {
+                editingItem.current = undefined;
+                toggleCreateItemModal((curr) => !curr);
+              }}
             />
           </div>
         }

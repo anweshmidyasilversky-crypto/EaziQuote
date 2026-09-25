@@ -105,7 +105,7 @@ function PresetQuotesIndexPage() {
     <div className="p-6 flex flex-col gap-6">
       <CustomHeader
         header="Preset Quotes"
-        headerInfo="Preset Quotes"
+        headerInfo="Manage all your quotes in one place"
         btnConfigList={headerBtnConfig}
       />
 
