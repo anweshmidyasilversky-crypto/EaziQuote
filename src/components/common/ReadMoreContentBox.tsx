@@ -59,7 +59,7 @@ function ReadMoreContentBox({
       {overFlown && (
         <a
           onClick={() => toggleFitContent((curr) => !curr)}
-          className={`text-brand-dark text-sm cursor-pointer ${linkCls ?? ""}`}
+          className={`text-brand-dark text-sm cursor-pointer ${linkCls ?? ""} underline`}
         >
           Read {fitContent ? "Less" : "More"}
         </a>

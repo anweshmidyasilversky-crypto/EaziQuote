@@ -8,7 +8,7 @@ function usePresetQuotesList() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchTerm });
   const [pageNo, setPageNo] = useState(1);
-  const { data, isFetching, error } = useQuery({
+  const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["preset_quotes_list", debouncedSearchTerm],
     queryFn: () =>
       getPresetQuoteList({
@@ -31,6 +31,7 @@ function usePresetQuotesList() {
     searchTerm,
     setSearchTerm,
     isFetching,
+    refetch,
   };
 }
 

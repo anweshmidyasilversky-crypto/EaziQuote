@@ -487,6 +487,7 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
         isOpen={createItemModal}
         toggleIsOpen={toggleCreateItemModal}
         creationFn={itemAddHandler}
+        isPending={createItemMutation.isPending}
       />
 
       <ItemForm
@@ -495,6 +496,7 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
         toggleIsOpen={toggleEditItemModal}
         currItem={editingItem.current}
         editFn={itemEditHandler}
+        isPending={updateItemMutation.isPending}
       />
     </>
   );

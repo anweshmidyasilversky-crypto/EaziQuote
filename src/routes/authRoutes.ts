@@ -37,6 +37,7 @@ import PaymentsDetailsPage from "@/pages/payments/PaymentsDetailsPage";
 import PaymentCreatePage from "@/pages/payments/PaymentCreatePage";
 import PresetQuotesIndexPage from "@/pages/presetQuotes/PresetQuotesIndexPage";
 import PresetQuotesDetailsPage from "@/pages/presetQuotes/PresetQuotesDetailsPage";
+import PresetQuoteMutationPage from "@/pages/presetQuotes/PresetQuoteMutationPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -144,6 +145,10 @@ export const authRoutes: RouteObject[] = [
                   {
                     path: ":id",
                     Component: PresetQuotesDetailsPage,
+                  },
+                  {
+                    path: "manage-preset-quotes/:id?",
+                    Component: PresetQuoteMutationPage,
                   },
                 ],
               },

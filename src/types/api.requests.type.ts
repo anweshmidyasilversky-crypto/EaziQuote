@@ -167,3 +167,18 @@ export interface CreatePaymentDeposit extends CreatePaymentBase {
 export interface CreatePaymentInvoice extends CreatePaymentBase {
   invoice_id: string | number;
 }
+
+export interface PresetQuoteMutationItems extends UpdateQuoteItems {
+  unit: string;
+}
+
+export interface CreatePresetQuote {
+  name: string;
+  description?: string;
+  quote_description?: string;
+  items?: PresetQuoteMutationItems[];
+}
+
+export interface UpdatePresetQuote extends Partial<CreatePresetQuote> {
+  id: string | number;
+}

@@ -1,4 +1,9 @@
-import type { PageFilters, SignupPayload } from "@/types/api.requests.type";
+import type {
+  CreatePresetQuote,
+  PageFilters,
+  SignupPayload,
+  UpdatePresetQuote,
+} from "@/types/api.requests.type";
 import { axiosInstance } from "../axiosInstance";
 import {
   type ApiResponse,
@@ -78,12 +83,47 @@ export const getPresetQuoteList = async (filters?: PageFilters) => {
   }
 };
 
+export const createPresetQuote = async (payload: CreatePresetQuote) => {
+  try {
+    const presetQuote = await axiosInstance.post<ApiResponse<PresetQuote>>(
+      API_ENDPOINTS.auth.createPresetQuote,
+      payload,
+    );
+    return presetQuote.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatePresetQuote = async (payload: UpdatePresetQuote) => {
+  try {
+    const presetQuote = await axiosInstance.post<ApiResponse<PresetQuote>>(
+      API_ENDPOINTS.auth.updatePresetQuote,
+      payload,
+    );
+    return presetQuote.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getPresetQuoteDetails = async (templateId: string | number) => {
   try {
     const quote = await axiosInstance.get<ApiResponse<PresetQuote>>(
       API_ENDPOINTS.auth.presetQuoteDetails(templateId),
     );
     return quote.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deletePresetQuote = async (templateId: string | number) => {
+  try {
+    const response = await axiosInstance.delete<ApiResponse<null>>(
+      API_ENDPOINTS.auth.deletePresetQuote(templateId),
+    );
+    return response.data;
   } catch (error) {
     throw error;
   }

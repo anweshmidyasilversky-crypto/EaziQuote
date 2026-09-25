@@ -57,7 +57,7 @@ function QuoteSummaryForm({
 
   const initialValue: QuoteSummary = {
     quoteTitle: "",
-    referenceNumber: refNo,
+    referenceNumber: refNo ?? "ref",
     quoteDate: "",
     expiryDate: "",
     hidePhoneNumber: true,

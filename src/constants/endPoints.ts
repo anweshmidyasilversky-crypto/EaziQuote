@@ -8,6 +8,10 @@ export const API_ENDPOINTS = {
     presetQuotes: `/quote-templates`,
     presetQuoteDetails: (templateId: string | number) =>
       `quote-templates/${templateId}`,
+    deletePresetQuote: (templateId: string | number) =>
+      `/quote-templates/${templateId}`,
+    createPresetQuote: `/quote-templates`,
+    updatePresetQuote: `/quote-templates`,
     appConfig: `/auth/config`,
   },
   address: {

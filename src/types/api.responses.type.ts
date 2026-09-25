@@ -213,12 +213,7 @@ export interface Quote {
   quote_date: string;
   expiry_date: string;
   url: string | null;
-  status: {
-    id: number;
-    status: QuoteStatus;
-    display_name: string;
-    color: string | null;
-  };
+  status: string;
   client: Client;
   items: Item[];
   attachments: Attachment[];
@@ -340,7 +335,7 @@ export interface ItemDetails extends Item {
 export interface PresetQuoteListing {
   id: number;
   name: string;
-  description: string;
+  description: string | null;
   quote_description: null | string;
   active: number;
   created_at: string;
@@ -362,12 +357,7 @@ export enum DocumentCategories {
 export interface QuoteDetails extends Omit<Quote, "status"> {
   notes: string;
   url: string;
-  status: {
-    id: number;
-    status: QuoteStatus;
-    display_name: string;
-    color: null | string;
-  };
+  status: QuoteStatus;
   deposit_required: boolean;
   deposit_type: DepositeTypes | null;
   deposit_amount: null | number;

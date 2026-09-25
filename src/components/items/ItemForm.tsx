@@ -22,6 +22,15 @@ import useSubcategoryByCategory from "@/hooks/apis/subcategories/useSubcategoryB
 import useSubCategoryMutations from "@/hooks/apis/subcategories/useSubCategoryMutations";
 import type { SubCategoryCreateApiPayload } from "@/types/api.requests.type";
 
+const emptyItemFormValues = {
+  name: "",
+  unit: "",
+  pricePerUnit: undefined,
+  unitPrice: undefined,
+  catId: undefined,
+  subCatId: undefined,
+} satisfies DefaultValues<ItemCreationPayload | ItemEditPayload>;
+
 export type ItemFormProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -32,6 +41,7 @@ export type ItemFormProps = {
   withAddCategory?: boolean;
   withAddSubCategory?: boolean;
   currItem?: ItemDetails;
+  isPending?: boolean;
 };
 
 function ItemForm({
@@ -44,6 +54,7 @@ function ItemForm({
   withAddCategory = true,
   withAddSubCategory = true,
   currItem,
+  isPending,
 }: ItemFormProps) {
   const [categoryForm, toggleCategoryForm] = useState(false);
   const [subCategoryForm, toggleSubCategoryForm] = useState(false);
@@ -105,18 +116,26 @@ function ItemForm({
 
   useEffect(() => {
     if (currItem) {
-      setValue("catId", currItem.category_id);
-      setValue("subCatId", currItem.subcategory_id?.toString());
-      setValue("name", currItem.name);
-      setValue("unit", currItem.unit);
-      setValue("unitPrice", currItem.cost);
-      setValue("pricePerUnit", currItem.price);
-
+      reset({
+        ...defaultValues,
+        catId: currItem.category_id,
+        subCatId: currItem.subcategory_id?.toString(),
+        name: currItem.name,
+        unit: currItem.unit,
+        unitPrice: currItem.cost,
+        pricePerUnit: currItem.price,
+      });
       setCatSearchTerm(currItem.category_name);
       setSubcatSearchTerm(currItem.subcategory_name ?? "");
       setUnitSearchTerm(currItem.unit ?? "");
+      return;
     }
-  }, [currItem]);
+
+    reset(emptyItemFormValues);
+    setCatSearchTerm("");
+    setSubcatSearchTerm("");
+    setUnitSearchTerm("");
+  }, [currItem, defaultValues, isOpen, mode]);
 
   const submitHandler = async (data: ItemCreationPayload | ItemEditPayload) => {
     toggleIsSubmitting(true);
@@ -126,28 +145,14 @@ function ItemForm({
       } else {
         await editFn?.(data);
       }
-      reset();
-      toggleIsOpen(false);
+      reset(emptyItemFormValues);
+      // toggleIsOpen(false);
     } catch (error) {
       showErrorToast(error);
     } finally {
       toggleIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (defaultValues) {
-      Object.keys(defaultValues).map((key) => {
-        const defKey = key as keyof DefaultValues<
-          ItemEditPayload | ItemCreationPayload
-        >;
-        setValue(
-          key as keyof ItemCreationPayload,
-          defaultValues?.[defKey] ?? "",
-        );
-      });
-    }
-  }, [defaultValues]);
 
   const handleCategoryCreation = (name: string) => {
     createCategoryMutation.mutate(name, {
@@ -186,12 +191,15 @@ function ItemForm({
         formCloseAction={() => {
           toggleIsOpen((curr) => !curr);
           clearErrors();
-          reset();
+          reset(emptyItemFormValues);
+          setCatSearchTerm("");
+          setSubcatSearchTerm("");
+          setUnitSearchTerm("");
         }}
         formHeading={mode === "creation" ? "Add Item" : "Edit Item"}
         sumbitBtnLabel="Save Item"
         submitHanlder={handleSubmit(submitHandler)}
-        isSubmitting={isSubmitting}
+        isSubmitting={isPending || isSubmitting}
       >
         <div className="input-non-oriented flex-col gap-2">
           <span> Category </span>

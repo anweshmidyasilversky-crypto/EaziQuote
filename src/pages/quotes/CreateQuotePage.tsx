@@ -13,8 +13,11 @@ import { useNavigate, useParams } from "react-router";
 import SectionSelectForm from "@/components/quotes/SectionSelectForm";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
 import { Spinner } from "@/components/ui/spinner";
-import { useAppDispatch, useAppSelector } from "@/redux/store";
-import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
+import { persistor, useAppDispatch, useAppSelector } from "@/redux/store";
+import {
+  removeQuote,
+  updateQuote as updateQuoteRedux,
+} from "@/redux/slices/quotes.slice";
 
 enum toggleId {
   Summary = "summary",
@@ -106,7 +109,7 @@ export function CreateQuotePage() {
                 {formCurrSection === toggleId.Summary && (
                   <QuoteSummaryForm
                     refNo={refNo}
-                    currQuote={quoteRedux}
+                    currQuote={params.id ? quoteRedux : undefined}
                     submitAction={() => changeFormCurrSection(toggleId.Items)}
                     prefillClient={isClientFetched}
                   />

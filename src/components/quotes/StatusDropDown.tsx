@@ -5,7 +5,7 @@ import { useState } from "react";
 import { QuoteStatus, type Quote } from "@/types/api.responses.type";
 
 export type StatusDropDownProps = {
-  currStatus: Quote["status"] | undefined;
+  currStatus: string | undefined;
   statusSelectAction?: (status: QuoteStatus) => void;
 };
 export function StatusDropDown({
@@ -17,7 +17,11 @@ export function StatusDropDown({
     <Popover open={popoverOpen} onOpenChange={togglePopoverOpen}>
       <PopoverTrigger>
         <StatusBadge
-          status={currStatus?.display_name ?? "Draft"}
+          status={
+            currStatus
+              ? currStatus[0].toLocaleUpperCase() + currStatus.slice(1)
+              : "draft"
+          }
           ChevronIcon={ChevronDown}
         />
       </PopoverTrigger>
@@ -36,7 +40,7 @@ export function StatusDropDown({
                     togglePopoverOpen(false);
                     statusSelectAction?.(QuoteStatus[key]);
                   }}
-                  className={`${key === currStatus?.display_name ? "bg-slate-100" : ""} cursor-pointer px-5 py-1 h-fit hover:bg-slate-100`}
+                  className={`${key === currStatus ? "bg-slate-100" : ""} cursor-pointer px-5 py-1 h-fit hover:bg-slate-100`}
                 >
                   {key[0].toLocaleUpperCase() + key.slice(1)}
                 </span>

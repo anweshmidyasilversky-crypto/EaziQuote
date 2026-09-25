@@ -8,6 +8,13 @@ import {
   type QuoteDetails,
 } from "@/types/api.responses.type";
 
+// {
+//     id: 0,
+//     status: QuoteStatus.draft,
+//     display_name: "",
+//     color: null,
+//   }
+
 const initialState: QuoteDetails = {
   id: 0,
   title: "",
@@ -23,12 +30,7 @@ const initialState: QuoteDetails = {
   quote_date: new Date().toISOString(),
   expiry_date: new Date(Date.now() + 86400000).toISOString(),
   url: "",
-  status: {
-    id: 0,
-    status: QuoteStatus.draft,
-    display_name: "",
-    color: null,
-  },
+  status: QuoteStatus.draft,
   client: {} as ClientDetails,
   items: [],
   is_editable: true,

@@ -2,7 +2,7 @@ import type { QuoteSection } from "./quoteSection.type";
 
 export interface QuoteSummary {
   quoteTitle: string;
-  referenceNumber: string;
+  referenceNumber?: string;
   quoteDate: string;
   expiryDate: string;
   hidePhoneNumber: boolean;

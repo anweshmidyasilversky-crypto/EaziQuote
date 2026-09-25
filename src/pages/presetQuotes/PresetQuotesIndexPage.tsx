@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import { CustomActionGroup } from "@/components/common/CustomActionGroup";
 import {
@@ -5,14 +6,19 @@ import {
   type CustomHeaderProps,
 } from "@/components/common/CustomHeader";
 import { CustomDataTable } from "@/components/common/CustomTable";
+import DeleteDialog from "@/components/common/DeleteDialog";
 import SearchInputGruop from "@/components/common/SearchInputGruop";
+import usePresetQuoteMutations from "@/hooks/apis/quotes/usePresetQuoteMutations";
 import usePresetQuotesList from "@/hooks/apis/quotes/usePresetQuotesList";
 import type { PresetQuoteListing } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 function PresetQuotesIndexPage() {
   const navigate = useNavigate();
+  const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
   const {
     presetQuoteList,
     isFetching,
@@ -20,7 +26,12 @@ function PresetQuotesIndexPage() {
     setPageNo,
     searchTerm,
     setSearchTerm,
+    refetch,
   } = usePresetQuotesList();
+
+  const targetPresetQuoteId = useRef<number | undefined>(undefined);
+
+  const { presetQuoteDeleteMutation } = usePresetQuoteMutations();
 
   const presetTableColumns: ColumnDef<TableFeatures, PresetQuoteListing>[] = [
     {
@@ -50,9 +61,15 @@ function PresetQuotesIndexPage() {
       id: "action",
       header: "Action",
       cell: (info) => {
+        const { id } = info.row.original;
         return (
           <CustomActionGroup
-            openFn={() => navigate(`/preset-quotes/${info.row.original.id}`)}
+            openFn={() => navigate(`/preset-quotes/${id}`)}
+            deleteFn={() => {
+              targetPresetQuoteId.current = id;
+              toggleDeleteModalOpen((curr) => !curr);
+            }}
+            editFn={() => navigate(`/preset-quotes/manage-preset-quotes/${id}`)}
           />
         );
       },
@@ -63,8 +80,26 @@ function PresetQuotesIndexPage() {
     {
       buttonLabel: "New Preset",
       leftIcon: assets.plusIcon,
+      onClick: () => navigate(`/preset-quotes/manage-preset-quotes`),
     },
   ];
+
+  const handlePresetDelete = () => {
+    if (targetPresetQuoteId.current) {
+      presetQuoteDeleteMutation.mutate(targetPresetQuoteId.current, {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          toggleDeleteModalOpen(false);
+          refetch();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      });
+    } else {
+      toast.error(`No Preset Selected For deletion`);
+    }
+  };
 
   return (
     <div className="p-6 flex flex-col gap-6">
@@ -92,6 +127,13 @@ function PresetQuotesIndexPage() {
           }
         />
       </div>
+
+      <DeleteDialog
+        isOpen={deleteModalOpen}
+        toggleOpen={toggleDeleteModalOpen}
+        deleteAction={handlePresetDelete}
+        isPending={presetQuoteDeleteMutation.isPending}
+      />
     </div>
   );
 }
