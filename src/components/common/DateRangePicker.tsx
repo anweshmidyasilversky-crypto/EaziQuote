@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { assets } from "../../assets/icons";
 import { Calendar } from "../ui/calendar";
 import {
@@ -8,6 +8,7 @@ import {
 } from "../ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Input as InputPrimitive } from "@base-ui/react";
+import { cn } from "@/lib/utils";
 
 export interface DateRange {
   startDate: Date | undefined;
@@ -52,6 +53,17 @@ export function DateRangePicker({
 
     return `${year}-${month}-${day}`;
   };
+
+  useEffect(() => {
+    if (dateRange.startDate && dateRange.endDate) {
+      if (dateRange.endDate < dateRange.startDate) {
+        setDateRange((curr) => ({
+          ...curr,
+          endDate: undefined,
+        }));
+      }
+    }
+  }, [dateRange.startDate]);
 
   return (
     <div className="flex w-full flex-1 flex-row items-center gap-4">
@@ -113,6 +125,14 @@ export function DateRangePicker({
                         "bg-brand-dark text-white font-medium hover:bg-brand-dark!",
                       today: "ring-1 bg-gray text-black font-bold hover:ring-0",
                     }}
+                    disabled={
+                      key === "startDate"
+                        ? { before: new Date() }
+                        : dateRange.startDate
+                          ? { before: dateRange.startDate }
+                          : undefined
+                    }
+                    captionLayout="dropdown"
                   />
                 </PopoverContent>
               </Popover>

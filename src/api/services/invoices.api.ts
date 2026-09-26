@@ -18,7 +18,7 @@ export const getInvoiceList = async (pageFilters?: PageFilters) => {
     const invoiceListRes = await axiosInstance.get<ApiResponse<InvoiceList>>(
       API_ENDPOINTS.invoices.invoiceList,
       {
-        params: pageFilters,
+        params: { ...pageFilters },
       },
     );
     return invoiceListRes.data;

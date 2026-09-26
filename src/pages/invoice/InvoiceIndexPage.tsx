@@ -196,15 +196,16 @@ function InvoiceIndexPage() {
           toggleIsOpen={toggleFilterSheetOpen}
           withClearOption={true}
           submitFn={() => {
-            if (filters.length >= 1) {
-              selectedFilters.current = {
-                status: filters[0],
-              };
-            }
             selectedFilters.current = {
               start_date: dateRange.startDate,
               end_date: dateRange.endDate,
             };
+            if (filters.length >= 1) {
+              selectedFilters.current = {
+                ...selectedFilters.current,
+                status: filters[0],
+              };
+            }
           }}
           clearFn={() => {
             selectFilters([]);

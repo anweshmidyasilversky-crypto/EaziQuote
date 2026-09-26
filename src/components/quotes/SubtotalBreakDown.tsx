@@ -324,7 +324,7 @@ export function SubtotalBreakDown({
           </div>
         </div>
 
-        <div className="mt-4 flex gap-4 items-center justify-between">
+        <div className="flex gap-4 items-center justify-between">
           <span className="subtotal-field">
             {" "}
             {`Discount` +
@@ -426,7 +426,7 @@ export function SubtotalBreakDown({
           )}
         </div>
 
-        {deposite && paymentMethod === PaymentMethods.cash && (
+        {paymentMethod === PaymentMethods.cash && (
           <div className="flex gap-1.5 justify-start items-start h-fit">
             <img
               src={assets.warningIcon}
