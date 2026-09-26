@@ -238,3 +238,14 @@ export function ObjToFormData<T extends Object>(data: T) {
   });
   return formData;
 }
+
+export const dateToDdMonYyyy = (dateString: string) => {
+  const date = new Date(dateString);
+  const formatted = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+
+  return formatted;
+};

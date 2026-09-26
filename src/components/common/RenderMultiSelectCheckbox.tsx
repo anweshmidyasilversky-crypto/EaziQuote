@@ -7,11 +7,13 @@ export type RenderMultiSelectCheckboxProps = {
   checkboxconfig: CheckboxConfig;
   selectedFilters: string[];
   toggleSelectedFilters: React.Dispatch<React.SetStateAction<string[]>>;
+  type?: "single" | "multiple";
 };
 export function RenderMultiSelectCheckbox({
   checkboxconfig,
   selectedFilters,
   toggleSelectedFilters,
+  type = "multiple",
 }: RenderMultiSelectCheckboxProps) {
   const selectHandler = (filterValue: string) => {
     if (selectedFilters.includes(filterValue)) {
@@ -19,7 +21,11 @@ export function RenderMultiSelectCheckbox({
         curr.filter((currFilter) => currFilter !== filterValue),
       );
     } else {
-      toggleSelectedFilters((curr) => [...curr, filterValue]);
+      if (type === "multiple") {
+        toggleSelectedFilters((curr) => [...curr, filterValue]);
+      } else {
+        toggleSelectedFilters([filterValue]);
+      }
     }
   };
 

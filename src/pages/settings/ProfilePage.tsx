@@ -13,10 +13,13 @@ import { useAppDispatch, useAppSelector } from "@/redux/store";
 import type { UserProfilePayload } from "@/types/userProfile.payload.type";
 import { userProfileSchema } from "@/validation/userProfile.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import BusinessInfoPage from "./BusinessInfoPage";
+import useUserMutations from "@/hooks/apis/user/useUserMutations";
+import useUserDetails from "@/hooks/apis/user/useUserDetails";
+import { Spinner } from "@/components/ui/spinner";
 
 enum toggle {
   personal = "personal",
@@ -24,29 +27,21 @@ enum toggle {
 }
 
 function ProfilePage() {
-  const user = useAppSelector((state) => state.user);
+  const { userDetails, isFetching } = useUserDetails();
   const dispatch = useAppDispatch();
+
+  const user = useAppSelector((state) => state.user);
   const [activeId, toggleActiveId] = useState<string>(toggle.personal);
   const [userImg, setUserImg] = useState<File | undefined>(undefined);
+  const profilePicUrl = useRef<string>(user.avatar ?? assets.userImg);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
 
+  const { profileSetupMutation } = useUserMutations();
+
   const { control, handleSubmit } = useForm<UserProfilePayload>({
-    defaultValues: async () => {
-      const baseDefaults = {
-        name: user.name,
-        phoneNo: user.phoneNumber,
-      };
-      try {
-        const img = await fetch(assets.userImg);
-        const blob = await img.blob();
-        console.log(blob);
-        return Object.assign(baseDefaults, {
-          profilePic: new File([blob], assets.userImg, { type: "image/png" }),
-        });
-      } catch {
-        toast.error(`Unable to fetch profile pic`);
-        return baseDefaults;
-      }
+    defaultValues: {
+      name: user.name,
+      phoneNo: user.phone,
     },
     resolver: yupResolver(userProfileSchema),
   });
@@ -62,88 +57,110 @@ function ProfilePage() {
     },
   ];
 
-  const submitHandler = (data: UserProfilePayload) => {
+  const submitHandler = async (data: UserProfilePayload) => {
     toggleIsSubmitting(true);
-    console.log(data);
-    setTimeout(() => {
-      dispatch(updateUser(data));
-      toast.success(`Successfully updated profile`);
-      toggleIsSubmitting(false);
-    }, 500);
+    profileSetupMutation.mutateAsync({
+      ...data,
+      profilePic: userImg,
+    });
   };
+
+  useEffect(() => {
+    if (userDetails) {
+      dispatch(
+        updateUser({
+          ...userDetails,
+          phone: userDetails.phone.slice(5).replaceAll(" ", ""),
+        }),
+      );
+    }
+  }, [userDetails]);
 
   return (
     <>
-      <HeaderBreadCrumb pageName="profile" />
+      {isFetching ? (
+        <div className="w-full h-full flex items-center justify-center">
+          {" "}
+          <Spinner className="text-brand-dark w-1/10 h-1/10" />{" "}
+        </div>
+      ) : (
+        <>
+          <HeaderBreadCrumb pageName="profile" />
 
-      <div className="flex flex-col gap-8 p-6 overflow-hidden">
-        <div className="pl-1 bg-white rounded-[10px] [&_.btnActive]:border-b-brand-dark [&_.btnActive]:text-brand-dark py-2 [&_.btnActive]:border-b">
-          <CustomToggleGroup
-            toggleActive={toggleActiveId}
-            activeId={activeId}
-            toggleConfig={toggleBtnConfig}
-            btnCls={cn(
-              `bg-transparent btn-auth text-left text-black-text hover:bg-transparent`,
-            )}
-            containerCls={cn(`border-b-separator!`)}
-          />
-
-          {/* Profile form */}
-          {activeId === toggle.personal && (
-            <div className="flex flex-col gap-8 p-5">
-              <div className="flex items-start">
-                <ImageInput
-                  imgFile={userImg}
-                  setImgFile={setUserImg}
-                  alt={assets.userImg}
-                  altClass={cn(`object-contain`)}
-                  withEditIcon
-                  iconBadgeCls={cn(`h-9 w-9`)}
-                />
-              </div>
-
-              <CustomInput
-                control={control}
-                name="name"
-                fieldName="Name"
-                inptType="text"
+          <div className="flex flex-col gap-8 p-6 overflow-hidden">
+            <div className="pl-1 bg-white rounded-[10px] [&_.btnActive]:border-b-brand-dark [&_.btnActive]:text-brand-dark py-2 [&_.btnActive]:border-b">
+              <CustomToggleGroup
+                toggleActive={toggleActiveId}
+                activeId={activeId}
+                toggleConfig={toggleBtnConfig}
+                btnCls={cn(
+                  `bg-transparent btn-auth text-left text-black-text hover:bg-transparent`,
+                )}
+                containerCls={cn(`border-b-separator!`)}
               />
 
-              <div className="flex items-center gap-5">
-                <div className="flex flex-col gap-2 items-start w-full">
-                  <label className="input-label" htmlFor="email">
-                    {" "}
-                    {"Email"}{" "}
-                  </label>
-                  <input
-                    className="input-field"
-                    readOnly
-                    disabled
-                    id="email"
-                    value={user.email}
+              {/* Profile form */}
+              {activeId === toggle.personal && (
+                <div className="flex flex-col gap-8 p-5">
+                  <div className="flex items-start">
+                    <ImageInput
+                      imgUrl={profilePicUrl.current}
+                      setImgFile={(img) => {
+                        profilePicUrl.current = URL.createObjectURL(img);
+                        setUserImg(img);
+                      }}
+                      alt={assets.userImg}
+                      altClass={cn(`object-contain`)}
+                      withEditIcon
+                      iconBadgeCls={cn(`h-9 w-9`)}
+                    />
+                  </div>
+
+                  <CustomInput
+                    control={control}
+                    name="name"
+                    fieldName="Name"
+                    inptType="text"
+                  />
+
+                  <div className="flex items-center gap-5">
+                    <div className="flex flex-col gap-2 items-start w-full">
+                      <label className="input-label" htmlFor="email">
+                        {" "}
+                        {"Email"}{" "}
+                      </label>
+                      <input
+                        className="input-field"
+                        readOnly
+                        disabled
+                        id="email"
+                        value={user.email}
+                      />
+                    </div>
+
+                    <CustomInput
+                      control={control}
+                      name="phoneNo"
+                      fieldName="Phone"
+                      inptType="phone"
+                      placeholder={`Please enter phone number`}
+                    />
+                  </div>
+
+                  <CustomBtn
+                    buttonLabel="Update Profile"
+                    onClick={handleSubmit(submitHandler)}
+                    isSubmitting={isSubmitting}
                   />
                 </div>
+              )}
 
-                <CustomInput
-                  control={control}
-                  name="phoneNo"
-                  fieldName="Phone"
-                  placeholder="Enter Phone Number"
-                />
-              </div>
-
-              <CustomBtn
-                buttonLabel="Update Profile"
-                onClick={handleSubmit(submitHandler)}
-                isSubmitting={isSubmitting}
-              />
+              {/* Business profile form */}
+              {activeId === toggle.business && <BusinessInfoPage />}
             </div>
-          )}
-
-          {/* Business profile form */}
-          {activeId === toggle.business && <BusinessInfoPage />}
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

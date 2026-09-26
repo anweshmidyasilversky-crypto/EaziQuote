@@ -38,6 +38,7 @@ import PaymentCreatePage from "@/pages/payments/PaymentCreatePage";
 import PresetQuotesIndexPage from "@/pages/presetQuotes/PresetQuotesIndexPage";
 import PresetQuotesDetailsPage from "@/pages/presetQuotes/PresetQuotesDetailsPage";
 import PresetQuoteMutationPage from "@/pages/presetQuotes/PresetQuoteMutationPage";
+import { InvoiceDetailsPage } from "@/pages/invoice/InvoiceDetailsPage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -175,6 +176,10 @@ export const authRoutes: RouteObject[] = [
                   {
                     index: true,
                     Component: InvoiceIndexPage,
+                  },
+                  {
+                    path: ":id",
+                    Component: InvoiceDetailsPage,
                   },
                 ],
               },

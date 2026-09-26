@@ -74,6 +74,8 @@ export const API_ENDPOINTS = {
     profileSetup: `/user/profile-setup`,
     businessProfileSetup: `/company`,
     addBusinessAddress: `/company`,
+    userDetails: `/user/detail`,
+    deleteUser: `/user`,
   },
   proposalDocuments: {
     getProposalDocumentList: `/proposal-document/sections`,
@@ -92,5 +94,15 @@ export const API_ENDPOINTS = {
   invoices: {
     invoiceList: `/invoices`,
     deleteInvoice: (id: string | number) => `/invoices/${id}`,
+    invoiceDetails: (invoice_id: string | number) => `/invoices/${invoice_id}`,
+    invoiceCreate: `/invoices`,
+    invoiceUpdate: (id: string | number) => `/invoices/${id}`,
+    updateStatus: `/update-status`,
+    sendEmail: (invoice_id: string | number) =>
+      `/invoices/${invoice_id}/send-email`,
+    invoicePreview: (invoice_id: string | number, hash: string) =>
+      `/invoice/${invoice_id}/preview/${hash}`,
+    invoicePdfGenerate: (invoice_id: string | number) =>
+      `/invoices/${invoice_id}/pdf`,
   },
 } as const;

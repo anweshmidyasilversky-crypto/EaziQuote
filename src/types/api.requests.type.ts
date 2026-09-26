@@ -1,8 +1,10 @@
 import type { Method } from "axios";
 import type {
+  DocumentCategories,
   PaymentAmountType,
   PaymentMethods,
   QuoteDetails,
+  QuoteTemplate,
 } from "./api.responses.type";
 
 export enum deviceType {
@@ -40,7 +42,7 @@ export interface BusinessAddressApiPayload {
 
 export interface PageFilters {
   page?: Number;
-  status?: string[];
+  status?: string[] | string;
   start_date?: string | Date;
   end_date?: string | Date;
   search?: string;
@@ -51,6 +53,10 @@ export interface PageFilters {
   client_id?: string | number;
   subcategory_ids?: (string | number)[];
   is_not_paid?: number;
+  preview?: number;
+  download?: number;
+  regenerate?: number;
+  is_download?: number;
 }
 
 export interface ClientCreateApiPayload {
@@ -181,4 +187,19 @@ export interface CreatePresetQuote {
 
 export interface UpdatePresetQuote extends Partial<CreatePresetQuote> {
   id: string | number;
+}
+
+export interface InvoiceCreateApiPayload {
+  quote_id: string | number;
+  invoice_date: string;
+  due_date: string;
+  message?: string;
+  attachments?: File[];
+  notes?: string;
+}
+
+export interface InvoiceUpdateApiPayload extends Partial<InvoiceCreateApiPayload> {
+  _method: Method;
+  template?: QuoteTemplate;
+  categorised?: DocumentCategories;
 }

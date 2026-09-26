@@ -34,7 +34,6 @@ export function CustomBtn({
     <button
       className={`h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth ${bgColor ?? ""} ${btncls ?? ""} ${className ?? ""}`}
       onClick={onClick}
-      type="button"
       {...props}
     >
       {leftIcon && (

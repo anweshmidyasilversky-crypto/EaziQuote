@@ -40,3 +40,14 @@ export const addBusinessAddress = async (payload: FormData) => {
     throw err;
   }
 };
+
+export const getUserDetails = async () => {
+  try {
+    const res = await axiosInstance.get<ApiResponse<User>>(
+      API_ENDPOINTS.users.userDetails,
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};

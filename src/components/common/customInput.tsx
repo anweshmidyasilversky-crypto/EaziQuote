@@ -120,7 +120,7 @@ export function CustomInput<T extends FieldValues>({
                     })}
                   </select>
                 )}{" "}
-                {["password", "text", "number"].includes(inptType) && (
+                {["password", "text", "number", "phone"].includes(inptType) && (
                   <div className="relative">
                     <input
                       type={
@@ -144,7 +144,7 @@ export function CustomInput<T extends FieldValues>({
                       }}
                       className={` input-field ${
                         error ? `input-error` : `input-valid`
-                      } ${className}`}
+                      } ${className} ${inptType === "phone" ? `pl-12` : ``}`}
                     />
                     {isPasswordField ? (
                       <button
@@ -159,6 +159,12 @@ export function CustomInput<T extends FieldValues>({
                         )}
                       </button>
                     ) : null}
+                    {inptType === "phone" && (
+                      <span className="absolute inset-y-0 left-2 top-2.5">
+                        {" "}
+                        {`(+44)`}{" "}
+                      </span>
+                    )}
                   </div>
                 )}
                 {inptType === "color" && (

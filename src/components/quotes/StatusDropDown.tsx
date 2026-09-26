@@ -2,15 +2,17 @@ import { ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import StatusBadge from "../common/StatusBadge";
 import { useState } from "react";
-import { QuoteStatus, type Quote } from "@/types/api.responses.type";
+import { QuoteStatus } from "@/types/api.responses.type";
 
 export type StatusDropDownProps = {
   currStatus: string | undefined;
-  statusSelectAction?: (status: QuoteStatus) => void;
+  statusSelectAction?: (status: string) => void;
+  statusEnum?: Record<string, string>;
 };
 export function StatusDropDown({
   currStatus,
   statusSelectAction,
+  statusEnum = QuoteStatus,
 }: StatusDropDownProps) {
   const [popoverOpen, togglePopoverOpen] = useState(false);
   return (
@@ -31,14 +33,14 @@ export function StatusDropDown({
         side="bottom"
       >
         <div className="flex flex-col">
-          {(Object.keys(QuoteStatus) as Array<keyof typeof QuoteStatus>).map(
+          {(Object.keys(statusEnum) as Array<keyof typeof statusEnum>).map(
             (key) => {
               return (
                 <span
                   key={key.toString()}
                   onClick={() => {
                     togglePopoverOpen(false);
-                    statusSelectAction?.(QuoteStatus[key]);
+                    statusSelectAction?.(statusEnum[key]);
                   }}
                   className={`${key === currStatus ? "bg-slate-100" : ""} cursor-pointer px-5 py-1 h-fit hover:bg-slate-100`}
                 >

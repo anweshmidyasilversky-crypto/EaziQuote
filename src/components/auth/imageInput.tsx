@@ -1,8 +1,9 @@
 import { PencilIcon, PlusIcon } from "lucide-react";
 
 export type ImageInputProps = {
-  imgFile: File | undefined;
-  setImgFile: (...event: any[]) => void;
+  imgFile?: File;
+  imgUrl?: string;
+  setImgFile: (...event: File[]) => void;
   alt: string;
   altClass?: string;
   altText?: string;
@@ -13,6 +14,7 @@ export type ImageInputProps = {
 
 export function ImageInput({
   imgFile,
+  imgUrl,
   setImgFile,
   alt,
   altClass,
@@ -47,7 +49,7 @@ export function ImageInput({
                 className={`h-full w-full border-none shadow-none ring-0 ring-offset-0 bg-[#DFE3E8] overflow-hidden rounded-full flex items-${alignAltImg ?? "end"} justify-center`}
               >
                 <img
-                  src={imgFile ? URL.createObjectURL(imgFile) : alt}
+                  src={imgUrl ?? (imgFile ? URL.createObjectURL(imgFile) : alt)}
                   className={`${imgFile ? "object-cover object-center h-full w-full" : (altClass ?? "object-contain h-21 w-21 object-bottom")}  border-none outline-none`}
                   alt={altText ?? "User Placeholder"}
                 />

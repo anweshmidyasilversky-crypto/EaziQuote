@@ -109,7 +109,7 @@ interface BaseActivity {
 
 export enum InvoiceStatus {
   paid = "paid",
-  unpaid = "unpaid",
+  due = "due",
   overdue = "overdue",
 }
 
@@ -354,6 +354,13 @@ export enum DocumentCategories {
   all = "by-category-subcategory-item",
 }
 
+export interface QuoteDiscount {
+  id: number;
+  order_id: number;
+  type: string;
+  amount: string;
+}
+
 export interface QuoteDetails extends Omit<Quote, "status"> {
   notes: string;
   url: string;
@@ -370,12 +377,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   vat_setting_id: number;
   vat: number;
   is_company_phone_number_show: boolean;
-  discount: {
-    id: number;
-    order_id: number;
-    type: string;
-    amount: string;
-  } | null;
+  discount: QuoteDiscount | null;
   financial_summary: {
     total_cost: number;
     sub_total: number;
@@ -531,4 +533,69 @@ export interface InvoiceSummary {
 
 export interface InvoiceList extends ListResponse<Invoice> {
   summary: InvoiceSummary;
+}
+
+export interface InvoiceQuote {
+  id: number;
+  type: string;
+  title: string;
+  name: string;
+  reference_number: string;
+  is_editable: boolean;
+  vat_setting_id: string;
+  vat: number;
+  discount: QuoteDiscount | null;
+  status: QuoteStatus;
+  categorised: DocumentCategories;
+  template: QuoteTemplate;
+  price: number;
+  expiry_date: string;
+  created_at: string;
+}
+
+export interface InvoicePayment {
+  date: string;
+  amount: number;
+  source: PaymentMethods;
+  allocated: number;
+}
+
+export interface InvoiceFinancialSummary {
+  vat: number;
+  total_cost: number;
+  sub_total: number;
+  tax: number;
+  discount: number;
+  grand_total: number;
+}
+
+export interface InvoiceDetails {
+  id: number;
+  customer_id: number;
+  invoice_number: string;
+  title: string;
+  invoice_date: string;
+  due_date: string;
+  paid_date: string | null;
+  status: InvoiceStatus;
+  deposit_required: boolean;
+  deposit_type: DepositeTypes | null;
+  deposit_amount: number | null;
+  deposit_available: number | null;
+  message: string | null;
+  notes: string | null;
+  is_editable: boolean;
+  url: string;
+  categorised: DocumentCategories;
+  template: QuoteTemplate;
+  is_company_phone_number_show: boolean;
+  quote: InvoiceQuote;
+  client: ClientDetails;
+  financial_summary: InvoiceFinancialSummary;
+  attachments: Attachment[];
+  items: ItemDetails[];
+  payments: InvoicePayment[];
+  created_at: string;
+  payment_method: PaymentMethods | null;
+  route_url: string;
 }
