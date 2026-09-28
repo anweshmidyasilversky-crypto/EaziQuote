@@ -7,9 +7,10 @@ import { useMemo, useState } from "react";
 
 export type useItemListProps = {
   filters?: PageFilters;
+  enabled?: boolean;
 };
 
-function useItemsList({ filters }: useItemListProps) {
+function useItemsList({ filters, enabled = true }: useItemListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const deboucedSearchTerm = useDebounce({ value: searchTerm });
   const [pageNo, setPageNo] = useState(1);
@@ -38,6 +39,8 @@ function useItemsList({ filters }: useItemListProps) {
       }
       return undefined;
     },
+
+    enabled,
   });
 
   if (error) {

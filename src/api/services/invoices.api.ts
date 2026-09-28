@@ -70,7 +70,7 @@ export const updateInvoice = async (
     const { invoice_id, ...patch } = payload;
     const response = await axiosInstance.post<ApiResponse<InvoiceDetails>>(
       API_ENDPOINTS.invoices.invoiceDetails(invoice_id),
-      patch,
+      ObjToFormData(patch),
     );
     return response.data;
   } catch (error) {

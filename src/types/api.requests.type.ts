@@ -1,6 +1,7 @@
 import type { Method } from "axios";
 import type {
   DocumentCategories,
+  ItemDetails,
   PaymentAmountType,
   PaymentMethods,
   QuoteDetails,
@@ -196,10 +197,14 @@ export interface InvoiceCreateApiPayload {
   message?: string;
   attachments?: File[];
   notes?: string;
+  template?: QuoteTemplate;
+  categorised?: DocumentCategories;
+  is_company_phone_number_show?: boolean;
 }
 
 export interface InvoiceUpdateApiPayload extends Partial<InvoiceCreateApiPayload> {
   _method: Method;
-  template?: QuoteTemplate;
-  categorised?: DocumentCategories;
+  items?: ItemDetails[];
+  discount?: number;
+  payment_method?: PaymentMethods;
 }

@@ -17,9 +17,10 @@ import AddTax from "./AddTax";
 import type { DepositeTypes } from "@/types/api.requests.type";
 import { useAppSelector } from "@/redux/store";
 import StripeAdvisoryDialog from "@/pages/settings/StripeAdvisoryDialog";
+import PaymentMethodSelectDialog from "../invoices/PaymentMethodSelectDialog";
 
 export type SubtotalBreakDownProps = {
-  paymentMethod: PaymentMethods;
+  paymentMethod?: PaymentMethods;
   items: {
     quantity: number;
     type: string;
@@ -38,6 +39,10 @@ export type SubtotalBreakDownProps = {
   depositeAmountRef?: React.RefObject<number | null>;
   depositeTypeRef?: React.RefObject<DepositeTypes | null>;
   depositePercentageRef?: React.RefObject<number | null>;
+
+  taxEditabled?: boolean;
+  toggleSelectedPaymentMethod?: (paymentMethod: string) => void;
+  creditAmount?: number;
 };
 
 type MarginSplit = {
@@ -61,6 +66,9 @@ export function SubtotalBreakDown({
   depositeAmountRef,
   depositeTypeRef,
   depositePercentageRef,
+  taxEditabled = true,
+  toggleSelectedPaymentMethod,
+  creditAmount,
 }: SubtotalBreakDownProps) {
   const location = useLocation();
   const items = renderItems ?? [];
@@ -80,6 +88,8 @@ export function SubtotalBreakDown({
   const [taxModalOpen, toggleTaxModalOpen] = useState(false);
   const user = useAppSelector((state) => state.user);
 
+  const [methodSelectOpen, toggleMethodSelectOpen] = useState(false);
+
   // One-time sync on mount: the parent creates these refs with their own
   // defaults/derived values, which may not match this component's actual
   // first-render state. After mount, each ref is kept in sync directly at
@@ -90,14 +100,22 @@ export function SubtotalBreakDown({
       depositeAmountRef.current = deposite ?? null;
     }
     if (depositePaymentMethodRef) {
-      depositePaymentMethodRef.current = paymentMethod;
+      depositePaymentMethodRef.current =
+        (paymentMethod ?? user.stripe_connected)
+          ? PaymentMethods.stripe
+          : PaymentMethods.cash;
     }
     if (discountRef) {
       discountRef.current = discountPercentage ?? null;
     }
   }, []);
 
-  const isEditPage = location.pathname.split("/").includes("manage-quotes");
+  const isEditPage =
+    location.pathname.split("/").includes("manage-quotes") ||
+    location.pathname.split("/").includes("manage-invoice");
+
+  const quotesPage = location.pathname.includes("quotes");
+  const invoicePage = location.pathname.includes("invoices");
 
   const subtotal = useMemo(
     () => items.reduce((acc, prev) => acc + prev.price * prev.quantity, 0),
@@ -191,8 +209,19 @@ export function SubtotalBreakDown({
   const applyPercentage = (base: number, percentage: number) =>
     (base * percentage) / 100;
 
+  function calcPercentage(part: number | undefined, total: number | undefined) {
+    // Check if either parameter is missing, undefined, null, or 0
+    if (!part || !total) {
+      return 0;
+    }
+
+    // Calculate percentage
+    return (part / total) * 100;
+  }
+
   const renderProps = {
     subtotal,
+    credit: calcPercentage(creditAmount, subtotal),
     margin: Number.isNaN(marginPercentage) ? 0 : marginPercentage,
   };
 
@@ -265,23 +294,29 @@ export function SubtotalBreakDown({
     }
     console.log(`Deletion completed`);
   };
-
   return (
     <>
       <div className="flex flex-col p-5 gap-4">
         {Object.keys(renderProps).map((field) => {
           const key = field as keyof typeof renderProps;
-          if (!["subtotal", "margin"].includes(field)) {
+          if (!["subtotal", "margin", "credit"].includes(key)) {
             extraCharges += applyPercentage(subtotal, renderProps[key]);
+          }
+          if (field === "credit" && (!creditAmount || !invoicePage)) {
+            return <></>;
           }
           return (
             <div className="flex justify-between gap-4" key={field}>
-              <span className="subtotal-field">
+              <span
+                className={`subtotal-field ${field === "credit" ? `text-paid-text` : ``}`}
+              >
                 {" "}
                 {field[0].toUpperCase() + field.slice(1)}{" "}
                 {field !== "subtotal" && `(${renderProps[key]}%)`}{" "}
               </span>
-              <span className="subtotal-value">
+              <span
+                className={`subtotal-value ${field === "credit" ? `text-paid-text` : ``}`}
+              >
                 {field === "subtotal" && formatCurrency(subtotal)}
                 {field === "margin" && (
                   <a
@@ -307,14 +342,18 @@ export function SubtotalBreakDown({
                 {formatCurrency(applyPercentage(subtotal, tax ?? 0))}{" "}
               </span>
             ) : (
-              <a
-                className="subtotal-value"
-                onClick={() => toggleTaxModalOpen((curr) => !curr)}
-              >
-                {`+ Select Tax Rate`}
-              </a>
+              <>
+                {taxEditabled && (
+                  <a
+                    className="subtotal-value"
+                    onClick={() => toggleTaxModalOpen((curr) => !curr)}
+                  >
+                    {`+ Select Tax Rate`}
+                  </a>
+                )}
+              </>
             )}
-            {isEditPage && tax !== undefined && (
+            {isEditPage && taxEditabled && tax !== undefined && (
               <CustomActionGroup
                 withOpen={false}
                 editFn={() => toggleTaxModalOpen((curr) => !curr)}
@@ -366,7 +405,8 @@ export function SubtotalBreakDown({
             <span className="subtotal-field"> Grand Total </span>
             <span className="font-bold subtotal-value">
               {formatCurrency(
-                subtotal +
+                subtotal -
+                  (creditAmount ?? 0) +
                   applyPercentage(subtotal, tax ?? 0) +
                   extraCharges -
                   applyPercentage(subtotal, discountPercentage ?? 0),
@@ -374,58 +414,82 @@ export function SubtotalBreakDown({
             </span>
           </div>
           <div className="dashed-y-separators" />
-          <div className="w-full justify-between gap-4 items-center">
-            <span className="subtotal-field">
+          {quotesPage && (
+            <>
               {" "}
-              {deposite
-                ? `Deposit Required`
-                : isEditPage
-                  ? `Deposite`
-                  : ``}{" "}
-            </span>
-
-            <div className="flex gap-2 items-center">
-              {deposite ? (
-                <span className="subtotal-value">
+              <div className="w-full justify-between gap-4 items-center">
+                <span className="subtotal-field">
                   {" "}
-                  {formatCurrency(deposite)}{" "}
+                  {deposite
+                    ? `Deposit Required`
+                    : isEditPage
+                      ? `Deposite`
+                      : ``}{" "}
                 </span>
-              ) : (
-                <>
-                  {isEditPage && (
-                    <a
-                      className="cursor-pointer subtotal-value"
-                      onClick={() => toggleDepositeDialog((curr) => !curr)}
-                    >
-                      {`+ Add Deposit`}
-                    </a>
+
+                <div className="flex gap-2 items-center">
+                  {deposite ? (
+                    <span className="subtotal-value">
+                      {" "}
+                      {formatCurrency(deposite)}{" "}
+                    </span>
+                  ) : (
+                    <>
+                      {isEditPage && (
+                        <a
+                          className="cursor-pointer subtotal-value"
+                          onClick={() => toggleDepositeDialog((curr) => !curr)}
+                        >
+                          {`+ Add Deposit`}
+                        </a>
+                      )}
+                    </>
                   )}
-                </>
+
+                  {isEditPage && deposite && (
+                    <CustomActionGroup
+                      withOpen={false}
+                      editFn={() => toggleDepositeDialog((curr) => !curr)}
+                      deleteFn={handleRemoveDeposite}
+                    />
+                  )}
+                </div>
+              </div>
+              {deposite && (
+                <div>
+                  <span className="subtotal-field"> Payment Method </span>
+                  <span className="subtotal-value">
+                    {" "}
+                    {user.stripe_connected
+                      ? PaymentMethods.stripe
+                      : PaymentMethods.cash}{" "}
+                  </span>
+                </div>
+              )}{" "}
+            </>
+          )}
+
+          {invoicePage && (
+            <div className="flex justify-between item-center">
+              {(paymentMethod || isEditPage) && (
+                <span className="subtotal-field"> {"Payment Method"} </span>
               )}
 
-              {isEditPage && deposite && (
-                <CustomActionGroup
-                  withOpen={false}
-                  editFn={() => toggleDepositeDialog((curr) => !curr)}
-                  deleteFn={handleRemoveDeposite}
-                />
-              )}
-            </div>
-          </div>
-
-          {deposite && (
-            <div>
-              <span className="subtotal-field"> Payment Method </span>
-              <span className="subtotal-value">
-                {" "}
-                {user.stripe_connected
-                  ? PaymentMethods.stripe
-                  : PaymentMethods.cash}{" "}
-              </span>
+              <div className="flex item-center gap-2">
+                {(paymentMethod || isEditPage) && (
+                  <span className="subtotal-value"> {paymentMethod} </span>
+                )}
+                {isEditPage && (
+                  <CustomActionGroup
+                    withOpen={false}
+                    withDelete={false}
+                    editFn={() => toggleMethodSelectOpen(true)}
+                  />
+                )}
+              </div>
             </div>
           )}
         </div>
-
         {paymentMethod === PaymentMethods.cash && (
           <div className="flex gap-1.5 justify-start items-start h-fit">
             <img
@@ -491,6 +555,16 @@ export function SubtotalBreakDown({
         isOpen={stripConnectPopupOpen}
         toggleIsOpen={toggleStripConnectPopup}
         type="connect"
+      />
+
+      <PaymentMethodSelectDialog
+        selectedMethod={
+          user.stripe_connected ? PaymentMethods.stripe : PaymentMethods.cash
+        }
+        isOpen={methodSelectOpen}
+        toggleOpen={toggleMethodSelectOpen}
+        toggleSelectedMethod={(method) => toggleSelectedPaymentMethod?.(method)}
+        isStipeConnected={user.stripe_connected}
       />
     </>
   );

@@ -34,6 +34,7 @@ export type CustomInputProps<T extends FieldValues> = {
   leftNode?: React.ReactNode;
   textInputFormatter?: (val: string) => string;
   labelRightNode?: React.ReactNode;
+  containerCls?: string;
 };
 
 function formatLabel(fieldName: string) {
@@ -63,6 +64,7 @@ export function CustomInput<T extends FieldValues>({
   leftNode,
   textInputFormatter,
   labelRightNode,
+  containerCls,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
@@ -70,7 +72,7 @@ export function CustomInput<T extends FieldValues>({
 
   return (
     <div
-      className={`input-non-oriented ${["verticle", undefined].includes(orientation) ? "flex-col" : "text-nowrap items-center! justify-center!"}`}
+      className={`input-non-oriented ${["verticle", undefined].includes(orientation) ? "flex-col" : `text-nowrap justify-center! ${inptType !== "switch" ? `items-center!` : ``}`} ${containerCls}`}
     >
       {withLabel && (
         <label htmlFor={fieldName as string} className="input-label">

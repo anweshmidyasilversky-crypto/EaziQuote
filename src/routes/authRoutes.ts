@@ -39,6 +39,7 @@ import PresetQuotesIndexPage from "@/pages/presetQuotes/PresetQuotesIndexPage";
 import PresetQuotesDetailsPage from "@/pages/presetQuotes/PresetQuotesDetailsPage";
 import PresetQuoteMutationPage from "@/pages/presetQuotes/PresetQuoteMutationPage";
 import { InvoiceDetailsPage } from "@/pages/invoice/InvoiceDetailsPage";
+import { CreateInvoicePage } from "@/pages/invoice/CreateInvoicePage";
 
 export const authRoutes: RouteObject[] = [
   {
@@ -180,6 +181,10 @@ export const authRoutes: RouteObject[] = [
                   {
                     path: ":id",
                     Component: InvoiceDetailsPage,
+                  },
+                  {
+                    path: "manage-invoice/:id?",
+                    Component: CreateInvoicePage,
                   },
                 ],
               },

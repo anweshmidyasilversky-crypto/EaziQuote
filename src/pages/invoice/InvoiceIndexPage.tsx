@@ -53,6 +53,7 @@ function InvoiceIndexPage() {
     {
       buttonLabel: "Invoice",
       leftIcon: assets.plusIcon,
+      onClick: () => navigate(`/invoices/manage-invoice`),
     },
   ];
 
@@ -153,7 +154,12 @@ function InvoiceIndexPage() {
       header: "Action",
       cell: (info) => {
         const { id } = info.row.original;
-        return <CustomActionGroup openFn={() => navigate(`/invoices/${id}`)} />;
+        return (
+          <CustomActionGroup
+            openFn={() => navigate(`/invoices/${id}`)}
+            editFn={() => navigate(`/invoices/manage-invoice/${id}`)}
+          />
+        );
       },
     },
   ];

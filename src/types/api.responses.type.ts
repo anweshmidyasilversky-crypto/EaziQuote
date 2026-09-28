@@ -596,6 +596,6 @@ export interface InvoiceDetails {
   items: ItemDetails[];
   payments: InvoicePayment[];
   created_at: string;
-  payment_method: PaymentMethods | null;
+  payment_method?: PaymentMethods | null;
   route_url: string;
 }

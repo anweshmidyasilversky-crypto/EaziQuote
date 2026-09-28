@@ -202,6 +202,8 @@ export function InvoiceDetailsPage() {
     });
   };
 
+  console.log(invoiceDetails);
+
   return (
     <React.Fragment>
       <div>
@@ -256,21 +258,22 @@ export function InvoiceDetailsPage() {
                     <div className="w-full flex justify-end">
                       <div className="max-w-75">
                         <SubtotalBreakDown
-                          taxPercentage={invoiceDetails?.financial_summary.tax}
+                          taxPercentage={invoiceDetails?.quote.vat}
                           discountPercentage={
-                            invoiceDetails?.financial_summary.discount
-                          }
-                          reqDeposite={
-                            invoiceDetails?.deposit_amount
-                              ? invoiceDetails?.deposit_amount
-                              : undefined
+                            invoiceDetails
+                              ? Number(
+                                  invoiceDetails.quote.discount?.amount ?? "0",
+                                )
+                              : 0
                           }
                           paymentMethod={
-                            user.stripe_connected
-                              ? PaymentMethods.stripe
-                              : PaymentMethods.cash
+                            invoiceDetails?.payment_method ?? undefined
                           }
                           items={invoiceDetails?.items ?? []}
+                          creditAmount={invoiceDetails?.payments.reduce(
+                            (acc, currPayment) => acc + currPayment.allocated,
+                            0,
+                          )}
                         />
                       </div>
                     </div>
