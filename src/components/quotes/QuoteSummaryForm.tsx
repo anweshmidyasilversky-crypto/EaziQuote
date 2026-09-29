@@ -17,7 +17,11 @@ import { updateQuote as updateQuoteRedux } from "../../redux/slices/quotes.slice
 import { toast } from "react-toastify";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
 import { showErrorToast } from "@/api/axiosInstance";
-import type { ClientDetails, QuoteDetails } from "@/types/api.responses.type";
+import type {
+  ClientDetails,
+  PresetQuote,
+  QuoteDetails,
+} from "@/types/api.responses.type";
 import { useNavigate } from "react-router";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
@@ -29,6 +33,7 @@ export type QuoteSummaryFormProps = {
   currQuote?: QuoteDetails;
   prefillClient: boolean;
   defaultClient?: ClientDetails;
+  presetQuote?: PresetQuote;
 };
 
 function QuoteSummaryForm({
@@ -37,6 +42,7 @@ function QuoteSummaryForm({
   currQuote,
   prefillClient,
   defaultClient,
+  presetQuote,
 }: QuoteSummaryFormProps) {
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
@@ -60,8 +66,8 @@ function QuoteSummaryForm({
   const initialValue: QuoteSummary = {
     quoteTitle: "",
     referenceNumber: refNo ?? "ref",
-    quoteDate: "",
-    expiryDate: "",
+    quoteDate: new Date().toISOString(),
+    expiryDate: new Date(new Date().getTime() + 860000).toISOString(),
     hidePhoneNumber: true,
     clientId: "0",
     jobDescription: "",
@@ -120,9 +126,17 @@ function QuoteSummaryForm({
     }
   }, [currQuote]);
 
+  useEffect(() => {
+    if (presetQuote) {
+      setValue("jobDescription", presetQuote.description ?? "");
+    }
+  }, [presetQuote]);
+
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: currQuote ? new Date(currQuote.quote_date) : undefined,
-    endDate: currQuote ? new Date(currQuote.expiry_date) : undefined,
+    startDate: currQuote ? new Date(currQuote.quote_date) : new Date(),
+    endDate: currQuote
+      ? new Date(currQuote.expiry_date)
+      : new Date(new Date().getTime() + 86400000),
   });
 
   useEffect(() => {

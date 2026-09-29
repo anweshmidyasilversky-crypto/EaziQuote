@@ -23,12 +23,14 @@ export type InvoiceSummaryFormProps = {
   mode: "create" | "edit";
   submitAction?: () => void;
   currInvoice?: InvoiceDetails;
+  prefillQuoteId?: number;
 };
 
 function InvoiceSummaryForm({
   mode,
   currInvoice,
   submitAction,
+  prefillQuoteId,
 }: InvoiceSummaryFormProps) {
   const navigate = useNavigate();
 
@@ -51,7 +53,7 @@ function InvoiceSummaryForm({
   const { attachmentDeleteMutation } = useQuotesMutations();
 
   const initialValue: InvoiceCreateApiPayload = {
-    quote_id: "",
+    quote_id: prefillQuoteId ?? "",
     invoice_date: new Date().toISOString(),
     due_date: new Date().toISOString(),
     attachments: currInvoice?.attachments.map((attachment) => {
@@ -174,6 +176,12 @@ function InvoiceSummaryForm({
       setQuoteSearchTerm(currInvoice.quote.reference_number);
     }
   }, [currInvoice]);
+
+  useEffect(() => {
+    if (quote) {
+      setQuoteSearchTerm(quote.reference_number);
+    }
+  }, [prefillQuoteId]);
 
   return (
     <React.Fragment>

@@ -38,16 +38,14 @@ import type {
 import type { PageFilters } from "@/types/api.requests.type";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
 import usePresetQuotesList from "@/hooks/apis/quotes/usePresetQuotesList";
-import usePresetQuoteDetails from "@/hooks/apis/quotes/usePresetQuoteDetails";
 import { useAppDispatch } from "@/redux/store";
-import {
-  removeQuote as removeQuoteRedux,
-  updateQuote as updateQuoteRedux,
-} from "@/redux/slices/quotes.slice";
+import { removeQuote as removeQuoteRedux } from "@/redux/slices/quotes.slice";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
+import ReadMoreContentBox from "@/components/common/ReadMoreContentBox";
+import type { CreateQuotePageLocationProps } from "./CreateQuotePage";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
@@ -204,50 +202,50 @@ export function QuotesIndexPage() {
 
   const [selectedPreset, setSelectedPreset] = useState<number>();
 
-  const presetQuotesColumns = useMemo(
-    () =>
-      [
-        {
-          id: "action",
-          header: "ACTION",
-          cell: (info) => (
-            <input
-              type="radio"
-              multiple
-              value={info.row.original.id}
-              checked={info.row.original.id === selectedPreset}
-              onChange={(e) => {
-                setSelectedPreset(Number(e.target.value));
-              }}
-            />
-          ),
-          enableSorting: false,
-        },
+  const presetQuotesColumns = [
+    {
+      id: "action",
+      header: "ACTION",
+      cell: (info) => (
+        <input
+          type="radio"
+          multiple
+          value={info.row.original.id}
+          checked={info.row.original.id === selectedPreset}
+          onChange={(e) => {
+            setSelectedPreset(Number(e.target.value));
+          }}
+        />
+      ),
+      enableSorting: false,
+    },
 
-        {
-          accessorKey: "name",
-          header: "TEMPLATE NAME",
-          enableSorting: false,
-        },
+    {
+      accessorKey: "name",
+      header: "TEMPLATE NAME",
+      enableSorting: false,
+    },
 
-        {
-          accessorKey: "items_count",
-          header: "ITEMS",
-          enableSorting: false,
-        },
+    {
+      accessorKey: "items_count",
+      header: "ITEMS",
+      enableSorting: false,
+    },
 
-        {
-          accessorKey: "description",
-          header: "Description",
-          cell: (info) => {
-            const desc = info.getValue<string>();
-            return <span className="text-wrap min-w-177.5"> {desc} </span>;
-          },
-          enableSorting: false,
-        },
-      ] as ColumnDef<TableFeatures, PresetQuoteListing>[],
-    [selectedPreset],
-  );
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: (info) => {
+        const desc = info.getValue<string>();
+        return (
+          <ReadMoreContentBox lines={4} contentBoxCls="bg-transparent!">
+            <p className="text-wrap">{desc}</p>
+          </ReadMoreContentBox>
+        );
+      },
+      enableSorting: false,
+    },
+  ] as ColumnDef<TableFeatures, PresetQuoteListing>[];
 
   const checkboxConfig: CheckboxConfig = useMemo(
     () => [
@@ -287,27 +285,12 @@ export function QuotesIndexPage() {
     }
   };
 
-  const fetchPresetQuote = useRef<boolean>(false);
-  const { presetQuote, isFetching: isPresetQuoteDetailsFetching } =
-    usePresetQuoteDetails({
-      templateId: selectedPreset ?? "",
-      enabled: fetchPresetQuote.current,
-    });
-
   const handlePresetQuoteSelect = () => {
-    fetchPresetQuote.current = true;
-    if (presetQuote) {
-      dispatch(
-        updateQuoteRedux({
-          ...presetQuote,
-          job_description: presetQuote.quote_description ?? "",
-          quote_date: new Date().toISOString(),
-          expiry_date: new Date(Date.now() + 86400000).toISOString(),
-        }),
-      );
-      fetchPresetQuote.current = false;
-      navigate(`/quotes/manage-quotes/`);
-    }
+    navigate(`/quotes/manage-quotes/`, {
+      state: {
+        presetQuoteId: selectedPreset,
+      } as CreateQuotePageLocationProps,
+    });
   };
 
   return (
@@ -441,7 +424,6 @@ export function QuotesIndexPage() {
         footerBtnAction={() => {
           handlePresetQuoteSelect();
         }}
-        isSubmitting={isPresetQuoteDetailsFetching}
       >
         <div className="lg:min-w-250 flex flex-col gap-4.5 mt-6 max-h-120 overflow-y-auto">
           <div className="px-5">

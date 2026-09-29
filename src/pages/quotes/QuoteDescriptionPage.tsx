@@ -1,3 +1,4 @@
+import ReadMoreContentBox from "@/components/common/ReadMoreContentBox";
 import StyledAttachments from "../../components/common/StyledAttachments";
 import type { QuoteDetails } from "@/types/api.responses.type";
 
@@ -17,21 +18,23 @@ export function QuoteDescriptionPage({ quote }: QuoteDescriptionPageProps) {
 
   return (
     <div className="bg-white rounded-[7px] flex flex-col gap-6 p-5">
-      <div className="quote-description-section">
-        <span className="header"> Job Description </span>
-        <span className="text-placeholder-text text-sm whitespace-pre-line">
-          {jobDescription}
-        </span>
-      </div>
+      <ReadMoreContentBox
+        title={"Job Description"}
+        lines={9}
+        contentBoxCls="p-0!"
+      >
+        {jobDescription}
+      </ReadMoreContentBox>
 
       <div className="dashed-y-separators" />
 
-      <div className="quote-description-section">
-        <span className="header"> Notes (Not visible on quote) </span>
-        <span className="text-placeholder-text text-sm whitespace-pre-line">
-          {notes}
-        </span>
-      </div>
+      <ReadMoreContentBox
+        title={"Notes (Not visible on quote)"}
+        lines={9}
+        contentBoxCls="p-0!"
+      >
+        {notes}
+      </ReadMoreContentBox>
 
       <div className="dashed-y-separators" />
 

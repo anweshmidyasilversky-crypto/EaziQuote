@@ -43,8 +43,8 @@ import { showErrorToast } from "@/api/axiosInstance";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 import useQuotePreview from "@/hooks/apis/quotes/useQuotePreview";
 import { FormLayout } from "@/components/common/FormLayout";
-import useSendEmail from "@/hooks/apis/quotes/useSendEmail";
 import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
+import type { CreateInvoicePageLocationProps } from "../invoice/CreateInvoicePage";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
@@ -72,25 +72,25 @@ export function QuotesDetailsPage() {
   const [moreOptionsOpen, toggleMoreOptionsOpen] = useState(false);
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const [quotePreviewOpen, toggleQuotePreviewOpen] = useState(false);
-  const [sendEmail, toggleSendEmail] = useState(false);
 
-  const { quoteDuplicateMutation, quoteDeleteMutation, statusUpdateMutation } =
-    useQuotesMutations();
+  const {
+    quoteDuplicateMutation,
+    quoteDeleteMutation,
+    statusUpdateMutation,
+    sendEmailMutation,
+  } = useQuotesMutations();
 
-  const { data, isSending } = useSendEmail({
-    quote_id: quote?.id ?? "",
-    enabled: sendEmail,
-  });
-
-  useEffect(() => {
-    if (isSending) {
-      toggleSendEmail(false);
-    } else {
-      if (data) {
-        toast.success(data.message);
-      }
-    }
-  }, [isSending]);
+  const handleEmailSend = () => {
+    sendEmailMutation.mutate(quote?.id ?? 0, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        toggleShareBoxOpen(false);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
 
   const { previewHtml, isFetching: isPreviewFetching } = useQuotePreview({
     quote_id: params.id,
@@ -149,6 +149,12 @@ export function QuotesDetailsPage() {
     {
       leftIcon: assets.plusIcon,
       buttonLabel: "Invoice",
+      onClick: () =>
+        navigate(`/invoices/manage-invoice`, {
+          state: {
+            quoteId: quote?.id,
+          } as CreateInvoicePageLocationProps,
+        }),
     },
     {
       leftIcon: assets.previewIcon,
@@ -186,6 +192,11 @@ export function QuotesDetailsPage() {
       onClick: () => toggleShareBoxOpen((curr) => !curr),
     },
   ];
+
+  if (quote?.status === QuoteStatus.draft) {
+    btnConfigList.pop();
+    btnConfigList.splice(0, 1);
+  }
 
   const toggleGroupConfig: CustomToggleGroupProps["toggleConfig"] = useMemo(
     () => [
@@ -245,7 +256,11 @@ export function QuotesDetailsPage() {
           <CustomHeader
             header={quote?.title ?? ""}
             headerInfo={quote?.id.toString()}
-            btnConfigList={btnConfigList}
+            btnConfigList={
+              quote?.status === QuoteStatus.approved
+                ? btnConfigList
+                : btnConfigList.slice(1)
+            }
           />
 
           <CustomToggleGroup
@@ -369,7 +384,6 @@ export function QuotesDetailsPage() {
                       </div>
                     </CustomInfoCard>
 
-                    {/* Invoice info card — kept as-is (uses dummyData invoiceData) */}
                     <CustomInfoCard header="Invoices">
                       {isInvoiceFetching ? (
                         <div className="flex items-center justify-center">
@@ -431,8 +445,8 @@ export function QuotesDetailsPage() {
             isOpen={shareBoxOpen}
             toggleIsOpen={toggleShareBoxOpen}
             clientEmail={quote?.client?.email ?? ""}
-            sendEmailAction={() => toggleSendEmail((curr) => !curr)}
-            isEmailSending={isSending}
+            sendEmailAction={handleEmailSend}
+            isEmailSending={sendEmailMutation.isPending}
           />
         </div>
         <DeleteDialog

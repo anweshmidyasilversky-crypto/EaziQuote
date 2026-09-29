@@ -16,6 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 import type { ClientDetails } from "@/types/api.responses.type";
+import usePresetQuoteDetails from "@/hooks/apis/quotes/usePresetQuoteDetails";
 
 enum toggleId {
   Summary = "summary",
@@ -25,13 +26,14 @@ enum toggleId {
 
 export type CreateQuotePageLocationProps = {
   defaultClient?: ClientDetails;
+  presetQuoteId?: number;
 };
 
 export function CreateQuotePage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const location = useLocation();
-  const { defaultClient } = (location.state ??
+  const { defaultClient, presetQuoteId } = (location.state ??
     {}) as CreateQuotePageLocationProps;
 
   const [formCurrSection, changeFormCurrSection] = useState<string>(
@@ -53,6 +55,12 @@ export function CreateQuotePage() {
       dispatch(updateQuoteRedux(quote));
     }
   }, [quote]);
+
+  const { presetQuote, isFetching: isPresetQuoteDetailsFetching } =
+    usePresetQuoteDetails({
+      templateId: presetQuoteId ?? "",
+      enabled: presetQuoteId !== undefined,
+    });
 
   const quoteRedux = useAppSelector((state) => state.quote);
 
@@ -95,7 +103,7 @@ export function CreateQuotePage() {
     <React.Fragment>
       <HeaderBreadCrumb pageName="New Quote" />
 
-      {isQuoteFetching ? (
+      {isQuoteFetching || isPresetQuoteDetailsFetching ? (
         <div className="flex w-full h-full items-center justify-center">
           <Spinner className="text-brand-dark w-1/10 h-1/10" />
         </div>
@@ -119,6 +127,7 @@ export function CreateQuotePage() {
                     submitAction={() => changeFormCurrSection(toggleId.Items)}
                     prefillClient={isClientFetched}
                     defaultClient={defaultClient}
+                    presetQuote={presetQuoteId ? presetQuote : undefined}
                   />
                 )}
                 {formCurrSection === toggleId.Items && (
@@ -126,6 +135,7 @@ export function CreateQuotePage() {
                     submitAction={() =>
                       changeFormCurrSection(toggleId.Sections)
                     }
+                    presetItems={presetQuote?.items}
                   />
                 )}
 

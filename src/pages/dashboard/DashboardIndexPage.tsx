@@ -8,7 +8,11 @@ import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { NotificationCard } from "../../components/dashboard/notification.card";
 import { type TransactionItem } from "../../constants/dummyData";
-import { formatDisplayDate, formatOrdinalDate } from "../../lib/utils";
+import {
+  formatCurrency,
+  formatDisplayDate,
+  formatOrdinalDate,
+} from "../../lib/utils";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";
@@ -80,6 +84,7 @@ export function DashboardIndexPage() {
       accessorKey: "price",
       header: "AMOUNT",
       enableSorting: false,
+      cell: (info) => formatCurrency(info.getValue<number>()),
     },
     {
       accessorKey: "status",
@@ -116,19 +121,32 @@ export function DashboardIndexPage() {
       id: "actions",
       header: "ACTION",
       enableSorting: false,
-      cell: (info) => (
-        <CustomActionGroup
-          openFn={() => navigate(`/quotes/${info.row.original.id}`)}
-          editFn={() =>
-            navigate(`/quotes/manage-quotes/${info.row.original.id}`)
-          }
-          deleteFn={() => {
-            ((targetActivityType.current = info.row.original.type),
-              (targetId.current = info.row.original.id));
-            toggleDeleteModal((curr) => !curr);
-          }}
-        />
-      ),
+      cell: (info) => {
+        const { id, type } = info.row.original;
+        return (
+          <CustomActionGroup
+            openFn={() => {
+              if (type === ActivityType.QUOTE) {
+                navigate(`/quotes/${id}`);
+              } else {
+                navigate(`/invoices/${id}`);
+              }
+            }}
+            editFn={() => {
+              if (type === ActivityType.QUOTE) {
+                navigate(`/quotes/manage-quotes/${id}`);
+              } else {
+                navigate(`/invoices/manage-invoice/${id}`);
+              }
+            }}
+            deleteFn={() => {
+              ((targetActivityType.current = info.row.original.type),
+                (targetId.current = info.row.original.id));
+              toggleDeleteModal((curr) => !curr);
+            }}
+          />
+        );
+      },
     },
   ];
 
@@ -165,42 +183,44 @@ export function DashboardIndexPage() {
   const kpiCardConfig: KpiCardProps[] = [
     {
       title: "Outstanding Invoices",
-      value:
-        homePage?.payload.invoiceDetails.outstanding_invoices_amount?.toString() ??
-        "",
+      value: formatCurrency(
+        homePage?.payload.invoiceDetails.outstanding_invoices_amount ?? 0,
+      ),
       kpiIcon: assets.invoiceColored,
       iconCls: "bg-transparent-royal-blue",
+      onClick: () => navigate(`/invoices`),
     },
     {
       title: "Pending Quotes",
-      value:
-        homePage?.payload.quoteDetails.pending_quotes_amount?.toString() ?? "",
+      value: formatCurrency(
+        homePage?.payload.quoteDetails.pending_quotes_amount ?? 0,
+      ),
       kpiIcon: assets.clockColored,
       iconCls: "bg-transparent-liquid-lava",
+      onClick: () => navigate(`/quotes`),
     },
     {
       title: "Money due this week",
-      value:
-        homePage?.payload.financialSummary.money_due_this_week?.toString() ??
-        "",
+      value: formatCurrency(
+        homePage?.payload.financialSummary.money_due_this_week ?? 0,
+      ),
       kpiIcon: assets.greenPoundIcon,
       iconCls: "bg-transparent-ming-green",
+      onClick: () => navigate(`/invoices`),
     },
     {
       title: "Quotes Accepted (Last 30 Days)",
-      value:
-        homePage?.payload.recentActivities
-          .reduce(
-            (acc, activity) =>
-              acc +
-              Number(
-                activity.type === "quote" && activity.status === "accepted",
-              ),
-            0,
-          )
-          .toString() ?? "",
+      value: formatCurrency(
+        homePage?.payload.recentActivities.reduce(
+          (acc, activity) =>
+            acc +
+            Number(activity.type === "quote" && activity.status === "accepted"),
+          0,
+        ) ?? 0,
+      ),
       kpiIcon: assets.invoiceColored,
       iconCls: "bg-transparent-royal-blue",
+      onClick: () => navigate(`/quotes`),
     },
   ];
 
@@ -275,16 +295,18 @@ export function DashboardIndexPage() {
                   value={kpiConfig.value}
                   kpiIcon={kpiConfig.kpiIcon}
                   iconCls={kpiConfig.iconCls}
+                  onClick={kpiConfig.onClick}
                 />
               );
             })}
           </div>
-          {(isNotificationFetching || (notificationList.length ?? 0) > 0) && (
-            <NotificationCard
-              notifications={notificationList.slice(0, 5) ?? []}
-              isFetching={isNotificationFetching}
-            />
-          )}
+          {isNotificationFetching ||
+            ((notificationList.length ?? 0) > 0 && (
+              <NotificationCard
+                notifications={notificationList.slice(0, 5) ?? []}
+                isFetching={isNotificationFetching}
+              />
+            ))}
         </div>
 
         <div className="flex flex-col py-4.5 gap-4.5 bg-table dashboard-card-theme rounded-[10px]">

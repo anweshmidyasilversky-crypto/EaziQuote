@@ -12,7 +12,7 @@ import { assets } from "@/assets/icons";
 import QuoteSectionForm, {
   type QuoteSectionFormProps,
 } from "./QuoteSectionForm";
-import type { QuoteSection } from "@/types/api.responses.type";
+import { QuoteStatus, type QuoteSection } from "@/types/api.responses.type";
 import { type DefaultValues } from "react-hook-form";
 import { useAppSelector } from "@/redux/store";
 import { toast } from "react-toastify";
@@ -23,6 +23,7 @@ import type {
 } from "@/types/api.requests.type";
 import useSectionMutations from "@/hooks/apis/quotes/sections/useSectionMutations";
 import { showErrorToast } from "@/api/axiosInstance";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 
 export type SectionSelectFormProps = {
   submitAction?: () => void;
@@ -160,6 +161,8 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
   const { sectionMutationForQuote, createSectionMutation } =
     useSectionMutations();
 
+  const { statusUpdateMutation } = useQuotesMutations();
+
   const handleSubmit = () => {
     const table = tableRef.current;
     sectionMutationForQuote.mutate(
@@ -174,6 +177,10 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
       {
         onSuccess: (response) => {
           toast.success(response.message);
+          statusUpdateMutation.mutate({
+            quote_id: currQuote.id,
+            status: QuoteStatus.completed,
+          });
           submitAction?.();
         },
         onError: (error) => {

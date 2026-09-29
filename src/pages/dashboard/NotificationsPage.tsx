@@ -47,7 +47,7 @@ function NotificationsPage() {
           <div className="flex w-full justify-between items-center p-5">
             <span className="text-placeholder-text text-sm">
               {" "}
-              {`Showing ${pagiantionMeta.per_page * pagiantionMeta.current_page} of ${pagiantionMeta.total} Results`}{" "}
+              {`Showing ${pagiantionMeta.from ?? 0} to ${pagiantionMeta.to ?? 0} of ${pagiantionMeta.total} Results`}{" "}
             </span>
 
             {paginationBtns && (

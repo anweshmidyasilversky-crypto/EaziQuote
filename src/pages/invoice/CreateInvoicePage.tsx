@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import type { CustomBtnProps } from "../../components/common/CustomBtn";
@@ -7,17 +7,8 @@ import {
   CustomToggleGroup,
   type CustomToggleGroupProps,
 } from "../../components/common/CustomToggleGroup";
-import QuoteSummaryForm from "../../components/quotes/QuoteSummaryForm";
-import ItemSelectForm from "../../components/quotes/ItemSelectForm";
-import { useNavigate, useParams } from "react-router";
-import SectionSelectForm from "@/components/quotes/SectionSelectForm";
-import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
+import { useLocation, useParams } from "react-router";
 import { Spinner } from "@/components/ui/spinner";
-import { persistor, useAppDispatch, useAppSelector } from "@/redux/store";
-import {
-  removeQuote,
-  updateQuote as updateQuoteRedux,
-} from "@/redux/slices/quotes.slice";
 import useInvoiceDetails from "@/hooks/apis/invoices/useInvoiceDetails";
 import InvoiceSummaryForm from "@/components/invoices/InvoiceSummaryForm";
 import InvoiceItemSelectForm from "@/components/invoices/InvoiceItemSelectForm";
@@ -28,12 +19,17 @@ enum toggleId {
   Sections = "sections",
 }
 
+export type CreateInvoicePageLocationProps = {
+  quoteId?: number;
+};
+
 export function CreateInvoicePage() {
-  const navigate = useNavigate();
   const [formCurrSection, changeFormCurrSection] = useState<string>(
     toggleId.Summary,
   );
   const params = useParams<{ id: string | undefined }>();
+  const location = useLocation();
+  const { quoteId } = (location.state ?? {}) as CreateInvoicePageLocationProps;
 
   const {
     invoiceDetails,
@@ -100,6 +96,7 @@ export function CreateInvoicePage() {
                       changeFormCurrSection(toggleId.Items);
                       refetch();
                     }}
+                    prefillQuoteId={quoteId}
                   />
                 )}
                 {formCurrSection === toggleId.Items && (

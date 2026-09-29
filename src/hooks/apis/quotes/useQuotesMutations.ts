@@ -3,6 +3,7 @@ import {
   deleteAttachemnt,
   deleteQuote,
   duplicateQuote,
+  sendEmail,
   updateQuote,
   updateStatus,
 } from "@/api/services/quotes.api";
@@ -48,6 +49,10 @@ function useQuotesMutations() {
       updateStatus(payload.quote_id, payload.status),
   });
 
+  const sendEmailMutation = useMutation({
+    mutationFn: (quote_id: string | number) => sendEmail(quote_id),
+  });
+
   return {
     quoteCreateMutation,
     quoteUpdateMutation,
@@ -55,6 +60,7 @@ function useQuotesMutations() {
     attachmentDeleteMutation,
     quoteDuplicateMutation,
     statusUpdateMutation,
+    sendEmailMutation,
   };
 }
 

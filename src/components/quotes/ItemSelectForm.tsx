@@ -36,9 +36,10 @@ import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 
 export type ItemSelectFormProps = {
   submitAction: () => void;
+  presetItems?: ItemDetails[];
 };
 
-function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
+function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   const currQuote = useAppSelector((state) => state.quote);
   const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -67,8 +68,6 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
   const [editItemModal, toggleEditItemModal] = useState(false);
 
   const [itemQty, setItemQty] = useState<Record<string, UpdateQuoteItems>>({});
-  console.log(itemQty);
-  console.log(currQuote);
   useEffect(() => {
     currQuote?.items.forEach((item) => {
       setItemQty((curr) => ({
@@ -76,7 +75,13 @@ function ItemSelectForm({ submitAction }: ItemSelectFormProps) {
         [item.id]: item,
       }));
     });
-  }, [currQuote]);
+    presetItems?.forEach((item) => {
+      setItemQty((curr) => ({
+        ...curr,
+        [item.id]: item,
+      }));
+    });
+  }, [currQuote, presetItems]);
 
   const editingItem = useRef<ItemDetails | undefined>(undefined);
 
