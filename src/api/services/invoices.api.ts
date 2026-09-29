@@ -66,9 +66,27 @@ export const updateInvoice = async (
     invoice_id: string | number;
   },
 ) => {
-  const { invoice_id, items, ...patch } = payload;
+  const {
+    invoice_id,
+    items,
+    attachments,
+    is_company_phone_number_show,
+    ...patch
+  } = payload;
 
   const formData = new FormData();
+
+  formData.append(
+    "is_company_phone_number_show",
+    is_company_phone_number_show ? "1" : "0",
+  );
+
+  attachments?.forEach((attachment) => {
+    formData.append(
+      `attachments[]`,
+      new Blob([attachment], { type: attachment.type }),
+    );
+  });
 
   Object.entries(patch).forEach(([key, value]) => {
     if (value === undefined || value === null) {
@@ -92,12 +110,11 @@ export const updateInvoice = async (
     }
   });
 
-  // Debug FormData properly
-  console.log("=== FormData ===");
+  // console.log("=== FormData ===");
 
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
+  // for (const [key, value] of formData.entries()) {
+  //   console.log(key, value);
+  // }
 
   const response = await axiosInstance.post<ApiResponse<InvoiceDetails>>(
     API_ENDPOINTS.invoices.invoiceDetails(invoice_id),
@@ -164,6 +181,17 @@ export const generateInvoicePdf = async (
       {
         params: filters,
       },
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const downloadInvoicePdf = async (invoice_id: string | number) => {
+  try {
+    const response = await axiosInstance.get<Blob>(
+      API_ENDPOINTS.invoices.invoicePdfDownload(invoice_id),
     );
     return response.data;
   } catch (error) {

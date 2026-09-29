@@ -234,9 +234,9 @@ function PaymentCreatePage() {
               activeId={activeToggle}
               toggleActive={setActiveToggle}
               containerCls={cn(
-                `border border-client-creation-secondary rounded-[7px] p-1.5 max-w-fit`,
+                `border border-client-creation-secondary rounded-[7px] p-1.5 max-w-fit max-h-11`,
               )}
-              btnCls={cn(`rounded-[7px]!`)}
+              btnCls={cn(`rounded-[7px]! max-h-8 max-w-20 text-sm`)}
             />
           </div>
 
@@ -283,6 +283,7 @@ function PaymentCreatePage() {
                   items={depositQuotes}
                   inptFieldValue={quoteSearchTerm}
                   inptFieldChange={setQuoteSearchTerm}
+                  inptDisabled={clientId === undefined}
                   getItemLabel={(quote) => `${quote.id} - ${quote.title}`}
                   getItemId={(quote) => quote.id}
                   onValueChange={(quote) => {
@@ -304,6 +305,9 @@ function PaymentCreatePage() {
                       ? `Search or select a quote`
                       : `Select a client first`
                   }
+                  className={cn(
+                    `${clientId === undefined ? `bg-slate-300! placeholder:text-black-text!` : ``}`,
+                  )}
                 />
               </div>
             </>

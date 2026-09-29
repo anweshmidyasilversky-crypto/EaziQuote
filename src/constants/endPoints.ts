@@ -60,6 +60,8 @@ export const API_ENDPOINTS = {
     updateStatus: `/update-status`,
     sendEmail: (quote_id: string | number) => `/quotes/${quote_id}/send-email`,
     paymentDepositeQuote: `/payment-deposit-quotes`,
+    downloadPdf: (quote_id: string | number) =>
+      `/quotes/${quote_id}/pdf?is_download=1`,
   },
   subCategories: {
     getSubcategoryList: `/sub-categories`,
@@ -103,6 +105,8 @@ export const API_ENDPOINTS = {
     invoicePreview: (invoice_id: string | number, hash: string) =>
       `/invoice/${invoice_id}/preview/${hash}`,
     invoicePdfGenerate: (invoice_id: string | number) =>
+      `/invoices/${invoice_id}/pdf`,
+    invoicePdfDownload: (invoice_id: string | number) =>
       `/invoices/${invoice_id}/pdf`,
   },
 } as const;

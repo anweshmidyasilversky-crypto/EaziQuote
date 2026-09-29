@@ -2,6 +2,7 @@ import {
   createQuote,
   deleteAttachemnt,
   deleteQuote,
+  downloadPdf,
   duplicateQuote,
   sendEmail,
   updateQuote,
@@ -53,6 +54,10 @@ function useQuotesMutations() {
     mutationFn: (quote_id: string | number) => sendEmail(quote_id),
   });
 
+  const downloadQuoteMutation = useMutation({
+    mutationFn: (quote_id: string | number) => downloadPdf(quote_id),
+  });
+
   return {
     quoteCreateMutation,
     quoteUpdateMutation,
@@ -61,6 +66,7 @@ function useQuotesMutations() {
     quoteDuplicateMutation,
     statusUpdateMutation,
     sendEmailMutation,
+    downloadQuoteMutation,
   };
 }
 

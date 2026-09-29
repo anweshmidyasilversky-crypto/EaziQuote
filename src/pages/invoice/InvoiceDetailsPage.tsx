@@ -132,10 +132,12 @@ export function InvoiceDetailsPage() {
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
       editAction={() => navigate(`/invoices/manage-invoice/${params?.id}`)}
     >
-      <CustomBtn
-        buttonLabel="More Actions"
+      <span
+        className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
         onClick={() => toggleMoreOptionsOpen((curr) => !curr)}
-      />
+      >
+        {"More Action"}
+      </span>
     </MoreOptionsPopup>,
 
     {

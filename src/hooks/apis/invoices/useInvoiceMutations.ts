@@ -4,6 +4,7 @@ import {
   updateInvoice,
   updateInvoiceStatus,
   sendInvoiceEmail,
+  downloadInvoicePdf,
 } from "@/api/services/invoices.api";
 import type {
   InvoiceCreateApiPayload,
@@ -45,12 +46,17 @@ function useInvoiceMutations() {
     mutationFn: (invoice_id: string | number) => sendInvoiceEmail(invoice_id),
   });
 
+  const downloadInvoicePdfMutation = useMutation({
+    mutationFn: (invoice_id: string | number) => downloadInvoicePdf(invoice_id),
+  });
+
   return {
     invoiceCreateMutation,
     invoiceUpdateMutation,
     invoiceStatusMutation,
     sendInvoiceEmailMutation,
     invoiceDeleteMutation,
+    downloadInvoicePdfMutation,
   };
 }
 

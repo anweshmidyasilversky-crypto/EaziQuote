@@ -36,6 +36,8 @@ interface CustomComboboxProps<T, V = T> {
   paginationMeta?: ApiResponseMeta;
   fetchNextPage?: () => void;
   isFetchingNextPage?: boolean;
+  inptDisabled?: boolean;
+  inptReadonly?: boolean;
 }
 
 export function CustomCombobox<T, V = T>({
@@ -58,6 +60,8 @@ export function CustomCombobox<T, V = T>({
   fetchNextPage,
   isFetchingNextPage,
   getItemId,
+  inptDisabled,
+  inptReadonly,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(
     selected ? getItemLabel(selected) : null,
@@ -121,6 +125,8 @@ export function CustomCombobox<T, V = T>({
         <div ref={inputAnchorRef} className="min-w-0 grow">
           <ComboboxInput
             placeholder={placeholder}
+            disabled={inptDisabled}
+            readOnly={inptReadonly}
             className={`
             input-field! pl-0! h-full max-h-11 w-full!
         rounded-lg border border-gray-300

@@ -20,6 +20,11 @@ export type MoreOptionsPopupProps = {
   side?: Side;
   popoverTarget?: string;
   withEdit?: boolean;
+  withDownload?: boolean;
+  downloadAction?: () => void;
+  withShare?: boolean;
+  shareAction?: () => void;
+  withDelete?: boolean;
 };
 
 function MoreOptionsPopup({
@@ -36,6 +41,11 @@ function MoreOptionsPopup({
   side,
   popoverTarget,
   withEdit = true,
+  withDownload,
+  downloadAction,
+  withShare,
+  shareAction,
+  withDelete = true,
 }: MoreOptionsPopupProps) {
   const closePopup = () => togglePopupOpen(false);
   return (
@@ -79,14 +89,38 @@ function MoreOptionsPopup({
           />
         )}
 
-        <CustomBtn
-          leftIcon={assets.binIcon}
-          buttonLabel="Delete"
-          onClick={() => {
-            deleteAction?.();
-            closePopup();
-          }}
-        />
+        {withDownload && (
+          <CustomBtn
+            buttonLabel="Download"
+            leftIcon={assets.downloadIconBlack}
+            onClick={() => {
+              closePopup();
+              downloadAction?.();
+            }}
+          />
+        )}
+
+        {withShare && (
+          <CustomBtn
+            buttonLabel="Share"
+            leftIcon={assets.shareIconBlack}
+            onClick={() => {
+              closePopup();
+              shareAction?.();
+            }}
+          />
+        )}
+
+        {withDelete && (
+          <CustomBtn
+            leftIcon={assets.binIcon}
+            buttonLabel="Delete"
+            onClick={() => {
+              deleteAction?.();
+              closePopup();
+            }}
+          />
+        )}
       </PopoverContent>
     </Popover>
   );

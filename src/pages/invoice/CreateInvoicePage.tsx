@@ -93,8 +93,8 @@ export function CreateInvoicePage() {
                     mode={params.id ? "edit" : "create"}
                     currInvoice={invoiceDetails}
                     submitAction={() => {
-                      changeFormCurrSection(toggleId.Items);
                       refetch();
+                      changeFormCurrSection(toggleId.Items);
                     }}
                     prefillQuoteId={quoteId}
                   />

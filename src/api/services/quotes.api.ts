@@ -2,7 +2,6 @@ import {
   type ListResponse,
   QuoteStatus,
   type ApiResponse,
-  type Quote,
   type QuoteDetails,
   type DepositQuote,
 } from "@/types/api.responses.type";
@@ -112,6 +111,20 @@ export const getPreviewPdf = async (quote_id: string | number) => {
   try {
     const response = await axiosInstance.get<HTMLDocument>(
       API_ENDPOINTS.quotes.generatePdf(quote_id),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const downloadPdf = async (quote_id: string | number) => {
+  try {
+    const response = await axiosInstance.get<Blob>(
+      API_ENDPOINTS.quotes.downloadPdf(quote_id),
+      {
+        responseType: "blob",
+      },
     );
     return response.data;
   } catch (error) {

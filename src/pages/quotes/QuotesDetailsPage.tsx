@@ -72,12 +72,14 @@ export function QuotesDetailsPage() {
   const [moreOptionsOpen, toggleMoreOptionsOpen] = useState(false);
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const [quotePreviewOpen, toggleQuotePreviewOpen] = useState(false);
+  const [shareExportPopupOpen, toggleShareExportPopup] = useState(false);
 
   const {
     quoteDuplicateMutation,
     quoteDeleteMutation,
     statusUpdateMutation,
     sendEmailMutation,
+    downloadQuoteMutation,
   } = useQuotesMutations();
 
   const handleEmailSend = () => {
@@ -88,6 +90,29 @@ export function QuotesDetailsPage() {
       },
       onError: (error) => {
         showErrorToast(error);
+      },
+    });
+  };
+
+  const handleQuoteDownload = () => {
+    downloadQuoteMutation.mutate(params.id, {
+      onSuccess: (response) => {
+        const blobUrl: string = window.URL.createObjectURL(
+          new Blob([response], { type: "application/pdf" }),
+        );
+
+        const link: HTMLAnchorElement = document.createElement("a");
+        link.href = blobUrl;
+        link.setAttribute(
+          "download",
+          `Proposal - ${quote?.reference_number}.pdf`,
+        );
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.parentNode?.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
       },
     });
   };
@@ -181,16 +206,38 @@ export function QuotesDetailsPage() {
         });
       }}
     >
-      <CustomBtn
-        buttonLabel="More Actions"
+      <span
+        className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
         onClick={() => toggleMoreOptionsOpen((curr) => !curr)}
-      />
+      >
+        {"More Action"}
+      </span>
     </MoreOptionsPopup>,
 
-    {
-      buttonLabel: "Share & Export",
-      onClick: () => toggleShareBoxOpen((curr) => !curr),
-    },
+    <MoreOptionsPopup
+      isPopupOpen={shareExportPopupOpen}
+      togglePopupOpen={toggleShareExportPopup}
+      withDelete={false}
+      withEdit={false}
+      withDownload
+      withShare
+      shareAction={() => toggleShareBoxOpen(true)}
+      downloadAction={handleQuoteDownload}
+    >
+      <span
+        className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
+        onClick={() => toggleShareExportPopup((curr) => !curr)}
+      >
+        {downloadQuoteMutation.isPending ? (
+          <div className="flex justify-center items-center">
+            {" "}
+            <Spinner className="text-white " />{" "}
+          </div>
+        ) : (
+          "Share & Export"
+        )}
+      </span>
+    </MoreOptionsPopup>,
   ];
 
   if (quote?.status === QuoteStatus.draft) {

@@ -56,18 +56,21 @@ function InvoiceSummaryForm({
     quote_id: prefillQuoteId ?? "",
     invoice_date: new Date().toISOString(),
     due_date: new Date().toISOString(),
-    attachments: currInvoice?.attachments.map((attachment) => {
-      return new File(
-        [],
-        `attachment_${attachment.id.toString()}.${attachment.type}`,
-        {
-          type:
-            attachment.type === "pdf"
-              ? `application/pdf`
-              : `image/${attachment.type}`,
-        },
-      );
-    }),
+    attachments:
+      mode === "edit"
+        ? currInvoice?.attachments.map((attachment) => {
+            return new File(
+              [],
+              `attachment_${attachment.id.toString()}.${attachment.type}`,
+              {
+                type:
+                  attachment.type === "pdf"
+                    ? `application/pdf`
+                    : `image/${attachment.type}`,
+              },
+            );
+          })
+        : [],
   };
 
   const {
@@ -145,6 +148,8 @@ function InvoiceSummaryForm({
           _method: "put",
           invoice_id: currInvoice?.id ?? "",
           ...data,
+          attachments:
+            data.attachments?.slice(currInvoice?.attachments.length ?? 0) ?? [],
         },
         {
           onSuccess: (response) => {
@@ -174,6 +179,10 @@ function InvoiceSummaryForm({
     if (currInvoice && mode === "edit") {
       setValue("quote_id", currInvoice.quote.id);
       setQuoteSearchTerm(currInvoice.quote.reference_number);
+      setValue(
+        "is_company_phone_number_show",
+        currInvoice.is_company_phone_number_show ? true : false,
+      );
     }
   }, [currInvoice]);
 

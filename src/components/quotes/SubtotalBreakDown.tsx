@@ -1,3 +1,4 @@
+import React from "react";
 import type {
   ColumnDef,
   HeaderContext,
@@ -18,6 +19,7 @@ import type { DepositeTypes } from "@/types/api.requests.type";
 import { useAppSelector } from "@/redux/store";
 import StripeAdvisoryDialog from "@/pages/settings/StripeAdvisoryDialog";
 import PaymentMethodSelectDialog from "../invoices/PaymentMethodSelectDialog";
+import { nanoid } from "@reduxjs/toolkit";
 
 export type SubtotalBreakDownProps = {
   paymentMethod?: PaymentMethods;
@@ -303,7 +305,7 @@ export function SubtotalBreakDown({
             extraCharges += applyPercentage(subtotal, renderProps[key]);
           }
           if (field === "credit" && (!creditAmount || !invoicePage)) {
-            return <></>;
+            return <React.Fragment key={nanoid()}></React.Fragment>;
           }
           return (
             <div className="flex justify-between gap-4" key={field}>
