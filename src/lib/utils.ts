@@ -236,6 +236,7 @@ export function ObjToFormData<T extends Object>(data: T) {
       }
     }
   });
+  console.log([...formData.entries()]);
   return formData;
 }
 

@@ -24,6 +24,7 @@ import {
   PaymentAmountType,
   PaymentMethods,
   PaymentTypes,
+  type ClientDetails,
   type DepositQuote,
   type Invoice,
 } from "@/types/api.responses.type";
@@ -37,11 +38,20 @@ import WarningDialog from "@/components/common/WarningDialog";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { showErrorToast } from "@/api/axiosInstance";
+
+export type PaymentCreatePageLocationProps = {
+  paymentType?: PaymentTypes;
+  invoice?: Invoice;
+  prefillClient?: ClientDetails;
+};
 
 function PaymentCreatePage() {
   const user = useAppSelector((state) => state.user);
+  const location = useLocation();
+  const { paymentType, invoice, prefillClient } = (location.state ??
+    {}) as PaymentCreatePageLocationProps;
   const navigate = useNavigate();
   const { createPaymentMutation } = usePaymentMutations();
   const [clientId, setClientId] = useState<number | undefined>(undefined);
@@ -54,7 +64,7 @@ function PaymentCreatePage() {
   const [stripDialogOpen, toggleStripDialogOpen] = useState(false);
   const [warningOpen, toggleWarningOpen] = useState(false);
   const [activeToggle, setActiveToggle] = useState<string>(
-    PaymentTypes.deposite,
+    paymentType ?? PaymentTypes.deposite,
   );
   const toggleConfig: CustomToggleGroupProps["toggleConfig"] = [
     {
@@ -201,6 +211,16 @@ function PaymentCreatePage() {
     });
   };
 
+  useEffect(() => {
+    if (invoice) {
+      setSelectedInvoice(invoice);
+      setInvoiceSearchTerm(`${invoice.reference_number} - ${invoice.title}`);
+    }
+    if (prefillClient) {
+      setClientId(prefillClient.id);
+      setClientSearchTerm(prefillClient.name);
+    }
+  }, [location.state]);
   return (
     <div className="p-6 flex flex-col gap-6">
       <CustomHeader header="Record Payment" btnConfigList={[]} />

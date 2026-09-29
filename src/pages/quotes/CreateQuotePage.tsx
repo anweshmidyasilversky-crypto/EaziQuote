@@ -9,15 +9,13 @@ import {
 } from "../../components/common/CustomToggleGroup";
 import QuoteSummaryForm from "../../components/quotes/QuoteSummaryForm";
 import ItemSelectForm from "../../components/quotes/ItemSelectForm";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import SectionSelectForm from "@/components/quotes/SectionSelectForm";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
 import { Spinner } from "@/components/ui/spinner";
-import { persistor, useAppDispatch, useAppSelector } from "@/redux/store";
-import {
-  removeQuote,
-  updateQuote as updateQuoteRedux,
-} from "@/redux/slices/quotes.slice";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
+import type { ClientDetails } from "@/types/api.responses.type";
 
 enum toggleId {
   Summary = "summary",
@@ -25,9 +23,17 @@ enum toggleId {
   Sections = "sections",
 }
 
+export type CreateQuotePageLocationProps = {
+  defaultClient?: ClientDetails;
+};
+
 export function CreateQuotePage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const location = useLocation();
+  const { defaultClient } = (location.state ??
+    {}) as CreateQuotePageLocationProps;
+
   const [formCurrSection, changeFormCurrSection] = useState<string>(
     toggleId.Summary,
   );
@@ -112,6 +118,7 @@ export function CreateQuotePage() {
                     currQuote={params.id ? quoteRedux : undefined}
                     submitAction={() => changeFormCurrSection(toggleId.Items)}
                     prefillClient={isClientFetched}
+                    defaultClient={defaultClient}
                   />
                 )}
                 {formCurrSection === toggleId.Items && (

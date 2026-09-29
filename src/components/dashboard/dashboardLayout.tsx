@@ -125,7 +125,10 @@ export function DashboardLayout() {
                   <img src={assets.headphoneIcon} className="w-4 h-5" />
                 </button>
 
-                <button className="h-10 w-10 flex items-center">
+                <button
+                  className="h-10 w-10 flex items-center"
+                  onClick={() => navigate(`/dashboard/notifications`)}
+                >
                   <img src={assets.bellIcon} className="h-4.5 w-4" />
                 </button>
               </div>

@@ -250,7 +250,11 @@ export function DashboardIndexPage() {
               onClick={() => navigate(`/quotes/manage-quotes/`)}
             />
 
-            <CustomBtn buttonLabel="New Invoice" leftIcon={assets.plusIcon} />
+            <CustomBtn
+              buttonLabel="New Invoice"
+              leftIcon={assets.plusIcon}
+              onClick={() => navigate(`/invoices/manage-invoice`)}
+            />
 
             <CustomBtn
               buttonLabel="Add Client"

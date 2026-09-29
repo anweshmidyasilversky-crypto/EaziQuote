@@ -54,6 +54,18 @@ function InvoiceSummaryForm({
     quote_id: "",
     invoice_date: new Date().toISOString(),
     due_date: new Date().toISOString(),
+    attachments: currInvoice?.attachments.map((attachment) => {
+      return new File(
+        [],
+        `attachment_${attachment.id.toString()}.${attachment.type}`,
+        {
+          type:
+            attachment.type === "pdf"
+              ? `application/pdf`
+              : `image/${attachment.type}`,
+        },
+      );
+    }),
   };
 
   const {
@@ -260,7 +272,7 @@ function InvoiceSummaryForm({
             <DateRangePicker
               dateRange={dateRange}
               setDateRange={setDateRange}
-              startDateAlias="Quote Date"
+              startDateAlias="Invoice Date"
               endDateAlias="Expiry Date"
               startDateStyle={`${errors.invoice_date ? `input-error!` : ``}`}
               endDateStyle={`${errors.due_date ? `input-error!` : ``}`}

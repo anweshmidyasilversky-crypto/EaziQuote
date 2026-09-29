@@ -1,35 +1,16 @@
-import { showErrorToast } from "@/api/axiosInstance";
-import { getNotificationList } from "@/api/services/notifications.api";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { getFormattedTimeDiff } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import useNotificationList from "@/hooks/apis/notifications/useNotificationList";
+import { cn, getFormattedTimeDiff } from "@/lib/utils";
+import React from "react";
 
 function NotificationsPage() {
-  const [pageNo, setPageNo] = useState(1);
+  const { notifications, isFetching, pagiantionMeta, setPageNo } =
+    useNotificationList();
 
-  const {
-    isFetching,
-    error,
-    data: notificationResponse,
-  } = useQuery({
-    queryKey: ["notifications", pageNo],
-    queryFn: () =>
-      getNotificationList({
-        page: pageNo,
-      }),
-  });
-
-  if (error) {
-    showErrorToast(error);
-  }
-
-  const notifications = notificationResponse?.payload.data;
-
-  const paginationInfo = notificationResponse?.payload.meta;
+  const paginationBtns = pagiantionMeta?.links;
 
   return (
     <>
@@ -62,47 +43,56 @@ function NotificationsPage() {
           )}
         </div>
 
-        {paginationInfo && (
-          <div className="flex w-full justify-between">
-            <span className="text-placeholder-text">
+        {pagiantionMeta && (
+          <div className="flex w-full justify-between items-center p-5">
+            <span className="text-placeholder-text text-sm">
               {" "}
-              {`Showing ${paginationInfo.last_page * paginationInfo.per_page} of ${paginationInfo.total} Results`}{" "}
+              {`Showing ${pagiantionMeta.per_page * pagiantionMeta.current_page} of ${pagiantionMeta.total} Results`}{" "}
             </span>
 
-            <div className="[&_button]:trnaslate-y-0! [&_button]:table-pagination-btn-common [&_button]:disabled:table-pagination-btn-inactive">
-              {paginationInfo.links.map((btnConfig, index) => {
-                if (index === 0) {
+            {paginationBtns && (
+              <div className="w-fit flex justify-between gap-2 min-h-8 items-center">
+                {paginationBtns?.map((paginationBtn, index) => {
+                  let label = paginationBtn.label;
+                  if (index === 0) {
+                    label = "Previous";
+                  } else if (index === paginationBtns?.length - 1) {
+                    label = "Next";
+                  }
                   return (
                     <CustomBtn
-                      key={btnConfig.label.replaceAll(" ", "-")}
-                      buttonLabel="Previous"
-                      disabled={!btnConfig.active}
-                      onClick={() => setPageNo((curr) => Math.max(0, curr - 1))}
+                      key={label}
+                      buttonLabel={label}
+                      onClick={() => {
+                        if (index === 0) {
+                          setPageNo?.((curr) => Math.max(1, curr - 1));
+                        } else if (index === paginationBtns?.length - 1) {
+                          setPageNo?.((curr) =>
+                            Math.min(
+                              Number(pagiantionMeta?.last_page ?? 1),
+                              curr + 1,
+                            ),
+                          );
+                        } else {
+                          if (!Number.isNaN(Number(label))) {
+                            setPageNo?.(Number(label));
+                          }
+                        }
+                      }}
+                      btncls={cn(
+                        `table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text
+                      ${paginationBtn.active ? `bg-brand-dark! text-white! max-w-8.5!` : ``}
+                      ${
+                        ["Previous", "Next"].includes(label)
+                          ? `table-pagination-btn-common!`
+                          : ``
+                      } `,
+                      )}
                     />
                   );
-                } else if (index === paginationInfo.links.length - 1) {
-                  return (
-                    <CustomBtn
-                      buttonLabel="Next"
-                      key={btnConfig.label.replaceAll(" ", "-")}
-                      disabled={!btnConfig.active}
-                      onClick={() =>
-                        setPageNo((curr) =>
-                          Math.min(paginationInfo.last_page, curr + 1),
-                        )
-                      }
-                    />
-                  );
-                } else {
-                  <CustomBtn
-                    buttonLabel={btnConfig.label}
-                    key={btnConfig.label.replaceAll(" ", "-")}
-                    disabled={!btnConfig.active}
-                    onClick={() => setPageNo(Number(btnConfig.label))}
-                  />;
-                }
-              })}
-            </div>
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

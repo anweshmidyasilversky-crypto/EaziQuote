@@ -17,7 +17,7 @@ import { updateQuote as updateQuoteRedux } from "../../redux/slices/quotes.slice
 import { toast } from "react-toastify";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
 import { showErrorToast } from "@/api/axiosInstance";
-import type { QuoteDetails } from "@/types/api.responses.type";
+import type { ClientDetails, QuoteDetails } from "@/types/api.responses.type";
 import { useNavigate } from "react-router";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
@@ -28,6 +28,7 @@ export type QuoteSummaryFormProps = {
   submitAction?: () => void;
   currQuote?: QuoteDetails;
   prefillClient: boolean;
+  defaultClient?: ClientDetails;
 };
 
 function QuoteSummaryForm({
@@ -35,6 +36,7 @@ function QuoteSummaryForm({
   submitAction,
   currQuote,
   prefillClient,
+  defaultClient,
 }: QuoteSummaryFormProps) {
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
@@ -237,6 +239,13 @@ function QuoteSummaryForm({
       );
     }
   };
+
+  useEffect(() => {
+    if (defaultClient) {
+      setClientSearchTerm(defaultClient.name);
+      setValue("clientId", defaultClient.id.toString());
+    }
+  }, [defaultClient]);
 
   return (
     <React.Fragment>

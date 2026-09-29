@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import {
   ActivitySummary,
@@ -15,6 +16,7 @@ import {
   DateRangePicker,
   type DateRange,
 } from "@/components/common/DateRangePicker";
+import DeleteDialog from "@/components/common/DeleteDialog";
 import FilterBtn from "@/components/common/FilterBtn";
 import {
   RenderMultiSelectCheckbox,
@@ -23,12 +25,14 @@ import {
 import SearchInputGruop from "@/components/common/SearchInputGruop";
 import StatusBadge from "@/components/common/StatusBadge";
 import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
+import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import { dateToDdMonYyyy, formatCurrency } from "@/lib/utils";
 import { type PageFilters } from "@/types/api.requests.type";
 import { InvoiceStatus, type Invoice } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 function InvoiceIndexPage() {
   const navigate = useNavigate();
@@ -39,6 +43,7 @@ function InvoiceIndexPage() {
     startDate: undefined,
     endDate: undefined,
   });
+  const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
   const {
     invoiceList,
     InvoiceSummary,
@@ -47,7 +52,11 @@ function InvoiceIndexPage() {
     setPageNo,
     searchTerm,
     setSearchTerm,
+    refetch,
   } = useInvoiceList({ filters: selectedFilters.current });
+
+  const { invoiceDeleteMutation } = useInvoiceMutations();
+  const targetInvoiceId = useRef<number | undefined>(undefined);
 
   const btnConfig: CustomHeaderProps["btnConfigList"] = [
     {
@@ -153,16 +162,39 @@ function InvoiceIndexPage() {
       id: "action",
       header: "Action",
       cell: (info) => {
-        const { id } = info.row.original;
+        const { id, is_editable } = info.row.original;
         return (
           <CustomActionGroup
             openFn={() => navigate(`/invoices/${id}`)}
             editFn={() => navigate(`/invoices/manage-invoice/${id}`)}
+            withEdit={is_editable}
+            withDelete={is_editable}
+            deleteFn={() => {
+              targetInvoiceId.current = id;
+              toggleDeleteModalOpen(true);
+            }}
           />
         );
       },
     },
   ];
+
+  const handleDelete = () => {
+    if (!targetInvoiceId.current) {
+      toast.error(`No invoice selected`);
+      return;
+    }
+    invoiceDeleteMutation.mutate(targetInvoiceId.current, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        toggleDeleteModalOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
 
   return (
     <div className="p-5 h-full flex flex-col gap-6">
@@ -242,6 +274,13 @@ function InvoiceIndexPage() {
             </div>
           </div>
         </CustomSheet>
+
+        <DeleteDialog
+          isOpen={deleteModalOpen}
+          toggleOpen={toggleDeleteModalOpen}
+          deleteAction={handleDelete}
+          isPending={invoiceDeleteMutation.isPending}
+        />
       </>
     </div>
   );

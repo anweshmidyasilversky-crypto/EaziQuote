@@ -203,6 +203,7 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
   ];
 
   const submitHandler = ({ items }: { items: ItemDetails[] }) => {
+    console.log(items);
     invoiceUpdateMutation.mutate(
       {
         invoice_id: currInvoice?.id ?? "",
@@ -214,7 +215,7 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
       {
         onSuccess: (response) => {
           toast.success(response.message);
-          navigate(`invoices/manage-invoice/${response.payload.id}`);
+          navigate(`/invoices/${response.payload.id}`);
         },
         onError: (error) => {
           showErrorToast(error);

@@ -8,11 +8,16 @@ import { useEffect, useMemo, useState } from "react";
 export type useQuoteListProps = {
   filters?: PageFilters;
   enabled?: boolean;
+  initialSearchTerm?: string;
 };
 
-function useInvoiceList({ filters, enabled }: useQuoteListProps) {
+function useInvoiceList({
+  filters,
+  enabled,
+  initialSearchTerm,
+}: useQuoteListProps) {
   const [pageNo, setPageNo] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm ?? "");
 
   const debouncedSearchTerm = useDebounce({
     value: searchTerm,
@@ -26,6 +31,9 @@ function useInvoiceList({ filters, enabled }: useQuoteListProps) {
     hasNextPage,
     fetchNextPage,
     refetch,
+    isFetched,
+    isFetchedAfterMount,
+    isRefetching,
   } = useInfiniteQuery({
     queryKey: ["quotes_list", filters, pageNo, debouncedSearchTerm],
 
@@ -110,6 +118,10 @@ function useInvoiceList({ filters, enabled }: useQuoteListProps) {
 
     // Summary
     InvoiceSummary,
+
+    isFetched,
+    isFetchedAfterMount,
+    isRefetching,
   };
 }
 

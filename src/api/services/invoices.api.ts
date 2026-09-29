@@ -66,16 +66,45 @@ export const updateInvoice = async (
     invoice_id: string | number;
   },
 ) => {
-  try {
-    const { invoice_id, ...patch } = payload;
-    const response = await axiosInstance.post<ApiResponse<InvoiceDetails>>(
-      API_ENDPOINTS.invoices.invoiceDetails(invoice_id),
-      ObjToFormData(patch),
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
+  const { invoice_id, items, ...patch } = payload;
+
+  const formData = new FormData();
+
+  Object.entries(patch).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    } else if (Array.isArray(value)) {
+      value.forEach((val) => formData.append(`${String(key)}[]`, val));
+    }
+
+    formData.append(key, String(value));
+  });
+
+  items?.forEach((item, index) => {
+    if (item.quantity > 0) {
+      Object.entries(item).forEach(([itemKey, value]) => {
+        if (value === undefined || value === null) {
+          return;
+        }
+
+        formData.append(`items[${index}][${itemKey}]`, String(value));
+      });
+    }
+  });
+
+  // Debug FormData properly
+  console.log("=== FormData ===");
+
+  for (const [key, value] of formData.entries()) {
+    console.log(key, value);
   }
+
+  const response = await axiosInstance.post<ApiResponse<InvoiceDetails>>(
+    API_ENDPOINTS.invoices.invoiceDetails(invoice_id),
+    formData,
+  );
+
+  return response.data;
 };
 
 export const updateInvoiceStatus = async (payload: {

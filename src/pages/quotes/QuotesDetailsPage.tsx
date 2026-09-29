@@ -28,7 +28,6 @@ import { ShareOptions } from "../../components/common/ShareOptions";
 import { QuoteDescriptionPage } from "./QuoteDescriptionPage";
 import { QuoteSectionPage } from "./QuoteSectionPage";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { invoiceData } from "../../constants/dummyData";
 import {
   PaymentMethods,
   QuoteStatus,
@@ -45,6 +44,7 @@ import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 import useQuotePreview from "@/hooks/apis/quotes/useQuotePreview";
 import { FormLayout } from "@/components/common/FormLayout";
 import useSendEmail from "@/hooks/apis/quotes/useSendEmail";
+import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
@@ -53,6 +53,16 @@ export function QuotesDetailsPage() {
   const dispatch = useAppDispatch();
   const { quote, isFetching, refetch } = useQuoteDetails({
     quote_id: params.id,
+  });
+  const invoiceListFilters = useMemo(
+    () => ({
+      quote_id: params.id,
+    }),
+    [params.id],
+  );
+  const { invoiceList, isFetching: isInvoiceFetching } = useInvoiceList({
+    filters: invoiceListFilters,
+    enabled: params.id !== undefined,
   });
   const [globalFilter, setGlobalFilter] = useState("");
   const deboucedFilter = useDebounce({ value: globalFilter, delay: 500 });
@@ -324,7 +334,7 @@ export function QuotesDetailsPage() {
                           <StatusDropDown
                             currStatus={quote?.status}
                             statusSelectAction={(status) =>
-                              handleStatusUpdate(status)
+                              handleStatusUpdate(status as QuoteStatus)
                             }
                           />
                         </div>
@@ -351,7 +361,7 @@ export function QuotesDetailsPage() {
                             {" "}
                             {quote?.client?.name ?? "Unknown Client"}{" "}
                           </span>
-                          <span className="text-placeholder-text text-sm">
+                          <span className="text-placeholder-text text-sm self-start">
                             {" "}
                             {quote?.client?.company_name ?? ""}{" "}
                           </span>
@@ -361,28 +371,44 @@ export function QuotesDetailsPage() {
 
                     {/* Invoice info card — kept as-is (uses dummyData invoiceData) */}
                     <CustomInfoCard header="Invoices">
-                      <div className="flex flex-col gap-3 max-h-125 overflow-y-auto">
-                        {invoiceData.map((invoice) => (
-                          <div
-                            key={invoice.id}
-                            className="min-h-15.5 flex justify-between items-center border border-dashed border-separator px-4 py-3 rounded-[7px]"
-                          >
-                            <div className="flex flex-col justify-between gap-2">
-                              <span className="font-medium text-xs">
+                      {isInvoiceFetching ? (
+                        <div className="flex items-center justify-center">
+                          {" "}
+                          <Spinner className="text-brand-dark w-1/10 h-1/10" />{" "}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-3 max-h-125 overflow-y-auto">
+                          <>
+                            {invoiceList.length === 0 && (
+                              <span className="self-center">
                                 {" "}
-                                {invoice.id}{" "}
+                                {" No linked invoices found "}{" "}
                               </span>
-                              <span className="text-placeholder-text">
-                                {" "}
-                                {formatCurrency(invoice.total)}{" "}
-                              </span>
-                            </div>
-                            <div className="bg-table-head min-h-6 rounded-sm px-2.5 flex items-center font-medium text-xs">
-                              {invoice.status}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                            )}
+                            {invoiceList.length >= 1 &&
+                              invoiceList.map((invoice) => (
+                                <div
+                                  key={invoice.id}
+                                  className="min-h-15.5 flex justify-between items-center border border-dashed border-separator px-4 py-3 rounded-[7px]"
+                                >
+                                  <div className="flex flex-col justify-between gap-2">
+                                    <span className="font-medium text-xs">
+                                      {" "}
+                                      {invoice.id}{" "}
+                                    </span>
+                                    <span className="text-placeholder-text">
+                                      {" "}
+                                      {formatCurrency(invoice.price)}{" "}
+                                    </span>
+                                  </div>
+                                  <div className="bg-table-head min-h-6 rounded-sm px-2.5 flex items-center font-medium text-xs">
+                                    {invoice.status}
+                                  </div>
+                                </div>
+                              ))}
+                          </>
+                        </div>
+                      )}
                     </CustomInfoCard>
                   </div>
                 </div>

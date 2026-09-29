@@ -64,6 +64,8 @@ import { ShareOptions } from "@/components/common/ShareOptions";
 import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
+import type { CreateQuotePageLocationProps } from "../quotes/CreateQuotePage";
+import type { PaymentCreatePageLocationProps } from "../payments/PaymentCreatePage";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
@@ -517,7 +519,7 @@ export function ClientDetailsPage() {
                   {" "}
                   {client?.name ?? "Alexander Christopher"}{" "}
                 </span>
-                <span className="text-[14px] text-placeholder-text text-nowrap">
+                <span className="text-[14px] text-placeholder-text text-nowrap self-start">
                   {" "}
                   {client?.company_name ?? "Greek Builders"}{" "}
                 </span>
@@ -567,6 +569,21 @@ export function ClientDetailsPage() {
                 buttonLabel={
                   isActivityTable ? "New Quote" : "Create Payment Record"
                 }
+                onClick={() => {
+                  if (isActivityTable) {
+                    navigate(`/quotes/manage-quotes/`, {
+                      state: {
+                        defaultClient: client,
+                      } as CreateQuotePageLocationProps,
+                    });
+                  } else {
+                    navigate(`/payments/record-payment`, {
+                      state: {
+                        prefillClient: client,
+                      } as PaymentCreatePageLocationProps,
+                    });
+                  }
+                }}
               />
             </div>
           </div>

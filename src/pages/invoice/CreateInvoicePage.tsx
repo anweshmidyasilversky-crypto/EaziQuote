@@ -96,7 +96,10 @@ export function CreateInvoicePage() {
                   <InvoiceSummaryForm
                     mode={params.id ? "edit" : "create"}
                     currInvoice={invoiceDetails}
-                    submitAction={() => changeFormCurrSection(toggleId.Items)}
+                    submitAction={() => {
+                      changeFormCurrSection(toggleId.Items);
+                      refetch();
+                    }}
                   />
                 )}
                 {formCurrSection === toggleId.Items && (

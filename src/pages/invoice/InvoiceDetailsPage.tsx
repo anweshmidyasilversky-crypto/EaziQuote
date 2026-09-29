@@ -25,12 +25,7 @@ import { CustomInfoCard } from "../../components/quotes/CustomInfoCard";
 import { StatusDropDown } from "../../components/quotes/StatusDropDown";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
 import { ShareOptions } from "../../components/common/ShareOptions";
-import { useAppSelector } from "../../redux/store";
-import {
-  InvoiceStatus,
-  PaymentMethods,
-  type ItemDetails,
-} from "@/types/api.responses.type";
+import { InvoiceStatus, type ItemDetails } from "@/types/api.responses.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import { toast } from "react-toastify";
@@ -47,7 +42,6 @@ import InvoicePaymentsPage from "./InvoicePaymentsPage";
 export function InvoiceDetailsPage() {
   const params = useParams() as { id: string };
   const navigate = useNavigate();
-  const user = useAppSelector((state) => state.user);
   const { invoiceDetails, isFetching, refetch } = useInvoiceDetails({
     id: params.id,
   });
@@ -136,7 +130,7 @@ export function InvoiceDetailsPage() {
       isPopupOpen={moreOptionsOpen}
       togglePopupOpen={toggleMoreOptionsOpen}
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
-      //editAction={() => navigate(`/quotes/manage-quotes/${quote?.id}`)}
+      editAction={() => navigate(`/invoices/manage-invoice/${params?.id}`)}
     >
       <CustomBtn
         buttonLabel="More Actions"
@@ -201,8 +195,6 @@ export function InvoiceDetailsPage() {
       },
     });
   };
-
-  console.log(invoiceDetails);
 
   return (
     <React.Fragment>
@@ -341,7 +333,7 @@ export function InvoiceDetailsPage() {
                             {invoiceDetails?.client?.name ??
                               "Unknown Client"}{" "}
                           </span>
-                          <span className="text-placeholder-text text-sm">
+                          <span className="text-placeholder-text text-sm self-start">
                             {" "}
                             {invoiceDetails?.client?.company_name ?? ""}{" "}
                           </span>
@@ -385,7 +377,10 @@ export function InvoiceDetailsPage() {
               )}
 
               {activeTable === "description" && (
-                <InvoiceDescriptionPage invoice={invoiceDetails} />
+                <InvoiceDescriptionPage
+                  invoice={invoiceDetails}
+                  onMutate={() => refetch()}
+                />
               )}
               {activeTable === "payments" && (
                 <InvoicePaymentsPage invoice={invoiceDetails} />
