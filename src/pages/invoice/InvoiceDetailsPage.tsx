@@ -53,11 +53,13 @@ export function InvoiceDetailsPage() {
   const [moreOptionsOpen, toggleMoreOptionsOpen] = useState(false);
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const [invoicePreviewOpen, toggleinvoicePreviewOpen] = useState(false);
+  const [shareExportPopupOpen, toggleShareExportPopup] = useState(false);
 
   const {
     invoiceStatusMutation,
     invoiceDeleteMutation,
     sendInvoiceEmailMutation,
+    downloadInvoicePdfMutation,
   } = useInvoiceMutations();
 
   const { invoiceList, isFetching: isInvoiceListFetching } = useInvoiceList({
@@ -117,6 +119,29 @@ export function InvoiceDetailsPage() {
     [],
   );
 
+  const handleInvoiceDownload = () => {
+    downloadInvoicePdfMutation.mutate(params.id, {
+      onSuccess: (response) => {
+        const blobUrl: string = window.URL.createObjectURL(
+          new Blob([response], { type: "application/pdf" }),
+        );
+
+        const link: HTMLAnchorElement = document.createElement("a");
+        link.href = blobUrl;
+        link.setAttribute(
+          "download",
+          `Invoice - ${invoiceDetails?.invoice_number}.pdf`,
+        );
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.parentNode?.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      },
+    });
+  };
+
   const btnConfigList: (CustomBtnProps | React.ReactNode)[] = [
     {
       leftIcon: assets.previewIcon,
@@ -140,10 +165,30 @@ export function InvoiceDetailsPage() {
       </span>
     </MoreOptionsPopup>,
 
-    {
-      buttonLabel: "Share & Export",
-      onClick: () => toggleShareBoxOpen((curr) => !curr),
-    },
+    <MoreOptionsPopup
+      isPopupOpen={shareExportPopupOpen}
+      togglePopupOpen={toggleShareExportPopup}
+      withDelete={false}
+      withEdit={false}
+      withDownload
+      withShare
+      shareAction={() => toggleShareBoxOpen(true)}
+      downloadAction={handleInvoiceDownload}
+    >
+      <span
+        className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
+        onClick={() => toggleShareExportPopup((curr) => !curr)}
+      >
+        {downloadInvoicePdfMutation.isPending ? (
+          <div className="flex justify-center items-center">
+            {" "}
+            <Spinner className="text-white " />{" "}
+          </div>
+        ) : (
+          "Share & Export"
+        )}
+      </span>
+    </MoreOptionsPopup>,
   ];
 
   const toggleGroupConfig: CustomToggleGroupProps["toggleConfig"] = useMemo(
