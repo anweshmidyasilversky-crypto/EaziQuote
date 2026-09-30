@@ -41,9 +41,17 @@ export const login = async (payload: SignupPayload) => {
   }
 };
 
-export const sendEmailVerification = async () => {
+export const sendEmailVerification = async (verificationToken: string) => {
   try {
-    await axiosInstance.post(API_ENDPOINTS.auth.sendVerificationEmail);
+    await axiosInstance.post(
+      API_ENDPOINTS.auth.sendVerificationEmail,
+      undefined,
+      {
+        headers: {
+          Authorization: `Bearer ${verificationToken}`,
+        },
+      },
+    );
   } catch (error) {
     throw error;
   }

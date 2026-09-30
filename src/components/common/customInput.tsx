@@ -13,6 +13,7 @@ import { assets } from "../../assets/icons";
 export type SelectOptions = {
   value: string;
   label: string;
+  icon?: string;
 }[];
 
 export type CustomInputProps<T extends FieldValues> = {
@@ -116,7 +117,16 @@ export function CustomInput<T extends FieldValues>({
                           key={selectOption.value}
                         >
                           {" "}
-                          {selectOption.label}{" "}
+                          <span className="flex items-center gap-2">
+                            {" "}
+                            {selectOption.icon && (
+                              <img
+                                src={selectOption.icon}
+                                className="w-5 aspect-auto"
+                              />
+                            )}{" "}
+                            {selectOption.label}
+                          </span>{" "}
                         </option>
                       );
                     })}

@@ -37,12 +37,14 @@ export function ProfileSetupPage() {
       formData.append("_method", "put");
       formData.append("name", data.name);
       formData.append("phone", `+44${data.phoneNo}`);
-      formData.append(
-        "avatar",
-        data.profilePic
-          ? new Blob([data.profilePic], { type: data.profilePic.type })
-          : new Blob(),
-      );
+      if (data.profilePic) {
+        formData.append(
+          "avatar",
+          data.profilePic
+            ? new Blob([data.profilePic], { type: data.profilePic.type })
+            : new Blob(),
+        );
+      }
       console.log(Object.fromEntries(formData));
       const apiRes = await profileSetup(formData);
       dispath(updateUser(apiRes.payload));

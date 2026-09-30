@@ -12,8 +12,9 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((request) => {
   const auth = store.getState().auth;
-  console.log(`apiToken: ${auth.apiToken}`);
-  request.headers["Authorization"] = `Bearer ${auth.apiToken}`;
+  if (!request.headers.Authorization && auth.apiToken) {
+    request.headers.Authorization = `Bearer ${auth.apiToken}`;
+  }
   return request;
 });
 

@@ -1,14 +1,7 @@
 import { useNavigate } from "react-router";
 import { assets } from "../../assets/icons";
-import { auth } from "../../lib/firebaseConfig";
 export function EmailVerified() {
   const navigate = useNavigate();
-  const user = auth.currentUser;
-  if (!user) {
-    navigate("/");
-  } else if (!user.emailVerified) {
-    navigate("/email-verification");
-  }
   return (
     <div className="auth-card-offset">
       <div className="auth-card flex items-center">
@@ -30,10 +23,10 @@ export function EmailVerified() {
         <button
           type="button"
           className="btn-auth"
-          onClick={() => navigate("#")}
+          onClick={() => navigate("/")}
         >
           <span className="h-4.75 font-sans font-medium text-[16px] leading-4.75 text-white flex-none text-center">
-            Go to Dashboard
+            Continue
           </span>
         </button>
       </div>

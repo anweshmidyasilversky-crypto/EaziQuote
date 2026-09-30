@@ -12,7 +12,6 @@ import { businessAddressSchema } from "../../validation/businessAddress.payload.
 import { CustomInput } from "../../components/common/CustomInput";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { addBusinessAddress } from "@/api/services/user.api";
 import { showErrorToast } from "@/api/axiosInstance";
@@ -25,7 +24,6 @@ import type { AddressDetails } from "@/types/api.responses.type";
 
 export function BusinessAddressForm() {
   const dispath = useAppDispatch();
-  const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("M11AE");
@@ -73,7 +71,6 @@ export function BusinessAddressForm() {
         updateUser({ is_company_address_setup: true, ...companyInfo.payload }),
       );
       toast.success("Successfully added business address");
-      navigate("/dashboard");
     } catch (err) {
       showErrorToast(err);
     } finally {

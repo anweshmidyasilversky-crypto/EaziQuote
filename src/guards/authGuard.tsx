@@ -3,57 +3,61 @@ import { useAppSelector } from "../redux/store";
 
 export function AuthGuard() {
   const user = useAppSelector((state) => state.user);
+  const auth = useAppSelector((state) => state.auth);
   const location = useLocation();
-  const publicOnlyRoutes = [
-    "/",
-    "/signup",
-    "/forgot-password",
-    "/email-verification",
-  ];
+  const pendingVerificationEmail = (location.state as { email?: string } | null)
+    ?.email;
+  const publicRoutes = ["/", "/signup", "/forgot-password"];
   const profileSetupRoutes = [
     "/profile-setup",
     "/business-profile",
     "/business-address",
   ];
+  const authenticatedLanding = user.is_company_address_setup
+    ? "/dashboard"
+    : "/profile-setup";
 
-  if (publicOnlyRoutes.includes(location.pathname)) {
-    if (user.email.length >= 1) {
-      return <Navigate to={"/dashboard"} replace={true} />;
-      // if (
-      //   !user.is_email_verified &&
-      //   location.pathname !== "/email-verification"
-      // ) {
-      //   return <Navigate to={"/email-verification"} replace={true} />;
-      // }
+  if (location.pathname === "/email-verified") {
+    return <Outlet />;
+  }
 
-      // const nextProfileStep = !user.is_profile_setup
-      //   ? "/profile-setup"
-      //   : !user.is_company_profile_setup
-      //     ? "/business-profile"
-      //     : !user.is_company_address_setup
-      //       ? "/business-address"
-      //       : undefined;
-
-      // if (
-      //   user.is_email_verified &&
-      //   nextProfileStep &&
-      //   location.pathname !== nextProfileStep
-      // ) {
-      //   return <Navigate to={nextProfileStep} replace={true} />;
-      // }
+  if (location.pathname === "/email-verification") {
+    if (!auth.apiToken) {
+      return pendingVerificationEmail ? (
+        <Outlet />
+      ) : (
+        <Navigate to="/" replace />
+      );
     }
-  } else {
-    if (user.email.length == 0) {
-      if (location.pathname !== "/") {
-        return <Navigate to={"/"} replace={true} />;
-      }
-    } else {
-      if (!user.is_company_address_setup) {
-        if (!profileSetupRoutes.includes(location.pathname)) {
-          return <Navigate to={"/profile-setup"} replace={true} />;
-        }
-      }
+    if (user.is_email_verified) {
+      return <Navigate to={authenticatedLanding} replace />;
     }
+    return <Outlet />;
+  }
+
+  if (publicRoutes.includes(location.pathname)) {
+    if (!auth.apiToken) {
+      return <Outlet />;
+    }
+    if (!user.is_email_verified) {
+      return <Navigate to="/email-verification" replace />;
+    }
+    return <Navigate to={authenticatedLanding} replace />;
+  }
+
+  if (auth.apiToken.length <= 0) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!user.is_email_verified) {
+    return <Navigate to="/email-verification" replace />;
+  }
+
+  if (
+    !user.is_company_address_setup &&
+    !profileSetupRoutes.includes(location.pathname)
+  ) {
+    return <Navigate to="/profile-setup" replace />;
   }
 
   return <Outlet />;

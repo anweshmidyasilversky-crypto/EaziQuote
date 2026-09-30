@@ -24,7 +24,6 @@ import {
 import { BrandColorPreview } from "../../components/auth/brandColor.preview";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { businessProfileSetup } from "@/api/services/user.api";
 import { isAxiosError } from "axios";
@@ -32,8 +31,8 @@ import { CustomBtn } from "@/components/common/CustomBtn";
 import { useMutation } from "@tanstack/react-query";
 
 export function BusinessProfileForm() {
+  const appConfig = useAppSelector((state) => state.appConfig);
   const dispath = useAppDispatch();
-  const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
 
@@ -62,7 +61,6 @@ export function BusinessProfileForm() {
       formData.append("phone", `+44${data.businessPhoneNo}`);
       formData.append("address", "dummyAddress");
       formData.append("vertical_market_id", data.trade);
-      formData.append("_method", "put");
       if (data.vatNumber) {
         formData.append("vat_number", data.vatNumber);
       }
@@ -80,7 +78,6 @@ export function BusinessProfileForm() {
         }),
       );
       toast.success("Business profile complete");
-      navigate("/business-address");
     } catch (err) {
       if (isAxiosError(err)) {
         toast.error(err.response?.data.message);
@@ -97,16 +94,24 @@ export function BusinessProfileForm() {
     name: ["brandColor", "vatRegistered"],
   });
 
-  const tradeSelectOptions: SelectOptions = [
-    { value: "", label: "Select an option" },
-    { value: "bricklaying_masonry", label: "Bricklaying & Masonry" },
-    { value: "carpentry_joinery", label: "Carpentry & Joinery" },
-    { value: "general_contracting", label: "General Contracting" },
-    { value: "painting_decorating", label: "Painting & Decorating" },
-    { value: "plastering_rendering", label: "Plastering & Rendering" },
-    { value: "roofing", label: "Roofing" },
-    { value: "tiling", label: "Tiling & Flooring" },
-  ];
+  // const tradeSelectOptions: SelectOptions = [
+  //   { value: "", label: "Select an option" },
+  //   { value: "bricklaying_masonry", label: "Bricklaying & Masonry" },
+  //   { value: "carpentry_joinery", label: "Carpentry & Joinery" },
+  //   { value: "general_contracting", label: "General Contracting" },
+  //   { value: "painting_decorating", label: "Painting & Decorating" },
+  //   { value: "plastering_rendering", label: "Plastering & Rendering" },
+  //   { value: "roofing", label: "Roofing" },
+  //   { value: "tiling", label: "Tiling & Flooring" },
+  // ];
+
+  const tradeSelectOptions: SelectOptions = appConfig.vertical_markets.map(
+    (option) => ({
+      value: option.id.toString(),
+      label: option.title,
+      icon: option.icon,
+    }),
+  );
 
   const [isPopoverOpen, toggleIsPopoverOpen] = useState(false);
   return (

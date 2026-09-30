@@ -2,13 +2,13 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type UserSignInPayload } from "../../types/user.signIn.payload.type";
 import { CustomInput } from "../../components/common/CustomInput";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { userSignInSchema } from "../../validation/user.signIn.payload.schema";
 import { toast } from "react-toastify";
 import { Spinner } from "../../components/ui/spinner";
 import { useNavigate } from "react-router";
 import { Card, CardContent } from "../../components/ui/card";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppDispatch } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { login } from "@/api/services/auth.api";
 import { deviceType } from "@/types/api.requests.type";
@@ -18,7 +18,6 @@ import { isAxiosError } from "axios";
 export function SignInPage() {
   const rememberMe = useRef(0);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const auth = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispath = useAppDispatch();
   const { control, handleSubmit } = useForm<UserSignInPayload>({
@@ -29,12 +28,6 @@ export function SignInPage() {
     resolver: yupResolver(userSignInSchema),
   });
 
-  useEffect(() => {
-    if (auth.apiToken.length >= 1) {
-      navigate("/dashboard");
-    }
-  }, []);
-
   const onsubmit = async (data: UserSignInPayload) => {
     toggleIsSubmitting(true);
     try {
@@ -43,14 +36,18 @@ export function SignInPage() {
         password: data.password,
         device_type: deviceType.web,
       });
-      dispath(setToken(loginResponse.payload.access_token));
       if (!loginResponse.payload.is_email_verified) {
         toast.error(`Please verify your email`);
-        navigate("/email-verification");
+        navigate("/email-verification", {
+          state: {
+            email: loginResponse.payload.email,
+            verificationToken: loginResponse.payload.access_token,
+          },
+        });
       } else {
+        dispath(setToken(loginResponse.payload.access_token));
         dispath(updateUser(loginResponse.payload));
         toast.success(`Signin success`);
-        navigate(`/dashboard`);
       }
     } catch (err) {
       if (isAxiosError(err)) {
