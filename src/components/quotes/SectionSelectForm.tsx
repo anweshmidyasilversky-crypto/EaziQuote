@@ -195,6 +195,7 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
       onSuccess: (response) => {
         toast.success(response.message);
         setSearchTerm("");
+        toggleSectionFormOpen(false);
         refetchSectionsList();
       },
       onError: (error) => {
@@ -258,6 +259,7 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
         }
         editFn={editFn}
         createFn={handleSectionCreation}
+        isSubmitting={createSectionMutation.isPending}
       />
     </>
   );

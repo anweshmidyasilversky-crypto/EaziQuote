@@ -50,7 +50,7 @@ export function ImageInput({
               >
                 <img
                   src={imgUrl ?? (imgFile ? URL.createObjectURL(imgFile) : alt)}
-                  className={`${imgFile ? "object-cover object-center h-full w-full" : (altClass ?? "object-contain h-21 w-21 object-bottom")}  border-none outline-none`}
+                  className={`h-full w-full object-cover object-center ${imgFile ? "" : (altClass ?? "object-contain h-21 w-21 object-bottom")}  border-none outline-none`}
                   alt={altText ?? "User Placeholder"}
                 />
               </div>

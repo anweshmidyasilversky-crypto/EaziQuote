@@ -5,14 +5,21 @@ import "react-toastify/dist/ReactToastify.css";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
 import App from "./App.tsx";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistor, store } from "./redux/store.ts";
 
 const client = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={client}>
-    <TooltipProvider>
-      <App />
-      <ToastContainer />
-    </TooltipProvider>
-  </QueryClientProvider>,
+  <Provider store={store}>
+    <PersistGate persistor={persistor}>
+      <QueryClientProvider client={client}>
+        <TooltipProvider>
+          <App />
+          <ToastContainer />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </PersistGate>
+  </Provider>,
 );

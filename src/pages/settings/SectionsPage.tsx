@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import { CustomActionGroup } from "@/components/common/CustomActionGroup";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
@@ -8,32 +9,86 @@ import SearchInputGruop from "@/components/common/SearchInputGruop";
 import QuoteSectionForm, {
   type QuoteSectionFormProps,
 } from "@/components/quotes/QuoteSectionForm";
-import { quoteSectionData } from "@/constants/dummyData";
-import { useDebounce } from "@/hooks/useDebounce";
-import type { QuoteSection } from "@/types/quoteSection.type";
+import useSectionMutations from "@/hooks/apis/quotes/sections/useSectionMutations";
+import useSectionsList from "@/hooks/apis/quotes/sections/useSectionsList";
+import type {
+  QuoteSectionCreatePayload,
+  QuoteSectionUpdatePayload,
+} from "@/types/api.requests.type";
+import { type QuoteSection } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 function SectionsPage() {
-  const [searchParam, setSearchParam] = useState("");
-  const debouncedSearchParam = useDebounce({ value: searchParam, delay: 500 });
+  const { sectionList, searchTerm, setSearchTerm, refetch, isFetching } =
+    useSectionsList({});
+
+  const {
+    createSectionMutation,
+    updateSectionMutation,
+    deleteSectionMutation,
+  } = useSectionMutations();
+
+  const handleSectionCreate = (data: QuoteSectionCreatePayload) => {
+    createSectionMutation.mutateAsync(data, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        toggleSectionFormOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const handleSectionUpdate = (data: QuoteSectionUpdatePayload) => {
+    updateSectionMutation.mutateAsync(data, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        toggleSectionFormOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const handleSectionDelete = () => {
+    if (targetSectionId.current) {
+      deleteSectionMutation.mutate(String(targetSectionId.current), {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          toggleDelDialogOpen(false);
+          refetch();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      });
+    }
+  };
+
   const [sectionFormOpen, toggleSectionFormOpen] = useState(false);
   const [delDialogOpen, toggleDelDialogOpen] = useState(false);
   const sectionFormMode = useRef<QuoteSectionFormProps["mode"]>("creation");
   const sectionDefaultValue = useRef<QuoteSection | undefined>(undefined);
+  const targetSectionId = useRef<number | string | undefined>(undefined);
   const sectionColumns: ColumnDef<TableFeatures, QuoteSection>[] = [
     {
-      accessorKey: "order",
+      accessorKey: "sort",
       header: "ORDER",
       enableSorting: false,
     },
     {
-      accessorKey: "section",
+      accessorKey: "title",
       header: "SECTION",
       enableSorting: false,
     },
     {
-      accessorKey: "description",
+      accessorKey: "content",
       header: "DESCRIPTION",
       enableSorting: false,
       cell: (info) => {
@@ -52,7 +107,10 @@ function SectionsPage() {
             sectionDefaultValue.current = info.row.original;
             toggleSectionFormOpen((curr) => !curr);
           }}
-          deleteFn={() => toggleDelDialogOpen((curr) => !curr)}
+          deleteFn={() => {
+            targetSectionId.current = info.row.original.id;
+            toggleDelDialogOpen((curr) => !curr);
+          }}
         />
       ),
     },
@@ -63,11 +121,11 @@ function SectionsPage() {
       <div className="flex flex-col py-5.5 gap-5.5 m-6 bg-table rounded-[10px]">
         <CustomDataTable
           columns={sectionColumns}
-          data={quoteSectionData}
+          data={sectionList}
           tableOptionsLeft={
             <SearchInputGruop
-              searchTerm={searchParam}
-              setSearchTerm={setSearchParam}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
               searchPlaceHolder="Search section"
             />
           }
@@ -82,7 +140,7 @@ function SectionsPage() {
               }}
             />
           }
-          globalFilterTerm={debouncedSearchParam}
+          isFetching={isFetching}
         />
       </div>
 
@@ -91,9 +149,19 @@ function SectionsPage() {
         toggleIsOpen={toggleSectionFormOpen}
         mode={sectionFormMode.current}
         defaultValues={sectionDefaultValue.current}
+        createFn={handleSectionCreate}
+        editFn={handleSectionUpdate}
+        isSubmitting={
+          createSectionMutation.isPending || updateSectionMutation.isPending
+        }
       />
 
-      <DeleteDialog isOpen={delDialogOpen} toggleOpen={toggleDelDialogOpen} />
+      <DeleteDialog
+        isOpen={delDialogOpen}
+        toggleOpen={toggleDelDialogOpen}
+        deleteAction={handleSectionDelete}
+        isPending={deleteSectionMutation.isPending}
+      />
     </>
   );
 }

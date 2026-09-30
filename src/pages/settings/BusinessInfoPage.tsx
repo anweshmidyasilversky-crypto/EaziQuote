@@ -1,54 +1,61 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import { ImageInput } from "@/components/auth/imageInput";
 import { CustomBtn } from "@/components/common/CustomBtn";
-import { CustomCombobox } from "@/components/common/CustomCombobox";
 import { CustomInput } from "@/components/common/CustomInput";
+import { PostCodeSelectComboBox } from "@/components/common/PostCodeSelectComboBox";
 import { Separator } from "@/components/ui/separator";
-import { postalCodes, type AddressDetail } from "@/constants/dummyData";
-import { cn, getAddress } from "@/lib/utils";
-import { updateUser } from "@/redux/slices/user.slice";
+import useUserMutations from "@/hooks/apis/user/useUserMutations";
+import { cn } from "@/lib/utils";
+import { updateCompany as updateCompanyRedux } from "@/redux/slices/user.slice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import type { BusinessAddressPayload } from "@/types/businessAddress.payload.type";
 import type { BusinessProfilePayload } from "@/types/businessProfile.payload.type";
 import { businessAddressSchema } from "@/validation/businessAddress.payload.schema";
 import { BusinessProfilePayloadSchema } from "@/validation/businessProfile.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 
 function BusinessInfoPage() {
-  const user = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
-  const [imgFile, toggleImgFile] = useState<File | undefined>(undefined);
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const { control, setValue, handleSubmit, clearErrors } = useForm<
-    Omit<BusinessProfilePayload & BusinessAddressPayload, "trade">
-  >({
-    defaultValues: async () => {
-      const baseDefaults = {
-        street: "",
-        country: "",
-        city: "",
-        postCode: "",
-        brandColor: "#00f",
-        businessName: "business",
-        businessPhoneNo: "",
-        vatRegistered: false,
-        showBusinessName: false,
-      } as BusinessProfilePayload & BusinessAddressPayload;
-      try {
-        const img = await fetch(assets.userImg);
-        const blob = await img.blob();
-        return Object.assign(baseDefaults, user, {
-          brandLogo: new File([blob], assets.userImg, {
-            type: "image/png",
-          }),
-        });
-      } catch {
-        return baseDefaults;
-      }
+  const {
+    company: {
+      address: companyAddress,
+      brand_color,
+      name: businessName,
+      phone_number: businessPhone,
+      vat_number,
+      is_company_name_show,
+      logo,
     },
+  } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+  const [companyLogo, setCompanyLogo] = useState<File | undefined>(undefined);
+  const companyLogoURl = useRef<string>(logo ?? assets.cameraIcon);
+  const { companyUpdateMutation } = useUserMutations();
+  const {
+    control,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+    clearErrors,
+  } = useForm<Omit<BusinessProfilePayload & BusinessAddressPayload, "trade">>({
+    defaultValues: {
+      street: companyAddress.address,
+      country: companyAddress.country,
+      city: companyAddress.city,
+      postCode: companyAddress.postcode,
+      brandColor: brand_color,
+      businessName: businessName,
+      businessPhoneNo: businessPhone.startsWith(`(+44)`)
+        ? businessPhone.slice(5)
+        : businessPhone,
+      vatRegistered: vat_number ? true : false,
+      showBusinessName: is_company_name_show,
+      vatNumber: vat_number,
+      brandLogo: undefined,
+    } as BusinessProfilePayload & BusinessAddressPayload,
     resolver: yupResolver(
       BusinessProfilePayloadSchema.omit(["trade"]).concat(
         businessAddressSchema,
@@ -56,36 +63,45 @@ function BusinessInfoPage() {
     ),
   });
 
-  const [isVatRegistered, showBusinessName] = useWatch({
+  const [isVatRegistered] = useWatch({
     control: control,
-    name: ["vatRegistered", "showBusinessName"],
+    name: ["vatRegistered"],
   });
-
-  useEffect(() => {
-    setValue("brandLogo", imgFile);
-  }, [imgFile]);
-
-  const addressSetter = (postCode: string) => {
-    const address = getAddress(postCode);
-    if (address) {
-      Object.keys(address).forEach((key) => {
-        setValue(
-          key as keyof BusinessAddressPayload,
-          address[key as keyof AddressDetail],
-        );
-        clearErrors(key as keyof BusinessAddressPayload);
-      });
-    }
-  };
 
   const submitHandler = (
     data: Omit<BusinessAddressPayload & BusinessProfilePayload, "trade">,
   ) => {
-    toggleIsSubmitting(true);
-    dispatch(updateUser(data));
-    toast.success(`Updated business info`);
-    toggleIsSubmitting(false);
+    companyUpdateMutation.mutate(
+      {
+        _method: "put",
+        name: data.businessName,
+        phone: data.businessPhoneNo,
+        address: data.street,
+        logo: companyLogo ?? undefined,
+        city: data.city,
+        postcode: data.postCode,
+        country: data.country,
+        brand_color: data.brandColor,
+        is_company_name_show: data.showBusinessName ? 1 : 0,
+        vat_number: data.vatNumber,
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          dispatch(updateCompanyRedux(response.payload));
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
+
+  useEffect(() => {
+    if (errors) {
+      console.log(errors);
+    }
+  }, [errors]);
 
   return (
     <div className="p-5 flex flex-col gap-5">
@@ -93,10 +109,13 @@ function BusinessInfoPage() {
         <div className="flex gap-8 items-center">
           <div className="flex items-start">
             <ImageInput
-              imgFile={imgFile}
-              setImgFile={toggleImgFile}
-              alt={assets.previewBrandlogo}
-              altClass={cn(`object-contain self-center!`)}
+              imgUrl={companyLogoURl.current}
+              setImgFile={(img) => {
+                companyLogoURl.current = URL.createObjectURL(img);
+                setCompanyLogo(img);
+              }}
+              alt={assets.userImg}
+              altClass={cn(`object-contain`)}
               withEditIcon
               iconBadgeCls={cn(`h-9 w-9`)}
             />
@@ -134,9 +153,8 @@ function BusinessInfoPage() {
             fieldName="Show business name on Quotes & Invoices"
             inptType="switch"
             orientation="horizontal"
-            className={cn(
-              `max-w-11! ${showBusinessName ? `translate-y-0!` : `translate-y-1!`}`,
-            )}
+            className={cn(`max-w-11!`)}
+            containerCls="min-h-0"
           />
         </div>
 
@@ -144,15 +162,22 @@ function BusinessInfoPage() {
           control={control}
           name="businessPhoneNo"
           fieldName="Phone"
-          placeholder="(+44)   456-798-5542"
+          inptType="phone"
+          placeholder="4567985542"
         />
       </div>
 
-      <CustomCombobox
-        items={postalCodes}
-        onValueChange={(postCode) => addressSetter(postCode as string)}
-        placeholder="Search postcode"
-        getItemLabel={(item) => item ?? ""}
+      <Separator className={`bg-separator`} />
+
+      <PostCodeSelectComboBox
+        addressSetter={(address) => {
+          setValue("city", address.city);
+          setValue("country", address.country);
+          setValue("postCode", address.postcode);
+          setValue("street", address.address_line_1);
+
+          clearErrors(["city", "country", "postCode", "street"]);
+        }}
       />
 
       <CustomInput control={control} name="street" fieldName="Street Address" />
@@ -187,9 +212,8 @@ function BusinessInfoPage() {
         fieldName="Are you VAT registered?"
         inptType="switch"
         orientation="horizontal"
-        className={cn(
-          `max-w-11! ${isVatRegistered ? `translate-y-0!` : `translate-y-1!`} `,
-        )}
+        className={cn(`max-w-11! `)}
+        containerCls="min-h-0"
       />
 
       {isVatRegistered && (
@@ -203,7 +227,7 @@ function BusinessInfoPage() {
 
       <CustomBtn
         buttonLabel="Update Profile"
-        isSubmitting={isSubmitting}
+        isSubmitting={companyUpdateMutation.isPending}
         onClick={handleSubmit(submitHandler)}
       />
     </div>

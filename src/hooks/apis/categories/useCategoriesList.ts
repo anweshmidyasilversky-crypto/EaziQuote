@@ -63,6 +63,7 @@ function useCategoriesList({ filters }: useCategoriesListProps) {
     fetchNextPage,
     refetch,
     hasNextPage,
+    pageNo,
     paginationMeta: data ? data.pages.at(-1)?.payload.meta : undefined,
   };
 }

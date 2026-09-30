@@ -76,7 +76,7 @@ function SubCategoriesPage() {
       id: "action",
       header: () => <div className="flex w-full justify-end">{"ACTION"}</div>,
       cell: (info) => (
-        <div className="min-w-70 flex justify-end pr-1">
+        <div className="w-full flex mr-20 justify-end ">
           <CustomActionGroup
             withOpen={false}
             editFn={() => {

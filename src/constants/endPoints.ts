@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
     createPresetQuote: `/quote-templates`,
     updatePresetQuote: `/quote-templates`,
     appConfig: `/auth/config`,
+    companyCreate: `/company`,
+    companyUpdate: `/company`,
   },
   address: {
     addressSearch: `/address/search`,
@@ -78,6 +80,11 @@ export const API_ENDPOINTS = {
     addBusinessAddress: `/company`,
     userDetails: `/user/detail`,
     deleteUser: `/user`,
+  },
+  teamMembers: {
+    memberList: `/company/users`,
+    memberCreate: `/company/users`,
+    memberUpdate: `/company/users`,
   },
   proposalDocuments: {
     getProposalDocumentList: `/proposal-document/sections`,

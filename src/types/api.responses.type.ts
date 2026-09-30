@@ -599,3 +599,13 @@ export interface InvoiceDetails {
   payment_method?: PaymentMethods | null;
   route_url: string;
 }
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  email: string;
+  avatar: null | string;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}

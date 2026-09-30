@@ -89,7 +89,9 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   const discount = useRef<number | null>(
     Number(currQuote.discount?.amount ?? "0"),
   );
-  const depositePaymentMethod = useRef<PaymentMethods>(PaymentMethods.cash);
+  const depositePaymentMethod = useRef<PaymentMethods>(
+    user.stripe_connected ? PaymentMethods.stripe : PaymentMethods.cash,
+  );
   const depositePercentageRef = useRef<number | null>(
     currQuote.deposit_percentage,
   );
@@ -291,6 +293,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   const { quoteUpdateMutation } = useQuotesMutations();
 
   const handleSave = () => {
+    console.log(depositePaymentMethod.current);
     const itemPatches = Object.values(itemQty);
     if (itemPatches.length <= 0) {
       toast.error(`Select at least one item to continue`);

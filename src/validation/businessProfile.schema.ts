@@ -31,8 +31,12 @@ export const BusinessProfilePayloadSchema: yup.ObjectSchema<BusinessProfilePaylo
   yup.object({
     brandLogo: yup
       .mixed<File>()
-      .required(notSelectedMsg("Brand Logo"))
-      .test((value, ctx) => {
+      .optional()
+      .test("file-validation", (value, ctx) => {
+        if (!value) {
+          return true;
+        }
+
         if (value.size / (1024 * 1024) > BRAND_LOGO.maxSize) {
           return ctx.createError({
             message: ExccedFileSizeLimit("Brand Logo", BRAND_LOGO.maxSize),
@@ -40,7 +44,9 @@ export const BusinessProfilePayloadSchema: yup.ObjectSchema<BusinessProfilePaylo
         }
 
         if (!ALLOWED_IMAGE_TYPES.includes(value.type)) {
-          return ctx.createError({ message: InvalidType(ALLOWED_IMAGE_TYPES) });
+          return ctx.createError({
+            message: InvalidType(ALLOWED_IMAGE_TYPES),
+          });
         }
 
         return true;

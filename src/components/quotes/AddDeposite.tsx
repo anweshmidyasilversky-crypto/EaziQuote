@@ -170,7 +170,12 @@ function AddDeposite({
         <div className="flex flex-col w-full gap-2">
           <CustomCombobox
             items={Object.values(PaymentMethods)}
-            selected={PaymentMethods.stripe}
+            selected={
+              defaultValues.paymentMethod ??
+              (user.stripe_connected
+                ? PaymentMethods.stripe
+                : PaymentMethods.cash)
+            }
             onValueChange={(method) => {
               method ? setValue("paymentMethod", method) : undefined;
               setSelectedMethod(method ?? "");

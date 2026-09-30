@@ -20,6 +20,7 @@ import BusinessInfoPage from "./BusinessInfoPage";
 import useUserMutations from "@/hooks/apis/user/useUserMutations";
 import useUserDetails from "@/hooks/apis/user/useUserDetails";
 import { Spinner } from "@/components/ui/spinner";
+import { showErrorToast } from "@/api/axiosInstance";
 
 enum toggle {
   personal = "personal",
@@ -34,14 +35,15 @@ function ProfilePage() {
   const [activeId, toggleActiveId] = useState<string>(toggle.personal);
   const [userImg, setUserImg] = useState<File | undefined>(undefined);
   const profilePicUrl = useRef<string>(user.avatar ?? assets.userImg);
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
 
   const { profileSetupMutation } = useUserMutations();
 
   const { control, handleSubmit } = useForm<UserProfilePayload>({
     defaultValues: {
       name: user.name,
-      phoneNo: user.phone,
+      phoneNo: user.phone.startsWith("(+44)")
+        ? user.phone.slice(5)
+        : user.phone,
     },
     resolver: yupResolver(userProfileSchema),
   });
@@ -58,11 +60,22 @@ function ProfilePage() {
   ];
 
   const submitHandler = async (data: UserProfilePayload) => {
-    toggleIsSubmitting(true);
-    profileSetupMutation.mutateAsync({
-      ...data,
-      profilePic: userImg,
-    });
+    await profileSetupMutation.mutateAsync(
+      {
+        ...data,
+        profilePic: userImg,
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          response.payload.phone = response.payload.phone?.replaceAll(" ", "");
+          dispatch(updateUser(response.payload));
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -150,7 +163,7 @@ function ProfilePage() {
                   <CustomBtn
                     buttonLabel="Update Profile"
                     onClick={handleSubmit(submitHandler)}
-                    isSubmitting={isSubmitting}
+                    isSubmitting={profileSetupMutation.isPending}
                   />
                 </div>
               )}

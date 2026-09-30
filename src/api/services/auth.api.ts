@@ -1,4 +1,6 @@
 import type {
+  CompanyCreateApiPayload,
+  CompanyUpdateApiPayload,
   CreatePresetQuote,
   PageFilters,
   SignupPayload,
@@ -14,8 +16,10 @@ import {
   type PresetQuoteListing,
   type AppConfig,
   type PresetQuote,
+  type Company,
 } from "@/types/api.responses.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
+import { ObjToFormData } from "@/lib/utils";
 
 export const signup = async (payload: SignupPayload) => {
   try {
@@ -135,6 +139,30 @@ export const getAppConfig = async () => {
       API_ENDPOINTS.auth.appConfig,
     );
     return appConfigResponse.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createCompany = async (payload: CompanyCreateApiPayload) => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<Company>>(
+      API_ENDPOINTS.auth.companyCreate,
+      ObjToFormData(payload),
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateCompany = async (payload: CompanyUpdateApiPayload) => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<Company>>(
+      API_ENDPOINTS.auth.companyUpdate,
+      ObjToFormData(payload),
+    );
+    return res.data;
   } catch (error) {
     throw error;
   }

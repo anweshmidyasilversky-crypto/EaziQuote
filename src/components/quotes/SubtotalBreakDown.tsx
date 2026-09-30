@@ -103,9 +103,8 @@ export function SubtotalBreakDown({
     }
     if (depositePaymentMethodRef) {
       depositePaymentMethodRef.current =
-        (paymentMethod ?? user.stripe_connected)
-          ? PaymentMethods.stripe
-          : PaymentMethods.cash;
+        paymentMethod ??
+        (user.stripe_connected ? PaymentMethods.stripe : PaymentMethods.cash);
     }
     if (discountRef) {
       discountRef.current = discountPercentage ?? null;
@@ -462,9 +461,10 @@ export function SubtotalBreakDown({
                   <span className="subtotal-field"> Payment Method </span>
                   <span className="subtotal-value">
                     {" "}
-                    {user.stripe_connected
-                      ? PaymentMethods.stripe
-                      : PaymentMethods.cash}{" "}
+                    {paymentMode ??
+                      (user.stripe_connected
+                        ? PaymentMethods.stripe
+                        : PaymentMethods.cash)}{" "}
                   </span>
                 </div>
               )}{" "}

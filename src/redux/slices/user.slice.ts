@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { type UserType } from "../../types/user.type";
-import type { User } from "@/types/api.responses.type";
+import type { Company, User } from "@/types/api.responses.type";
 
 export const initialState: User = {
   id: 0,
@@ -74,11 +74,15 @@ export const userSlice = createSlice({
       Object.assign(state, action.payload);
     },
 
+    updateCompany(state, action: PayloadAction<Company>) {
+      Object.assign(state.company, action.payload);
+    },
+
     removeUser(state) {
       Object.assign(state, initialState);
     },
   },
 });
 
-export const { updateUser, removeUser } = userSlice.actions;
+export const { updateUser, removeUser, updateCompany } = userSlice.actions;
 export default userSlice.reducer;

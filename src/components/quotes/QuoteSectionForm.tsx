@@ -13,15 +13,14 @@ import {
   qouteSectionCreateSchema,
   QuoteSectionUpdateSchema,
 } from "@/validation/quoteSection.payload.schema";
+import type { QuoteSection } from "@/types/api.responses.type";
 
 export type QuoteSectionFormProps = {
   mode: "creation" | "updation";
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   titleId?: string;
-  defaultValues?: DefaultValues<
-    QuoteSectionCreatePayload | QuoteSectionUpdatePayload
-  >;
+  defaultValues?: Partial<QuoteSection>;
   editFn?: (payload: QuoteSectionUpdatePayload) => void;
   createFn?: (payload: QuoteSectionCreatePayload) => void;
   isSubmitting?: boolean;
@@ -57,6 +56,7 @@ function QuoteSectionForm({
 
   useEffect(() => {
     if (mode === "updation" && defaultValues) {
+      console.log(`Setting Default Values`);
       if (defaultValues?.sort) {
         setValue("sort", defaultValues.sort);
         setComboboxSearchTerm(defaultValues.sort.toString());
@@ -66,8 +66,10 @@ function QuoteSectionForm({
         setValue("title", defaultValues.title);
       }
       setValue("id", (defaultValues as QuoteSectionUpdatePayload).id);
+    } else {
+      setComboboxSearchTerm("");
     }
-  }, [defaultValues]);
+  }, [mode, defaultValues]);
 
   const submitHandler = (
     data: QuoteSectionCreatePayload | QuoteSectionUpdatePayload,
@@ -75,10 +77,9 @@ function QuoteSectionForm({
     if (mode === "creation") {
       createFn?.(data as QuoteSectionCreatePayload);
     } else {
-      editFn?.(data as QuoteSectionUpdatePayload);
+      const { id } = defaultValues ?? {};
+      editFn?.(Object.assign(data, id) as QuoteSectionUpdatePayload);
     }
-    toggleIsOpen(false);
-    reset();
   };
 
   return (
@@ -91,7 +92,7 @@ function QuoteSectionForm({
       footerBtnLabel={mode === "creation" ? "Add Section" : "Save Changes"}
       footerBtnAction={handleSubmit(submitHandler)}
       showFooterSeparator={false}
-      xIconAction={reset}
+      xIconAction={() => reset()}
       isSubmitting={isSubmitting}
     >
       <div className="flex flex-col gap-5 p-5">
@@ -99,7 +100,7 @@ function QuoteSectionForm({
           <div className="flex flex-col gap-2 grow">
             <label className="input-label justify-start!"> sort </label>
             <CustomCombobox
-              items={Array.from({ length: 10 }, (_, i) => i + 1)}
+              items={Array.from({ length: 11 }, (_, i) => i)}
               onValueChange={(val) => {
                 if (val) {
                   setComboboxSearchTerm(val.toString());

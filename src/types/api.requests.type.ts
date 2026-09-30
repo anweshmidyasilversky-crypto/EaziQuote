@@ -208,3 +208,36 @@ export interface InvoiceUpdateApiPayload extends Partial<InvoiceCreateApiPayload
   discount?: number;
   payment_method?: PaymentMethods;
 }
+
+export interface CompanyCreateApiPayload {
+  name: string;
+  phone: string;
+  email?: string | null;
+  address: string;
+  logo?: File | null;
+  city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  postcode?: string | null;
+  currency?: "USD" | "EUR" | "GBP" | "INR" | null;
+  state?: string | null;
+  country?: string | null;
+  brand_color?: string | null;
+  is_company_name_show: number;
+  vat_number?: string;
+}
+
+export interface CompanyUpdateApiPayload extends Partial<CompanyCreateApiPayload> {
+  _method: Method;
+}
+
+export interface TeamMemberCreateApiPayload {
+  name: string;
+  email: string;
+  password: string;
+  active?: number;
+}
+
+export interface TeamMemberUpdateApiPayload extends Partial<TeamMemberCreateApiPayload> {
+  id: string | number;
+}

@@ -11,16 +11,17 @@ import { ClientForm } from "../clients/ClientForm";
 import { type QuoteSummary } from "../../types/quoteCreation.payload.type";
 import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { cn } from "../../lib/utils";
 import { updateQuote as updateQuoteRedux } from "../../redux/slices/quotes.slice";
 import { toast } from "react-toastify";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";
 import { showErrorToast } from "@/api/axiosInstance";
-import type {
-  ClientDetails,
-  PresetQuote,
-  QuoteDetails,
+import {
+  PaymentMethods,
+  type ClientDetails,
+  type PresetQuote,
+  type QuoteDetails,
 } from "@/types/api.responses.type";
 import { useNavigate } from "react-router";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
@@ -44,6 +45,7 @@ function QuoteSummaryForm({
   defaultClient,
   presetQuote,
 }: QuoteSummaryFormProps) {
+  const user = useAppSelector((state) => state.user);
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
   const dispatch = useAppDispatch();
@@ -215,6 +217,10 @@ function QuoteSummaryForm({
           client_id: Number(data.clientId),
           notes: data.notes ?? "",
           attachments: data.attachments?.slice(currQuote?.attachments.length),
+          deposit_payment_method: user.stripe_connected
+            ? PaymentMethods.stripe
+            : PaymentMethods.cash,
+          is_company_phone_number_show: !data.hidePhoneNumber,
         },
         {
           onSuccess: (response) => {
