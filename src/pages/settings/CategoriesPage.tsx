@@ -70,20 +70,23 @@ function CategoriesPage() {
       id: "action",
       header: () => <div className="flex w-full justify-end">{"ACTION"}</div>,
       cell: (info) => (
-        <div className="w-full flex justify-end pr-1">
-          <CustomActionGroup
-            withOpen={false}
-            editFn={() => {
-              currCatId.current = info.row.original.id;
-              defaultvalue.current = { name: info.row.original.name };
-              categoryFormMode.current = "updation";
-              toggleCategoryFormOpen((curr) => !curr);
-            }}
-            deleteFn={() => {
-              currCatId.current = info.row.original.id;
-              setDeleteModalOpen(true);
-            }}
-          />
+        <div className="w-full grid grid-cols-2 ml-10 md:ml-20 lg:ml-50">
+          <div />
+          <div className="flex justify-end">
+            <CustomActionGroup
+              withOpen={false}
+              editFn={() => {
+                currCatId.current = info.row.original.id;
+                defaultvalue.current = { name: info.row.original.name };
+                categoryFormMode.current = "updation";
+                toggleCategoryFormOpen((curr) => !curr);
+              }}
+              deleteFn={() => {
+                currCatId.current = info.row.original.id;
+                setDeleteModalOpen(true);
+              }}
+            />
+          </div>
         </div>
       ),
     },

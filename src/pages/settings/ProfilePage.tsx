@@ -28,7 +28,7 @@ enum toggle {
 }
 
 function ProfilePage() {
-  const { userDetails, isFetching } = useUserDetails();
+  const { userDetails, isFetching } = useUserDetails({});
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state) => state.user);

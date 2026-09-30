@@ -9,13 +9,14 @@ import {
   type ListResponse,
   type ApiResponse,
   type Subcategory,
+  type SubcategoryWithCategory,
 } from "@/types/api.responses.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
 
 export const getSubCatList = async (filters: PageFilters) => {
   try {
     const catListResponse = await axiosInstance.get<
-      ApiResponse<ListResponse<Subcategory>>
+      ApiResponse<ListResponse<SubcategoryWithCategory>>
     >(API_ENDPOINTS.subCategories.getSubcategoryList, {
       params: filters,
     });
@@ -43,10 +44,9 @@ export const updateSubCategory = async (
   payload: subCategoryUpdateApiPayload,
 ) => {
   try {
-    const updatedSubCategory = await axiosInstance.post(
-      API_ENDPOINTS.subCategories.updateSubcategory,
-      ObjToFormData(payload),
-    );
+    const updatedSubCategory = await axiosInstance.post<
+      ApiResponse<Subcategory>
+    >(API_ENDPOINTS.subCategories.updateSubcategory, ObjToFormData(payload));
     return updatedSubCategory.data;
   } catch (error) {
     throw error;

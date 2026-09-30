@@ -404,6 +404,15 @@ export interface Subcategory {
   products_count: number;
 }
 
+export interface SubcategoryWithCategory extends Subcategory {
+  category: {
+    id: number;
+    name: string;
+    subcategories_count: null | number;
+    items_count: null | number;
+  };
+}
+
 export interface MeasurementUnit {
   id: string;
   description: string;
