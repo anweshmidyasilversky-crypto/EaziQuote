@@ -51,3 +51,14 @@ export const getUserDetails = async () => {
     throw error;
   }
 };
+
+export const deleteUser = async () => {
+  try {
+    const res = await axiosInstance.delete<ApiResponse<null>>(
+      API_ENDPOINTS.users.deleteUser,
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};

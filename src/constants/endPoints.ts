@@ -2,6 +2,7 @@ export const API_ENDPOINTS = {
   auth: {
     signup: `/auth/signup`,
     login: `/auth/login`,
+    logout: `/auth/logout`,
     sendVerificationEmail: `/auth/send-verification-email`,
     home: `/home`,
     quoteList: `/quotes`,

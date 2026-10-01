@@ -203,3 +203,14 @@ export const changePassword = async (payload: ChangePasswordApiPayload) => {
     throw error;
   }
 };
+
+export const logout = async () => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<null>>(
+      API_ENDPOINTS.auth.logout,
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};

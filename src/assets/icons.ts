@@ -120,6 +120,9 @@ import binIconWhite from "./icons/binIconWhite.png";
 
 import downloadIconBlack from "./icons/downloadIconBlack.png";
 import shareIconBlack from "./icons/shareIconBlack.png";
+
+import logoutIconBlack from "./icons/logoutIconBlack.png";
+import binIconBlack from "./icons/binIconBlack.png";
 export const assets = {
   loginHeader,
   logo,
@@ -240,4 +243,7 @@ export const assets = {
 
   downloadIconBlack,
   shareIconBlack,
+
+  logoutIconBlack,
+  binIconBlack,
 };

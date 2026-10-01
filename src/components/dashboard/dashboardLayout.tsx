@@ -2,9 +2,18 @@ import { assets } from "../../assets/icons";
 import { Outlet, useNavigate } from "react-router";
 import { DashboardSidebarButton } from "./DashboardSidebarButton";
 import { useState } from "react";
-import { useAppSelector } from "../../redux/store";
+import { persistor, useAppDispatch, useAppSelector } from "../../redux/store";
 import { CustomAvatar } from "../common/CustomAvatar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
+import { toast } from "react-toastify";
+import { releaseToken } from "@/redux/slices/auth.slice";
+import { removeUser } from "@/redux/slices/user.slice";
+import { showErrorToast } from "@/api/axiosInstance";
+import { Spinner } from "../ui/spinner";
 export function DashboardLayout() {
+  const { logoutMutation, userDeleteMutation } = useAuthMutation();
+  const dispatch = useAppDispatch();
   const [activeBtn, toggleActiveBtn] = useState<string>("dashboard");
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
@@ -72,6 +81,37 @@ export function DashboardLayout() {
       clickHandler: () => navigate("/settings"),
     },
   ];
+
+  const handleUserDelete = () => {
+    userDeleteMutation.mutate(undefined, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        dispatch(releaseToken());
+        dispatch(removeUser());
+        persistor.purge();
+        navigate("/");
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        dispatch(releaseToken());
+        dispatch(removeUser());
+        persistor.purge();
+        navigate("/");
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
   return (
     <div className="w-screen h-screen flex">
       <div className="bg-sidebar sm:w-auto md:w-63 max-w-63 h-screen border-r-sidebar-border border-r-[0.5px]">
@@ -118,7 +158,6 @@ export function DashboardLayout() {
               </button>
             </div>
 
-            {/* Logged in user */}
             <div className="h-full w-auto max-w-67.5 flex gap-6 items-center">
               <div className="flex items-center max-h-10">
                 <button className="h-10 w-10 flex items-center">
@@ -133,12 +172,53 @@ export function DashboardLayout() {
                 </button>
               </div>
 
-              <div className="flex p-4.5 gap-3 items-center bg-header-user-det overflow-hidden">
-                <CustomAvatar src={user.avatar ?? ""} fallback="U" />
-                <span className="font-sans font-medium text-[14px] min-h-4.25 max-w-21.5 text-wrap">
-                  {user.name}
-                </span>
-              </div>
+              {/* Logged in user */}
+              <Popover>
+                <PopoverTrigger className={`translate-y-0!`}>
+                  <div className="flex p-4.5 gap-3 items-center bg-header-user-det overflow-hidden">
+                    <CustomAvatar src={user.avatar ?? ""} fallback="U" />
+                    <span className="font-sans font-medium text-[14px] min-h-4.25 max-w-21.5 text-wrap">
+                      {user.name}
+                    </span>
+                  </div>
+                </PopoverTrigger>
+
+                {/* Delete user & logout */}
+                <PopoverContent
+                  className={`w-fit ring-0 shadow-none dashboard-card-theme p-2 rounded-2 [&_div]:cursor-pointer`}
+                  align="center"
+                  side="bottom"
+                >
+                  <div className="flex flex-col gap-1">
+                    <span
+                      className="py-2 px-4 flex gap-2 items-center"
+                      onClick={handleUserDelete}
+                    >
+                      {userDeleteMutation.isPending ? (
+                        <Spinner className="text-brand-dark" />
+                      ) : (
+                        <img src={assets.binIconBlack} className="w-3.5 h-4" />
+                      )}
+                      {"Delete Account"}
+                    </span>
+
+                    <span
+                      className="py-2 px-4 flex gap-2 items-center"
+                      onClick={handleLogout}
+                    >
+                      {logoutMutation.isPending ? (
+                        <Spinner className="text-brand-dark" />
+                      ) : (
+                        <img
+                          src={assets.logoutIconBlack}
+                          className="w-3.5 h-4"
+                        />
+                      )}
+                      {"Logout"}
+                    </span>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
