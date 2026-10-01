@@ -1,12 +1,13 @@
 import { CustomAvatar } from "./CustomAvatar";
 import { colorThemes } from "../../constants/colors";
-import { getRandomIndex } from "../../lib/utils";
+import { cn, getRandomIndex } from "../../lib/utils";
 import { useRender } from "@base-ui/react/use-render";
 
 export type ClientNameBadgeProps = {
   name: string;
   withName?: boolean;
   imgSrc?: string;
+  textWrap?: boolean;
 };
 
 export function ClientNameBadge({
@@ -14,6 +15,7 @@ export function ClientNameBadge({
   withName = true,
   className,
   imgSrc,
+  textWrap,
 }: ClientNameBadgeProps & useRender.ComponentProps<"span">) {
   const randomColConfig = colorThemes[getRandomIndex(colorThemes.length)];
   const [firstName, lastName] = name.split(" ");
@@ -27,7 +29,14 @@ export function ClientNameBadge({
         fallback={initials}
         fallbackCls={` ${randomColConfig.textCol} ${randomColConfig.bgCol}`}
       />
-      {withName && <span className="min-h-4.25 text-nowrap"> {name} </span>}
+      {withName && (
+        <span
+          className={cn(`min-h-4.25 ${textWrap ? `text-wrap` : `text-nowrap`}`)}
+        >
+          {" "}
+          {name}{" "}
+        </span>
+      )}
     </div>
   );
 }

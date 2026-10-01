@@ -33,6 +33,7 @@ import useSubcategoryByCategory from "@/hooks/apis/subcategories/useSubcategoryB
 import { Spinner } from "../ui/spinner";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
+import DeleteDialog from "../common/DeleteDialog";
 
 export type ItemSelectFormProps = {
   submitAction: () => void;
@@ -57,6 +58,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   const [filterOpen, toggleFilterOpen] = useState(false);
   const [filters, setFilters] = useState<string[]>([]);
   const targetSubCategory = useRef<string[] | undefined>(undefined);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { subCategories, isFetching: isFetchingSubCategories } =
     useSubcategoryByCategory({
@@ -102,6 +104,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
     () =>
       ({
         quote_id: currQuote?.id,
+        category_id: filterCategory,
         subcategory_ids: targetSubCategory.current,
       }) as PageFilters,
     [currQuote, targetSubCategory.current],
@@ -153,7 +156,12 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
     toggleEditItemModal(false);
   };
 
-  const itemDeleteHandler = (itemId: string | number) => {
+  const itemDeleteHandler = () => {
+    if (!editingItem.current) {
+      toast.error(`No item Selected to delete`);
+      return;
+    }
+    const itemId = editingItem.current.id;
     deleteItemMutation.mutate(itemId, {
       onSuccess: (response) => {
         if (Object.hasOwn(itemQty, itemId)) {
@@ -161,6 +169,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
           setItemQty(rest);
         }
         toast.success(response.message);
+        setDeleteDialogOpen(false);
         refetchItemsList();
       },
       onError: (error) => {
@@ -280,9 +289,9 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
                 toggleEditItemModal((curr) => !curr);
               }}
               deleteFn={() => {
-                itemDeleteHandler(item.id);
+                editingItem.current = item;
+                setDeleteDialogOpen(true);
               }}
-              isDeletePending={deleteItemMutation.isPending}
             />
           </div>
         );
@@ -402,6 +411,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
         clearFn={() => {
           setFilters([]);
           targetSubCategory.current = undefined;
+          setFilterCategory("");
         }}
         submitFn={() => (targetSubCategory.current = filters)}
       >
@@ -491,6 +501,13 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
         currItem={editingItem.current}
         editFn={itemEditHandler}
         isPending={updateItemMutation.isPending}
+      />
+
+      <DeleteDialog
+        isOpen={deleteDialogOpen}
+        toggleOpen={setDeleteDialogOpen}
+        deleteAction={itemDeleteHandler}
+        isPending={deleteItemMutation.isPending}
       />
     </>
   );

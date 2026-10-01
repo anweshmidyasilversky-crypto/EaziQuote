@@ -6,7 +6,7 @@ import type { SubcategoryPayload } from "../types/subCategory.payload.type";
 export const itemCreationSchema: yup.ObjectSchema<ItemCreationPayload> =
   yup.object({
     catId: yup.string().trim().required(notSelectedMsg("Category")),
-    subCatId: yup.string().trim().required(notSelectedMsg("Sub-Category")),
+    subCatId: yup.string().trim().optional(),
     name: yup.string().trim().required(emptyMsg("Item name")),
     unit: yup.string().trim().required(emptyMsg("unit")),
     pricePerUnit: yup

@@ -130,7 +130,7 @@ export function QuotesIndexPage() {
         header: "CLIENT",
         cell: (info) => {
           const client = info.getValue<string>();
-          return <ClientNameBadge name={client} />;
+          return <ClientNameBadge name={client} textWrap />;
         },
         enableSorting: false,
         filterFn: filterFn_includesString,

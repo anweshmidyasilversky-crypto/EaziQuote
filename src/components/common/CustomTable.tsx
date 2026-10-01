@@ -234,9 +234,9 @@ function CustomTable<TData extends RowData>({
                         {row.getVisibleCells().map((cell) => (
                           <td
                             key={cell.id}
-                            className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                            className="px-6 text-wrap h-fit! min-w-30! py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
                           >
-                            <div className="flex items-center">
+                            <div className="flex items-center text-wrap wrap-break-word">
                               {<table.FlexRender cell={cell} />}
                             </div>
                           </td>

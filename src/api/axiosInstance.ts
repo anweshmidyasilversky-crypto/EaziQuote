@@ -6,7 +6,7 @@ export const axiosInstance = axios.create({
   baseURL: "https://sandbox.eaziquote.com/api",
   timeout: 5 * 1000,
   headers: {
-    "x-api-key": "p7Sp7nxtiIapkc9n5U9OOc2W4hSUCpKxQ55IQDjfoszEmI0nS7",
+    "x-api-key": import.meta.env.VITE_X_API_KEY,
   },
 });
 

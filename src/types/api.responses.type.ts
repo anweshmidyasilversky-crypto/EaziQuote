@@ -618,3 +618,11 @@ export interface TeamMember {
   created_at: string;
   updated_at: string;
 }
+
+export interface ItemImportResult {
+  batch_id: string;
+  products: ItemDetails[];
+  missing_columns: string[];
+  duplicates: boolean;
+  product_with_issue_count: number;
+}

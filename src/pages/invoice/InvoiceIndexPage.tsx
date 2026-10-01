@@ -129,7 +129,7 @@ function InvoiceIndexPage() {
       enableSorting: false,
       cell: (info) => {
         const clientName = info.getValue<string>();
-        return <ClientNameBadge name={clientName} withName={true} />;
+        return <ClientNameBadge name={clientName} withName={true} textWrap />;
       },
     },
     {

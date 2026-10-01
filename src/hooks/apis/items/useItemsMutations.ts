@@ -1,4 +1,10 @@
-import { createItem, deleteItem, updateItem } from "@/api/services/items.api";
+import {
+  createItem,
+  deleteItem,
+  getSampleTemplate,
+  itemImport,
+  updateItem,
+} from "@/api/services/items.api";
 import type { ItemCreateApiPayload } from "@/types/api.requests.type";
 import type { ItemDetails } from "@/types/api.responses.type";
 import { useMutation } from "@tanstack/react-query";
@@ -19,10 +25,23 @@ function useItemsMutations() {
     mutationKey: ["items_delete"],
     mutationFn: (itemId: string | number) => deleteItem(itemId),
   });
+
+  const itemsImportMutation = useMutation({
+    mutationKey: ["items_upload"],
+    mutationFn: (file: File) => itemImport(file),
+  });
+
+  const templateDownloaMutation = useMutation({
+    mutationKey: ["items_sample_download"],
+    mutationFn: getSampleTemplate,
+  });
+
   return {
     createItemMutation,
     updateItemMutation,
     deleteItemMutation,
+    itemsImportMutation,
+    templateDownloaMutation,
   };
 }
 

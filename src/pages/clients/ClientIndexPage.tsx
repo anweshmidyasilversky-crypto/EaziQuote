@@ -70,7 +70,9 @@ export function ClientIndexPage() {
       accessorKey: "name",
       header: "CLIENT",
       filterFn: filterFn_includesString,
-      cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
+      cell: (info) => (
+        <ClientNameBadge name={info.getValue<string>()} textWrap />
+      ),
     },
     {
       accessorKey: "company_name",

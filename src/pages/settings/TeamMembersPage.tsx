@@ -11,7 +11,12 @@ import MemberForm from "@/components/settings/MemberForm";
 import { Switch } from "@/components/ui/switch";
 import useMembersList from "@/hooks/apis/members/useMembersList";
 import useMembersMutation from "@/hooks/apis/members/useMembersMutation";
-import type { TeamMember } from "@/types/api.responses.type";
+import type {
+  ApiResponse,
+  ListResponse,
+  TeamMember,
+} from "@/types/api.responses.type";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import React, { useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -25,10 +30,14 @@ function TeamMembersPage() {
     setPageNo,
     refetch,
     paginationMeta,
+    queryKey,
   } = useMembersList({});
 
   const { memberUpdateMutation } = useMembersMutation();
+  const queryClient = useQueryClient();
 
+  // Only for switch spinner ui
+  const statusUpdatingMemberId = useRef<string>("");
   const handleActiveStatusUpdate = (memberId: number, status: boolean) => {
     memberUpdateMutation.mutate(
       {
@@ -38,10 +47,32 @@ function TeamMembersPage() {
       {
         onSuccess: (response) => {
           toast.success(response.message);
-          refetch();
+          // Update the cache instade of full refetch
+          queryClient.setQueryData(
+            queryKey,
+            (oldData: ApiResponse<ListResponse<TeamMember>>) => {
+              if (!oldData) return oldData;
+
+              // 2. Return the identical structure down to payload.data
+              return {
+                ...oldData,
+                payload: {
+                  ...oldData.payload,
+                  data: oldData.payload.data.map((member: TeamMember) =>
+                    member.id === memberId
+                      ? { ...member, active: status } // Update target member
+                      : member,
+                  ),
+                },
+              };
+            },
+          );
         },
         onError: (error) => {
           showErrorToast(error);
+        },
+        onSettled: () => {
+          statusUpdatingMemberId.current = "";
         },
       },
     );
@@ -50,13 +81,16 @@ function TeamMembersPage() {
   const [memberFormOpen, toggleMemberFormOpen] = useState(false);
   const memberFormMode = useRef<MemberFormProps["mode"]>("creation");
   const memberDet = useRef<TeamMember | undefined>(undefined);
+
   const membersColumns: ColumnDef<TableFeatures, TeamMember>[] = [
     {
       accessorKey: "name",
       header: "USER",
       cell: (info) => {
         const name = info.getValue<string>();
-        return <ClientNameBadge name={name} imgSrc={assets.userImgFemale} />;
+        return (
+          <ClientNameBadge name={name} imgSrc={assets.userImgFemale} textWrap />
+        );
       },
       enableSorting: false,
     },
@@ -80,7 +114,14 @@ function TeamMembersPage() {
           <Switch
             className="max-w-11!"
             checked={active}
-            onCheckedChange={(state) => handleActiveStatusUpdate(id, state)}
+            onCheckedChange={(state) => {
+              statusUpdatingMemberId.current = id.toString();
+              handleActiveStatusUpdate(id, state);
+            }}
+            isTansitioning={
+              statusUpdatingMemberId.current === id.toString() &&
+              memberUpdateMutation.isPending
+            }
           />
         );
       },
@@ -132,7 +173,7 @@ function TeamMembersPage() {
           paginationMeta={paginationMeta}
           paginationBtns={paginationMeta?.links}
           setPageNo={setPageNo}
-          isFetching={isFetching || memberUpdateMutation.isPending}
+          isFetching={isFetching}
         />
       </div>
 

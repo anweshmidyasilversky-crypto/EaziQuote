@@ -1,10 +1,18 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import React from "react";
+import useConfigMutations from "@/hooks/apis/appConfig/useConfigMutations";
+import { updateConfig } from "@/redux/slices/settings.slice";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import React, { useRef } from "react";
+import { toast } from "react-toastify";
 
 function NotificationPreferencesPage() {
+  const { notification_settings } = useAppSelector((state) => state.appConfig);
+  const dispatch = useAppDispatch();
+  const { notificationSettingsMutation } = useConfigMutations();
   const toggleConfig: {
     id: string;
     label: string;
@@ -12,16 +20,44 @@ function NotificationPreferencesPage() {
     onClick?: () => void;
   }[] = [
     {
-      id: "Push Notifications",
+      id: "push_notification_enabled",
       label: "Push Notifications",
       icon: assets.bellIcon,
     },
     {
-      id: "Email Updates",
+      id: "email_notification_enabled",
       label: "Email Updates",
       icon: assets.emailIcon,
     },
   ];
+
+  const targetId = useRef<string>("");
+
+  const handleCheckedChange = (id: string, state: boolean) => {
+    notificationSettingsMutation.mutate(
+      {
+        push_notification_enabled:
+          id === `push_notification_enabled`
+            ? Number(state)
+            : Number(notification_settings.push_notification_enabled),
+
+        email_notification_enabled:
+          id === `email_notification_enabled`
+            ? Number(state)
+            : Number(notification_settings.email_notification_enabled),
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          dispatch(updateConfig(response.payload));
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
+  };
+
   return (
     <>
       <HeaderBreadCrumb pageName="Notifications preference" />
@@ -36,7 +72,23 @@ function NotificationPreferencesPage() {
                 </div>
                 <span className="text-sm text-nowrap"> {config.label} </span>
               </div>
-              <Switch className="w-9.5 aspect-auto" />
+              <Switch
+                className="w-9.5 aspect-auto"
+                withLabel={false}
+                checked={
+                  notification_settings[
+                    config.id as keyof typeof notification_settings
+                  ]
+                }
+                onCheckedChange={(state) => {
+                  targetId.current = config.id;
+                  handleCheckedChange(config.id, state);
+                }}
+                isTansitioning={
+                  targetId.current === config.id &&
+                  notificationSettingsMutation.isPending
+                }
+              />
             </div>
 
             {index < toggleConfig.length - 1 && (

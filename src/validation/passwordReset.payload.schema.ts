@@ -8,6 +8,6 @@ export const passwordResetSchema: yup.ObjectSchema<PasswordResetPayload> =
     newPassword: userSignInSchema.fields.password as yup.StringSchema<string>,
     confirmPassword: yup
       .string()
-      .required()
+      .required("Please re enter your password")
       .oneOf([yup.ref("newPassword")], "Passwords must match"),
   });

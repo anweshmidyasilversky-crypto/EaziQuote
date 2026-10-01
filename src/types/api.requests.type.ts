@@ -241,3 +241,13 @@ export interface TeamMemberCreateApiPayload {
 export interface TeamMemberUpdateApiPayload extends Partial<TeamMemberCreateApiPayload> {
   id: string | number;
 }
+
+export interface NotificationSettingsUpdate {
+  push_notification_enabled: number;
+  email_notification_enabled: number;
+}
+
+export interface ChangePasswordApiPayload {
+  old_password: string;
+  new_password: string;
+}

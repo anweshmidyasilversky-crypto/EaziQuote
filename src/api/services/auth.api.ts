@@ -1,7 +1,9 @@
 import type {
+  ChangePasswordApiPayload,
   CompanyCreateApiPayload,
   CompanyUpdateApiPayload,
   CreatePresetQuote,
+  NotificationSettingsUpdate,
   PageFilters,
   SignupPayload,
   UpdatePresetQuote,
@@ -168,6 +170,32 @@ export const updateCompany = async (payload: CompanyUpdateApiPayload) => {
   try {
     const res = await axiosInstance.post<ApiResponse<Company>>(
       API_ENDPOINTS.auth.companyUpdate,
+      ObjToFormData(payload),
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateNotificationSettings = async (
+  payload: NotificationSettingsUpdate,
+) => {
+  try {
+    const res = await axiosInstance.patch<ApiResponse<AppConfig>>(
+      API_ENDPOINTS.auth.notificationSettingsUpdate,
+      payload,
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const changePassword = async (payload: ChangePasswordApiPayload) => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<null>>(
+      API_ENDPOINTS.auth.changePassword,
       ObjToFormData(payload),
     );
     return res.data;

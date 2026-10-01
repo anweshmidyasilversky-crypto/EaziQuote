@@ -15,7 +15,7 @@ function useMembersList({ filters, enabled = true }: useMembersListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchTerm });
 
-  const { data, isFetching, error, refetch } = useQuery({
+  const { data, isFetching, error, refetch, isLoading } = useQuery({
     queryKey: ["team_member", pageNo, debouncedSearchTerm],
     queryFn: () =>
       getTeamMemberList({
@@ -41,6 +41,8 @@ function useMembersList({ filters, enabled = true }: useMembersListProps) {
     setSearchTerm,
     searchTerm,
     paginationMeta: data?.payload.meta,
+    isLoading,
+    queryKey: ["team_member", pageNo, debouncedSearchTerm],
   };
 }
 

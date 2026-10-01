@@ -1,16 +1,20 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import { CustomActionGroup } from "@/components/common/CustomActionGroup";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { CustomDataTable } from "@/components/common/CustomTable";
+import DeleteDialog from "@/components/common/DeleteDialog";
 import { FormLayout } from "@/components/common/FormLayout";
 import SearchInputGruop from "@/components/common/SearchInputGruop";
 import type { ItemFormProps } from "@/components/items/ItemForm";
 import ItemForm from "@/components/items/ItemForm";
-import { useDebounce } from "@/hooks/useDebounce";
+import { Spinner } from "@/components/ui/spinner";
+import useItemsList from "@/hooks/apis/items/useItemsList";
+import useItemsMutations from "@/hooks/apis/items/useItemsMutations";
 import { cn, formatCurrency } from "@/lib/utils";
-import { useAppSelector } from "@/redux/store";
-import type { Item } from "@/types/item.type";
+import type { ItemDetails } from "@/types/api.responses.type";
+import type { ItemCreationPayload } from "@/types/itemCreation.payload.type";
 import { type ItemEditPayload } from "@/types/itemEdit.payload.type";
 import { nanoid } from "@reduxjs/toolkit";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
@@ -19,39 +23,132 @@ import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 function ItemsPage() {
-  const items = useAppSelector((state) => state.items);
-  const categories = useAppSelector((state) => state.categories);
-  const subCategories = useAppSelector((state) => state.subCategories);
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
+  const {
+    itemsList,
+    searchTerm,
+    setSearchTerm,
+    setPageNo,
+    isFetching,
+    refetch: refetchItemsList,
+    paginationMeta,
+  } = useItemsList({});
+
+  const {
+    createItemMutation,
+    updateItemMutation,
+    deleteItemMutation,
+    templateDownloaMutation,
+    itemsImportMutation,
+  } = useItemsMutations();
+
+  const itemAddHandler = async (data: ItemCreationPayload) => {
+    const response = await createItemMutation.mutateAsync({
+      name: data.name,
+      category_id: Number(data.catId),
+      subcategory_id: data.subCatId ? Number(data.subCatId) : undefined,
+      unit: data.unit,
+      price: data.pricePerUnit,
+      cost: data.unitPrice,
+      type: "product",
+    });
+    toast.success(response.message);
+    refetchItemsList();
+    setPageNo(1);
+    toggleItemFormOpen(false);
+  };
+
+  const itemEditHandler = async (data: ItemEditPayload) => {
+    const response = await updateItemMutation.mutateAsync({
+      id: Number(targetItem.current?.id ?? "0"),
+      name: data.name,
+      category_id: data.catId ? Number(data.catId) : undefined,
+      subcategory_id: data.subCatId ? Number(data.subCatId) : undefined,
+      cost: data.unitPrice,
+      price: data.pricePerUnit,
+      unit: data.unit,
+      type: "product",
+    });
+
+    toast.success(response.message);
+    refetchItemsList();
+    toggleItemFormOpen(false);
+  };
+
+  const itemDeleteHandler = () => {
+    if (!targetItem.current?.id) {
+      toast.error(`No item selected to delete`);
+    } else {
+      deleteItemMutation.mutate(targetItem.current.id, {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          setDeleteDialogOpen(false);
+          refetchItemsList();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      });
+    }
+  };
+
+  const handleDownload = () => {
+    templateDownloaMutation.mutate(undefined, {
+      onSuccess: (response) => {
+        const blob = new Blob([response], {
+          type: `application/octet-stream`,
+        });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `products template.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const handleImport = (file: File) => {
+    itemsImportMutation.mutate(file, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        toggleCsvFormOpen(false);
+        refetchItemsList();
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
   const [itemFormOpen, toggleItemFormOpen] = useState(false);
   const itemFormMode = useRef<ItemFormProps["mode"]>("creation");
-  const defaultValues = useRef<ItemEditPayload | undefined>(undefined);
+  const defaultValues = useRef<ItemCreationPayload>(undefined);
+  const targetItem = useRef<ItemDetails | undefined>(undefined);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [csvFormOpen, toggleCsvFormOpen] = useState(false);
-  const [csvUploading, toggleCsvUploading] = useState(false);
   const [csvFile, setCsvFile] = useState<File | undefined>(undefined);
-  const getCategory = (catId: string) => {
-    return categories.find((category) => category.id === catId);
-  };
-  const getSubCategory = (subCatId: string) => {
-    return subCategories.find((subCategory) => subCategory.id === subCatId);
-  };
-  const itemColumns: ColumnDef<TableFeatures, Item>[] = [
+  const itemColumns: ColumnDef<TableFeatures, ItemDetails>[] = [
     {
       accessorKey: "name",
       header: "ITEM",
       enableSorting: false,
     },
     {
-      id: "categories",
+      accessorKey: "category_name",
       header: "CATEGORIES",
-      accessorFn: (row) => getCategory(row.catId)?.name ?? "Unknown",
       enableSorting: false,
     },
     {
-      id: "subCategories",
+      accessorKey: "subcategory_name",
       header: "SUBCATEGORIES",
-      accessorFn: (row) => getSubCategory(row.subCatId)?.name ?? "Unknown",
       enableSorting: false,
     },
     {
@@ -60,13 +157,13 @@ function ItemsPage() {
       enableSorting: false,
     },
     {
-      accessorKey: "pricePerUnit",
+      accessorKey: "price",
       header: "Price/Unit",
       cell: (info) => formatCurrency(info.getValue<number>()),
       enableSorting: false,
     },
     {
-      accessorKey: "unitPrice",
+      accessorKey: "cost",
       header: "Unit Cost",
       cell: (info) => formatCurrency(info.getValue<number>()),
       enableSorting: false,
@@ -74,22 +171,35 @@ function ItemsPage() {
     {
       id: "action",
       header: () => <div className="w-full flex justify-end">{"ACTION"}</div>,
-      cell: (info) => (
-        <div className="w-full flex min-w-70 justify-end">
-          <CustomActionGroup
-            withOpen={false}
-            editFn={() => {
-              ((itemFormMode.current = "updation"),
-                (defaultValues.current = info.row.original),
-                toggleItemFormOpen((curr) => !curr));
-            }}
-          />
-        </div>
-      ),
+      cell: (info) => {
+        const item = info.row.original;
+        return (
+          <div className="w-full flex min-w-70 justify-end">
+            <CustomActionGroup
+              withOpen={false}
+              editFn={() => {
+                itemFormMode.current = "updation";
+                defaultValues.current = {
+                  catId: item.category_id,
+                  name: item.name,
+                  unit: item.unit,
+                  unitPrice: item.cost,
+                  pricePerUnit: item.price,
+                };
+                targetItem.current = item;
+                toggleItemFormOpen((curr) => !curr);
+              }}
+              deleteFn={() => {
+                targetItem.current = item;
+                setDeleteDialogOpen(true);
+              }}
+            />
+          </div>
+        );
+      },
       enableSorting: false,
     },
   ];
-
   const csvGuidLines: { id: string; content: string }[] = [
     {
       id: nanoid(),
@@ -100,6 +210,7 @@ function ItemsPage() {
       content: "Required columns: Categories, Subcategories, Items",
     },
   ];
+
   return (
     <>
       <HeaderBreadCrumb pageName="Items" />
@@ -108,7 +219,7 @@ function ItemsPage() {
         <div className="flex flex-col gap-5 py-4.5 rounded-[10px] bg-table">
           <CustomDataTable
             columns={itemColumns}
-            data={items}
+            data={itemsList}
             tableOptionsLeft={
               <SearchInputGruop
                 searchTerm={searchTerm}
@@ -122,9 +233,9 @@ function ItemsPage() {
                   buttonLabel="New Item"
                   leftIcon={assets.plusIcon}
                   onClick={() => {
-                    ((itemFormMode.current = "creation"),
-                      (defaultValues.current = undefined),
-                      toggleItemFormOpen((curr) => !curr));
+                    itemFormMode.current = "creation";
+                    targetItem.current = undefined;
+                    toggleItemFormOpen((curr) => !curr);
                   }}
                 />
 
@@ -138,7 +249,11 @@ function ItemsPage() {
                 />
               </div>
             }
-            globalFilterTerm={debouncedSearchTerm}
+            showPaginated
+            isFetching={isFetching}
+            paginationMeta={paginationMeta}
+            paginationBtns={paginationMeta?.links}
+            setPageNo={setPageNo}
           />
         </div>
       </div>
@@ -147,9 +262,12 @@ function ItemsPage() {
         isOpen={itemFormOpen}
         toggleIsOpen={toggleItemFormOpen}
         mode={itemFormMode.current}
-        defaultValues={defaultValues.current}
+        currItem={targetItem.current}
         withAddCategory={false}
         withAddSubCategory={false}
+        creationFn={itemAddHandler}
+        editFn={itemEditHandler}
+        isPending={createItemMutation.isPending || updateItemMutation.isPending}
       />
 
       <FormLayout
@@ -157,14 +275,13 @@ function ItemsPage() {
         formCloseAction={() => toggleCsvFormOpen(false)}
         formHeading="Import Items"
         sumbitBtnLabel="Upload"
-        isSubmitting={csvUploading}
+        isSubmitting={itemsImportMutation.isPending}
         submitHanlder={() => {
-          toggleCsvUploading(true);
           if (!csvFile) {
             toast.error(`Please upload a csv file`);
+            return;
           }
-          console.log(csvFile);
-          toggleCsvUploading(false);
+          handleImport(csvFile);
         }}
       >
         <div className="flex w-full flex-col gap-6">
@@ -177,11 +294,15 @@ function ItemsPage() {
             ))}
           </ul>
 
-          <a className="flex items-center gap-2">
-            <img
-              src={assets.downloadIconBlue}
-              className="w-4 h-4 aspect-square"
-            />
+          <a className="flex items-center gap-2" onClick={handleDownload}>
+            {templateDownloaMutation.isPending ? (
+              <Spinner className="text-brand-dark" />
+            ) : (
+              <img
+                src={assets.downloadIconBlue}
+                className="w-4 h-4 aspect-square"
+              />
+            )}
             <span> {"Download Sample File"} </span>
           </a>
 
@@ -228,6 +349,13 @@ function ItemsPage() {
           </div>
         </div>
       </FormLayout>
+
+      <DeleteDialog
+        isOpen={deleteDialogOpen}
+        toggleOpen={setDeleteDialogOpen}
+        deleteAction={itemDeleteHandler}
+        isPending={deleteItemMutation.isPending}
+      />
     </>
   );
 }

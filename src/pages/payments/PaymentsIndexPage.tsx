@@ -82,7 +82,9 @@ function PaymentsIndexPage() {
     {
       accessorKey: "client_name",
       header: "client",
-      cell: (info) => <ClientNameBadge name={info.getValue<string>()} />,
+      cell: (info) => (
+        <ClientNameBadge name={info.getValue<string>()} textWrap />
+      ),
       enableSorting: false,
     },
     {
@@ -130,27 +132,25 @@ function PaymentsIndexPage() {
     },
     {
       id: "action",
-      header: () => <div className="w-full flex justify-end">{"ACTION"}</div>,
+      header: "ACTION",
       cell: (info) => {
         const { id, status, client_email } = info.row.original;
         return (
-          <div className="flex min-w-20 justify-end">
-            <CustomActionGroup
-              withEdit={false}
-              withShare={status !== PaymentStatus.Received}
-              withDelete={status !== PaymentStatus.Received}
-              deleteFn={() => {
-                targetPaymentId.current = id;
-                toggleDeleteModal((curr) => !curr);
-              }}
-              openFn={() => navigate(`/payments/${id}`)}
-              shareAction={() => {
-                targetPaymentId.current = id;
-                targetClientEmail.current = client_email;
-                toggleShareModal((curr) => !curr);
-              }}
-            />
-          </div>
+          <CustomActionGroup
+            withEdit={false}
+            withShare={status !== PaymentStatus.Received}
+            withDelete={status !== PaymentStatus.Received}
+            deleteFn={() => {
+              targetPaymentId.current = id;
+              toggleDeleteModal((curr) => !curr);
+            }}
+            openFn={() => navigate(`/payments/${id}`)}
+            shareAction={() => {
+              targetPaymentId.current = id;
+              targetClientEmail.current = client_email;
+              toggleShareModal((curr) => !curr);
+            }}
+          />
         );
       },
     },

@@ -1,10 +1,12 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { CustomInput } from "@/components/common/CustomInput";
+import useUserMutations from "@/hooks/apis/user/useUserMutations";
 import type { PasswordResetPayload } from "@/types/passwordReset.payload.type";
 import { passwordResetSchema } from "@/validation/passwordReset.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -13,20 +15,32 @@ export type PasswordResetPageProps = {
 };
 
 function ChangePasswordPage({ defaultValues }: PasswordResetPageProps) {
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const { passwordUpdateMutation } = useUserMutations();
   const { control, setValue, handleSubmit, reset } =
     useForm<PasswordResetPayload>({
       resolver: yupResolver(passwordResetSchema),
     });
 
   const submitHandler = (data: PasswordResetPayload) => {
-    toggleIsSubmitting(true);
-    setTimeout(() => {
-      toast.success(`Password change success`);
-      console.log(data);
-      toggleIsSubmitting(false);
-      reset();
-    });
+    passwordUpdateMutation.mutate(
+      {
+        old_password: data.oldPassword,
+        new_password: data.newPassword,
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          reset({
+            oldPassword: undefined,
+            newPassword: undefined,
+            confirmPassword: undefined,
+          });
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -67,7 +81,7 @@ function ChangePasswordPage({ defaultValues }: PasswordResetPageProps) {
         <CustomBtn
           buttonLabel="Change Password"
           onClick={handleSubmit(submitHandler)}
-          isSubmitting={isSubmitting}
+          isSubmitting={passwordUpdateMutation.isPending}
         />
       </div>
     </>

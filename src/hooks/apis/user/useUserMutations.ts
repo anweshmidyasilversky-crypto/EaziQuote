@@ -1,6 +1,11 @@
-import { createCompany, updateCompany } from "@/api/services/auth.api";
+import {
+  changePassword,
+  createCompany,
+  updateCompany,
+} from "@/api/services/auth.api";
 import { profileSetup } from "@/api/services/user.api";
 import type {
+  ChangePasswordApiPayload,
   CompanyCreateApiPayload,
   CompanyUpdateApiPayload,
 } from "@/types/api.requests.type";
@@ -36,10 +41,16 @@ function useUserMutations() {
     mutationFn: (data: CompanyUpdateApiPayload) => updateCompany(data),
   });
 
+  const passwordUpdateMutation = useMutation({
+    mutationKey: ["update_password"],
+    mutationFn: (payload: ChangePasswordApiPayload) => changePassword(payload),
+  });
+
   return {
     profileSetupMutation,
     companyCreateMutation,
     companyUpdateMutation,
+    passwordUpdateMutation,
   };
 }
 

@@ -15,6 +15,8 @@ export const API_ENDPOINTS = {
     appConfig: `/auth/config`,
     companyCreate: `/company`,
     companyUpdate: `/company`,
+    notificationSettingsUpdate: `/auth/notification_settings`,
+    changePassword: `/auth/change-password`,
   },
   address: {
     addressSearch: `/address/search`,
@@ -36,6 +38,8 @@ export const API_ENDPOINTS = {
     getItemList: `/items`,
     itemCreateOrUpdate: `/item/create-or-update`,
     deleteItem: (item_id: string | number) => `/items/${item_id}`,
+    itemsImport: `/items/import`,
+    sampleTemplate: `/items/sample-template`,
   },
   notifications: {
     getNotificationList: `/notifications`,

@@ -82,6 +82,7 @@ function ItemForm({
     reset,
     formState: { errors },
     clearErrors,
+    unregister,
   } = useForm<ItemCreationPayload | ItemEditPayload>({
     defaultValues: {
       name: "",
@@ -115,7 +116,7 @@ function ItemForm({
   const { createSubCategoryMutation } = useSubCategoryMutations();
 
   useEffect(() => {
-    if (currItem) {
+    if (currItem && isOpen === true) {
       reset({
         ...defaultValues,
         catId: currItem.category_id,
@@ -128,14 +129,13 @@ function ItemForm({
       setCatSearchTerm(currItem.category_name);
       setSubcatSearchTerm(currItem.subcategory_name ?? "");
       setUnitSearchTerm(currItem.unit ?? "");
-      return;
+    } else {
+      reset(emptyItemFormValues);
+      setCatSearchTerm("");
+      setSubcatSearchTerm("");
+      setUnitSearchTerm("");
     }
-
-    reset(emptyItemFormValues);
-    setCatSearchTerm("");
-    setSubcatSearchTerm("");
-    setUnitSearchTerm("");
-  }, [currItem, defaultValues, isOpen, mode]);
+  }, [mode, currItem, isOpen]);
 
   const submitHandler = async (data: ItemCreationPayload | ItemEditPayload) => {
     toggleIsSubmitting(true);
@@ -146,7 +146,6 @@ function ItemForm({
         await editFn?.(data);
       }
       reset(emptyItemFormValues);
-      // toggleIsOpen(false);
     } catch (error) {
       showErrorToast(error);
     } finally {
@@ -195,6 +194,7 @@ function ItemForm({
           setCatSearchTerm("");
           setSubcatSearchTerm("");
           setUnitSearchTerm("");
+          unregister(["unitPrice", "pricePerUnit"]);
         }}
         formHeading={mode === "creation" ? "Add Item" : "Edit Item"}
         sumbitBtnLabel="Save Item"
@@ -217,7 +217,7 @@ function ItemForm({
               }
             }}
             placeholder="Search or select a category"
-            className={errors.catId ? `input-error` : ``}
+            className={errors.catId ? `input-error!` : ``}
             inputRightNode={
               withAddCategory ? (
                 <CustomBtn
@@ -258,7 +258,7 @@ function ItemForm({
                 clearErrors("subCatId");
               }
             }}
-            className={errors.subCatId ? `input-error` : ``}
+            className={errors.subCatId ? `input-error!` : ``}
             placeholder="Search or select a subcategory"
             inputRightNode={
               withAddSubCategory ? (
@@ -297,15 +297,20 @@ function ItemForm({
             filterFn={(item, query) => {
               return item.description.toLocaleLowerCase().includes(query);
             }}
+            className={errors.unit ? `input-error!` : ``}
             onValueChange={(unit) => {
               if (unit) {
                 setValue("unit", unit.id);
                 setUnitSearchTerm(unit.description);
+                clearErrors("unit");
               }
             }}
             inptFieldValue={unitSearchTerm}
             inptFieldChange={(unit) => setUnitSearchTerm(unit)}
           />
+          {errors.unit && (
+            <span className="error-text"> {errors.unit.message} </span>
+          )}
         </div>
 
         <CustomInput
