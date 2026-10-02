@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/store";
 import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
 import { updateConfig } from "@/redux/slices/settings.slice";
 import { showErrorToast } from "@/api/axiosInstance";
+import { updateUser } from "@/redux/slices/user.slice";
 
 function QuoteSettingsForm() {
   const { quote_invoice_settings } = useAppSelector((state) => state.appConfig);
@@ -53,6 +54,11 @@ function QuoteSettingsForm() {
       {
         onSuccess: (response) => {
           dispatch(updateConfig(response.payload));
+          dispatch(
+            updateUser({
+              hasSignatureAdded: true,
+            }),
+          );
           toast.success(response.message);
         },
         onError: (error) => {
