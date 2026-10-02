@@ -26,7 +26,12 @@ export const configInitial: AppConfig = {
   },
   vat_settings: [],
   vertical_markets: [],
-  support_ticket_areas: [],
+  support_ticket_areas: [
+    {
+      id: 1,
+      label: "Quote Not Appering",
+    },
+  ],
   document_setting: {
     categories: {
       by_item: "by-item",
@@ -47,7 +52,17 @@ export const appConfigSlice = createSlice({
   initialState: configInitial,
   reducers: {
     updateConfig: (state, action: PayloadAction<Partial<AppConfig>>) => {
-      Object.assign(state, action.payload);
+      Object.assign(
+        state,
+        Object.assign(action.payload, {
+          support_ticket_areas: [
+            {
+              id: 1,
+              label: "Quote Not Appering",
+            },
+          ],
+        }),
+      );
     },
 
     clearConfig: (state) => {

@@ -15,6 +15,7 @@ interface CustomComboboxProps<T, V = T> {
   items: T[];
   onValueChange?: (value: V | null) => void;
   getItemLabel?: (item: T) => string;
+  getItemRender?: (item: T) => React.ReactNode;
   getItemValue?: (item: T) => V;
   placeholder?: string;
   emptyMessage?: string;
@@ -62,6 +63,7 @@ export function CustomCombobox<T, V = T>({
   getItemId,
   inptDisabled,
   inptReadonly,
+  getItemRender,
 }: CustomComboboxProps<T, V>) {
   const [value, setValue] = useState<string | null>(
     selected ? getItemLabel(selected) : null,
@@ -186,7 +188,7 @@ export function CustomCombobox<T, V = T>({
                 data-[highlighted]:brand-dark
               "
             >
-              {getItemLabel(item)}
+              {getItemRender ? getItemRender(item) : getItemLabel(item)}
             </ComboboxItem>
           )}
         </ComboboxList>

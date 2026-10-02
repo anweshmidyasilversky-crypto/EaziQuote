@@ -11,15 +11,45 @@ import { releaseToken } from "@/redux/slices/auth.slice";
 import { removeUser } from "@/redux/slices/user.slice";
 import { showErrorToast } from "@/api/axiosInstance";
 import { Spinner } from "../ui/spinner";
+import useSupportMutation from "@/hooks/apis/support/useSupportMutation";
+import type { SupportTicketCreatePayload } from "@/types/api.requests.type";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { supportTicketCreateSchema } from "@/validation/supportTicket.create.payload.schema";
+import CustomDialog from "../common/CustomDialog";
+import { CustomCombobox } from "../common/CustomCombobox";
+import { cn } from "@/lib/utils";
+import { CustomInput } from "../common/CustomInput";
 export function DashboardLayout() {
   const { logoutMutation, userDeleteMutation } = useAuthMutation();
   const dispatch = useAppDispatch();
   const [activeBtn, toggleActiveBtn] = useState<string>("dashboard");
+  const [ticketCreateDialogOpen, setTicketCreateDialogOpen] = useState(false);
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
+  const config = useAppSelector((state) => state.appConfig);
   const endDate = new Date(user.subscription_ended_at ?? new Date());
   const btnIcon = (btnId: string, activeIcon: string, inActiveIcon: string) =>
     btnId === activeBtn ? activeIcon : inActiveIcon;
+  const { ticketCreateMutation } = useSupportMutation();
+
+  const [ticketAreaSearchTerm, setTicketAreaSearchTerm] = useState("");
+  const {
+    control,
+    reset,
+    clearErrors,
+    formState: { errors },
+    handleSubmit,
+    setValue,
+  } = useForm<SupportTicketCreatePayload>({
+    defaultValues: {
+      support_ticket_area_id: undefined,
+      description: undefined,
+      other_area: undefined,
+    },
+    resolver: yupResolver(supportTicketCreateSchema),
+  });
+
   const btnConfig: {
     id: string;
     label: string;
@@ -112,6 +142,20 @@ export function DashboardLayout() {
     });
   };
 
+  const handleTicketCreation = (payload: SupportTicketCreatePayload) => {
+    ticketCreateMutation.mutate(payload, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        setTicketCreateDialogOpen(false);
+        reset();
+        setTicketAreaSearchTerm("");
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
   return (
     <div className="w-screen h-screen flex">
       <div className="bg-sidebar sm:w-auto md:w-63 max-w-63 h-screen border-r-sidebar-border border-r-[0.5px]">
@@ -136,7 +180,7 @@ export function DashboardLayout() {
         </div>
       </div>
 
-      <div className="flex flex-col w-full h-ull overflow-y-auto">
+      <div className="flex flex-col w-full h-fit">
         <div className="w-full border-b-sidebar-border border-b-[0.5px] min-h-17.5 flex items-center px-6">
           {/* Header content spaced between */}
           <div className="w-full flex justify-between gap-2 items-center">
@@ -146,7 +190,7 @@ export function DashboardLayout() {
                 {user.is_trial_period &&
                   `Free trial ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
                 {!user.is_trial_period &&
-                  `Plan ${user.is_subscription_active ? "ends" : "ended"} on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
+                  `${user.is_subscription_active ? `Plan ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}` : "Your subscription has expired"} `}
               </span>
 
               <button
@@ -160,7 +204,10 @@ export function DashboardLayout() {
 
             <div className="h-full w-auto max-w-67.5 flex gap-6 items-center">
               <div className="flex items-center max-h-10">
-                <button className="h-10 w-10 flex items-center">
+                <button
+                  className="h-10 w-10 flex items-center"
+                  onClick={() => setTicketCreateDialogOpen(true)}
+                >
                   <img src={assets.headphoneIcon} className="w-4 h-5" />
                 </button>
 
@@ -176,7 +223,10 @@ export function DashboardLayout() {
               <Popover>
                 <PopoverTrigger className={`translate-y-0!`}>
                   <div className="flex p-4.5 gap-3 items-center bg-header-user-det overflow-hidden">
-                    <CustomAvatar src={user.avatar ?? ""} fallback="U" />
+                    <CustomAvatar
+                      src={user.avatar ?? assets.userIconSvg}
+                      fallback="U"
+                    />
                     <span className="font-sans font-medium text-[14px] min-h-4.25 max-w-21.5 text-wrap">
                       {user.name}
                     </span>
@@ -227,6 +277,76 @@ export function DashboardLayout() {
           <Outlet />
         </div>
       </div>
+
+      <CustomDialog
+        dialogOpen={ticketCreateDialogOpen}
+        toggleDialogOpen={setTicketCreateDialogOpen}
+        header="Support"
+        xIconAction={() => {
+          reset();
+          setTicketCreateDialogOpen(false);
+          setTicketAreaSearchTerm("");
+        }}
+        withFooter={true}
+        showFooterSeparator={false}
+        footerBtnLabel="Submit"
+        footerBtnAction={handleSubmit(handleTicketCreation)}
+        closeOnSubmit={false}
+        isSubmitting={ticketCreateMutation.isPending}
+      >
+        <div className="flex flex-col gap-6 px-5 py-6">
+          <div className="input-non-oriented flex-col gap-2">
+            <label className="input-label"> {"Area"} </label>
+            <CustomCombobox
+              items={config.support_ticket_areas}
+              getItemLabel={(ticketConfig) => ticketConfig?.label}
+              getItemId={(ticketConfig) => ticketConfig?.id}
+              filterFn={(item, query) => {
+                return Object.values(item).some((val) =>
+                  val
+                    .toString()
+                    .toLocaleLowerCase()
+                    .includes(query.toString().toLocaleLowerCase()),
+                );
+              }}
+              onValueChange={(item) => {
+                if (item) {
+                  setTicketAreaSearchTerm(item.label);
+                  setValue("support_ticket_area_id", item.id);
+                  clearErrors("support_ticket_area_id");
+                }
+              }}
+              inptFieldValue={ticketAreaSearchTerm}
+              inptFieldChange={setTicketAreaSearchTerm}
+              className={cn(
+                `input-field ${errors.support_ticket_area_id ? `input-error!` : ``}`,
+              )}
+              placeholder="Select Support area"
+            />
+            {errors.support_ticket_area_id && (
+              <p className="error-text">
+                {" "}
+                {errors.support_ticket_area_id.message}{" "}
+              </p>
+            )}
+          </div>
+
+          <CustomInput
+            control={control}
+            name="other_area"
+            fieldName="Be Specific"
+            placeholder="Enter email"
+          />
+
+          <CustomInput
+            control={control}
+            name="description"
+            fieldName="Description"
+            inptType="textarea"
+            placeholder="Enter support description"
+          />
+        </div>
+      </CustomDialog>
     </div>
   );
 }

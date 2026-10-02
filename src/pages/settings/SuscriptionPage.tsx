@@ -11,7 +11,8 @@ import SettingsCard, {
 } from "@/components/settings/SettingsCard";
 import { invoiceData } from "@/constants/dummyData";
 import { useDebounce } from "@/hooks/useDebounce";
-import { cn } from "@/lib/utils";
+import { cn, formatDisplayDate } from "@/lib/utils";
+import { useAppSelector } from "@/redux/store";
 import type { Invoice, InvoiceStatus } from "@/types/invoice.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useState } from "react";
@@ -47,34 +48,44 @@ function SuscriptionPage() {
     },
     {
       id: "action",
-      header: () => <div className="flex w-full justify-end">ACTION</div>,
-      meta: {
-        headerClassName: cn(`justify-end!`),
-      },
+      header: () => (
+        <div className="w-full grid grid-cols-3">
+          <span className="col-start-3"> {"Action"} </span>
+        </div>
+      ),
       cell: () => (
-        <div className="min-w-125 flex justify-end pr-6.5">
-          <CustomActionGroup downloadOnly />
+        <div className="w-full grid grid-cols-3">
+          <div className="col-start-3">
+            <CustomActionGroup downloadOnly />
+          </div>
         </div>
       ),
     },
   ];
 
-  {
-    /* For dummt purpose to show the states for subscribed, free and expired subscription user */
-  }
+  const user = useAppSelector((state) => state.user);
   enum subStatus {
     free = "free",
     expired = "expired",
     pro = "pro",
   }
-  const userSubStatus: subStatus = subStatus.pro;
+  let userSubStatus: subStatus = subStatus.expired;
+  if (user.is_trial_period) {
+    userSubStatus = subStatus.free;
+  } else {
+    if (user.is_subscription_active) {
+      userSubStatus = subStatus.pro;
+    } else {
+      userSubStatus = subStatus.expired;
+    }
+  }
 
   // Primary card according to different type of users
   const statusCardConfig: SettingsCardProps[] = [
     {
       icon: assets.subscriptionIconBlue,
       title: "Free Plan",
-      info: `Free trial ends on November 20, 2025`,
+      info: `Free trial ends on ${formatDisplayDate(user.subscription_ended_at ?? new Date().toISOString())}`,
       btnConfig: {
         buttonLabel: "Subscribe",
         btncls: cn(`bg-subscription-gradient`),
@@ -127,12 +138,13 @@ function SuscriptionPage() {
 
   // If subscription expired
   if ((userSubStatus as subStatus) === subStatus.expired) {
+    console.log(user.subscription_ended_at);
     Object.assign(statusCardConfig[0], {
       title: "No Active Plan",
       btnConfig: {
         ...statusCardConfig[0].btnConfig,
       },
-      info: "Your subscription ended on November 20, 2025",
+      info: `${user.subscription_ended_at ? ` Your subscription ended on ${formatDisplayDate(user.subscription_ended_at)} ` : ` Your subscription is expired `}`,
     } as SettingsCardProps);
   }
 

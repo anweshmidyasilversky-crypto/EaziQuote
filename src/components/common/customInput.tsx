@@ -117,7 +117,7 @@ export function CustomInput<T extends FieldValues>({
                           key={selectOption.value}
                         >
                           {" "}
-                          <span className="flex items-center gap-2">
+                          <li className="flex items-center gap-2">
                             {" "}
                             {selectOption.icon && (
                               <img
@@ -126,7 +126,7 @@ export function CustomInput<T extends FieldValues>({
                               />
                             )}{" "}
                             {selectOption.label}
-                          </span>{" "}
+                          </li>{" "}
                         </option>
                       );
                     })}
@@ -172,7 +172,7 @@ export function CustomInput<T extends FieldValues>({
                       </button>
                     ) : null}
                     {inptType === "phone" && (
-                      <span className="absolute inset-y-0 left-2 top-2.5">
+                      <span className="absolute left-2 bottom-1/4">
                         {" "}
                         {`(+44)`}{" "}
                       </span>

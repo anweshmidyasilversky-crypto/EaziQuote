@@ -251,3 +251,9 @@ export interface ChangePasswordApiPayload {
   old_password: string;
   new_password: string;
 }
+
+export interface SupportTicketCreatePayload {
+  support_ticket_area_id: number;
+  other_area?: string;
+  description: string;
+}

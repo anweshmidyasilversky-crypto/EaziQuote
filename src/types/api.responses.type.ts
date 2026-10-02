@@ -456,7 +456,10 @@ export interface AppConfig {
   notification_settings: NotificationSettings;
   vat_settings: Vat[];
   vertical_markets: Trade[];
-  support_ticket_areas: [];
+  support_ticket_areas: {
+    id: number;
+    label: string;
+  }[];
   document_setting: {
     categories: Record<string, string>;
     templates: Record<string, string>;

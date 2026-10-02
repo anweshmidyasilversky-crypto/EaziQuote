@@ -46,7 +46,15 @@ export function SignInPage() {
         });
       } else {
         dispath(setToken(loginResponse.payload.access_token));
-        dispath(updateUser(loginResponse.payload));
+        dispath(
+          updateUser({
+            ...loginResponse.payload,
+            is_company_address_setup: loginResponse.payload.company?.address
+              ?.postcode
+              ? true
+              : false,
+          }),
+        );
         toast.success(`Signin success`);
       }
     } catch (err) {

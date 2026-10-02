@@ -121,4 +121,7 @@ export const API_ENDPOINTS = {
     invoicePdfDownload: (invoice_id: string | number) =>
       `/invoices/${invoice_id}/pdf`,
   },
+  support: {
+    createTicket: `/support-ticket`,
+  },
 } as const;

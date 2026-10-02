@@ -103,8 +103,8 @@ function QuoteSummaryForm({
       setValue("hidePhoneNumber", !currQuote.is_company_phone_number_show);
 
       if (prefillClient) {
-        setValue("clientId", currQuote.client.id.toString());
-        setClientSearchTerm(currQuote.client.name);
+        setValue("clientId", currQuote.client.id?.toString());
+        setClientSearchTerm(currQuote.client?.name);
       }
       setValue("jobDescription", currQuote.job_description);
       const attachmentList: File[] = [];
@@ -112,7 +112,7 @@ function QuoteSummaryForm({
         attachmentList.push(
           new File(
             [],
-            `attachment_${attachment.id.toString()}.${attachment.type}`,
+            `attachment_${attachment.id?.toString()}.${attachment.type}`,
             {
               type:
                 attachment.type === "pdf"
@@ -263,7 +263,7 @@ function QuoteSummaryForm({
   useEffect(() => {
     if (defaultClient) {
       setClientSearchTerm(defaultClient.name);
-      setValue("clientId", defaultClient.id.toString());
+      setValue("clientId", defaultClient.id?.toString());
     }
   }, [defaultClient]);
 
@@ -344,7 +344,7 @@ function QuoteSummaryForm({
                 items={clientList ?? []}
                 getItemLabel={(client) => client?.name ?? ""}
                 onValueChange={(client) => {
-                  setValue("clientId", (client?.id ?? 0).toString());
+                  setValue("clientId", (client?.id ?? 0)?.toString());
                   setClientSearchTerm(client?.name ?? "");
                   clearErrors("clientId");
                 }}

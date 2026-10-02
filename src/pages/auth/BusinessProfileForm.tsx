@@ -29,19 +29,29 @@ import { businessProfileSetup } from "@/api/services/user.api";
 import { isAxiosError } from "axios";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { useMutation } from "@tanstack/react-query";
+import { CustomCombobox } from "@/components/common/CustomCombobox";
+import { cn } from "@/lib/utils";
 
 export function BusinessProfileForm() {
   const appConfig = useAppSelector((state) => state.appConfig);
   const dispath = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const [tradeSearchTerm, setTradeSearchTerm] = useState("");
 
   const { mutateAsync: createBusinessProfile } = useMutation({
     mutationKey: ["companyProfile"],
     mutationFn: (data: FormData) => businessProfileSetup(data),
   });
 
-  const { control, handleSubmit } = useForm<BusinessProfilePayload>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, dirtyFields },
+    setValue,
+    unregister,
+    clearErrors,
+  } = useForm<BusinessProfilePayload>({
     defaultValues: {
       brandColor: "#00AAFF",
       businessName: user.company?.name ?? "",
@@ -94,17 +104,6 @@ export function BusinessProfileForm() {
     name: ["brandColor", "vatRegistered"],
   });
 
-  // const tradeSelectOptions: SelectOptions = [
-  //   { value: "", label: "Select an option" },
-  //   { value: "bricklaying_masonry", label: "Bricklaying & Masonry" },
-  //   { value: "carpentry_joinery", label: "Carpentry & Joinery" },
-  //   { value: "general_contracting", label: "General Contracting" },
-  //   { value: "painting_decorating", label: "Painting & Decorating" },
-  //   { value: "plastering_rendering", label: "Plastering & Rendering" },
-  //   { value: "roofing", label: "Roofing" },
-  //   { value: "tiling", label: "Tiling & Flooring" },
-  // ];
-
   const tradeSelectOptions: SelectOptions = appConfig.vertical_markets.map(
     (option) => ({
       value: option.id.toString(),
@@ -129,11 +128,9 @@ export function BusinessProfileForm() {
                 withLabel={false}
                 inptType="image"
                 imgAlt={user.company?.logo ?? assets.cameraIcon}
-                imgAltCls={
-                  user.company?.logo
-                    ? "object-cover object-center h-full w-full"
-                    : "object-center h-10 w-10"
-                }
+                imgAltCls={cn(
+                  `object-contain object-center ${user.company?.logo ? `` : `h-10! w-10!`}`,
+                )}
                 imgAltAlign="center"
               />
 
@@ -187,16 +184,58 @@ export function BusinessProfileForm() {
                 name="businessPhoneNo"
                 fieldName="Business Phone Number"
                 placeholder="Enter phone number"
-                inptType="text"
+                inptType="phone"
               />
 
-              <CustomInput
-                control={control}
-                name="trade"
-                fieldName="What trade do you do?"
-                inptType="select"
-                selectOptions={tradeSelectOptions}
-              />
+              <div className="input-non-oriented flex-col gap-2">
+                <label className="input-label">
+                  {" "}
+                  {"What trade do you do?"}{" "}
+                </label>
+                <CustomCombobox
+                  items={tradeSelectOptions}
+                  getItemRender={(tradeConfig) => (
+                    <div className="flex gap-2">
+                      <img src={tradeConfig.icon} className="w-5 aspect-auto" />
+                      <span> {tradeConfig.label} </span>
+                    </div>
+                  )}
+                  getItemId={(tradeConfig) => tradeConfig?.value}
+                  getItemLabel={(tradeConfig) => tradeConfig?.label}
+                  inptFieldValue={tradeSearchTerm}
+                  inptFieldChange={(query) => {
+                    if (dirtyFields.trade) {
+                      unregister("trade");
+                    }
+                    setTradeSearchTerm(query);
+                  }}
+                  onValueChange={(tradeConfig) => {
+                    if (tradeConfig) {
+                      setTradeSearchTerm(tradeConfig.label);
+                      setValue("trade", tradeConfig.value);
+                      clearErrors("trade");
+                    } else {
+                      setTradeSearchTerm("");
+                      unregister("trade");
+                    }
+                  }}
+                  filterFn={(tradeConfig, query) => {
+                    const { icon, ...rest } = tradeConfig;
+                    return Object.values(rest).some((val) =>
+                      val
+                        .toLocaleLowerCase()
+                        .includes(query.toLocaleLowerCase()),
+                    );
+                  }}
+                  className={cn(
+                    `${errors.trade ? `input-error!` : `input-field`}`,
+                  )}
+                  placeholder="Search or select your trade"
+                />
+                {errors.trade && (
+                  <p className="error-text"> {errors.trade.message} </p>
+                )}
+              </div>
             </div>
           </CardContent>
 
