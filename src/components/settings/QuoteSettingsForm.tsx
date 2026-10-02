@@ -1,20 +1,21 @@
 import { type QuoteSettings } from "@/types/quoteSettings.payload.type";
 import { quoteSettingsSchema } from "@/validation/quoteSettings.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { CustomInput } from "../common/CustomInput";
 import CustomTooltip from "../common/CustomTooltip";
 import { toast } from "react-toastify";
 import { CustomBtn } from "../common/CustomBtn";
 import SignatureModal from "../common/SignatureModal";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
+import { updateConfig } from "@/redux/slices/settings.slice";
+import { showErrorToast } from "@/api/axiosInstance";
 
-export type QuoteSettingsProps = {
-  defaultValues?: QuoteSettings;
-};
-
-function QuoteSettingsForm({ defaultValues }: QuoteSettingsProps) {
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
+function QuoteSettingsForm() {
+  const { quote_invoice_settings } = useAppSelector((state) => state.appConfig);
+  const dispatch = useAppDispatch();
   const [signatureModalOpen, toggleSignatureModalOpen] = useState(false);
   const {
     control,
@@ -23,6 +24,10 @@ function QuoteSettingsForm({ defaultValues }: QuoteSettingsProps) {
     formState: { errors },
     clearErrors,
   } = useForm<QuoteSettings>({
+    defaultValues: {
+      footerMsg: quote_invoice_settings.footer_message,
+      terms: quote_invoice_settings.terms_and_conditions,
+    },
     resolver: yupResolver(quoteSettingsSchema),
   });
 
@@ -36,22 +41,25 @@ function QuoteSettingsForm({ defaultValues }: QuoteSettingsProps) {
     clearErrors("signatureBlob");
   };
 
-  useEffect(() => {
-    if (defaultValues) {
-      Object.keys(defaultValues).forEach((key) => {
-        const objKey = key as keyof QuoteSettings;
-        setValue(objKey, defaultValues[objKey]);
-      });
-    }
-  }, [defaultValues]);
+  const { quoteInvoiceSettingsMutation } = useAuthMutation();
 
   const submitHandler = (data: QuoteSettings) => {
-    toggleIsSubmitting(true);
-    setTimeout(() => {
-      toast.success(`Saved Quote Settings`);
-      console.log(data);
-      toggleIsSubmitting(false);
-    }, 500);
+    quoteInvoiceSettingsMutation.mutate(
+      {
+        footer_message: data.footerMsg,
+        terms_and_conditions: data.terms,
+        signature: data.signatureBlob,
+      },
+      {
+        onSuccess: (response) => {
+          dispatch(updateConfig(response.payload));
+          toast.success(response.message);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   return (
@@ -90,12 +98,16 @@ function QuoteSettingsForm({ defaultValues }: QuoteSettingsProps) {
               className={`min-h-16 max-w-31.25 border border-input-field-border rounded-[7px] cursor-pointer ${errors.signatureBlob ? `input-error` : ``}`}
               onClick={() => toggleSignatureModalOpen((curr) => !curr)}
             >
-              {signatureBlob && (
+              {
                 <img
-                  src={URL.createObjectURL(signatureBlob)}
+                  src={
+                    signatureBlob
+                      ? URL.createObjectURL(signatureBlob)
+                      : (quote_invoice_settings.signature ?? "")
+                  }
                   className="min-h-11 aspect-auto"
                 />
-              )}
+              }
             </div>
             {errors.signatureBlob && (
               <p className="error-text"> {errors.signatureBlob.message} </p>
@@ -106,7 +118,7 @@ function QuoteSettingsForm({ defaultValues }: QuoteSettingsProps) {
         <CustomBtn
           buttonLabel="Save Changes"
           onClick={handleSubmit(submitHandler)}
-          isSubmitting={isSubmitting}
+          isSubmitting={quoteInvoiceSettingsMutation.isPending}
         />
       </div>
 

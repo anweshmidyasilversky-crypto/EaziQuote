@@ -1,14 +1,16 @@
 import type { BankInfo } from "@/types/bankInfo.payload";
 import { bankInfoSchema } from "@/validation/bankInfo.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { CustomInput } from "../common/CustomInput";
 import { Separator } from "../ui/separator";
 import { CustomBtn } from "../common/CustomBtn";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/redux/store";
-import { updateUser } from "@/redux/slices/user.slice";
+import { updateBillingDetailsRedux } from "@/redux/slices/user.slice";
+import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export type BankInfoFormProps = {
   defaultValues?: BankInfo;
@@ -20,7 +22,8 @@ function BankInfoForm({ defaultValues, submitAction }: BankInfoFormProps) {
   const { control, setValue, handleSubmit } = useForm<BankInfo>({
     resolver: yupResolver(bankInfoSchema),
   });
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
+
+  const { billingDetailsMutation } = useAuthMutation();
 
   useEffect(() => {
     if (defaultValues) {
@@ -32,14 +35,30 @@ function BankInfoForm({ defaultValues, submitAction }: BankInfoFormProps) {
   }, [defaultValues]);
 
   const submitHandler = (data: BankInfo) => {
-    toggleIsSubmitting(true);
-    console.log(data);
-    setTimeout(() => {
-      dispath(updateUser({ bankInfo: data, bankInfoAdded: true }));
-      toast.success(`Saved Changes`);
-      toggleIsSubmitting(false);
-      submitAction();
-    }, 500);
+    billingDetailsMutation.mutate(
+      {
+        account_number: data.accNumber,
+        name: data.accName,
+        bank_name: data.bankName,
+        email: data.paymentLink,
+        sort_code: data.sortCode,
+      },
+      {
+        onSuccess: (response) => {
+          dispath(
+            updateBillingDetailsRedux({
+              ...response.payload,
+              hasBankAccountDetailAdded: true,
+            }),
+          );
+          toast.success(response.message);
+          submitAction?.();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   return (
@@ -86,7 +105,7 @@ function BankInfoForm({ defaultValues, submitAction }: BankInfoFormProps) {
         </div>
         <CustomBtn
           buttonLabel="Save Changes"
-          isSubmitting={isSubmitting}
+          isSubmitting={billingDetailsMutation.isPending}
           onClick={handleSubmit(submitHandler)}
         />
       </div>

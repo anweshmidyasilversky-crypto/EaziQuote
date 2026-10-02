@@ -1,5 +1,4 @@
-import { PAYMENT_TERMS, QUOTE_EXPIRY } from "@/constants/limits";
-import { emptyMsg, minLengthMsg, notSelectedMsg } from "@/constants/messages";
+import { emptyMsg, notSelectedMsg } from "@/constants/messages";
 import type { BillingPreference } from "@/types/billingPreference.payload.type";
 import * as yup from "yup";
 
@@ -9,15 +8,9 @@ export const billingPreferenceSchema: yup.ObjectSchema<BillingPreference> =
     quoteExpiry: yup
       .number()
       .required(emptyMsg("Quote Expiry"))
-      .min(
-        QUOTE_EXPIRY.minLength,
-        minLengthMsg("Quote Expiry", QUOTE_EXPIRY.minLength),
-      ),
+      .min(1, "Quote Expiry Should be atleast 1"),
     paymentTerms: yup
       .number()
       .required(emptyMsg("Payment Terms"))
-      .min(
-        PAYMENT_TERMS.minLength,
-        minLengthMsg("Payment Terms", PAYMENT_TERMS.minLength),
-      ),
+      .min(1, `Payment Terms Should be atleast 1`),
   });

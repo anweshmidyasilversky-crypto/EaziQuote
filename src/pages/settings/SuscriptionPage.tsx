@@ -1,3 +1,4 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import { assets } from "@/assets/icons";
 import { CustomActionGroup } from "@/components/common/CustomActionGroup";
 import { HeaderBreadCrumb } from "@/components/common/CustomBreadCrumb";
@@ -9,35 +10,71 @@ import CardForm from "@/components/settings/CardForm";
 import SettingsCard, {
   type SettingsCardProps,
 } from "@/components/settings/SettingsCard";
-import { invoiceData } from "@/constants/dummyData";
+import { Spinner } from "@/components/ui/spinner";
+import useBillingInvoiceList from "@/hooks/apis/subscription/useBillingInvoiceList";
+import useSubscriptionMutations from "@/hooks/apis/subscription/useSubscriptionMutations";
 import { useDebounce } from "@/hooks/useDebounce";
-import { cn, formatDisplayDate } from "@/lib/utils";
+import { cn, dateToDdMonYyyy, formatDisplayDate } from "@/lib/utils";
 import { useAppSelector } from "@/redux/store";
-import type { Invoice, InvoiceStatus } from "@/types/invoice.type";
+import {
+  InvoiceStatus,
+  type BillingInvoiceItem,
+} from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 function SuscriptionPage() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [benifitModalOpen, toggleBenifitModalOpen] = useState(false);
   const [cardChangeOpen, toggleCardChangeOpen] = useState(false);
   const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
-  const invoiceColumns: ColumnDef<TableFeatures, Invoice>[] = [
+  const targetBillInvoice = useRef<BillingInvoiceItem | undefined>(undefined);
+
+  const { downloadInvoiceMutation } = useSubscriptionMutations();
+
+  const handleDownload = () => {
+    if (!targetBillInvoice.current) {
+      toast.error(`No invoice selected for download`);
+      return;
+    }
+    downloadInvoiceMutation.mutate(targetBillInvoice.current.invoice_url, {
+      onSuccess: (response) => {
+        const url = window.URL.createObjectURL(response);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `invoice-${targetBillInvoice.current?.id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const invoiceColumns: ColumnDef<TableFeatures, BillingInvoiceItem>[] = [
     {
       accessorKey: "id",
       header: "INVOICE ID",
       enableSorting: false,
     },
     {
-      accessorKey: "date",
+      accessorKey: "paid_at",
       header: "DATE",
       enableSorting: false,
+      cell: (info) =>
+        dateToDdMonYyyy(new Date(info.getValue<string>()).toISOString()),
     },
     {
-      accessorKey: "status",
+      id: "status",
       header: "STATUS",
-      cell: (info) => {
-        return <StatusBadge status={info.getValue<InvoiceStatus>()} />;
+      cell: () => {
+        return <StatusBadge status={InvoiceStatus.paid} />;
       },
       enableSorting: false,
     },
@@ -53,15 +90,50 @@ function SuscriptionPage() {
           <span className="col-start-3"> {"Action"} </span>
         </div>
       ),
-      cell: () => (
-        <div className="w-full grid grid-cols-3">
-          <div className="col-start-3">
-            <CustomActionGroup downloadOnly />
+      cell: (info) => {
+        const { id } = info.row.original;
+        const currMutatingInvoiceId = targetBillInvoice.current?.id;
+        return (
+          <div className="w-full grid grid-cols-3">
+            <div className="col-start-3">
+              {currMutatingInvoiceId === id &&
+              downloadInvoiceMutation.isPending ? (
+                <Spinner className="text-brand-dark" />
+              ) : (
+                <CustomActionGroup
+                  downloadOnly
+                  downloadFn={() => {
+                    targetBillInvoice.current = info.row.original;
+                    handleDownload();
+                  }}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
   ];
+
+  const [pageNo, setPageNo] = useState(1);
+  const [prevPageLastIds, setPrevPageLastIds] = useState<string[]>([]);
+  const isFetchingNextPage = useRef<boolean>(false);
+  const [startAfter, setStartAfter] = useState<string | undefined>(undefined);
+
+  const { invoiceList, isFetching, hasNextPage } = useBillingInvoiceList({
+    start_after: startAfter,
+  });
+  useEffect(() => {
+    if (isFetchingNextPage.current) {
+      isFetchingNextPage.current = false;
+      if (invoiceList.length >= 1) {
+        setPrevPageLastIds((curr) => [
+          ...curr,
+          invoiceList.at(-1)?.id as string,
+        ]);
+      }
+    }
+  }, [invoiceList]);
 
   const user = useAppSelector((state) => state.user);
   enum subStatus {
@@ -89,13 +161,14 @@ function SuscriptionPage() {
       btnConfig: {
         buttonLabel: "Subscribe",
         btncls: cn(`bg-subscription-gradient`),
+        onClick: () => navigate(`/subscribe-plan`),
       },
       contentCls: "pb-4",
     },
   ];
 
   // IF paid user then add visa card detail
-  if ((userSubStatus as subStatus) !== subStatus.free) {
+  if ((userSubStatus as subStatus) === subStatus.pro) {
     statusCardConfig.push({
       icon: assets.visaIconBlue,
       title: "Visa",
@@ -109,7 +182,10 @@ function SuscriptionPage() {
       info: (
         <div className="flex flex-col gap-2 text-placeholder-text text-sm">
           <span> {"•••• •••• •••• 4069"} </span>
-          <span> {`Expires on 21 August 2028`} </span>
+          <span>
+            {" "}
+            {`Expires on ${formatDisplayDate(user.subscription_ended_at ?? "")}`}{" "}
+          </span>
         </div>
       ),
     });
@@ -177,12 +253,7 @@ function SuscriptionPage() {
         <div className="overflow-x-auto">
           <CustomDataTable
             columns={invoiceColumns}
-            data={invoiceData.map((invoice) => ({
-              ...invoice,
-              date: new Date().toLocaleDateString("en-Gb", {
-                dateStyle: "medium",
-              }),
-            }))}
+            data={invoiceList}
             title="Billing History"
             headerSlot={
               <div className="min-w-75">
@@ -194,7 +265,41 @@ function SuscriptionPage() {
               </div>
             }
             globalFilterTerm={debouncedSearchTerm}
+            isFetching={isFetching}
           />
+        </div>
+
+        <div className="w-full flex gap-2 justify-end [&_button]:btn-auth [&_button]:table-pagination-btn-common [&_button]:min-w-fit! [&_button]:disabled:translate-y-0! px-5">
+          <button
+            disabled={pageNo === 1}
+            className={cn(
+              `table-pagination-btn-inactive disabled:text-muted disabled:hover:text-muted`,
+            )}
+            onClick={() => {
+              const cursur = prevPageLastIds.at(-2);
+              setPrevPageLastIds((curr) => curr.slice(0, -2));
+              setStartAfter(cursur);
+              setPageNo((curr) => curr - 1);
+            }}
+          >
+            {"Previous"}
+          </button>
+
+          <button className="bg-brand-dark! text-white!">{pageNo}</button>
+
+          <button
+            disabled={!hasNextPage}
+            className={cn(
+              `table-pagination-btn-inactive disabled:text-muted disabled:hover:text-muted`,
+            )}
+            onClick={() => {
+              isFetchingNextPage.current = true;
+              setStartAfter(prevPageLastIds.at(-1));
+              setPageNo((curr) => curr + 1);
+            }}
+          >
+            {"Next"}
+          </button>
         </div>
       </div>
 

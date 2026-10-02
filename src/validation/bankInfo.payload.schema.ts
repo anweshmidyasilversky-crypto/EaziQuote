@@ -60,6 +60,5 @@ export const bankInfoSchema: yup.ObjectSchema<BankInfo> = yup.object({
     .string()
     .trim()
     .required(emptyMsg("Sort Code"))
-    .min(SORT_CODE.minLength, minLengthMsg("Sort Code", SORT_CODE.minLength))
-    .max(SORT_CODE.maxLength, maxLengthMsg("Sort Code", SORT_CODE.maxLength)),
+    .min(1, minLengthMsg("Sort Code", 1)),
 });

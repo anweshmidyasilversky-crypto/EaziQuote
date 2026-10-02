@@ -1,10 +1,13 @@
 import type {
+  BillingDetailsApiPayload,
+  BillingPreferenceApiPayload,
   ChangePasswordApiPayload,
   CompanyCreateApiPayload,
   CompanyUpdateApiPayload,
   CreatePresetQuote,
   NotificationSettingsUpdate,
   PageFilters,
+  QuoteInvoiceSettingsApiPayload,
   SignupPayload,
   UpdatePresetQuote,
 } from "@/types/api.requests.type";
@@ -19,6 +22,7 @@ import {
   type AppConfig,
   type PresetQuote,
   type Company,
+  type BillingDetailsResponse,
 } from "@/types/api.responses.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
 import { ObjToFormData } from "@/lib/utils";
@@ -210,6 +214,54 @@ export const logout = async () => {
       API_ENDPOINTS.auth.logout,
     );
     return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateBillingDetails = async (
+  payload: BillingDetailsApiPayload,
+) => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<BillingDetailsResponse>>(
+      API_ENDPOINTS.auth.updateBillingDetails,
+      ObjToFormData(payload),
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateBillingPreference = async (
+  payload: BillingPreferenceApiPayload,
+) => {
+  try {
+    const response = await axiosInstance.post<ApiResponse<AppConfig>>(
+      API_ENDPOINTS.auth.billingPreference,
+      ObjToFormData(payload),
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateQuoteInvoiceSettings = async (
+  payload: QuoteInvoiceSettingsApiPayload,
+) => {
+  try {
+    const formData = new FormData();
+    formData.append(`terms_and_conditions`, payload.terms_and_conditions);
+    formData.append(`footer_message`, payload.footer_message);
+    if (payload.signature) {
+      formData.append(`signature`, payload.signature);
+    }
+    const response = await axiosInstance.post<ApiResponse<AppConfig>>(
+      API_ENDPOINTS.auth.invoiceSettings,
+      formData,
+    );
+    return response.data;
   } catch (error) {
     throw error;
   }

@@ -18,6 +18,10 @@ enum toggle {
 
 function PaymentAndInvoicePage() {
   const user = useAppSelector((state) => state.user);
+  const { billing_details } = user.company;
+  const { billing_preferences, vat_settings } = useAppSelector(
+    (state) => state.appConfig,
+  );
   const [activeToggle, toggleActive] = useState<string>(toggle.payInfo);
   const toggleConfig: CustomToggleGroupProps["toggleConfig"] = [
     {
@@ -27,12 +31,12 @@ function PaymentAndInvoicePage() {
     {
       btnId: toggle.billPref,
       btnLabel: toggle.billPref,
-      disabled: !user.bankInfoAdded,
+      disabled: !user.hasBankAccountDetailAdded,
     },
     {
       btnId: toggle.quoteSetting,
       btnLabel: toggle.quoteSetting,
-      disabled: !user.billingPreferenceProvided,
+      disabled: !user.hasBankAccountDetailAdded,
     },
   ];
 
@@ -55,13 +59,25 @@ function PaymentAndInvoicePage() {
         {activeToggle === toggle.payInfo && (
           <BankInfoForm
             submitAction={() => toggleActive(toggle.billPref)}
-            defaultValues={user?.bankInfo}
+            defaultValues={{
+              paymentLink: billing_details.email,
+              bankName: billing_details.bank_name,
+              accName: billing_details.name,
+              accNumber: billing_details.account_number,
+              sortCode: billing_details.sort_code,
+            }}
           />
         )}
 
         {activeToggle === toggle.billPref && (
           <BillingPreferenceForm
-            defaultValues={user?.billingPref}
+            defaultValues={{
+              vatRate: billing_preferences.vat.id,
+              quoteExpiry: billing_preferences.quote_expiration,
+              paymentTerms: billing_preferences.payment_expiration,
+            }}
+            vatSetting={vat_settings}
+            selectedVat={billing_preferences.vat}
             submitAction={() => toggleActive(toggle.quoteSetting)}
           />
         )}

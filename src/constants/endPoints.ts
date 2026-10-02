@@ -18,6 +18,9 @@ export const API_ENDPOINTS = {
     companyUpdate: `/company`,
     notificationSettingsUpdate: `/auth/notification_settings`,
     changePassword: `/auth/change-password`,
+    updateBillingDetails: `/company/billing-details`,
+    billingPreference: `/auth/billing-preferences`,
+    invoiceSettings: `/auth/quote-invoice-settings`,
   },
   address: {
     addressSearch: `/address/search`,
@@ -123,5 +126,9 @@ export const API_ENDPOINTS = {
   },
   support: {
     createTicket: `/support-ticket`,
+  },
+  subscription: {
+    billingHistory: `/billing-history`,
+    billDownload: `/bill-download`,
   },
 } as const;

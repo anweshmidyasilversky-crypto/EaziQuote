@@ -180,10 +180,10 @@ export function DashboardLayout() {
         </div>
       </div>
 
-      <div className="flex flex-col w-full h-fit">
+      <div className="flex flex-col w-full h-full">
         <div className="w-full border-b-sidebar-border border-b-[0.5px] min-h-17.5 flex items-center px-6">
           {/* Header content spaced between */}
-          <div className="w-full flex justify-between gap-2 items-center">
+          <div className="w-full min-h-fit flex justify-between gap-2 items-center">
             {/* Subscription end detail */}
             <div className="w-80.25 min-h-8 flex gap-3 items-center">
               <span className="max-h-4.75 w-auto max-w-53 font-sans text-xs md:text-sm text-placeholder-text flex items-center min-w-20 py-2">

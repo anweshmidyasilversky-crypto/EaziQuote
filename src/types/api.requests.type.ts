@@ -58,6 +58,7 @@ export interface PageFilters {
   download?: number;
   regenerate?: number;
   is_download?: number;
+  starting_after?: string;
 }
 
 export interface ClientCreateApiPayload {
@@ -256,4 +257,24 @@ export interface SupportTicketCreatePayload {
   support_ticket_area_id: number;
   other_area?: string;
   description: string;
+}
+
+export interface BillingDetailsApiPayload {
+  account_number: string;
+  bank_name: string;
+  email: string;
+  name: string;
+  sort_code: string;
+}
+
+export interface BillingPreferenceApiPayload {
+  payment_expiration: number;
+  quote_expiration: number;
+  vat_id: number;
+}
+
+export interface QuoteInvoiceSettingsApiPayload {
+  footer_message: string;
+  terms_and_conditions: string;
+  signature: Blob | null;
 }

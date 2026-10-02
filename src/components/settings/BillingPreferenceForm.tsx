@@ -8,34 +8,34 @@ import { cn } from "@/lib/utils";
 import { CustomInput } from "../common/CustomInput";
 import { CustomBtn } from "../common/CustomBtn";
 import { useAppDispatch } from "@/redux/store";
-import { updateUser } from "@/redux/slices/user.slice";
 import { toast } from "react-toastify";
+import type { Vat } from "@/types/api.responses.type";
+import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
+import { updateConfig } from "@/redux/slices/settings.slice";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export type BillingPreferenceFormProps = {
   defaultValues?: BillingPreference;
   submitAction: () => void;
+  vatSetting: Vat[];
+  selectedVat?: Vat;
 };
 
 function BillingPreferenceForm({
   defaultValues,
   submitAction,
+  vatSetting,
+  selectedVat,
 }: BillingPreferenceFormProps) {
-  const vatRates: { value: number; label: string }[] = [
-    { value: 0, label: "0% Domestic reverse charge" },
-    { value: 11.54, label: "VAT at 11.54%" },
-    { value: 20, label: "VAT at 20%" },
-    { value: 4, label: "VAT at 4%" },
-    { value: 5, label: "VAT at 5%" },
-    { value: 0, label: "Zero rated" },
-  ];
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
+  const [vatSearchTerm, setVatSearchTerm] = useState(selectedVat?.name ?? "");
   const dispatch = useAppDispatch();
   const {
     control,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     clearErrors,
     handleSubmit,
+    unregister,
   } = useForm<BillingPreference>({
     defaultValues: {
       vatRate: undefined,
@@ -43,15 +43,26 @@ function BillingPreferenceForm({
     resolver: yupResolver(billingPreferenceSchema),
   });
 
+  const { billingPreferenceMutation } = useAuthMutation();
+
   const submitHandler = (data: BillingPreference) => {
-    toggleIsSubmitting(true);
-    setTimeout(() => {
-      dispatch(
-        updateUser({ billingPref: data, billingPreferenceProvided: true }),
-      );
-      submitAction();
-      toast.success(`Sucessfully saved billing preference`);
-    }, 500);
+    billingPreferenceMutation.mutate(
+      {
+        vat_id: data.vatRate,
+        quote_expiration: data.quoteExpiry,
+        payment_expiration: data.paymentTerms,
+      },
+      {
+        onSuccess: (response) => {
+          dispatch(updateConfig(response.payload));
+          toast.success(response.message);
+          submitAction?.();
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -62,28 +73,40 @@ function BillingPreferenceForm({
       });
     }
   }, [defaultValues]);
-  console.log(errors.vatRate);
 
   return (
-    <div className="p-5 flex flex-col gap-5">
+    <div className="p-5 pt-0 flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <label className="input-label self-start">
           {" "}
           {"Default VAT Rate (%)"}{" "}
         </label>
         <CustomCombobox
-          items={vatRates}
-          getItemLabel={(item) => item?.label ?? null}
-          onValueChange={(item) => {
-            if (item) {
-              setValue("vatRate", item?.value ?? 0);
+          items={vatSetting}
+          getItemLabel={(vat) => vat.name ?? null}
+          onValueChange={(vat) => {
+            if (vat) {
+              setValue("vatRate", vat.id);
               clearErrors("vatRate");
             }
           }}
-          className={cn(
-            `${errors.vatRate ? `input-error` : `input-field`} readOnly`,
-          )}
+          className={cn(`${errors.vatRate ? `input-error!` : `input-field`} `)}
           placeholder="Select a vat rate"
+          selected={selectedVat}
+          inptFieldValue={vatSearchTerm}
+          inptFieldChange={(query) => {
+            if (dirtyFields.vatRate) {
+              unregister("vatRate");
+            }
+            setVatSearchTerm(query);
+          }}
+          filterFn={(vat, query) => {
+            return Object.values(vat).some((val) =>
+              String(val)
+                .toLocaleLowerCase()
+                .includes(query.toLocaleLowerCase()),
+            );
+          }}
         />
         {errors.vatRate && (
           <p className="error-text"> {errors.vatRate.message} </p>
@@ -107,7 +130,7 @@ function BillingPreferenceForm({
       <CustomBtn
         buttonLabel="Save Changes"
         onClick={handleSubmit(submitHandler)}
-        isSubmitting={isSubmitting}
+        isSubmitting={billingPreferenceMutation.isPending}
       />
     </div>
   );

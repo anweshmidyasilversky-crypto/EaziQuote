@@ -250,6 +250,13 @@ export interface ListResponse<T> {
   meta: ApiResponseMeta;
 }
 
+export interface ListResponseItem<T> {
+  items: T[];
+  next_page: string | null;
+  url: string;
+  object: string;
+}
+
 export interface QuoteListResponse {
   summary: {
     total_count: number;
@@ -628,4 +635,44 @@ export interface ItemImportResult {
   missing_columns: string[];
   duplicates: boolean;
   product_with_issue_count: number;
+}
+
+export interface BillingInvoiceItem {
+  id: string;
+  invoice_url: string;
+  issued_at: number;
+  line_items: [
+    {
+      object: "invoice.line_item";
+      product_display_name: string;
+      product_duration: string;
+      product_identifier: string;
+      quantity: number;
+      unit_amount: {
+        currency: string;
+        gross: number;
+        proceeds: number;
+        tax: number;
+      };
+    },
+  ];
+  object: "invoice";
+  paid_at: number;
+  total_amount: {
+    currency: string;
+    gross: number;
+    proceeds: number;
+    tax: number;
+  };
+}
+
+export interface BillingDetailsResponse {
+  id: number;
+  company_id: number;
+  name: string;
+  phone: string;
+  email: string;
+  sort_code: string;
+  account_number: string;
+  bank_name: string;
 }
