@@ -48,7 +48,7 @@ function QuoteSettingsForm() {
       {
         footer_message: data.footerMsg,
         terms_and_conditions: data.terms,
-        signature: data.signatureBlob,
+        signature: data.signatureBlob ?? null,
       },
       {
         onSuccess: (response) => {

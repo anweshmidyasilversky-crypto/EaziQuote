@@ -8,8 +8,11 @@ export const quoteSettingsSchema: yup.ObjectSchema<QuoteSettings> = yup.object({
   footerMsg: yup.string().trim().required(emptyMsg("Footer Message")),
   signatureBlob: yup
     .mixed<Blob>()
-    .required(emptyMsg("Signature"))
+    .optional()
     .test((value, ctx) => {
+      if (!value) {
+        return true;
+      }
       if (!(value instanceof Blob)) {
         return ctx.createError({
           message: `Please attach file of correct format`,
