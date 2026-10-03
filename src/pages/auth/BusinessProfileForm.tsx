@@ -23,10 +23,7 @@ import {
 } from "../../components/ui/popover";
 import { BrandColorPreview } from "../../components/auth/brandColor.preview";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import {
-  updateUser,
-  updateCompany as updateCompanyRedux,
-} from "../../redux/slices/user.slice";
+import { updateUser } from "../../redux/slices/user.slice";
 import { toast } from "react-toastify";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { CustomCombobox } from "@/components/common/CustomCombobox";

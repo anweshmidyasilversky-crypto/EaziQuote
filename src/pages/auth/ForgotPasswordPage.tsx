@@ -1,5 +1,4 @@
 import { toast } from "react-toastify";
-import { showFirebaseError } from "../../lib/firebase.errors";
 import { useNavigate } from "react-router";
 import { CustomForm } from "../../components/auth/CustomForm";
 import type { CustomInputProps } from "../../components/common/CustomInput";
