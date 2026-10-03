@@ -278,3 +278,7 @@ export interface QuoteInvoiceSettingsApiPayload {
   terms_and_conditions: string;
   signature: Blob | null;
 }
+
+export interface PasswordResetLinkPayload {
+  email: string;
+}

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,42 +9,28 @@ import { type BusinessAddressPayload } from "../../types/businessAddress.payload
 import { yupResolver } from "@hookform/resolvers/yup";
 import { businessAddressSchema } from "../../validation/businessAddress.payload.schema";
 import { CustomInput } from "../../components/common/CustomInput";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppDispatch } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
 import { toast } from "react-toastify";
-import { addBusinessAddress } from "@/api/services/user.api";
 import { showErrorToast } from "@/api/axiosInstance";
 import { CustomBtn } from "@/components/common/CustomBtn";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@/hooks/useDebounce";
-import { getAddressList } from "@/api/services/address.api";
-import { CustomCombobox } from "@/components/common/CustomCombobox";
 import type { AddressDetails } from "@/types/api.responses.type";
+import useUserMutations from "@/hooks/apis/user/useUserMutations";
+import { PostCodeSelectComboBox } from "@/components/common/PostCodeSelectComboBox";
+import { useNavigate } from "react-router";
 
 export function BusinessAddressForm() {
+  const navigate = useNavigate();
   const dispath = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("M11AE");
-  const debouncedSearchTerm = useDebounce({ value: searchTerm });
-
-  const { data: addressList } = useQuery({
-    queryKey: ["address", debouncedSearchTerm],
-    queryFn: () => getAddressList(debouncedSearchTerm),
-  });
-
-  const { mutateAsync: addCompanyAddress } = useMutation({
-    mutationKey: ["companyAddress"],
-    mutationFn: (data: FormData) => addBusinessAddress(data),
-  });
+  const { comapnyAddressCreateMutation } = useUserMutations();
 
   const { control, setValue, handleSubmit, clearErrors } =
     useForm<BusinessAddressPayload>({
       defaultValues: {
-        postCode: user.company?.address?.postcode ?? " ",
-        street: user.company?.address?.address ?? " ",
-        city: user.company?.address?.city ?? "",
-        country: user.company?.address?.country ?? "",
+        postCode: " ",
+        street: " ",
+        city: "",
+        country: "",
       },
       resolver: yupResolver(businessAddressSchema),
     });
@@ -59,23 +44,21 @@ export function BusinessAddressForm() {
   };
 
   const onsubmit = async (data: BusinessAddressPayload) => {
-    toggleIsSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append("city", data.city);
-      formData.append("country", data.country);
-      formData.append("postcode", data.postCode);
-      formData.append("address", data.street);
-      const companyInfo = await addCompanyAddress(formData);
-      dispath(
-        updateUser({ is_company_address_setup: true, ...companyInfo.payload }),
-      );
-      toast.success("Successfully added business address");
-    } catch (err) {
-      showErrorToast(err);
-    } finally {
-      toggleIsSubmitting(false);
-    }
+    comapnyAddressCreateMutation.mutate(data, {
+      onSuccess: (response) => {
+        dispath(
+          updateUser({
+            is_company_address_setup: true,
+            company: response.payload,
+          }),
+        );
+        toast.success(response.message);
+        navigate("/dashboard");
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   return (
@@ -89,17 +72,7 @@ export function BusinessAddressForm() {
         </CardHeader>
 
         <CardContent className="w-full flex flex-col gap-5 justify-center">
-          <CustomCombobox
-            items={addressList?.payload ?? []}
-            getItemLabel={(addressDetail) => addressDetail?.formatted_address}
-            onValueChange={(addressDetail) => {
-              if (addressDetail) {
-                setAddress(addressDetail);
-              }
-            }}
-            inptFieldValue={searchTerm}
-            inptFieldChange={(postCode) => setSearchTerm(postCode)}
-          />
+          <PostCodeSelectComboBox addressSetter={setAddress} />
 
           <CustomInput
             control={control}
@@ -137,7 +110,7 @@ export function BusinessAddressForm() {
             buttonLabel="Continue"
             className="btn-auth"
             onClick={handleSubmit(onsubmit)}
-            isSubmitting={isSubmitting}
+            isSubmitting={comapnyAddressCreateMutation.isPending}
           />
         </CardContent>
       </Card>

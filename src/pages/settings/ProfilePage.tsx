@@ -63,6 +63,7 @@ function ProfilePage() {
     await profileSetupMutation.mutateAsync(
       {
         ...data,
+        _method: "put",
         profilePic: userImg,
       },
       {

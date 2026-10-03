@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
     login: `/auth/login`,
     logout: `/auth/logout`,
     sendVerificationEmail: `/auth/send-verification-email`,
+    forgotPassword: `/auth/forgot-password`,
     home: `/home`,
     quoteList: `/quotes`,
     presetQuotes: `/quote-templates`,

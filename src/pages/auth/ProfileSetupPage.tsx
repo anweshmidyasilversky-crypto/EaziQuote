@@ -14,15 +14,13 @@ import { toast } from "react-toastify";
 import { assets } from "../../assets/icons";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { profileSetup } from "@/api/services/user.api";
-import { useState } from "react";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { showErrorToast } from "@/api/axiosInstance";
+import useUserMutations from "@/hooks/apis/user/useUserMutations";
 
 export function ProfileSetupPage() {
   const dispath = useAppDispatch();
   const user = useAppSelector((state) => state.user);
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
   const { control, handleSubmit } = useForm<UserProfilePayload>({
     defaultValues: {
       name: user.name ?? "",
@@ -30,30 +28,25 @@ export function ProfileSetupPage() {
     },
     resolver: yupResolver(userProfileSchema),
   });
+
+  const { profileSetupMutation } = useUserMutations();
+
   const submitHandler = async (data: UserProfilePayload) => {
-    toggleIsSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append("_method", "put");
-      formData.append("name", data.name);
-      formData.append("phone", `+44${data.phoneNo}`);
-      if (data.profilePic) {
-        formData.append(
-          "avatar",
-          data.profilePic
-            ? new Blob([data.profilePic], { type: data.profilePic.type })
-            : new Blob(),
-        );
-      }
-      console.log(Object.fromEntries(formData));
-      const apiRes = await profileSetup(formData);
-      dispath(updateUser(apiRes.payload));
-      toast.success("User profile is set up");
-    } catch (err) {
-      showErrorToast(err);
-    } finally {
-      toggleIsSubmitting(false);
-    }
+    profileSetupMutation.mutate(
+      {
+        ...data,
+        _method: "put",
+      },
+      {
+        onSuccess: (response) => {
+          dispath(updateUser(response.payload));
+          toast.success(response.message);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
   return (
     <div className="auth-card-offset">
@@ -102,7 +95,7 @@ export function ProfileSetupPage() {
             <CustomBtn
               buttonLabel="Continue"
               onClick={handleSubmit(submitHandler)}
-              isSubmitting={isSubmitting}
+              isSubmitting={profileSetupMutation.isPending}
               className="w-full"
               btncls="min-h-11"
             />

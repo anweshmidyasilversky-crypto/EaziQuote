@@ -23,26 +23,26 @@ import {
 } from "../../components/ui/popover";
 import { BrandColorPreview } from "../../components/auth/brandColor.preview";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { updateUser } from "../../redux/slices/user.slice";
+import {
+  updateUser,
+  updateCompany as updateCompanyRedux,
+} from "../../redux/slices/user.slice";
 import { toast } from "react-toastify";
-import { businessProfileSetup } from "@/api/services/user.api";
-import { isAxiosError } from "axios";
 import { CustomBtn } from "@/components/common/CustomBtn";
-import { useMutation } from "@tanstack/react-query";
 import { CustomCombobox } from "@/components/common/CustomCombobox";
 import { cn } from "@/lib/utils";
+import useUserMutations from "@/hooks/apis/user/useUserMutations";
+import { showErrorToast } from "@/api/axiosInstance";
+import { useNavigate } from "react-router";
 
 export function BusinessProfileForm() {
+  const navigate = useNavigate();
   const appConfig = useAppSelector((state) => state.appConfig);
   const dispath = useAppDispatch();
   const user = useAppSelector((state) => state.user);
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
   const [tradeSearchTerm, setTradeSearchTerm] = useState("");
 
-  const { mutateAsync: createBusinessProfile } = useMutation({
-    mutationKey: ["companyProfile"],
-    mutationFn: (data: FormData) => businessProfileSetup(data),
-  });
+  const { businessProfileMutation } = useUserMutations();
 
   const {
     control,
@@ -64,39 +64,21 @@ export function BusinessProfileForm() {
   });
 
   const submitHandler = async (data: BusinessProfilePayload) => {
-    toggleIsSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append("name", data.businessName);
-      formData.append("phone", `+44${data.businessPhoneNo}`);
-      formData.append("address", "dummyAddress");
-      formData.append("vertical_market_id", data.trade);
-      if (data.vatNumber) {
-        formData.append("vat_number", data.vatNumber);
-      }
-      if (data.brandLogo) {
-        formData.append(
-          "logo",
-          new Blob([data.brandLogo], { type: data.brandLogo.type }),
+    businessProfileMutation.mutate(data, {
+      onSuccess: (response) => {
+        dispath(
+          updateUser({
+            is_company_profile_setup: true,
+            company: response.payload,
+          }),
         );
-      }
-      const businessProfile = await createBusinessProfile(formData);
-      dispath(
-        updateUser({
-          is_company_profile_setup: true,
-          ...businessProfile.payload,
-        }),
-      );
-      toast.success("Business profile complete");
-    } catch (err) {
-      if (isAxiosError(err)) {
-        toast.error(err.response?.data.message);
-      } else {
-        toast.error((err as Error).message);
-      }
-    } finally {
-      toggleIsSubmitting(false);
-    }
+        toast.success(response.message);
+        navigate(`/business-address`);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   const [chosenColor, isVatRegistered] = useWatch({
@@ -272,11 +254,9 @@ export function BusinessProfileForm() {
 
               <CustomBtn
                 className="w-full"
-                onClick={() => {
-                  handleSubmit(submitHandler)();
-                }}
+                onClick={handleSubmit(submitHandler)}
                 buttonLabel="Continue"
-                isSubmitting={isSubmitting}
+                isSubmitting={businessProfileMutation.isPending}
               />
             </div>
           </CardFooter>

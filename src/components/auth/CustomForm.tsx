@@ -16,6 +16,7 @@ export type PasswordFormProps<T extends FieldValues> = {
   defaultValues: DefaultValues<T>;
   buttonLabel?: string;
   resolver: Resolver<T, any, T>;
+  isPending?: boolean;
 };
 
 export function CustomForm<T extends FieldValues>({
@@ -26,6 +27,7 @@ export function CustomForm<T extends FieldValues>({
   defaultValues,
   resolver,
   buttonLabel = "Update Password",
+  isPending,
 }: PasswordFormProps<T>) {
   const { control, handleSubmit } = useForm<T>({ defaultValues, resolver });
   const [isSubmitting, toggleIsSubmitting] = useState(false);
@@ -69,7 +71,7 @@ export function CustomForm<T extends FieldValues>({
                   disabled={isSubmitting}
                 >
                   <span className="w-31.25 h-4.75 font-medium text-[16px] leading-4.75 text-white flex-none order-0 grow-0">
-                    {isSubmitting ? <Spinner /> : buttonLabel}
+                    {isSubmitting || isPending ? <Spinner /> : buttonLabel}
                   </span>
                 </button>
               </div>

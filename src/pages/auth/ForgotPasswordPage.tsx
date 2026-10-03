@@ -5,16 +5,23 @@ import { CustomForm } from "../../components/auth/CustomForm";
 import type { CustomInputProps } from "../../components/common/CustomInput";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { emailSchema } from "../../validation/user.signIn.payload.schema";
+import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export function ForgotPasswordPage() {
   const navigate = useNavigate();
+  const { passwordResetMutation } = useAuthMutation();
+
   const submitHandler = async (data: { email: string }) => {
-    try {
-      toast("Mailed password reset link to entered email", { type: "success" });
-      navigate("/");
-    } catch (err) {
-      showFirebaseError(err);
-    }
+    passwordResetMutation.mutate(data, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        navigate("/");
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   const fileds: Omit<CustomInputProps<{ email: string }>, "control">[] = [
@@ -34,6 +41,7 @@ export function ForgotPasswordPage() {
       submitHandler={submitHandler}
       buttonLabel="Send Now"
       resolver={yupResolver(emailSchema)}
+      isPending={passwordResetMutation.isPending}
     />
   );
 }

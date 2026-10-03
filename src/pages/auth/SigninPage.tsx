@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type UserSignInPayload } from "../../types/user.signIn.payload.type";
 import { CustomInput } from "../../components/common/CustomInput";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { userSignInSchema } from "../../validation/user.signIn.payload.schema";
 import { toast } from "react-toastify";
 import { Spinner } from "../../components/ui/spinner";
@@ -10,14 +10,13 @@ import { useNavigate } from "react-router";
 import { Card, CardContent } from "../../components/ui/card";
 import { useAppDispatch } from "../../redux/store";
 import { updateUser } from "../../redux/slices/user.slice";
-import { login } from "@/api/services/auth.api";
 import { deviceType } from "@/types/api.requests.type";
 import { setToken } from "@/redux/slices/auth.slice";
-import { isAxiosError } from "axios";
+import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export function SignInPage() {
   const rememberMe = useRef(0);
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const dispath = useAppDispatch();
   const { control, handleSubmit } = useForm<UserSignInPayload>({
@@ -28,44 +27,45 @@ export function SignInPage() {
     resolver: yupResolver(userSignInSchema),
   });
 
+  const { loginMutation } = useAuthMutation();
+
   const onsubmit = async (data: UserSignInPayload) => {
-    toggleIsSubmitting(true);
-    try {
-      const loginResponse = await login({
+    loginMutation.mutate(
+      {
         email: data.email,
         password: data.password,
         device_type: deviceType.web,
-      });
-      if (!loginResponse.payload.is_email_verified) {
-        toast.error(`Please verify your email`);
-        navigate("/email-verification", {
-          state: {
-            email: loginResponse.payload.email,
-            verificationToken: loginResponse.payload.access_token,
-          },
-        });
-      } else {
-        dispath(setToken(loginResponse.payload.access_token));
-        dispath(
-          updateUser({
-            ...loginResponse.payload,
-            is_company_address_setup: loginResponse.payload.company?.address
-              ?.postcode
-              ? true
-              : false,
-          }),
-        );
-        toast.success(`Signin success`);
-      }
-    } catch (err) {
-      if (isAxiosError(err)) {
-        toast.error(err.response?.data.message);
-      } else {
-        toast.error(`Something went wrong`);
-      }
-    } finally {
-      toggleIsSubmitting(false);
-    }
+      },
+      {
+        onSuccess: (loginResponse) => {
+          if (!loginResponse.payload.is_email_verified) {
+            toast.error(`Please verify your email`);
+            navigate("/email-verification", {
+              state: {
+                email: loginResponse.payload.email,
+                verificationToken: loginResponse.payload.access_token,
+              },
+            });
+          } else {
+            console.log(loginResponse.payload.company?.address);
+            dispath(setToken(loginResponse.payload.access_token));
+            dispath(
+              updateUser({
+                ...loginResponse.payload,
+                is_company_address_setup: loginResponse.payload.company?.address
+                  ?.postcode
+                  ? true
+                  : false,
+              }),
+            );
+            toast.success(`Signin success`);
+          }
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   return (
@@ -125,11 +125,11 @@ export function SignInPage() {
                 </a>
               </div>
               <button
-                disabled={isSubmitting}
+                disabled={loginMutation.isPending}
                 type="submit"
                 className="btn-auth"
               >
-                {isSubmitting ? <Spinner /> : "Sign in"}
+                {loginMutation.isPending ? <Spinner /> : "Sign in"}
               </button>
               <p className="flex gap-1 items-center h-4.75 font-sans font-normal text-[16px] leading-4.75 text-[#89909D] flex-none">
                 Don’t have an account?{" "}

@@ -2,17 +2,16 @@ import { useForm } from "react-hook-form";
 import { type UserSignupPayload } from "@/types/user.signup.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { UserSignupPayloadSchema } from "../../validation/user.signup.payload.schema";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { CustomInput } from "../../components/common/CustomInput";
 import { Spinner } from "../../components/ui/spinner";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
-import { signup } from "@/api/services/auth.api";
 import { deviceType } from "@/types/api.requests.type";
-import { isAxiosError } from "axios";
+import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
+import { showErrorToast } from "@/api/axiosInstance";
 
 export function SignupPage() {
-  const [isSubmitting, toggleIsSubmitting] = useState(false);
   const tcAccept = useRef(0);
   const navigate = useNavigate();
 
@@ -25,28 +24,32 @@ export function SignupPage() {
     resolver: yupResolver(UserSignupPayloadSchema),
   });
 
+  const { signupMutation } = useAuthMutation();
+
   const onsubmit = async (data: UserSignupPayload) => {
     if (!tcAccept.current) {
       toast("Please accept T&C to continue", { type: "error" });
       return;
     }
-    toggleIsSubmitting(true);
-    try {
-      await signup({
+
+    signupMutation.mutate(
+      {
         email: data.email,
         password: data.password,
         device_type: deviceType.web,
-      });
-      toast.success(`Signup success, please check mail for verification link`);
-      navigate(`/`);
-    } catch (err) {
-      if (isAxiosError(err)) {
-        toast.error(err.message);
-      }
-      toast.error(`Something went wrong`);
-    } finally {
-      toggleIsSubmitting(false);
-    }
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(
+            `${response.message}, please check mail for verification link`,
+          );
+          navigate(`/`);
+        },
+        onError: (error) => {
+          showErrorToast(error);
+        },
+      },
+    );
   };
 
   return (
@@ -109,11 +112,11 @@ export function SignupPage() {
                 </div>
               </div>
               <button
-                disabled={isSubmitting}
+                disabled={signupMutation.isPending}
                 type="submit"
                 className="btn-auth"
               >
-                {isSubmitting ? <Spinner /> : "Sign Up"}
+                {signupMutation.isPending ? <Spinner /> : "Sign Up"}
               </button>
               <p className="flex gap-1 items-center h-4.75 font-sans font-normal text-[16px] leading-4.75 text-[#89909D] flex-none">
                 Already have an account?

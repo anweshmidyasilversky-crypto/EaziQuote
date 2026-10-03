@@ -157,10 +157,14 @@ export function DashboardLayout() {
   };
 
   return (
-    <div className="w-screen h-screen flex">
-      <div className="bg-sidebar sm:w-auto md:w-63 max-w-63 h-screen border-r-sidebar-border border-r-[0.5px]">
-        <div className="flex justify-center items-center mb-10">
-          <img src={assets.sidebarLogo} className="h-6 mt-6 md:max-w-32.5" />
+    <div className="w-screen h-screen flex overflow-hidden">
+      <div className="bg-sidebar sm:w-auto md:w-63 max-w-63 h-full shrink-0 overflow-y-auto border-r-sidebar-border border-r-[0.5px]">
+        <div className="flex justify-center items-center mb-10 cursor-pointer">
+          <img
+            src={assets.sidebarLogo}
+            className="h-6 mt-6 md:max-w-32.5"
+            onClick={() => navigate("/dashboard")}
+          />
         </div>
 
         <div className="flex flex-col gap-5 p-6 pl-4.5 justify-center items-center">
@@ -180,8 +184,8 @@ export function DashboardLayout() {
         </div>
       </div>
 
-      <div className="flex flex-col w-full h-full">
-        <div className="w-full border-b-sidebar-border border-b-[0.5px] min-h-17.5 flex items-center px-6">
+      <div className="flex flex-col w-full h-full min-w-0 min-h-0">
+        <div className="w-full border-b-sidebar-border border-b-[0.5px] min-h-17.5 shrink-0 flex items-center px-6">
           {/* Header content spaced between */}
           <div className="w-full min-h-fit flex justify-between gap-2 items-center">
             {/* Subscription end detail */}
@@ -273,7 +277,7 @@ export function DashboardLayout() {
           </div>
         </div>
 
-        <div className="bg-dashboard w-full h-full overflow-y-auto">
+        <div className="bg-dashboard w-full flex-1 min-h-0 overflow-y-auto">
           <Outlet />
         </div>
       </div>

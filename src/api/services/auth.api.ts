@@ -7,6 +7,7 @@ import type {
   CreatePresetQuote,
   NotificationSettingsUpdate,
   PageFilters,
+  PasswordResetLinkPayload,
   QuoteInvoiceSettingsApiPayload,
   SignupPayload,
   UpdatePresetQuote,
@@ -29,7 +30,11 @@ import { ObjToFormData } from "@/lib/utils";
 
 export const signup = async (payload: SignupPayload) => {
   try {
-    await axiosInstance.post(API_ENDPOINTS.auth.signup, payload);
+    const res = await axiosInstance.post<ApiResponse<null>>(
+      API_ENDPOINTS.auth.signup,
+      payload,
+    );
+    return res.data;
   } catch (error) {
     throw error;
   }
@@ -39,6 +44,20 @@ export const login = async (payload: SignupPayload) => {
   try {
     const res = await axiosInstance.post<ApiResponse<User>>(
       API_ENDPOINTS.auth.login,
+      payload,
+    );
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const sendPasswordResetLink = async (
+  payload: PasswordResetLinkPayload,
+) => {
+  try {
+    const res = await axiosInstance.post<ApiResponse<null>>(
+      API_ENDPOINTS.auth.forgotPassword,
       payload,
     );
     return res.data;

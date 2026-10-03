@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from "@/constants/endPoints";
 import { axiosInstance } from "../axiosInstance";
-import type { ApiResponse, User } from "@/types/api.responses.type";
+import type { ApiResponse, Company, User } from "@/types/api.responses.type";
 
 export const profileSetup = async (payload: FormData) => {
   try {
@@ -16,7 +16,7 @@ export const profileSetup = async (payload: FormData) => {
 
 export const businessProfileSetup = async (payload: FormData) => {
   try {
-    const res = await axiosInstance.post<ApiResponse<Partial<User>>>(
+    const res = await axiosInstance.post<ApiResponse<Company>>(
       API_ENDPOINTS.users.businessProfileSetup,
       payload,
     );
@@ -28,12 +28,9 @@ export const businessProfileSetup = async (payload: FormData) => {
 
 export const addBusinessAddress = async (payload: FormData) => {
   try {
-    const res = await axiosInstance.post<ApiResponse<Partial<User>>>(
+    const res = await axiosInstance.post<ApiResponse<Company>>(
       API_ENDPOINTS.users.addBusinessAddress,
-      {
-        _method: "put",
-        ...payload,
-      },
+      payload,
     );
     return res.data;
   } catch (err) {
