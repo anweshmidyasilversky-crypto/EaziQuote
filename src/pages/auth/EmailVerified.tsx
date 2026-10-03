@@ -12,7 +12,7 @@ export function EmailVerified() {
         />
 
         <div className="success-text-group">
-          <h1 className="h-7.25 font-sans font-semibold text-[24px] leading-7.25 text-[#2D2D2D] flex-none text-center">
+          <h1 className="h-7.25 font-sans font-semibold text-[24px] leading-7.25 text-black-text flex-none text-center">
             Email Verified
           </h1>
           <p className="h-4.25 font-sans font-normal text-[14px] leading-4.25 text-[#89909D] flex-none text-center">
