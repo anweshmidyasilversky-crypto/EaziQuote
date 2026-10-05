@@ -11,15 +11,13 @@ import StripeAdvisoryDialog, {
   type StripeAdvisoryDialogProps,
 } from "./StripeAdvisoryDialog";
 import { useNavigate } from "react-router";
+import { useAppSelector } from "@/redux/store";
 
 function SettingsIndexPage() {
   const navigate = useNavigate();
   const [stripeDialogOpen, toggleStripeDialogOpen] = useState(false);
 
-  {
-    /* For dummy purpose state to toggle between connect and connected state for stripe */
-  }
-  const [isStripConnected, toggleStripConnected] = useState(false);
+  const user = useAppSelector((state) => state.user);
 
   const stripAdvisoryType =
     useRef<StripeAdvisoryDialogProps["type"]>("connect");
@@ -63,10 +61,10 @@ function SettingsIndexPage() {
       title: "Connect Stripe",
       titleDesc: "Set up Stripe to start accepting payments from your clients.",
       btnConfig: {
-        buttonLabel: isStripConnected ? "Connected" : "Connect",
-        disabled: isStripConnected,
+        buttonLabel: user.stripe_connected ? "Connected" : "Connect",
+        disabled: user.stripe_connected,
         btncls: cn(
-          isStripConnected
+          user.stripe_connected
             ? `bg-transparent-ming-green text-ming-green hover:bg-transparent-ming-green`
             : ``,
         ),
@@ -157,11 +155,11 @@ function SettingsIndexPage() {
         isOpen={stripeDialogOpen}
         toggleIsOpen={toggleStripeDialogOpen}
         type={stripAdvisoryType.current}
-        action={
-          stripAdvisoryType.current === "connect"
-            ? () => toggleStripConnected((curr) => !curr)
-            : undefined
-        }
+        action={() => {
+          if (stripAdvisoryType.current === "advisory") {
+            toggleStripeDialogOpen(false);
+          }
+        }}
       />
 
       <footer className="min-h-15 w-full bg-settings-footer flex px-5 gap-8 text-sm [&_a]:text-placeholder-text! items-center">

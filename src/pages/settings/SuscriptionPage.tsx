@@ -79,7 +79,8 @@ function SuscriptionPage() {
       enableSorting: false,
     },
     {
-      accessorKey: "total",
+      id: "amount",
+      accessorFn: (invoice) => invoice.total_amount.gross,
       header: "AMOUNT",
       enableSorting: false,
     },

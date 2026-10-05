@@ -1,4 +1,4 @@
-import { store } from "@/redux/store";
+import { persistor, store } from "@/redux/store";
 import axios, { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 
@@ -10,6 +10,8 @@ export const axiosInstance = axios.create({
   },
 });
 
+let unauthorizedRedirectInProgress = false;
+
 axiosInstance.interceptors.request.use((request) => {
   const auth = store.getState().auth;
   if (!request.headers.Authorization && auth.apiToken) {
@@ -18,10 +20,24 @@ axiosInstance.interceptors.request.use((request) => {
   return request;
 });
 
-axiosInstance.interceptors.response.use((response) => {
-  console.log(response.data);
-  return response;
-});
+axiosInstance.interceptors.response.use(
+  (response) => {
+    console.log(response.data);
+    return response;
+  },
+  async (error: unknown) => {
+    if (
+      isAxiosError(error) &&
+      error.response?.status === 401 &&
+      !unauthorizedRedirectInProgress
+    ) {
+      unauthorizedRedirectInProgress = true;
+      await persistor.purge();
+      window.location.replace("/");
+    }
+    return Promise.reject(error);
+  },
+);
 
 export const showErrorToast = (error: unknown) => {
   if (isAxiosError(error)) {

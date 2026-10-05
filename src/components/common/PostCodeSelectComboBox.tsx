@@ -13,12 +13,13 @@ export type PostCodeSelectComboBoxProps = {
 export function PostCodeSelectComboBox({
   addressSetter,
 }: PostCodeSelectComboBoxProps) {
-  const [searchTerm, setSearchTerm] = useState("M11AE");
+  const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce({ value: searchTerm });
 
   const { data: addressList, error } = useQuery({
     queryKey: ["address", debouncedSearchTerm],
     queryFn: () => getAddressList(debouncedSearchTerm),
+    enabled: debouncedSearchTerm !== "",
   });
 
   if (error) {
@@ -36,6 +37,7 @@ export function PostCodeSelectComboBox({
       }}
       inptFieldValue={searchTerm}
       inptFieldChange={(postCode) => setSearchTerm(postCode)}
+      placeholder="M11AE"
     />
   );
 }
