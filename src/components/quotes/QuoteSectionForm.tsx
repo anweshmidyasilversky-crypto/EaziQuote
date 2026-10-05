@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useForm, type DefaultValues } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/CustomInput";

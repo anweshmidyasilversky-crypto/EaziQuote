@@ -676,3 +676,10 @@ export interface BillingDetailsResponse {
   account_number: string;
   bank_name: string;
 }
+
+export interface StripeOnboard {
+  url: string;
+  object: string;
+  created: number;
+  expires_at: number;
+}

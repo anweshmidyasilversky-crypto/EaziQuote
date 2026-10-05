@@ -1,6 +1,9 @@
+import { showErrorToast } from "@/api/axiosInstance";
 import CustomDialog from "@/components/common/CustomDialog";
+import useStripeMutation from "@/hooks/apis/stripe/useStripeMutation";
 import { cn } from "@/lib/utils";
 import React from "react";
+import { useLocation } from "react-router";
 
 export type StripeAdvisoryDialogProps = {
   isOpen: boolean;
@@ -15,6 +18,22 @@ function StripeAdvisoryDialog({
   type,
   action,
 }: StripeAdvisoryDialogProps) {
+  const location = useLocation();
+
+  const { userOnboardMutation } = useStripeMutation();
+
+  const handleUserOnboard = () => {
+    userOnboardMutation.mutate(undefined, {
+      onSuccess: (response) => {
+        window.location.href = response?.payload.url ?? location.pathname;
+        toggleIsOpen(false);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
   return (
     <CustomDialog
       dialogOpen={isOpen}
@@ -30,7 +49,9 @@ function StripeAdvisoryDialog({
       contentCls={cn(`p-8! max-w-120!`)}
       footerCls={cn(`py-8! pb-4!`)}
       footerBtnCls={cn(`p-0! w-full grow`)}
-      footerBtnAction={action}
+      footerBtnAction={type === "connect" ? handleUserOnboard : action}
+      isSubmitting={userOnboardMutation.isPending}
+      closeOnSubmit={false}
     >
       <div className="flex flex-col gap-4 px-4 text-wrap [&_p]:text-placeholder-text [&_p]:text-sm">
         <p> {"Online payments are securely processed through Stripe."} </p>

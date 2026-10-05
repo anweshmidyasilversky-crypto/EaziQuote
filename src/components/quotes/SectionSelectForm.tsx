@@ -177,11 +177,24 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
       {
         onSuccess: (response) => {
           toast.success(response.message);
-          statusUpdateMutation.mutate({
-            quote_id: currQuote.id,
-            status: QuoteStatus.completed,
-          });
-          submitAction?.();
+          if (currQuote.status === QuoteStatus.draft) {
+            statusUpdateMutation.mutate(
+              {
+                quote_id: currQuote.id,
+                status: QuoteStatus.completed,
+              },
+              {
+                onError: (error) => {
+                  showErrorToast(error);
+                },
+                onSettled: () => {
+                  submitAction?.();
+                },
+              },
+            );
+          } else {
+            submitAction?.();
+          }
         },
         onError: (error) => {
           showErrorToast(error);

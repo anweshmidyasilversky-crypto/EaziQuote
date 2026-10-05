@@ -132,4 +132,7 @@ export const API_ENDPOINTS = {
     billingHistory: `/billing-history`,
     billDownload: `/bill-download`,
   },
+  strip: {
+    onboard: `/stripe/connect/onboard`,
+  },
 } as const;

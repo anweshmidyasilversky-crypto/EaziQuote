@@ -211,7 +211,8 @@ export function DashboardIndexPage() {
       onClick: () => navigate(`/invoices`),
     },
     {
-      title: "Quotes Accepted (Last 30 Days)",
+      title: "Quotes Accepted ",
+      titleExtra: "(Last 30 Days)",
       value: formatCurrency(
         homePage?.payload.recentActivities.reduce(
           (acc, activity) =>
@@ -286,14 +287,15 @@ export function DashboardIndexPage() {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="w-full grid grid-cols-[1fr_minmax(0,1fr)] gap-2">
           {/* KPI cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grow">
+          <div className="w-full grid grid-cols-2 gap-4">
             {kpiCardConfig.map((kpiConfig) => {
               return (
                 <KpiCard
                   key={kpiConfig.title}
                   title={kpiConfig.title}
+                  titleExtra={kpiConfig.titleExtra}
                   value={kpiConfig.value}
                   kpiIcon={kpiConfig.kpiIcon}
                   iconCls={kpiConfig.iconCls}
@@ -302,13 +304,15 @@ export function DashboardIndexPage() {
               );
             })}
           </div>
-          {isNotificationFetching ||
-            ((notificationList.length ?? 0) > 0 && (
+
+          <div className="max-h-80!">
+            {(isNotificationFetching || notificationList.length > 0) && (
               <NotificationCard
-                notifications={notificationList.slice(0, 5) ?? []}
+                notifications={notificationList.slice(0, 5)}
                 isFetching={isNotificationFetching}
               />
-            ))}
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col py-4.5 gap-4.5 bg-table dashboard-card-theme rounded-[10px]">
