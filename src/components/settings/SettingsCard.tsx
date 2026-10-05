@@ -70,10 +70,12 @@ function SettingsCard({
                   </button>
                 )}
               </div>
-              <span className="text-sm text-placeholder-text">
-                {" "}
-                {titleDesc}{" "}
-              </span>
+              {titleDesc && (
+                <span className="text-sm text-placeholder-text">
+                  {" "}
+                  {titleDesc}{" "}
+                </span>
+              )}
             </div>
 
             {/* right btn */}

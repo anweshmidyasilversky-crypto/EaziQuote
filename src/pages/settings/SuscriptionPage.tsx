@@ -205,8 +205,7 @@ function SuscriptionPage() {
       },
       info: (
         <div className="flex flex-col gap-2 text-sm text-placeholder-text">
-          <span> {"£49/month"} </span>
-          <span> {`Subscription ends on November 20, 2025`} </span>
+          <span> {user.subscription_amount} </span>
         </div>
       ),
     } as SettingsCardProps);

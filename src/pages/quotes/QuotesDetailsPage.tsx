@@ -7,10 +7,7 @@ import {
 } from "../../lib/utils";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { useNavigate, useParams } from "react-router";
-import {
-  CustomBtn,
-  type CustomBtnProps,
-} from "../../components/common/CustomBtn";
+import { type CustomBtnProps } from "../../components/common/CustomBtn";
 import { assets } from "../../assets/icons";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import {
@@ -87,6 +84,7 @@ export function QuotesDetailsPage() {
       onSuccess: (response) => {
         toast.success(response.message);
         toggleShareBoxOpen(false);
+        refetch();
       },
       onError: (error) => {
         showErrorToast(error);
@@ -419,7 +417,7 @@ export function QuotesDetailsPage() {
                           </span>
                         </div>
                         <div className="flex flex-col justify-between items-center">
-                          <span className="font-medium text-base">
+                          <span className="font-medium text-base self-start">
                             {" "}
                             {quote?.client?.name ?? "Unknown Client"}{" "}
                           </span>

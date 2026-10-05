@@ -20,8 +20,13 @@ import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { cn } from "@/lib/utils";
 import { CustomInput } from "../common/CustomInput";
+import { CircleArrowOutUpLeft } from "lucide-react";
+import { CustomBtn } from "../common/CustomBtn";
+import DeleteDialog from "../common/DeleteDialog";
 export function DashboardLayout() {
   const { logoutMutation, userDeleteMutation } = useAuthMutation();
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const dispatch = useAppDispatch();
   const [activeBtn, toggleActiveBtn] = useState<string>("dashboard");
   const [ticketCreateDialogOpen, setTicketCreateDialogOpen] = useState(false);
@@ -246,7 +251,7 @@ export function DashboardLayout() {
                   <div className="flex flex-col gap-1">
                     <span
                       className="py-2 px-4 flex gap-2 items-center"
-                      onClick={handleUserDelete}
+                      onClick={() => setDeleteModalOpen(true)}
                     >
                       {userDeleteMutation.isPending ? (
                         <Spinner className="text-brand-dark" />
@@ -258,7 +263,7 @@ export function DashboardLayout() {
 
                     <span
                       className="py-2 px-4 flex gap-2 items-center"
-                      onClick={handleLogout}
+                      onClick={() => setLogoutModalOpen(true)}
                     >
                       {logoutMutation.isPending ? (
                         <Spinner className="text-brand-dark" />
@@ -286,19 +291,19 @@ export function DashboardLayout() {
         dialogOpen={ticketCreateDialogOpen}
         toggleDialogOpen={setTicketCreateDialogOpen}
         header="Support"
-        xIconAction={() => {
-          reset();
-          setTicketCreateDialogOpen(false);
-          setTicketAreaSearchTerm("");
-        }}
         withFooter={true}
         showFooterSeparator={false}
         footerBtnLabel="Submit"
         footerBtnAction={handleSubmit(handleTicketCreation)}
         closeOnSubmit={false}
         isSubmitting={ticketCreateMutation.isPending}
+        closeAction={() => {
+          reset();
+          setTicketCreateDialogOpen(false);
+          setTicketAreaSearchTerm("");
+        }}
       >
-        <div className="flex flex-col gap-6 px-5 py-6">
+        <div className="min-w-125 flex flex-col gap-6 px-5 py-6">
           <div className="input-non-oriented flex-col gap-2">
             <label className="input-label"> {"Area"} </label>
             <CustomCombobox
@@ -351,6 +356,50 @@ export function DashboardLayout() {
           />
         </div>
       </CustomDialog>
+
+      {/* Logout modal */}
+      <CustomDialog
+        dialogOpen={logoutModalOpen}
+        toggleDialogOpen={setLogoutModalOpen}
+        isSubmitting={logoutMutation.isPending}
+        withHeader={false}
+      >
+        <div className="min-w-fit md:min-w-125 flex flex-col gap-8 items-center justify-center py-5">
+          <CircleArrowOutUpLeft className="text-brand-dark w-12 h-12 -rotate-45" />
+
+          <div className="flex flex-col gap-2 items-center justify-center">
+            <h1 className="text-black text-2xl"> {"Logout"} </h1>
+            <span className="text-placeholder-text text-sm">
+              {" "}
+              {"Are you sure you want to logout?"}{" "}
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            <CustomBtn
+              buttonLabel="Close"
+              onClick={() => setLogoutModalOpen(false)}
+              className="bg-slate-100 hover:bg-slate-300 text-black-text"
+            />
+
+            <CustomBtn
+              buttonLabel="Logout"
+              onClick={handleLogout}
+              isSubmitting={logoutMutation.isPending}
+            />
+          </div>
+        </div>
+      </CustomDialog>
+
+      {/* Delete Modal */}
+      <DeleteDialog
+        isOpen={deleteModalOpen}
+        toggleOpen={setDeleteModalOpen}
+        deleteAction={handleUserDelete}
+        isPending={userDeleteMutation.isPending}
+        dialogHeader="Delete Account"
+        dialogDescription="Are you sure you want to delete your account?"
+      />
     </div>
   );
 }

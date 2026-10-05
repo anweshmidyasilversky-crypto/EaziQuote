@@ -125,6 +125,9 @@ import logoutIconBlack from "./icons/logoutIconBlack.png";
 import binIconBlack from "./icons/binIconBlack.png";
 
 import userIconSvg from "./icons/userIcon.svg";
+
+import polygonGradient from "./icons/polygonGradient.svg";
+import subsCriptionWhiteIcon from "./icons/subscriptionIconWhite.svg";
 export const assets = {
   loginHeader,
   logo,
@@ -250,4 +253,6 @@ export const assets = {
   binIconBlack,
 
   userIconSvg,
+  polygonGradient,
+  subsCriptionWhiteIcon,
 };

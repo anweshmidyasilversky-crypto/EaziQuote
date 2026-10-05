@@ -21,6 +21,8 @@ export type CustomDialogProps = {
   footerCls?: string;
   footerBtnCls?: string;
   isSubmitting?: boolean;
+  closeAction?: () => void;
+  withHeader?: boolean;
 };
 
 function CustomDialog({
@@ -41,28 +43,39 @@ function CustomDialog({
   footerCls,
   footerBtnCls,
   isSubmitting,
+  closeAction,
+  withHeader = true,
 }: CustomDialogProps) {
   return (
-    <Dialog open={dialogOpen} onOpenChange={toggleDialogOpen}>
+    <Dialog
+      open={dialogOpen}
+      onOpenChange={(state) => {
+        closeAction?.();
+        toggleDialogOpen(state);
+      }}
+    >
       <DialogTrigger />
       <DialogContent
         className={`dashboard-card-theme bg-white w-fit! max-w-screen! ring-0 p-0 gap-0 ${contentCls}`}
         showCloseButton={false}
       >
-        <div
-          className={`bg-custom-dialog-primary w-full min-h-15 flex justify-between items-center border-b-2 border-b-client-detail-secondary rounded-t-[7px] p-5 ${headerCls}`}
-        >
-          <span className="font-medium text-base"> {header} </span>
-          {withXIcon && (
-            <XIcon
-              className={`text-muted hover:text-black-text`}
-              onClick={() => {
-                xIconAction?.();
-                toggleDialogOpen(false);
-              }}
-            />
-          )}
-        </div>
+        {withHeader && (
+          <div
+            className={`bg-custom-dialog-primary w-full min-h-15 flex justify-between items-center border-b-2 border-b-client-detail-secondary rounded-t-[7px] p-5 ${headerCls}`}
+          >
+            <span className="font-medium text-base"> {header} </span>
+            {withXIcon && (
+              <XIcon
+                className={`text-muted hover:text-black-text`}
+                onClick={() => {
+                  closeAction?.();
+                  xIconAction?.();
+                  toggleDialogOpen(false);
+                }}
+              />
+            )}
+          </div>
+        )}
 
         {children}
 

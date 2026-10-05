@@ -8,7 +8,12 @@ import BillingPreferenceForm from "@/components/settings/BillingPreferenceForm";
 import QuoteSettingsForm from "@/components/settings/QuoteSettingsForm";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/redux/store";
+import {
+  SettingsPaymentPageReason,
+  type SettingsLocationProps,
+} from "@/types/common.types";
 import { useState } from "react";
+import { useLocation } from "react-router";
 
 enum toggle {
   payInfo = "Payment Info",
@@ -18,11 +23,17 @@ enum toggle {
 
 function PaymentAndInvoicePage() {
   const user = useAppSelector((state) => state.user);
+  const location = useLocation();
+  const { reason } = (location.state ?? {}) as SettingsLocationProps;
   const { billing_details } = user.company;
   const { billing_preferences, vat_settings } = useAppSelector(
     (state) => state.appConfig,
   );
-  const [activeToggle, toggleActive] = useState<string>(toggle.payInfo);
+  const [activeToggle, toggleActive] = useState<string>(
+    reason === SettingsPaymentPageReason.addSignature
+      ? toggle.quoteSetting
+      : toggle.payInfo,
+  );
   const toggleConfig: CustomToggleGroupProps["toggleConfig"] = [
     {
       btnId: toggle.payInfo,
@@ -82,7 +93,13 @@ function PaymentAndInvoicePage() {
           />
         )}
 
-        {activeToggle === toggle.quoteSetting && <QuoteSettingsForm />}
+        {activeToggle === toggle.quoteSetting && (
+          <QuoteSettingsForm
+            signatureModalOpenDefault={
+              reason === SettingsPaymentPageReason.addSignature ? true : false
+            }
+          />
+        )}
       </div>
     </>
   );

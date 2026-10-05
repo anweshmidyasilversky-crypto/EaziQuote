@@ -23,7 +23,7 @@ import {
 } from "@/types/api.responses.type";
 import type { ClientCreationPayload } from "@/types/clientCreation.payload.type";
 import { toast } from "react-toastify";
-import { useAppDispatch } from "@/redux/store";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { updateConfig } from "@/redux/slices/settings.slice";
 import useAppConfig from "@/hooks/apis/appConfig/useAppConfig";
 import useNotifications from "@/hooks/apis/notifications/useNotifications";
@@ -33,12 +33,21 @@ import useClientMutations from "@/hooks/apis/clients/useClientMutations";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
+import WarningDialog from "@/components/common/WarningDialog";
+import {
+  SettingsPaymentPageReason,
+  type SettingsLocationProps,
+} from "@/types/common.types";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.user);
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
   const [deleteModalOpen, toggleDeleteModal] = useState(false);
+  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
+  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
+  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
   const targetActivityType = useRef<ActivityType>(ActivityType.QUOTE);
   const targetId = useRef<number | undefined>(undefined);
 
@@ -247,6 +256,22 @@ export function DashboardIndexPage() {
     );
   };
 
+  const canUsercreateRecord = () => {
+    if (!user.hasBankAccountDetailAdded) {
+      setAddBankDetailsDialog(true);
+      return false;
+    }
+    if (!user.hasSignatureAdded) {
+      setAddSignatureWarningOpen(true);
+      return false;
+    }
+    if (!(user.is_trial_period || user.is_subscription_active)) {
+      setSubsEndWarningOpen(true);
+      return false;
+    }
+    return true;
+  };
+
   return (
     <div className="h-full w-full">
       {/* Main container */}
@@ -270,13 +295,21 @@ export function DashboardIndexPage() {
             <CustomBtn
               buttonLabel="New Quote"
               leftIcon={assets.plusIcon}
-              onClick={() => navigate(`/quotes/manage-quotes/`)}
+              onClick={() => {
+                if (canUsercreateRecord()) {
+                  navigate(`/quotes/manage-quotes/`);
+                }
+              }}
             />
 
             <CustomBtn
               buttonLabel="New Invoice"
               leftIcon={assets.plusIcon}
-              onClick={() => navigate(`/invoices/manage-invoice`)}
+              onClick={() => {
+                if (canUsercreateRecord()) {
+                  navigate(`/invoices/manage-invoice`);
+                }
+              }}
             />
 
             <CustomBtn
@@ -287,7 +320,9 @@ export function DashboardIndexPage() {
           </div>
         </div>
 
-        <div className="w-full grid grid-cols-[1fr_minmax(0,1fr)] gap-2">
+        <div
+          className={`w-full grid ${notificationList.length <= 0 && !isNotificationFetching ? `grid-cols-1` : `grid-cols-2`} gap-2`}
+        >
           {/* KPI cards */}
           <div className="w-full grid grid-cols-2 gap-4">
             {kpiCardConfig.map((kpiConfig) => {
@@ -305,14 +340,12 @@ export function DashboardIndexPage() {
             })}
           </div>
 
-          <div className="max-h-80!">
-            {(isNotificationFetching || notificationList.length > 0) && (
-              <NotificationCard
-                notifications={notificationList.slice(0, 5)}
-                isFetching={isNotificationFetching}
-              />
-            )}
-          </div>
+          {(isNotificationFetching || notificationList.length > 0) && (
+            <NotificationCard
+              notifications={notificationList.slice(0, 5)}
+              isFetching={isNotificationFetching}
+            />
+          )}
         </div>
 
         <div className="flex flex-col py-4.5 gap-4.5 bg-table dashboard-card-theme rounded-[10px]">
@@ -342,6 +375,51 @@ export function DashboardIndexPage() {
         deleteAction={handleActivityDelete}
         isPending={
           quoteDeleteMutation.isPending || invoiceDeleteMutation.isPending
+        }
+      />
+
+      <WarningDialog
+        open={addBankDetailsDialog}
+        toggleOpen={setAddBankDetailsDialog}
+        warningHeader="Complete Your Setup"
+        warningContent="Add your bank details and signature to ensure your quotes look professional and include payment information."
+        acceptBtnLabel="Complete Setup"
+        acceptAction={() => navigate(`/settings/payments-and-invoicing`)}
+        withCancelBtn={false}
+      />
+
+      <WarningDialog
+        open={addSignatureWarningOpen}
+        toggleOpen={setAddSignatureWarningOpen}
+        warningHeader="Add Your Signature"
+        warningContent="Adding a signature helps build trust and makes your quote feel complete and professional."
+        withCancelBtn={false}
+        acceptBtnLabel="Add Signature"
+        acceptAction={() =>
+          navigate(`/settings/payments-and-invoicing`, {
+            state: {
+              reason: SettingsPaymentPageReason.addSignature,
+            } as SettingsLocationProps,
+          })
+        }
+      />
+
+      <WarningDialog
+        open={subsEndWarningOpen}
+        toggleOpen={setSubsEndWarningOpen}
+        warningHeader="Subscription Required"
+        warningContent="To continue using EaziQuote, please activate or renew your subscription."
+        acceptBtnLabel="Activate Subscription"
+        acceptAction={() => navigate(`/subscribe-plan`)}
+        withCancelBtn={false}
+        warningImgElement={
+          <div className="relative flex items-center justify-center">
+            <img src={assets.polygonGradient} className="h-20 aspect-auto" />
+            <img
+              src={assets.subsCriptionWhiteIcon}
+              className="h-7.5 aspect-auto z-10 absolute"
+            />
+          </div>
         }
       />
     </div>

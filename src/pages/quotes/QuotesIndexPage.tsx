@@ -38,7 +38,7 @@ import type {
 import type { PageFilters } from "@/types/api.requests.type";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
 import usePresetQuotesList from "@/hooks/apis/quotes/usePresetQuotesList";
-import { useAppDispatch } from "@/redux/store";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { removeQuote as removeQuoteRedux } from "@/redux/slices/quotes.slice";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
@@ -46,9 +46,15 @@ import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
 import ReadMoreContentBox from "@/components/common/ReadMoreContentBox";
 import type { CreateQuotePageLocationProps } from "./CreateQuotePage";
+import WarningDialog from "@/components/common/WarningDialog";
+import {
+  SettingsPaymentPageReason,
+  type SettingsLocationProps,
+} from "@/types/common.types";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
+  const user = useAppSelector((state) => state.user);
   const [filerOpen, toggleFilterOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: undefined,
@@ -60,6 +66,9 @@ export function QuotesIndexPage() {
   const pageFilters = useRef<PageFilters>({});
   const dispatch = useAppDispatch();
   const [deleteModalOpen, toggleDeleteModal] = useState(false);
+  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
+  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
+  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
   const targetQuoteId = useRef<number | undefined>(undefined);
 
   const {
@@ -239,7 +248,7 @@ export function QuotesIndexPage() {
         const desc = info.getValue<string>();
         return (
           <ReadMoreContentBox lines={4} contentBoxCls="bg-transparent!">
-            <p className="text-wrap">{desc}</p>
+            <span className="text-wrap">{desc}</span>
           </ReadMoreContentBox>
         );
       },
@@ -264,7 +273,21 @@ export function QuotesIndexPage() {
     {
       leftIcon: assets.plusIcon,
       buttonLabel: "New Quote",
-      onClick: () => toggleQuoteDialogOpen((curr) => !curr),
+      onClick: () => {
+        if (!user.hasBankAccountDetailAdded) {
+          setAddBankDetailsDialog(true);
+          return;
+        }
+        if (!user.hasSignatureAdded) {
+          setAddSignatureWarningOpen(true);
+          return;
+        }
+        if (!(user.is_trial_period || user.is_subscription_active)) {
+          setSubsEndWarningOpen(true);
+          return;
+        }
+        toggleQuoteDialogOpen((curr) => !curr);
+      },
     },
   ];
 
@@ -424,6 +447,11 @@ export function QuotesIndexPage() {
         footerBtnAction={() => {
           handlePresetQuoteSelect();
         }}
+        closeAction={() => {
+          if (selectedPreset) {
+            setSelectedPreset(undefined);
+          }
+        }}
       >
         <div className="lg:min-w-250 flex flex-col gap-4.5 mt-6 max-h-120 overflow-y-auto">
           <div className="px-5">
@@ -450,6 +478,51 @@ export function QuotesIndexPage() {
         toggleOpen={toggleDeleteModal}
         deleteAction={handleQuoteDelete}
         isPending={quoteDeleteMutation.isPending}
+      />
+
+      <WarningDialog
+        open={addBankDetailsDialog}
+        toggleOpen={setAddBankDetailsDialog}
+        warningHeader="Complete Your Setup"
+        warningContent="Add your bank details and signature to ensure your quotes look professional and include payment information."
+        acceptBtnLabel="Complete Setup"
+        acceptAction={() => navigate(`/settings/payments-and-invoicing`)}
+        withCancelBtn={false}
+      />
+
+      <WarningDialog
+        open={addSignatureWarningOpen}
+        toggleOpen={setAddSignatureWarningOpen}
+        warningHeader="Add Your Signature"
+        warningContent="Adding a signature helps build trust and makes your quote feel complete and professional."
+        withCancelBtn={false}
+        acceptBtnLabel="Add Signature"
+        acceptAction={() =>
+          navigate(`/settings/payments-and-invoicing`, {
+            state: {
+              reason: SettingsPaymentPageReason.addSignature,
+            } as SettingsLocationProps,
+          })
+        }
+      />
+
+      <WarningDialog
+        open={subsEndWarningOpen}
+        toggleOpen={setSubsEndWarningOpen}
+        warningHeader="Subscription Required"
+        warningContent="To continue using EaziQuote, please activate or renew your subscription."
+        acceptBtnLabel="Activate Subscription"
+        acceptAction={() => navigate(`/subscribe-plan`)}
+        withCancelBtn={false}
+        warningImgElement={
+          <div className="relative flex items-center justify-center">
+            <img src={assets.polygonGradient} className="h-20 aspect-auto" />
+            <img
+              src={assets.subsCriptionWhiteIcon}
+              className="h-7.5 aspect-auto z-10 absolute"
+            />
+          </div>
+        }
       />
     </React.Fragment>
   );

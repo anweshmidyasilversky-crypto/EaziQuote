@@ -66,11 +66,18 @@ import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import type { CreateQuotePageLocationProps } from "../quotes/CreateQuotePage";
 import type { PaymentCreatePageLocationProps } from "../payments/PaymentCreatePage";
+import WarningDialog from "@/components/common/WarningDialog";
+import {
+  SettingsPaymentPageReason,
+  type SettingsLocationProps,
+} from "@/types/common.types";
+import { useAppSelector } from "@/redux/store";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
   const param = useParams<{ id: string }>();
 
+  const user = useAppSelector((state) => state.user);
   const [currTable, toggleCurrTable] = useState<string>("activity");
   const [searchTearm, setSearchTerm] = useState<string>("");
   const debouncedVal = useDebounce({ value: searchTearm, delay: 500 });
@@ -87,6 +94,10 @@ export function ClientDetailsPage() {
 
   const [filters, setFilters] = useState<string[]>([]);
   const activityTableFilters = useRef<ColumnFiltersState>([]);
+
+  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
+  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
+  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
 
   const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
   const targetPaymentId = useRef<number | undefined>(undefined);
@@ -571,6 +582,20 @@ export function ClientDetailsPage() {
                 }
                 onClick={() => {
                   if (isActivityTable) {
+                    if (!user.hasBankAccountDetailAdded) {
+                      setAddBankDetailsDialog(true);
+                      return;
+                    }
+                    if (!user.hasSignatureAdded) {
+                      setAddSignatureWarningOpen(true);
+                      return;
+                    }
+                    if (
+                      !(user.is_trial_period || user.is_subscription_active)
+                    ) {
+                      setSubsEndWarningOpen(true);
+                      return;
+                    }
                     navigate(`/quotes/manage-quotes/`, {
                       state: {
                         defaultClient: client,
@@ -722,6 +747,51 @@ export function ClientDetailsPage() {
         deleteAction={handleActivityDelete}
         isPending={
           quoteDeleteMutation.isPending || invoiceDeleteMutation.isPending
+        }
+      />
+
+      <WarningDialog
+        open={addBankDetailsDialog}
+        toggleOpen={setAddBankDetailsDialog}
+        warningHeader="Complete Your Setup"
+        warningContent="Add your bank details and signature to ensure your quotes look professional and include payment information."
+        acceptBtnLabel="Complete Setup"
+        acceptAction={() => navigate(`/settings/payments-and-invoicing`)}
+        withCancelBtn={false}
+      />
+
+      <WarningDialog
+        open={addSignatureWarningOpen}
+        toggleOpen={setAddSignatureWarningOpen}
+        warningHeader="Add Your Signature"
+        warningContent="Adding a signature helps build trust and makes your quote feel complete and professional."
+        withCancelBtn={false}
+        acceptBtnLabel="Add Signature"
+        acceptAction={() =>
+          navigate(`/settings/payments-and-invoicing`, {
+            state: {
+              reason: SettingsPaymentPageReason.addSignature,
+            } as SettingsLocationProps,
+          })
+        }
+      />
+
+      <WarningDialog
+        open={subsEndWarningOpen}
+        toggleOpen={setSubsEndWarningOpen}
+        warningHeader="Subscription Required"
+        warningContent="To continue using EaziQuote, please activate or renew your subscription."
+        acceptBtnLabel="Activate Subscription"
+        acceptAction={() => navigate(`/subscribe-plan`)}
+        withCancelBtn={false}
+        warningImgElement={
+          <div className="relative flex items-center justify-center">
+            <img src={assets.polygonGradient} className="h-20 aspect-auto" />
+            <img
+              src={assets.subsCriptionWhiteIcon}
+              className="h-7.5 aspect-auto z-10 absolute"
+            />
+          </div>
         }
       />
     </div>

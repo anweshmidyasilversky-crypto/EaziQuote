@@ -16,6 +16,8 @@ export type WarningDialogProps = {
   acceptAction?: () => void;
   xIconAction?: () => void;
   isAccepting?: boolean;
+  withCancelBtn?: boolean;
+  warningImgElement?: React.ReactNode;
 };
 
 function WarningDialog({
@@ -29,6 +31,8 @@ function WarningDialog({
   acceptAction,
   xIconAction,
   isAccepting,
+  withCancelBtn = true,
+  warningImgElement,
 }: WarningDialogProps) {
   return (
     <Dialog open={open} onOpenChange={toggleOpen}>
@@ -47,7 +51,11 @@ function WarningDialog({
           />
         </div>
         <div className="flex flex-col gap-8 items-center justify-center">
-          <img src={assets.warningIconBlue} className="w-20 aspect-auto" />
+          {warningImgElement ? (
+            warningImgElement
+          ) : (
+            <img src={assets.warningIconBlue} className="w-20 aspect-auto" />
+          )}
           <div className="flex flex-col items-center justify-center gap-2">
             <h2 className="font-semibold text-2xl"> {warningHeader} </h2>
             <p className="text-wrap wrap-break-word text-sm text-center">
@@ -62,13 +70,15 @@ function WarningDialog({
               onClick={() => acceptAction?.()}
               isSubmitting={isAccepting}
             />
-            <CustomBtn
-              buttonLabel={cancelBtnLabel ?? `Cancel`}
-              btncls={cn(
-                `bg-warning-dialog-cencel-bg text-warning-dialog-cancel-text hover:bg-warning-dialog-cencel-bg`,
-              )}
-              onClick={() => toggleOpen(false)}
-            />
+            {withCancelBtn && (
+              <CustomBtn
+                buttonLabel={cancelBtnLabel ?? `Cancel`}
+                btncls={cn(
+                  `bg-warning-dialog-cencel-bg text-warning-dialog-cancel-text hover:bg-warning-dialog-cencel-bg`,
+                )}
+                onClick={() => toggleOpen(false)}
+              />
+            )}
           </div>
         </div>
       </DialogContent>

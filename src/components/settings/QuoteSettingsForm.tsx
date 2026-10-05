@@ -14,10 +14,18 @@ import { updateConfig } from "@/redux/slices/settings.slice";
 import { showErrorToast } from "@/api/axiosInstance";
 import { updateUser } from "@/redux/slices/user.slice";
 
-function QuoteSettingsForm() {
+export type QuoteSettingsFormProps = {
+  signatureModalOpenDefault?: boolean;
+};
+
+function QuoteSettingsForm({
+  signatureModalOpenDefault,
+}: QuoteSettingsFormProps) {
   const { quote_invoice_settings } = useAppSelector((state) => state.appConfig);
   const dispatch = useAppDispatch();
-  const [signatureModalOpen, toggleSignatureModalOpen] = useState(false);
+  const [signatureModalOpen, toggleSignatureModalOpen] = useState(
+    signatureModalOpenDefault ?? false,
+  );
   const {
     control,
     setValue,
@@ -109,7 +117,7 @@ function QuoteSettingsForm() {
                   src={
                     signatureBlob
                       ? URL.createObjectURL(signatureBlob)
-                      : (quote_invoice_settings.signature ?? "")
+                      : (quote_invoice_settings.signature ?? undefined)
                   }
                   className="min-h-11 aspect-auto"
                 />

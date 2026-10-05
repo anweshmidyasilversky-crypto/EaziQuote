@@ -106,8 +106,26 @@ export function SignupPage() {
                     className="h-5 w-5"
                     onClick={() => (tcAccept.current ^= 1)}
                   />
-                  <label htmlFor="tNc" className="text-xs md:text-[16px]">
-                    I agree to the Terms & Conditions and Privacy Policy
+                  <label
+                    htmlFor="tNc"
+                    className="text-xs md:text-[16px] [&_a]:font-semibold [&_a]:hover:underline"
+                  >
+                    I agree to the{" "}
+                    <a
+                      href="https://eaziquote.com/legal/terms-of-service"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Terms & Conditions
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="https://eaziquote.com/legal/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Privacy Policy
+                    </a>
                   </label>
                 </div>
               </div>

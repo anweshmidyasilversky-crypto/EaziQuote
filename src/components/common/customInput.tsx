@@ -221,7 +221,9 @@ export function CustomInput<T extends FieldValues>({
                   <textarea
                     value={fieldValue}
                     onChange={onChange}
-                    className={`input-field min-h-20.25 md:min-w-105 overflow-y-auto ${className} ${error ? `input-error` : ``}`}
+                    rows={5}
+                    style={{ resize: "vertical", overflowY: "auto" }}
+                    className={`min-h-32 w-full rounded-[7px] border border-input-field-border bg-white p-3 transition-all duration-200 ${className} ${error ? `input-error` : `focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100`}`}
                     placeholder={placeholder}
                   />
                 )}

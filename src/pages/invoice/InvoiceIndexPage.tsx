@@ -24,11 +24,17 @@ import {
 } from "@/components/common/RenderMultiSelectCheckbox";
 import SearchInputGruop from "@/components/common/SearchInputGruop";
 import StatusBadge from "@/components/common/StatusBadge";
+import WarningDialog from "@/components/common/WarningDialog";
 import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import { dateToDdMonYyyy, formatCurrency } from "@/lib/utils";
+import { useAppSelector } from "@/redux/store";
 import { type PageFilters } from "@/types/api.requests.type";
 import { InvoiceStatus, type Invoice } from "@/types/api.responses.type";
+import {
+  SettingsPaymentPageReason,
+  type SettingsLocationProps,
+} from "@/types/common.types";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -36,6 +42,7 @@ import { toast } from "react-toastify";
 
 function InvoiceIndexPage() {
   const navigate = useNavigate();
+  const user = useAppSelector((state) => state.user);
   const [filterSheetOpen, toggleFilterSheetOpen] = useState(false);
   const [filters, selectFilters] = useState<string[]>([]);
   const selectedFilters = useRef<PageFilters | undefined>(undefined);
@@ -44,6 +51,9 @@ function InvoiceIndexPage() {
     endDate: undefined,
   });
   const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
+  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
+  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
+  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
   const {
     invoiceList,
     InvoiceSummary,
@@ -62,7 +72,21 @@ function InvoiceIndexPage() {
     {
       buttonLabel: "Invoice",
       leftIcon: assets.plusIcon,
-      onClick: () => navigate(`/invoices/manage-invoice`),
+      onClick: () => {
+        if (!user.hasBankAccountDetailAdded) {
+          setAddBankDetailsDialog(true);
+          return;
+        }
+        if (!user.hasSignatureAdded) {
+          setAddSignatureWarningOpen(true);
+          return;
+        }
+        if (!(user.is_trial_period || user.is_subscription_active)) {
+          setSubsEndWarningOpen(true);
+          return;
+        }
+        navigate(`/invoices/manage-invoice`);
+      },
     },
   ];
 
@@ -282,6 +306,51 @@ function InvoiceIndexPage() {
           isPending={invoiceDeleteMutation.isPending}
         />
       </>
+
+      <WarningDialog
+        open={addBankDetailsDialog}
+        toggleOpen={setAddBankDetailsDialog}
+        warningHeader="Complete Your Setup"
+        warningContent="Add your bank details and signature to ensure your quotes look professional and include payment information."
+        acceptBtnLabel="Complete Setup"
+        acceptAction={() => navigate(`/settings/payments-and-invoicing`)}
+        withCancelBtn={false}
+      />
+
+      <WarningDialog
+        open={addSignatureWarningOpen}
+        toggleOpen={setAddSignatureWarningOpen}
+        warningHeader="Add Your Signature"
+        warningContent="Adding a signature helps build trust and makes your quote feel complete and professional."
+        withCancelBtn={false}
+        acceptBtnLabel="Add Signature"
+        acceptAction={() =>
+          navigate(`/settings/payments-and-invoicing`, {
+            state: {
+              reason: SettingsPaymentPageReason.addSignature,
+            } as SettingsLocationProps,
+          })
+        }
+      />
+
+      <WarningDialog
+        open={subsEndWarningOpen}
+        toggleOpen={setSubsEndWarningOpen}
+        warningHeader="Subscription Required"
+        warningContent="To continue using EaziQuote, please activate or renew your subscription."
+        acceptBtnLabel="Activate Subscription"
+        acceptAction={() => navigate(`/subscribe-plan`)}
+        withCancelBtn={false}
+        warningImgElement={
+          <div className="relative flex items-center justify-center">
+            <img src={assets.polygonGradient} className="h-20 aspect-auto" />
+            <img
+              src={assets.subsCriptionWhiteIcon}
+              className="h-7.5 aspect-auto z-10 absolute"
+            />
+          </div>
+        }
+      />
     </div>
   );
 }

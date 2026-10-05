@@ -16,7 +16,7 @@ export function NotificationCard({
 }: NotificationCardProps) {
   const navigate = useNavigate();
   return (
-    <div className="lg:min-w-100 w-full h-full max-h-70 min-h-0 flex flex-col items-center rounded-[10px] py-4.5 dashboard-card-theme gap-4.5 overflow-hidden">
+    <div className="min-w-0! w-full h-full max-h-70 min-h-0 flex flex-col items-center rounded-[10px] py-4.5 dashboard-card-theme gap-4.5 overflow-hidden">
       {/* header */}
       <div className="w-full flex justify-between px-5 items-center shrink-0">
         <span className="min-h-4.75 font-medium text-[16px]">

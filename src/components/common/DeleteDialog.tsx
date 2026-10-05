@@ -9,6 +9,8 @@ export type DeleteDialogProps = {
   toggleOpen: React.Dispatch<React.SetStateAction<boolean>>;
   deleteAction?: () => void | Promise<void>;
   isPending?: boolean;
+  dialogHeader?: string;
+  dialogDescription?: string;
 };
 
 function DeleteDialog({
@@ -16,6 +18,8 @@ function DeleteDialog({
   toggleOpen,
   deleteAction,
   isPending = false,
+  dialogHeader,
+  dialogDescription,
 }: DeleteDialogProps) {
   const [isDeleting, toggleIsDeleting] = useState(false);
   const handleDelete = async () => {
@@ -42,10 +46,14 @@ function DeleteDialog({
         <Trash2Icon className="text-danger w-12 h-12" />
 
         <div className="flex flex-col gap-2 items-center">
-          <h4 className="font-semibold text-xl"> {"Are you sure ?"} </h4>
+          <h4 className="font-semibold text-xl">
+            {" "}
+            {dialogHeader ?? "Are you sure ?"}{" "}
+          </h4>
           <span className="text-base">
             {" "}
-            {"Are you sure you want to remove this record?"}{" "}
+            {dialogDescription ??
+              "Are you sure you want to remove this record?"}{" "}
           </span>
         </div>
 
