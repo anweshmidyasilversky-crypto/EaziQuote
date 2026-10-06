@@ -13,7 +13,7 @@ export function CustomHeader({
   btnConfigList,
 }: CustomHeaderProps) {
   return (
-    <div className="flex justify-between items-center w-full min-h-13.5">
+    <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center w-full min-h-13.5">
       <div className="flex flex-col gap-2 h-full">
         <span className="min-h-7.25 font-bold text-xl md:text-2xl self-start">
           {header}

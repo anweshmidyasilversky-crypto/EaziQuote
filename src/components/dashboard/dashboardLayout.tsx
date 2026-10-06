@@ -20,7 +20,7 @@ import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { cn } from "@/lib/utils";
 import { CustomInput } from "../common/CustomInput";
-import { CircleArrowOutUpLeft } from "lucide-react";
+import { CircleArrowOutUpLeft, Menu, X } from "lucide-react";
 import { CustomBtn } from "../common/CustomBtn";
 import DeleteDialog from "../common/DeleteDialog";
 export function DashboardLayout() {
@@ -29,6 +29,7 @@ export function DashboardLayout() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const dispatch = useAppDispatch();
   const [activeBtn, toggleActiveBtn] = useState<string>("dashboard");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [ticketCreateDialogOpen, setTicketCreateDialogOpen] = useState(false);
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
@@ -163,29 +164,67 @@ export function DashboardLayout() {
 
   return (
     <div className="w-screen h-screen flex overflow-hidden">
-      <div className="bg-sidebar sm:w-auto md:w-63 max-w-63 h-full shrink-0 overflow-y-auto border-r-sidebar-border border-r-[0.5px]">
-        <div className="flex justify-center items-center mb-10 cursor-pointer">
-          <img
-            src={assets.sidebarLogo}
-            className="h-6 mt-6 md:max-w-32.5"
-            onClick={() => navigate("/dashboard")}
-          />
-        </div>
+      <div
+        className={cn(
+          "bg-sidebar h-full shrink-0 overflow-y-auto border-r-sidebar-border border-r-[0.5px] md:static md:inset-auto md:z-auto md:w-63 md:max-w-63",
+          mobileSidebarOpen
+            ? "fixed inset-0 z-50 w-full max-w-none"
+            : "w-12 max-w-12",
+        )}
+      >
+        {!mobileSidebarOpen && (
+          <button
+            type="button"
+            className="flex h-12 w-12 items-center justify-center md:hidden"
+            aria-label="Open navigation menu"
+            aria-expanded={mobileSidebarOpen}
+            onClick={() => setMobileSidebarOpen(true)}
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        )}
 
-        <div className="flex flex-col gap-5 p-6 pl-4.5 justify-center items-center">
-          {btnConfig.map((btn) => {
-            return (
-              <DashboardSidebarButton
-                key={btn.id}
-                id={btn.id}
-                toggleActive={toggleActiveBtn}
-                currActive={activeBtn}
-                leftIcon={btnIcon(btn.id, btn.activeBtn, btn.inactiveBtn)}
-                clickHandler={btn.clickHandler}
-                buttonLabel={btn.label}
-              />
-            );
-          })}
+        <div className={cn("hidden md:block", mobileSidebarOpen && "block")}>
+          <div className="flex justify-center items-center mb-5 cursor-pointer">
+            <img
+              src={assets.sidebarLogo}
+              className="h-6 mt-6 md:max-w-32.5 self-center"
+              onClick={() => {
+                navigate("/dashboard");
+                setMobileSidebarOpen(false);
+              }}
+            />
+            {mobileSidebarOpen && (
+              <button
+                type="button"
+                className="absolute right-0 flex h-12 w-12 items-center justify-center md:hidden"
+                aria-label="Close navigation menu"
+                aria-expanded={mobileSidebarOpen}
+                onClick={() => setMobileSidebarOpen(false)}
+              >
+                <X className="h-6 w-6" />
+              </button>
+            )}
+          </div>
+
+          <div className="w-full flex flex-col gap-5 p-6 pl-4.5 justify-center items-center">
+            {btnConfig.map((btn) => {
+              return (
+                <DashboardSidebarButton
+                  key={btn.id}
+                  id={btn.id}
+                  toggleActive={toggleActiveBtn}
+                  currActive={activeBtn}
+                  leftIcon={btnIcon(btn.id, btn.activeBtn, btn.inactiveBtn)}
+                  clickHandler={() => {
+                    btn.clickHandler?.();
+                    setMobileSidebarOpen(false);
+                  }}
+                  buttonLabel={btn.label}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -211,17 +250,17 @@ export function DashboardLayout() {
               </button>
             </div>
 
-            <div className="h-full w-auto max-w-67.5 flex gap-6 items-center">
-              <div className="flex items-center max-h-10">
+            <div className="h-full w-auto max-w-67.5 flex md:gap-6 items-center">
+              <div className="flex items-center gap-2 md:gap-5 max-h-10">
                 <button
-                  className="h-10 w-10 flex items-center"
+                  className="min-h-5 min-w-5 flex items-center"
                   onClick={() => setTicketCreateDialogOpen(true)}
                 >
                   <img src={assets.headphoneIcon} className="w-4 h-5" />
                 </button>
 
                 <button
-                  className="h-10 w-10 flex items-center"
+                  className="min-h-5 min-w-5 flex items-center"
                   onClick={() => navigate(`/dashboard/notifications`)}
                 >
                   <img src={assets.bellIcon} className="h-4.5 w-4" />
@@ -231,7 +270,7 @@ export function DashboardLayout() {
               {/* Logged in user */}
               <Popover>
                 <PopoverTrigger className={`translate-y-0!`}>
-                  <div className="flex p-4.5 gap-3 items-center bg-header-user-det overflow-hidden">
+                  <div className="flex flex-col md:flex-row p-4.5 gap-3 items-center bg-header-user-det overflow-hidden">
                     <CustomAvatar
                       src={user.avatar ?? assets.userIconSvg}
                       fallback="U"
@@ -369,7 +408,7 @@ export function DashboardLayout() {
 
           <div className="flex flex-col gap-2 items-center justify-center">
             <h1 className="text-black text-2xl"> {"Logout"} </h1>
-            <span className="text-placeholder-text text-sm">
+            <span className="text-placeholder-text text-sm [@media(min-width:375px)_and_(max-width:767px)]:text-center">
               {" "}
               {"Are you sure you want to logout?"}{" "}
             </span>

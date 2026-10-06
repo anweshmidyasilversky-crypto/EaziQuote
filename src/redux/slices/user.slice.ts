@@ -75,6 +75,7 @@ export const userSlice = createSlice({
       state,
       action: PayloadAction<Partial<UserType> & Partial<User>>,
     ) {
+      console.log(`PAyload: `, action.payload);
       Object.assign(state, action.payload);
     },
 
@@ -86,7 +87,17 @@ export const userSlice = createSlice({
       state,
       action: PayloadAction<BillingDetailsResponse & Partial<User>>,
     ) {
-      Object.assign(state.company.billing_details, action.payload);
+      const newState = {
+        ...state,
+        hasBankAccountDetailAdded: true,
+        company: Object.assign(state.company, {
+          billing_details: action.payload,
+        } as Partial<Company>),
+      } as User;
+
+      console.log(newState);
+
+      Object.assign(state, newState);
     },
 
     removeUser(state) {

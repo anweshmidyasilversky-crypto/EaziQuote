@@ -135,4 +135,7 @@ export const API_ENDPOINTS = {
   strip: {
     onboard: `/stripe/connect/onboard`,
   },
+  revenewCat: {
+    getOfferings: (userId: number) => `/subscribers/${userId}/offerings`,
+  },
 } as const;

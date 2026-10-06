@@ -38,7 +38,7 @@ function WarningDialog({
     <Dialog open={open} onOpenChange={toggleOpen}>
       <DialogTrigger />
       <DialogContent
-        className={`dashboard-card-theme bg-white min-h-85 ring-0 p-8 gap-0 rounded-xl min-w-112.5 ${contentCls}`}
+        className={`dashboard-card-theme bg-white min-h-85 ring-0 p-8 gap-0 rounded-xl md:min-w-112.5 ${contentCls}`}
         showCloseButton={false}
       >
         <div className="flex w-full justify-end">

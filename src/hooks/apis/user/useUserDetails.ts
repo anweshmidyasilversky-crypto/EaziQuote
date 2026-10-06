@@ -21,8 +21,7 @@ function useUserDetails({ enabled = true }: useUserDetailsProps) {
     queryKey: ["user_details", apiToken],
     queryFn: getUserDetails,
     enabled: enabled && Boolean(apiToken),
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
+    staleTime: 0,
   });
 
   if (error) {

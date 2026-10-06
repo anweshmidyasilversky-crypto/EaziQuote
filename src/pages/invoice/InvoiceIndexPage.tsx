@@ -223,11 +223,13 @@ function InvoiceIndexPage() {
   return (
     <div className="p-5 h-full flex flex-col gap-6">
       <>
-        <CustomHeader
-          header="Invoices"
-          headerInfo="Manage all your invoices in one place"
-          btnConfigList={btnConfig}
-        />
+        <div>
+          <CustomHeader
+            header="Invoices"
+            headerInfo="Manage all your invoices in one place"
+            btnConfigList={btnConfig}
+          />
+        </div>
 
         <ActivitySummary summaryConfig={summaryConfig} />
 

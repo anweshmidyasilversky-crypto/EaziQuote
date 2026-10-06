@@ -277,7 +277,7 @@ export function DashboardIndexPage() {
       {/* Main container */}
       <div className="px-6 pt-6 flex pb-5 flex-col gap-6">
         {/* Heading */}
-        <div className="flex w-full min-h-13.5 justify-between">
+        <div className="flex w-full min-h-13.5 flex-col md:flex-row md:justify-between">
           {/* Date and greeting */}
           <div className="flex flex-col gap-2">
             <span className="text-placeholder-text">
@@ -321,10 +321,10 @@ export function DashboardIndexPage() {
         </div>
 
         <div
-          className={`w-full grid ${notificationList.length <= 0 && !isNotificationFetching ? `grid-cols-1` : `grid-cols-2`} gap-2`}
+          className={`w-full grid ${notificationList.length <= 0 && !isNotificationFetching ? `grid-cols-1` : `md:grid-cols-2`} gap-2`}
         >
           {/* KPI cards */}
-          <div className="w-full grid grid-cols-2 gap-4">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
             {kpiCardConfig.map((kpiConfig) => {
               return (
                 <KpiCard

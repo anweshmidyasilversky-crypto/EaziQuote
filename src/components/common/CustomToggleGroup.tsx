@@ -22,7 +22,7 @@ export function CustomToggleGroup({
   const isActive = (id: string) => id === activeId;
   return (
     <div
-      className={`w-full min-h-8.75 border-b border-b-client-detail-secondary ${containerCls}`}
+      className={`w-full min-h-8.75 overflow-x-auto border-b border-b-client-detail-secondary ${containerCls}`}
     >
       {/* Table Toggles */}
       <div className={`flex ${className}`}>

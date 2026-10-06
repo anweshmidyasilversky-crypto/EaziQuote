@@ -42,7 +42,7 @@ function DeleteDialog({
       withFooter={false}
       closeOnSubmit={false}
     >
-      <div className="p-5 flex flex-col items-center gap-8 min-w-125">
+      <div className="p-5 flex flex-col items-center gap-8 md:min-w-125">
         <Trash2Icon className="text-danger w-12 h-12" />
 
         <div className="flex flex-col gap-2 items-center">
@@ -50,7 +50,7 @@ function DeleteDialog({
             {" "}
             {dialogHeader ?? "Are you sure ?"}{" "}
           </h4>
-          <span className="text-base">
+          <span className="text-base [@media(min-width:375px)_and_(max-width:767px)]:text-center">
             {" "}
             {dialogDescription ??
               "Are you sure you want to remove this record?"}{" "}
