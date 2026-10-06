@@ -751,3 +751,46 @@ export interface RevenueCatResponse {
     };
   };
 }
+
+export interface OfferingProductPrice {
+  amount: number;
+  amount_micros: number;
+  currency: string;
+}
+
+export interface OfferingProductBase {
+  cycle_count: number;
+  period_duration: string;
+  price: OfferingProductPrice;
+}
+
+export interface OfferingProductOption {
+  base: OfferingProductBase;
+  discount: unknown | null;
+  id: string;
+  intro_price: unknown | null;
+  price_id: string;
+  trial: unknown | null;
+}
+
+export enum SubsctiptionPeriodLabel {
+  P1D = "/day",
+  P1W = "/wk",
+  P1M = "/mo",
+  P3M = "/3mo",
+  P6M = "/6mo",
+  P1Y = "/yr",
+}
+
+export interface OfferingProductDetails {
+  current_price: OfferingProductPrice;
+  default_purchase_option_id: string;
+  default_subscription_option_id: string;
+  description: string;
+  identifier: string;
+  normal_period_duration: keyof typeof SubsctiptionPeriodLabel;
+  product_type: string;
+  purchase_options: Record<string, OfferingProductOption>;
+  subscription_options: Record<string, OfferingProductOption>;
+  title: string;
+}

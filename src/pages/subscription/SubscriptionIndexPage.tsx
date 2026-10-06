@@ -1,101 +1,153 @@
-import { assets } from "@/assets/icons";
-import { CustomBtn } from "@/components/common/CustomBtn";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type {
+  OfferingProductDetails,
+  RevenueCatOffering,
+  RevenueCatPackage,
+} from "@/types/api.responses.type";
+import { useAppSelector } from "@/redux/store";
+import useOfferListings from "@/hooks/apis/revenewCat/useOfferListings";
+import useRevenewCatMutation from "@/hooks/apis/revenewCat/useRevenewCatMutation";
+import { SubscriptionCard } from "@/components/subscriptions/SubscriptionCard";
+import { showErrorToast } from "@/api/axiosInstance";
+
+interface Plan {
+  offering: RevenueCatOffering;
+  pkg: RevenueCatPackage;
+  product: OfferingProductDetails;
+}
+
+const isMonthly = (pkg: RevenueCatPackage) =>
+  pkg.identifier === "$rc_monthly" ||
+  pkg.platform_product_identifier.toLowerCase().includes("monthly");
+
+const isWebOffering = (offering: RevenueCatOffering) =>
+  [
+    offering.identifier,
+    offering.description,
+    ...offering.packages.map((p) => p.platform_product_identifier),
+    ...offering.packages.map((p) => p.web_checkout_url ?? ""),
+    offering.web_checkout_url ?? "",
+    offering.web_checkout_urls?.production ?? "",
+    offering.web_checkout_urls?.sandbox ?? "",
+  ]
+    .join(" ")
+    .toLowerCase()
+    .includes("web");
+
+const pickPackage = (offering: RevenueCatOffering) =>
+  offering.packages.find((p) => p.web_checkout_url && isMonthly(p)) ??
+  offering.packages.find((p) => p.web_checkout_url) ??
+  offering.packages.find(isMonthly) ??
+  offering.packages[0];
+
+function PlanSkeleton() {
+  return (
+    <div
+      aria-busy="true"
+      className="w-full max-w-112.5 min-h-136.25 rounded-[15px] bg-separator/40 animate-pulse"
+    />
+  );
+}
 
 function SubscriptionIndexPage() {
-  const btnConfig: {
-    id: string;
-    label: string;
-    leftIcon: string;
-  }[] = [
-    {
-      id: "Unlimited Quotes-&-Invoices",
-      label: "Unlimited Quotes & Invoices",
-      leftIcon: assets.infinityIcon,
-    },
-    {
-      id: "Unlimited-Clients",
-      label: "Unlimited Clients",
-      leftIcon: assets.clientGroupIcon,
-    },
-    {
-      id: "Custom-Branding",
-      label: "Custom Branding",
-      leftIcon: assets.brushIcon,
-    },
-    {
-      id: "Advanced-Analytics-&-Insights",
-      label: "Advanced Analytics & Insights",
-      leftIcon: assets.statisticsIcon,
-    },
-  ];
+  const user = useAppSelector((state) => state.user);
+  const { offerings: revenueCatData, isFetching } = useOfferListings({
+    userId: user.id,
+  });
+  const { getProductDetailsMutation } = useRevenewCatMutation();
+
+  const [results, setResults] = useState<Record<string, Plan | "error">>({});
+  const [subscriptionCards, setSubciptionCards] = useState<React.ReactNode[]>(
+    [],
+  );
+
+  // Memoise so the effect below only re-runs when the API data actually changes
+  const webOfferings = useMemo(
+    () => (revenueCatData?.offerings ?? []).filter(isWebOffering),
+    [revenueCatData],
+  );
+
+  useEffect(() => {
+    setResults({});
+    if (webOfferings.length === 0) return;
+
+    let cancelled = false;
+    const finish = (id: string, value: Plan | "error") => {
+      if (!cancelled) setResults((prev) => ({ ...prev, [id]: value }));
+    };
+
+    webOfferings.forEach((offering) => {
+      const pkg = pickPackage(offering);
+      if (!pkg) return finish(offering.identifier, "error");
+      getProductDetailsMutation.mutate(
+        {
+          userId: user.id,
+          productId: pkg.platform_product_identifier,
+        },
+        {
+          onSuccess: (products) => {
+            products.product_details.forEach((product) => {
+              setSubciptionCards((curr) => [
+                ...curr,
+                <SubscriptionCard
+                  productDetails={product}
+                  checkoutUrl={
+                    pkg.web_checkout_url ?? offering.web_checkout_url
+                  }
+                />,
+              ]);
+            });
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
+        },
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [webOfferings, user.id]);
+
+  const pending = webOfferings.filter((o) => !results[o.identifier]).length;
+  const loading = isFetching || pending > 0;
+
+  const cards = webOfferings.flatMap((offering) => {
+    const result = results[offering.identifier];
+    if (result === "error") return [];
+    if (!result) return [<PlanSkeleton key={offering.identifier} />];
+    return [
+      <SubscriptionCard
+        key={offering.identifier}
+        productDetails={result.product}
+        checkoutUrl={result.pkg.web_checkout_url ?? offering.web_checkout_url}
+      />,
+    ];
+  });
 
   return (
-    <div className="m-6 flex flex-col items-center justify-center gap-12">
+    <div className="m-6 flex flex-col items-center gap-12">
       <div className="flex flex-col gap-2 min-h-13.5">
-        <h1 className="font-bold text-2xl text-center">
-          {" "}
-          {"Plans & Pricing"}{" "}
-        </h1>
+        <h1 className="font-bold text-2xl text-center">Plans & Pricing</h1>
         <span className="font-medium text-sm text-placeholder-text text-center">
-          {" "}
-          {"Simple pricing with complete access to all features."}{" "}
+          Simple pricing with complete access to all features.
         </span>
       </div>
 
-      <div className="min-h-136.25 min-w-112.5 dashboard-card-theme flex flex-col gap-2 rounded-[15px]">
-        <div className="flex justify-center items-center min-h-22.5 w-full p-6 font-semibold font-mori">
-          <span className="text-[40px]"> {"$99"} </span>
-          <span className="text-[28px] text-placeholder-text"> {"/mo"} </span>
+      {cards.length > 0 ? (
+        <div className="w-full max-w-250 flex flex-col justify-center items-center">
+          {subscriptionCards}
         </div>
-        <Separator className={`bg-separator`} />
-        <div className="flex flex-col gap-8 p-6">
-          <div className="flex flex-col gap-5">
-            <div className="flex justify-center items-center gap-3">
-              <img src={assets.starIcon} className="w-3 aspect-square" />
-              <span className="uppercase font-medium text-base text-center">
-                {" "}
-                {"benefits"}{" "}
-              </span>
-              <img src={assets.starIcon} className="w-3 aspect-square" />
-            </div>
-
-            <div className="flex flex-col gap-4 p-3 border rounded-xl border-separator bg-subcription-card-primary">
-              {btnConfig.map((config, index) => (
-                <React.Fragment key={config.id}>
-                  <div className="flex gap-3 items-center">
-                    <div className="w-8 flex aspect-square bg-white rounded-[7px] items-center justify-center">
-                      <img src={config.leftIcon} className="w-4 aspect-auto" />
-                    </div>
-                    <span className="text-base"> {config.label} </span>
-                  </div>
-                  {index < btnConfig.length - 1 && (
-                    <Separator className={`bg-separator`} />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-2 [&_button]:font-medium [&_button]:text-base [&_button]:min-h-12 [&_button]:w-full">
-              <CustomBtn
-                buttonLabel="Subscribe Now"
-                btncls={cn(
-                  `bg-subscription-gradient hover:bg-subscription-gradient `,
-                )}
-              />
-
-              <CustomBtn
-                buttonLabel="Restore"
-                btncls={cn(
-                  `bg-transparent hover:bg-transparent text-black-text border border-separator`,
-                )}
-              />
-            </div>
-          </div>
+      ) : (
+        <div className="flex items-center justify-center min-h-40">
+          <span className="text-placeholder-text">
+            {loading
+              ? "Loading subscription plans..."
+              : "No subscription plans available."}
+          </span>
         </div>
-      </div>
+      )}
     </div>
   );
 }
