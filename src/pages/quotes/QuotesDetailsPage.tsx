@@ -28,6 +28,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import {
   PaymentMethods,
   QuoteStatus,
+  StripAccountStatus,
   type ItemDetails,
 } from "@/types/api.responses.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
@@ -359,7 +360,8 @@ export function QuotesDetailsPage() {
                               : undefined
                           }
                           paymentMethod={
-                            user.stripe_connected
+                            user.stripe_account_status ===
+                            StripAccountStatus.active
                               ? PaymentMethods.stripe
                               : PaymentMethods.cash
                           }

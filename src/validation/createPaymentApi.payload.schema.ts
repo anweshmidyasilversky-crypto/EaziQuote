@@ -28,7 +28,7 @@ const amountTypeSchema = yup
 export const paymentDepositSchema: yup.ObjectSchema<CreatePaymentDeposit> = yup
   .object({
     client_id: yup.string().trim().required(notSelectedMsg("Client")),
-    quote_id: yup.string().trim().required(notSelectedMsg("Quote")),
+    order_id: yup.string().trim().required(notSelectedMsg("Quote")),
     amount: amountSchema,
     amount_type: amountTypeSchema,
   })

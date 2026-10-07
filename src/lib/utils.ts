@@ -1,31 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import {
-  addressList,
-  QuoteActivityStatus,
-  type AddressDetail,
-  type ClientDataWithFilters,
-  type QuoteData,
-} from "../constants/dummyData";
 import { useAppSelector } from "../redux/store";
 import type { Quote } from "../types/quote.type";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// ── Redux selector helpers ────────────────────────────────────────────────────
-// NOTE: these are React hooks — only call them inside React function components.
-
-export const useClientById = (clientId: string) => {
-  return useAppSelector((state) =>
-    state.clients.find((c) => c.id === clientId),
-  );
-};
-
-export const useQuoteById = (quoteId: string) => {
-  return useAppSelector((state) => state.quotes.find((q) => q.id === quoteId));
-};
 
 // ── Computed value helpers ────────────────────────────────────────────────────
 
@@ -35,47 +15,6 @@ export const useQuoteById = (quoteId: string) => {
  */
 export const getQuoteAmount = (quote: Quote): number =>
   quote.items?.reduce((sum, item) => sum + item.total, 0) || 0;
-
-/**
- * Map a Redux `Quote` + client lookup to the `QuoteData` shape used by tables.
- * The `amount` field is computed from line items — never stored separately.
- */
-export const quoteToDisplayData = (
-  quote: Quote,
-  clients: Client[],
-): QuoteData => {
-  const client = clients.find((c) => c.id === quote.clientId);
-  return {
-    id: quote.id,
-    title: quote.title,
-    quote: quote.referenceNumber,
-    client: client?.name ?? "Unknown Client",
-    companyName: client?.companyName,
-    amount: getQuoteAmount(quote),
-    // QuoteActivityStatus values match QuoteStatus — cast is safe
-    status: quote.status as unknown as QuoteActivityStatus,
-    creationDate: formatDisplayDate(quote.quoteDate),
-    expiryDate: formatDisplayDate(quote.expiryDate),
-    paymentMethod: quote.paymentMethod as "Cash" | "Online",
-  };
-};
-
-/**
- * Map a Redux `Client` to the `ClientDataWithFilters` shape used by tables.
- * `activityCount` is computed as the number of quotes associated with this client.
- */
-export const clientToDisplayData = (
-  client: Client,
-  quotes: Quote[],
-): ClientDataWithFilters => ({
-  id: client.id,
-  client: client.name,
-  company: client.companyName,
-  phone: client.phone,
-  email: client.email,
-  createdAt: client.createdAt ?? new Date().toISOString(),
-  activityCount: quotes.filter((q) => q.clientId === client.id).length,
-});
 
 // ── Date formatting helpers ───────────────────────────────────────────────────
 
@@ -154,10 +93,6 @@ export function getRandomIndex(length: number): number {
   return Math.floor(Math.random() * length);
 }
 
-export function getAddress(postCode: string): AddressDetail | undefined {
-  return addressList.find((address) => address.postCode === postCode);
-}
-
 export const getInitials = (fullName: string) => {
   if (!fullName) {
     return "user";
@@ -171,34 +106,6 @@ export const formatCurrency = (value: number) => {
     style: "currency",
     currency: "GBP",
   }).format(value);
-};
-
-export const nextQuoteRefNo = () => {
-  const quotes = useAppSelector((state) => state.quotes);
-  let maxId = 1;
-  const currYear = new Date().getFullYear().toString();
-  quotes.forEach((quote) => {
-    const [_, quoteYear, quoteNo] = quote.referenceNumber.split("-");
-    if (currYear === quoteYear) {
-      maxId = Math.max(maxId, Number(quoteNo) + 1);
-    }
-  });
-  return `QT-${currYear}-${maxId}`;
-};
-
-export const getQuote = (refNo: string) => {
-  const quotes = useAppSelector((state) => state.quotes);
-  return quotes.find((quote) => quote.referenceNumber === refNo);
-};
-
-export const getClient = (clientId: string | undefined) => {
-  const clients = useAppSelector((state) => state.clients);
-  return clients.find((client) => client.id === clientId);
-};
-
-export const getCategory = (catId: string) => {
-  const categories = useAppSelector((state) => state.categories);
-  return categories.find((category) => category.id === catId);
 };
 
 export const getSubCategory = (subCatId: string) => {

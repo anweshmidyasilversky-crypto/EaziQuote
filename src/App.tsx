@@ -8,6 +8,8 @@ import { updateConfig } from "./redux/slices/settings.slice.ts";
 import { useEffect } from "react";
 import useUserDetails from "./hooks/apis/user/useUserDetails.ts";
 import { updateUser } from "./redux/slices/user.slice.ts";
+import { configureRevenueCat } from "./lib/revenueCat.ts";
+import { showErrorToast } from "./api/axiosInstance.ts";
 
 const routes = [...authRoutes, ...dashboardRoutes];
 
@@ -39,6 +41,14 @@ function App() {
       );
     }
   }, [auth.apiToken, appConfig?.payload, dispatch, userDetails]);
+
+  useEffect(() => {
+    if (!auth.apiToken || user.id <= 0) {
+      return;
+    }
+
+    void configureRevenueCat(String(user.id)).catch(showErrorToast);
+  }, [auth.apiToken, user.id]);
 
   return <RouterProvider router={router} />;
 }

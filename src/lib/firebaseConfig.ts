@@ -1,13 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import {
   browserLocalPersistence,
-  connectAuthEmulator,
   getAuth,
-  onAuthStateChanged,
   setPersistence,
-  updateCurrentUser,
   type ActionCodeSettings,
 } from "firebase/auth";
 

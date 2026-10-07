@@ -282,3 +282,10 @@ export interface QuoteInvoiceSettingsApiPayload {
 export interface PasswordResetLinkPayload {
   email: string;
 }
+
+export interface QuoteSectionPayload {
+  id: string;
+  order: string;
+  section: string;
+  description: string;
+}

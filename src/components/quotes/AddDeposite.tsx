@@ -17,7 +17,10 @@ import {
 import { cn, formatCurrency } from "../../lib/utils";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomBtn } from "../common/CustomBtn";
-import { PaymentMethods } from "@/types/api.responses.type";
+import {
+  PaymentMethods,
+  StripAccountStatus,
+} from "@/types/api.responses.type";
 import { DepositeTypes } from "@/types/api.requests.type";
 import { useAppSelector } from "@/redux/store";
 
@@ -51,6 +54,8 @@ function AddDeposite({
   toggleStripPopup,
 }: AddDepositeProps) {
   const user = useAppSelector((state) => state.user);
+  const isStripeConnected =
+    user.stripe_account_status === StripAccountStatus.active;
   const DepositeTypesConfig: CustomToggleGroupProps["toggleConfig"] = [
     {
       btnId: DepositeTypes.fixed,
@@ -89,7 +94,7 @@ function AddDeposite({
   const submitHanler = (data: AddDepositePayload) => {
     if (
       data.paymentMethod === PaymentMethods.stripe &&
-      !user.stripe_connected
+      !isStripeConnected
     ) {
       toggleStripPopup(true);
       toggleOpen(false);
@@ -172,7 +177,7 @@ function AddDeposite({
             items={Object.values(PaymentMethods)}
             selected={
               defaultValues.paymentMethod ??
-              (user.stripe_connected
+              (isStripeConnected
                 ? PaymentMethods.stripe
                 : PaymentMethods.cash)
             }

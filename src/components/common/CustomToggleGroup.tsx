@@ -28,7 +28,7 @@ export function CustomToggleGroup({
       <div className={`flex ${className}`}>
         {toggleConfig.map((toggleBtn) => (
           <button
-            className={`${isActive(toggleBtn.btnId) ? "btn-auth btnActive" : ""} rounded-b-none w-34.5 min-h-4.75 ${btnCls}`}
+            className={` ${isActive(toggleBtn.btnId) ? "btn-auth btnActive transform transition-all duration-300 delay-200" : ""} rounded-b-none w-34.5 min-h-4.75 ${btnCls}`}
             onClick={() => toggleActive(toggleBtn.btnId)}
             key={toggleBtn.btnId}
             disabled={toggleBtn.disabled || false}

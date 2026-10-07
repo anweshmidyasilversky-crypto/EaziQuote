@@ -24,6 +24,7 @@ import {
   PaymentAmountType,
   PaymentMethods,
   PaymentTypes,
+  StripAccountStatus,
   type ClientDetails,
   type DepositQuote,
   type Invoice,
@@ -84,7 +85,8 @@ function PaymentCreatePage() {
     formState: { errors },
   } = useForm<Omit<CreatePaymentBase, "amount" | "amount_type">>({
     defaultValues: {
-      payment_method: user.stripe_connected
+      payment_method:
+        user.stripe_account_status === StripAccountStatus.active
         ? PaymentMethods.stripe
         : PaymentMethods.cash,
       payment_date: new Date().toISOString(),
@@ -154,7 +156,10 @@ function PaymentCreatePage() {
   });
 
   useEffect(() => {
-    if (paymentMethod === PaymentMethods.stripe && !user.stripe_connected) {
+    if (
+      paymentMethod === PaymentMethods.stripe &&
+      user.stripe_account_status !== StripAccountStatus.active
+    ) {
       toggleStripDialogOpen(true);
       setValue("payment_method", PaymentMethods.cash);
     }

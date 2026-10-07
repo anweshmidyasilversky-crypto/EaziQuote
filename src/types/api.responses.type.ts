@@ -46,6 +46,11 @@ export interface Company {
   updated_at: string;
 }
 
+export enum StripAccountStatus {
+  active = "active",
+  inactive = "inactive",
+}
+
 export interface User {
   id: number;
   name: string;
@@ -70,8 +75,7 @@ export interface User {
   hasSignatureAdded: boolean;
   is_team_member: boolean;
   default_payment_method: string;
-  stripe_connected: boolean;
-  stripe_account_status: string;
+  stripe_account_status: StripAccountStatus;
 }
 
 export interface AddressDetails {

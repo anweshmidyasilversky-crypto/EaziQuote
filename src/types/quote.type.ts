@@ -1,6 +1,6 @@
-import type { PaymentMethods } from "./addDeposite.payload.type";
+import type { PaymentMethods } from "./api.responses.type";
 import type { QuoteLineItem } from "./quoteLineItem.type";
-import type { QuoteSection } from "./quoteSection.type";
+import type { QuoteSection } from "./api.responses.type";
 
 export type QuoteStatus =
   | "Draft"

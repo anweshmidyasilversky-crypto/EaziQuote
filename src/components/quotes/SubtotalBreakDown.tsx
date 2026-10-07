@@ -13,7 +13,11 @@ import AddDeposite from "./AddDeposite";
 import { useLocation } from "react-router";
 import { CustomActionGroup } from "../common/CustomActionGroup";
 import AddDiscount from "./AddDiscount";
-import { PaymentMethods, type Vat } from "@/types/api.responses.type";
+import {
+  PaymentMethods,
+  StripAccountStatus,
+  type Vat,
+} from "@/types/api.responses.type";
 import AddTax from "./AddTax";
 import type { DepositeTypes } from "@/types/api.requests.type";
 import { useAppSelector } from "@/redux/store";
@@ -89,6 +93,8 @@ export function SubtotalBreakDown({
   const [stripConnectPopupOpen, toggleStripConnectPopup] = useState(false);
   const [taxModalOpen, toggleTaxModalOpen] = useState(false);
   const user = useAppSelector((state) => state.user);
+  const isStripeConnected =
+    user.stripe_account_status === StripAccountStatus.active;
 
   const [methodSelectOpen, toggleMethodSelectOpen] = useState(false);
 
@@ -104,7 +110,7 @@ export function SubtotalBreakDown({
     if (depositePaymentMethodRef) {
       depositePaymentMethodRef.current =
         paymentMethod ??
-        (user.stripe_connected ? PaymentMethods.stripe : PaymentMethods.cash);
+        (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash);
     }
     if (discountRef) {
       discountRef.current = discountPercentage ?? null;
@@ -462,7 +468,7 @@ export function SubtotalBreakDown({
                   <span className="subtotal-value">
                     {" "}
                     {paymentMode ??
-                      (user.stripe_connected
+                      (isStripeConnected
                         ? PaymentMethods.stripe
                         : PaymentMethods.cash)}{" "}
                   </span>
@@ -530,7 +536,7 @@ export function SubtotalBreakDown({
         defaultValues={{
           paymentMethod:
             paymentMethod ??
-            (user.stripe_connected
+            (isStripeConnected
               ? PaymentMethods.stripe
               : PaymentMethods.cash),
           deposite: deposite ?? undefined,
@@ -561,12 +567,12 @@ export function SubtotalBreakDown({
 
       <PaymentMethodSelectDialog
         selectedMethod={
-          user.stripe_connected ? PaymentMethods.stripe : PaymentMethods.cash
+          isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash
         }
         isOpen={methodSelectOpen}
         toggleOpen={toggleMethodSelectOpen}
         toggleSelectedMethod={(method) => toggleSelectedPaymentMethod?.(method)}
-        isStipeConnected={user.stripe_connected}
+        isStipeConnected={isStripeConnected}
       />
     </>
   );

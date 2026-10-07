@@ -192,6 +192,12 @@ export const downloadInvoicePdf = async (invoice_id: string | number) => {
   try {
     const response = await axiosInstance.get<Blob>(
       API_ENDPOINTS.invoices.invoicePdfDownload(invoice_id),
+      {
+        params: {
+          is_download: 1,
+        } as PageFilters,
+        responseType: "blob",
+      },
     );
     return response.data;
   } catch (error) {

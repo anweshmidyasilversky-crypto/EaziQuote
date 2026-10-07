@@ -10,7 +10,6 @@ import type {
   ListResponse,
 } from "@/types/api.responses.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
-import { ObjToFormData } from "@/lib/utils";
 
 export const getItemList = async (filters: PageFilters) => {
   try {

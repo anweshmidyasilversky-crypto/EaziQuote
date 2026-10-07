@@ -3,7 +3,6 @@ import {
   ACCOUNT_NUMBER,
   BANK_NAME,
   PAYMENT_LINK,
-  SORT_CODE,
 } from "@/constants/limits";
 import { emptyMsg, maxLengthMsg, minLengthMsg } from "@/constants/messages";
 import type { BankInfo } from "@/types/bankInfo.payload";

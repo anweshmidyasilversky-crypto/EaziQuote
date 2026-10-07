@@ -12,12 +12,15 @@ import StripeAdvisoryDialog, {
 } from "./StripeAdvisoryDialog";
 import { useNavigate } from "react-router";
 import { useAppSelector } from "@/redux/store";
+import { StripAccountStatus } from "@/types/api.responses.type";
 
 function SettingsIndexPage() {
   const navigate = useNavigate();
   const [stripeDialogOpen, toggleStripeDialogOpen] = useState(false);
 
   const user = useAppSelector((state) => state.user);
+  const isStripeConnected =
+    user.stripe_account_status === StripAccountStatus.active;
 
   const stripAdvisoryType =
     useRef<StripeAdvisoryDialogProps["type"]>("connect");
@@ -61,10 +64,10 @@ function SettingsIndexPage() {
       title: "Connect Stripe",
       titleDesc: "Set up Stripe to start accepting payments from your clients.",
       btnConfig: {
-        buttonLabel: user.stripe_connected ? "Connected" : "Connect",
-        disabled: user.stripe_connected,
+        buttonLabel: isStripeConnected ? "Connected" : "Connect",
+        disabled: isStripeConnected,
         btncls: cn(
-          user.stripe_connected
+          isStripeConnected
             ? `bg-transparent-ming-green text-ming-green hover:bg-transparent-ming-green`
             : ``,
         ),

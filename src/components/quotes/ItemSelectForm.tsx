@@ -16,6 +16,7 @@ import type { ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { toast } from "react-toastify";
 import {
   PaymentMethods,
+  StripAccountStatus,
   type Category,
   type ItemDetails,
 } from "@/types/api.responses.type";
@@ -43,6 +44,8 @@ export type ItemSelectFormProps = {
 function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   const currQuote = useAppSelector((state) => state.quote);
   const user = useAppSelector((state) => state.user);
+  const isStripeConnected =
+    user.stripe_account_status === StripAccountStatus.active;
   const dispatch = useAppDispatch();
   const {
     searchTerm: categorySearch,
@@ -92,7 +95,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
     Number(currQuote.discount?.amount ?? "0"),
   );
   const depositePaymentMethod = useRef<PaymentMethods>(
-    user.stripe_connected ? PaymentMethods.stripe : PaymentMethods.cash,
+    isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash,
   );
   const depositePercentageRef = useRef<number | null>(
     currQuote.deposit_percentage,
@@ -385,7 +388,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
           <SubtotalBreakDown
             items={Object.values(itemQty)}
             paymentMethod={
-              user.stripe_connected
+              isStripeConnected
                 ? PaymentMethods.stripe
                 : PaymentMethods.cash
             }

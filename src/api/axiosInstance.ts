@@ -1,4 +1,6 @@
 import { persistor, store } from "@/redux/store";
+import { API_ENDPOINTS } from "@/constants/endPoints";
+import { PUBLIC_ONLY_ROUTES } from "@/constants/routes";
 import axios, { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 
@@ -29,6 +31,8 @@ axiosInstance.interceptors.response.use(
     if (
       isAxiosError(error) &&
       error.response?.status === 401 &&
+      error.config?.url !== API_ENDPOINTS.auth.login &&
+      !PUBLIC_ONLY_ROUTES.includes(window.location.pathname) &&
       !unauthorizedRedirectInProgress
     ) {
       unauthorizedRedirectInProgress = true;

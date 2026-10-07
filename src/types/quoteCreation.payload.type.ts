@@ -1,4 +1,4 @@
-import type { QuoteSection } from "./quoteSection.type";
+import type { QuoteSection } from "./api.responses.type";
 
 export interface QuoteSummary {
   quoteTitle: string;

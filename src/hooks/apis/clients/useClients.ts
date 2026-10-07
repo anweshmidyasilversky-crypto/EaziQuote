@@ -2,7 +2,7 @@ import { getClientList } from "@/api/services/clients.api";
 
 import type { PageFilters } from "@/types/api.requests.type";
 
-import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { useEffect, useMemo, useState } from "react";
 

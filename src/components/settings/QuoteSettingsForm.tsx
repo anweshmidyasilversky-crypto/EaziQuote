@@ -13,6 +13,7 @@ import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
 import { updateConfig } from "@/redux/slices/settings.slice";
 import { showErrorToast } from "@/api/axiosInstance";
 import { updateUser } from "@/redux/slices/user.slice";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type QuoteSettingsFormProps = {
   signatureModalOpenDefault?: boolean;
@@ -23,6 +24,7 @@ function QuoteSettingsForm({
 }: QuoteSettingsFormProps) {
   const { quote_invoice_settings } = useAppSelector((state) => state.appConfig);
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const [signatureModalOpen, toggleSignatureModalOpen] = useState(
     signatureModalOpenDefault ?? false,
   );
@@ -60,8 +62,11 @@ function QuoteSettingsForm({
         signature: data.signatureBlob ?? null,
       },
       {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
           dispatch(updateConfig(response.payload));
+          await queryClient.invalidateQueries({
+            queryKey: ["user_details"],
+          });
           dispatch(
             updateUser({
               hasSignatureAdded: true,

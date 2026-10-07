@@ -5,10 +5,6 @@ import {
   type ActivitySummaryProps,
 } from "../../components/clients/ActivitySummary";
 import {
-  ClientActivityStatus,
-  PaymentActivityStatus,
-} from "../../constants/dummyData";
-import {
   filterFn_includesString,
   type ColumnDef,
   type ColumnFiltersState,
@@ -267,7 +263,7 @@ export function ClientDetailsPage() {
         accessorKey: "status",
         header: "STATUS",
         cell: (info) => {
-          const status = info.getValue<ClientActivityStatus>();
+          const status = info.getValue<string>();
           return <StatusBadge status={status} />;
         },
         enableSorting: false,
@@ -383,7 +379,7 @@ export function ClientDetailsPage() {
       {
         accessorKey: "status",
         cell: (info) => {
-          const status = info.getValue<PaymentActivityStatus>();
+          const status = info.getValue<PaymentStatus>();
 
           return <StatusBadge status={status} />;
         },

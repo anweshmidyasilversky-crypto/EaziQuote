@@ -13,11 +13,12 @@ export default defineConfig({
     },
   },
   server: {
-    host: true,
+    host: "0.0.0.0",
     allowedHosts: [
       "nine-falcons-report.loca.lt",
       "dirty-lizards-feel.loca.lt",
       "participated-stop-ethnic-segments.trycloudflare.com",
+      "muskiness-come-emotion.ngrok-free.dev",
     ],
   },
 });

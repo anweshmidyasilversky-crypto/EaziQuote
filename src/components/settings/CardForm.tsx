@@ -3,7 +3,6 @@ import CustomDialog from "../common/CustomDialog";
 import { type Card } from "@/types/cardDetails.payload.type";
 import { CustomInput } from "../common/CustomInput";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { countryStates } from "@/constants/dummyData";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -22,7 +21,6 @@ function CardForm({ isOpen, toggleIsOpen, submitAction }: CardFormProps) {
     clearErrors,
     setValue,
     formState: { errors },
-    watch,
     handleSubmit,
   } = useForm<Card>({
     defaultValues: {
@@ -95,7 +93,7 @@ function CardForm({ isOpen, toggleIsOpen, submitAction }: CardFormProps) {
         <div className="flex flex-col gap-2 items-start">
           <label className="input-label"> Country </label>
           <CustomCombobox
-            items={Object.keys(countryStates)}
+            items={[]}
             onValueChange={(val) => {
               if (val) {
                 setValue("country", val);
@@ -114,16 +112,16 @@ function CardForm({ isOpen, toggleIsOpen, submitAction }: CardFormProps) {
         <div className="flex flex-col gap-2 items-start">
           <label className="input-label"> State </label>
           <CustomCombobox
-            items={countryStates[watch().country] ?? []}
+            items={[]}
             onValueChange={(val) => {
               if (val) {
-                setValue("state", val);
+                setValue("state", val as string);
                 clearErrors("state");
               }
             }}
             placeholder="State/Province/Region"
             emptyMessage="Please select a country first"
-            getItemLabel={(val) => val ?? ""}
+            getItemLabel={(val) => (val as string) ?? ""}
             className={cn(`${errors.state ? `input-error` : ``}`)}
           />
           {errors.state && (

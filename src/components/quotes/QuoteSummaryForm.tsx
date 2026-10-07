@@ -19,6 +19,7 @@ import type { ClientCreationPayload } from "../../types/clientCreation.payload.t
 import { showErrorToast } from "@/api/axiosInstance";
 import {
   PaymentMethods,
+  StripAccountStatus,
   type ClientDetails,
   type PresetQuote,
   type QuoteDetails,
@@ -217,7 +218,8 @@ function QuoteSummaryForm({
           client_id: Number(data.clientId),
           notes: data.notes ?? "",
           attachments: data.attachments?.slice(currQuote?.attachments.length),
-          deposit_payment_method: user.stripe_connected
+          deposit_payment_method:
+            user.stripe_account_status === StripAccountStatus.active
             ? PaymentMethods.stripe
             : PaymentMethods.cash,
           is_company_phone_number_show: !data.hidePhoneNumber,

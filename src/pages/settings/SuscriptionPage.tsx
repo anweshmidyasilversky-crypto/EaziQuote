@@ -6,7 +6,7 @@ import CustomDialog from "@/components/common/CustomDialog";
 import { CustomDataTable } from "@/components/common/CustomTable";
 import SearchInputGruop from "@/components/common/SearchInputGruop";
 import StatusBadge from "@/components/common/StatusBadge";
-import CardForm from "@/components/settings/CardForm";
+// import CardForm from "@/components/settings/CardForm";
 import SettingsCard, {
   type SettingsCardProps,
 } from "@/components/settings/SettingsCard";
@@ -29,7 +29,7 @@ function SuscriptionPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [benifitModalOpen, toggleBenifitModalOpen] = useState(false);
-  const [cardChangeOpen, toggleCardChangeOpen] = useState(false);
+  const [_, toggleCardChangeOpen] = useState(false);
   const debouncedSearchTerm = useDebounce({ value: searchTerm, delay: 500 });
   const targetBillInvoice = useRef<BillingInvoiceItem | undefined>(undefined);
 
@@ -323,7 +323,7 @@ function SuscriptionPage() {
       </CustomDialog>
 
       {/* Card chage form */}
-      <CardForm isOpen={cardChangeOpen} toggleIsOpen={toggleCardChangeOpen} />
+      {/* <CardForm isOpen={cardChangeOpen} toggleIsOpen={toggleCardChangeOpen} /> */}
     </>
   );
 }

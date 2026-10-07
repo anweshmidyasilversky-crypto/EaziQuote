@@ -128,7 +128,7 @@ export function ClientForm({
               control={control}
               name={"phone"}
               fieldName="Phone"
-              inptType="text"
+              inptType="phone"
               placeholder="Phone number"
             />
 

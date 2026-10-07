@@ -89,6 +89,7 @@ export function ProfileSetupPage() {
               control={control}
               name="phoneNo"
               fieldName="Phone"
+              inptType="phone"
               placeholder="Enter phone number"
             />
 

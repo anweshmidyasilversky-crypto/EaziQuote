@@ -11,6 +11,7 @@ import { useAppDispatch } from "@/redux/store";
 import { updateBillingDetailsRedux } from "@/redux/slices/user.slice";
 import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
 import { showErrorToast } from "@/api/axiosInstance";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type BankInfoFormProps = {
   defaultValues?: BankInfo;
@@ -19,6 +20,7 @@ export type BankInfoFormProps = {
 
 function BankInfoForm({ defaultValues, submitAction }: BankInfoFormProps) {
   const dispath = useAppDispatch();
+  const queryClient = useQueryClient();
   const { control, setValue, handleSubmit } = useForm<BankInfo>({
     resolver: yupResolver(bankInfoSchema),
   });
@@ -44,13 +46,16 @@ function BankInfoForm({ defaultValues, submitAction }: BankInfoFormProps) {
         sort_code: data.sortCode,
       },
       {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
           dispath(
             updateBillingDetailsRedux({
               ...response.payload,
               hasBankAccountDetailAdded: true,
             }),
           );
+          await queryClient.invalidateQueries({
+            queryKey: ["user_details"],
+          });
           toast.success(response.message);
           submitAction?.();
         },

@@ -7,7 +7,6 @@ import { CustomDataTable } from "../../components/common/CustomTable";
 import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { NotificationCard } from "../../components/dashboard/notification.card";
-import { type TransactionItem } from "../../constants/dummyData";
 import {
   formatCurrency,
   formatDisplayDate,
@@ -19,6 +18,8 @@ import { ClientForm } from "../../components/clients/ClientForm";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityType,
+  InvoiceStatus,
+  QuoteStatus,
   type DashboardActivityItem,
 } from "@/types/api.responses.type";
 import type { ClientCreationPayload } from "@/types/clientCreation.payload.type";
@@ -102,7 +103,7 @@ export function DashboardIndexPage() {
       header: "STATUS",
       enableSorting: false,
       cell: (info) => {
-        const status = info.getValue<TransactionItem["status"]>();
+        const status = info.getValue<QuoteStatus | InvoiceStatus>();
         return <StatusBadge status={status} />;
       },
     },

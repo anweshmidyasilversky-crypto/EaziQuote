@@ -5,6 +5,7 @@ import type {
   Company,
   User,
 } from "@/types/api.responses.type";
+import { StripAccountStatus } from "@/types/api.responses.type";
 
 export const initialState: User = {
   id: 0,
@@ -63,8 +64,7 @@ export const initialState: User = {
   hasSignatureAdded: false,
   is_team_member: false,
   default_payment_method: "",
-  stripe_connected: false,
-  stripe_account_status: "",
+  stripe_account_status: StripAccountStatus.inactive,
 };
 
 export const userSlice = createSlice({

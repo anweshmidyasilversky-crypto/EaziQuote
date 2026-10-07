@@ -1,9 +1,4 @@
 import { type LucideIcon } from "lucide-react";
-import type {
-  ClientActivityStatus,
-  PaymentActivityStatus,
-  QuoteActivityStatus,
-} from "../../constants/dummyData";
 import type { InvoiceStatus } from "@/types/invoice.type";
 import type { PaymentStatus } from "@/types/paymentRecord.type";
 import type { QuoteStatus } from "@/types/api.responses.type";
@@ -14,9 +9,6 @@ export type StatusBadgeProps = {
     | "Paid"
     | "Overdue"
     | "Draft"
-    | ClientActivityStatus
-    | PaymentActivityStatus
-    | QuoteActivityStatus
     | InvoiceStatus
     | PaymentStatus
     | QuoteStatus

@@ -14,7 +14,7 @@ export function ActivitySummary({ summaryConfig }: ActivitySummaryProps) {
     <div className="flex w-full min-h-27.75 items-stretch rounded-[10px] dashboard-card-theme overflow-hidden">
       {summaryConfig.map((summaryDet, index) => (
         <React.Fragment key={summaryDet.summaryTitle}>
-          <div className="flex p-3 sm:p-4 flex-col justify-center gap-2 flex-1 min-w-0">
+          <div className="flex p-3 sm:p-4 flex-col justify-between gap-2 flex-1 min-w-0">
             <span className="wrap-break-word text-placeholder-text font-medium uppercase text-[11px] sm:text-[12px] leading-tight">
               {summaryDet.summaryTitle}
             </span>

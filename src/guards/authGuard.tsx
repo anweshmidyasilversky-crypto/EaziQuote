@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 import { useAppSelector } from "../redux/store";
+import { PUBLIC_ONLY_ROUTES } from "@/constants/routes";
 
 export function AuthGuard() {
   const user = useAppSelector((state) => state.user);
@@ -7,7 +8,6 @@ export function AuthGuard() {
   const location = useLocation();
   const pendingVerificationEmail = (location.state as { email?: string } | null)
     ?.email;
-  const publicRoutes = ["/", "/signup", "/forgot-password"];
   const profileSetupRoutes = [
     "/profile-setup",
     "/business-profile",
@@ -35,7 +35,7 @@ export function AuthGuard() {
     return <Outlet />;
   }
 
-  if (publicRoutes.includes(location.pathname)) {
+  if (PUBLIC_ONLY_ROUTES.includes(location.pathname)) {
     if (!auth.apiToken) {
       return <Outlet />;
     }

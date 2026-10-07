@@ -1,5 +1,6 @@
 import {
   PaymentMethods,
+  StripAccountStatus,
   type Category,
   type InvoiceDetails,
   type ItemDetails,
@@ -387,7 +388,8 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
         <div className="max-w-75">
           <SubtotalBreakDown
             paymentMethod={
-              (currInvoice?.payment_method ?? user.stripe_connected)
+              (currInvoice?.payment_method ??
+                (user.stripe_account_status === StripAccountStatus.active))
                 ? PaymentMethods.stripe
                 : PaymentMethods.cash
             }
