@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   ErrorCode,
-  Purchases,
   PurchasesError,
   type CustomerInfo,
   type Package,
+  type Purchases,
 } from "@revenuecat/purchases-js";
 import { toast } from "react-toastify";
+import { configureRevenueCat } from "@/lib/revenueCat";
 
 interface RevenueCatContextType {
   purchases: Purchases | null;
@@ -29,27 +30,33 @@ export const RevenueCatProvider = ({
   appUserId,
 }: {
   children: React.ReactNode;
-  appUserId?: string;
+  appUserId?: number;
 }) => {
   const [purchases, setPurchases] = useState<Purchases | null>(null);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!appUserId) return;
+    if (!appUserId) {
+      setPurchases(null);
+      setCustomerInfo(null);
+      setIsLoading(false);
+      return;
+    }
 
     let isMounted = true;
 
     const initRevenueCat = async () => {
       try {
         setIsLoading(true);
+        setPurchases(null);
+        setCustomerInfo(null);
 
-        const purchasesInstance = Purchases.configure({
-          apiKey: import.meta.env.VITE_REVENUECAT_WEB_API_KEY,
-          appUserId: appUserId,
-        });
-
-        if (isMounted) setPurchases(purchasesInstance);
+        const purchasesInstance = await configureRevenueCat(
+          appUserId.toString(),
+        );
+        if (!isMounted) return;
+        setPurchases(purchasesInstance);
 
         const info = await purchasesInstance.getCustomerInfo();
         if (isMounted) setCustomerInfo(info);

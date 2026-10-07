@@ -1,12 +1,11 @@
 import { cn } from "@/lib/utils";
-import {
-  SubsctiptionPeriodLabel,
-  type OfferingProductDetails,
-} from "@/types/api.responses.type";
+import { SubsctiptionPeriodLabel } from "@/types/api.responses.type";
 import { Separator } from "../ui/separator";
 import { assets } from "@/assets/icons";
 import React from "react";
 import { CustomBtn } from "../common/CustomBtn";
+import type { Package, Product } from "@revenuecat/purchases-js";
+import { usePurchases } from "@/context/RevenueCatContext";
 
 const featureConfig = [
   {
@@ -30,22 +29,21 @@ const featureConfig = [
 export function SubscriptionCard({
   productDetails,
   checkoutUrl,
+  pkg,
 }: {
-  productDetails: OfferingProductDetails;
+  productDetails: Product;
   checkoutUrl?: string;
+  pkg: Package;
 }) {
-  const handleSubscribe = () => {
-    if (!checkoutUrl) {
-      return;
-    }
-
-    window.location.href = checkoutUrl;
+  const { purchasePackage } = usePurchases();
+  const handleSubscribe = async () => {
+    await purchasePackage(pkg);
   };
 
   const formattedPrice = new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: productDetails.current_price.currency,
-  }).format(productDetails.current_price.amount_micros / 1000000);
+    currency: productDetails.currentPrice.currency,
+  }).format(productDetails.currentPrice.amountMicros / 1000000);
 
   return (
     <div
@@ -56,6 +54,7 @@ export function SubscriptionCard({
         "dashboard-card-theme",
         "flex flex-col gap-2",
         "rounded-[15px]",
+        "transform transition-all delay-200 hover:-translate-y-0.5 hover:shadow-2xl",
       )}
     >
       {/* Price */}
@@ -63,7 +62,11 @@ export function SubscriptionCard({
         <span className="text-[40px]">{formattedPrice}</span>
 
         <span className="text-[28px] text-placeholder-text">
-          {SubsctiptionPeriodLabel[productDetails.normal_period_duration]}
+          {
+            SubsctiptionPeriodLabel[
+              productDetails.normalPeriodDuration as keyof typeof SubsctiptionPeriodLabel
+            ]
+          }
         </span>
       </div>
 
@@ -122,7 +125,6 @@ export function SubscriptionCard({
             <CustomBtn
               buttonLabel="Subscribe Now"
               onClick={handleSubscribe}
-              disabled={!checkoutUrl}
               btncls={cn(
                 "bg-subscription-gradient",
                 "hover:bg-subscription-gradient",

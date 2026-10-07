@@ -3,7 +3,7 @@ import { Purchases } from "@revenuecat/purchases-js";
 let purchasesInstance: Purchases | undefined;
 let userChangeQueue: Promise<void> = Promise.resolve();
 
-export function configureRevenueCat(appUserId: string): Promise<void> {
+export function configureRevenueCat(appUserId: string): Promise<Purchases> {
   const normalizedAppUserId = appUserId.trim();
   if (!normalizedAppUserId) {
     return Promise.reject(new Error("RevenueCat requires a non-empty app user ID."));
@@ -39,5 +39,5 @@ export function configureRevenueCat(appUserId: string): Promise<void> {
     () => undefined,
   );
 
-  return changeUser;
+  return changeUser.then(() => instance);
 }
