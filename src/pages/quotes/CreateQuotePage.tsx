@@ -17,6 +17,11 @@ import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 import type { ClientDetails } from "@/types/api.responses.type";
 import usePresetQuoteDetails from "@/hooks/apis/quotes/usePresetQuoteDetails";
+import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import { saveToDevice } from "@/lib/utils";
+import { showErrorToast } from "@/api/axiosInstance";
+import { toast } from "react-toastify";
+import { ShareOptions } from "@/components/common/ShareOptions";
 
 enum toggleId {
   Summary = "summary",
@@ -33,6 +38,7 @@ export function CreateQuotePage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const location = useLocation();
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const { defaultClient, presetQuoteId } = (location.state ??
     {}) as CreateQuotePageLocationProps;
 
@@ -48,6 +54,7 @@ export function CreateQuotePage() {
   } = useQuoteDetails({
     quote_id: params.id as string,
     enabled: params.id ? true : false,
+    refetchOnFocus: false,
   });
 
   useEffect(() => {
@@ -56,10 +63,13 @@ export function CreateQuotePage() {
     }
   }, [quote]);
 
+  const { downloadQuoteMutation, sendEmailMutation } = useQuotesMutations();
+
   const { presetQuote, isFetching: isPresetQuoteDetailsFetching } =
     usePresetQuoteDetails({
       templateId: presetQuoteId ?? "",
       enabled: presetQuoteId !== undefined,
+      refetchOnFocus: false,
     });
 
   const quoteRedux = useAppSelector((state) => state.quote);
@@ -70,15 +80,46 @@ export function CreateQuotePage() {
       ? (quote?.reference_number as string)
       : dummyRefNo;
 
+  const handleDownload = () => {
+    if (!quote) {
+      return;
+    }
+    downloadQuoteMutation.mutate(quote.id, {
+      onSuccess: (blob) => {
+        saveToDevice(blob, `proposal - ${quote.reference_number}.pdf`);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+  const handleEmailSend = () => {
+    if (!quote) {
+      return;
+    }
+    sendEmailMutation.mutate(quote.id, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        setShareModalOpen(false);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
   const btnConfigList: CustomBtnProps[] = [
     {
       buttonLabel: "Download",
-      leftIcon: assets.plusIcon,
+      leftIcon: downloadQuoteMutation.isPending ? "" : assets.downloadIconWhite,
+      disabled: downloadQuoteMutation.isPending,
+      onClick: handleDownload,
+      isSubmitting: downloadQuoteMutation.isPending,
     },
     {
       buttonLabel: "share",
       leftIcon: assets.shareIconWhite,
       className: `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
+      onClick: () => setShareModalOpen(true),
     },
   ];
 
@@ -101,7 +142,10 @@ export function CreateQuotePage() {
 
   return (
     <React.Fragment>
-      <HeaderBreadCrumb pageName="New Quote" />
+      <HeaderBreadCrumb
+        pageName={`${params.id ? `Edit` : `New`} Quote`}
+        parentPagePath={location.pathname.split("/").toSpliced(-2).join("/")}
+      />
 
       {isQuoteFetching || isPresetQuoteDetailsFetching ? (
         <div className="flex w-full h-full items-center justify-center">
@@ -109,7 +153,10 @@ export function CreateQuotePage() {
         </div>
       ) : (
         <div className="p-5 flex flex-col gap-6">
-          <CustomHeader header="New Quote" btnConfigList={btnConfigList} />
+          <CustomHeader
+            header={`${params.id ? `Edit` : `New`} Quote`}
+            btnConfigList={quote ? btnConfigList : []}
+          />
 
           <div className="flex gap-6 overflow-x-auto rounded-[7px]">
             <div className="bg-white rounded-[7px] grow">
@@ -151,6 +198,14 @@ export function CreateQuotePage() {
           </div>
         </div>
       )}
+
+      <ShareOptions
+        isOpen={shareModalOpen}
+        toggleIsOpen={setShareModalOpen}
+        sendEmailAction={handleEmailSend}
+        isEmailSending={sendEmailMutation.isPending}
+        clientEmail={quote?.client.email ?? ""}
+      />
     </React.Fragment>
   );
 }

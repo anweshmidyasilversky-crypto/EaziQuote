@@ -39,10 +39,25 @@ export const createQuote = async (payload: CreateQuoteApiPayload) => {
 
 export const updateQuote = async (payload: UpdateQuoteApiPayload) => {
   try {
-    const { quote_id, ...patch } = payload;
+    const { quote_id, items, ...patch } = payload;
+    patch.is_company_phone_number_show = patch.is_company_phone_number_show
+      ? 1
+      : 0;
+    const formData = ObjToFormData(patch);
+    items?.forEach((item, index) => {
+      if (item.quantity > 0) {
+        Object.entries(item).forEach(([itemKey, value]) => {
+          if (value === undefined || value === null) {
+            return;
+          }
+
+          formData.append(`items[${index}][${itemKey}]`, String(value));
+        });
+      }
+    });
     const updatedQuote = await axiosInstance.post<ApiResponse<QuoteDetails>>(
       API_ENDPOINTS.quotes.updateQuote(quote_id),
-      patch,
+      formData,
     );
     return updatedQuote.data;
   } catch (error) {

@@ -217,12 +217,15 @@ function QuoteSummaryForm({
           expiry_date: data.expiryDate,
           client_id: Number(data.clientId),
           notes: data.notes ?? "",
-          attachments: data.attachments?.slice(currQuote?.attachments.length),
+          attachments: data.attachments?.toSpliced(
+            0,
+            currQuote?.attachments.length,
+          ),
           deposit_payment_method:
             user.stripe_account_status === StripAccountStatus.active
-            ? PaymentMethods.stripe
-            : PaymentMethods.cash,
-          is_company_phone_number_show: !data.hidePhoneNumber,
+              ? PaymentMethods.stripe
+              : PaymentMethods.cash,
+          is_company_phone_number_show: data.hidePhoneNumber ? 0 : 1,
         },
         {
           onSuccess: (response) => {
@@ -393,26 +396,34 @@ function QuoteSummaryForm({
         />
         {attachments && (
           <div className="attachment-layout">
-            {attachments.map((attachment, index) => (
-              <StyledAttachments
-                key={attachment.name}
-                fileName={attachment.name}
-                deleteAction={() => {
-                  if (
-                    currQuote &&
-                    index < (currQuote.attachments.length ?? 0)
-                  ) {
-                    handleAttachmentDelete(
-                      currQuote.id,
-                      currQuote.attachments[index].id,
-                      attachment.name,
-                    );
-                  } else {
-                    removeAttachment(attachment.name);
-                  }
-                }}
-              />
-            ))}
+            {attachments.map((attachment, index) => {
+              const noOfPrefilAttachments = currQuote?.attachments.length ?? 0;
+
+              return (
+                <StyledAttachments
+                  key={attachment.name}
+                  fileName={attachment.name}
+                  deleteAction={() => {
+                    if (
+                      currQuote &&
+                      index < (currQuote.attachments.length ?? 0)
+                    ) {
+                      handleAttachmentDelete(
+                        currQuote.id,
+                        currQuote.attachments[index].id,
+                        attachment.name,
+                      );
+                    } else {
+                      removeAttachment(attachment.name);
+                    }
+                  }}
+                  withDownload={index < noOfPrefilAttachments}
+                  attachmentId={currQuote?.attachments?.at(index)?.id}
+                  withOpen
+                  defaultOpenUrl={window.URL.createObjectURL(attachment)}
+                />
+              );
+            })}
           </div>
         )}
 

@@ -126,7 +126,7 @@ export function DateRangePicker({
                     }}
                     disabled={
                       key === "startDate"
-                        ? { before: new Date() }
+                        ? undefined
                         : dateRange.startDate
                           ? { before: dateRange.startDate }
                           : undefined

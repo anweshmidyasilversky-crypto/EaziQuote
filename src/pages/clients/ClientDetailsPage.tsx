@@ -283,32 +283,30 @@ export function ClientDetailsPage() {
         header: "CREATION DATE",
         enableSorting: false,
         cell: (info) => formatDisplayDate(info.getValue<string>()),
-        filterFn: (row, _, filterVal: Date | undefined) => {
-          if (!filterVal) {
-            return true;
-          }
+        filterFn: (row, _, filterVal: DateRange) => {
+          const { startDate, endDate } = filterVal;
           const quote_date = new Date(row.original.created_at);
           // Reset both to local midnight (00:00:00.000)
           quote_date.setHours(0, 0, 0, 0);
-          filterVal.setHours(0, 0, 0, 0);
-          return quote_date >= filterVal;
+          if (startDate) {
+            startDate.setHours(0, 0, 0, 0);
+            if (quote_date < startDate) {
+              return false;
+            }
+          }
+          if (endDate) {
+            endDate.setHours(0, 0, 0, 0);
+            if (quote_date > endDate) {
+              return false;
+            }
+          }
+          return true;
         },
       },
       {
         accessorKey: "expiry_date",
         header: "EXPIRY/DUE DATE",
         enableSorting: false,
-        filterFn: (row, _, filterVal: Date | undefined) => {
-          if (!filterVal) {
-            return true;
-          }
-          const expiryDate = new Date(row.original.expiry_date);
-          // Reset both to local midnight (00:00:00.000)
-          expiryDate.setHours(0, 0, 0, 0);
-          filterVal.setHours(0, 0, 0, 0);
-
-          return expiryDate <= filterVal;
-        },
         cell: (info) => formatDisplayDate(info.getValue<string>()),
       },
       {
@@ -675,17 +673,15 @@ export function ClientDetailsPage() {
           activityTableFilters.current = [
             {
               id: "created_at",
-              value: dateRange.startDate,
-            },
-            {
-              id: "expiry_date",
-              value: dateRange.endDate,
-            },
-            {
-              id: "status",
-              value: filters,
+              value: dateRange,
             },
           ];
+          if (filters.length >= 1) {
+            activityTableFilters.current.push({
+              id: "status",
+              value: filters,
+            });
+          }
         }}
         clearFn={() => {
           setFilters([]);

@@ -25,6 +25,8 @@ export type MoreOptionsPopupProps = {
   withShare?: boolean;
   shareAction?: () => void;
   withDelete?: boolean;
+  withOpen?: boolean;
+  openFn?: () => void;
 };
 
 function MoreOptionsPopup({
@@ -46,6 +48,8 @@ function MoreOptionsPopup({
   withShare,
   shareAction,
   withDelete = true,
+  withOpen,
+  openFn,
 }: MoreOptionsPopupProps) {
   const closePopup = () => togglePopupOpen(false);
   return (
@@ -57,9 +61,19 @@ function MoreOptionsPopup({
         align={align ?? "start"}
         popoverTarget={popoverTarget}
       >
+        {withOpen && (
+          <CustomBtn
+            buttonLabel="view"
+            leftIcon={assets.openEyeBlackIcon}
+            onClick={() => {
+              openFn?.();
+              closePopup();
+            }}
+          />
+        )}
         {withContactInfo && (
           <CustomBtn
-            leftIcon={assets.phoneIcon}
+            leftIcon={assets.phoneIconBlack}
             buttonLabel="Contact Info"
             onClick={() => {
               contactInfoAction?.();
@@ -69,7 +83,7 @@ function MoreOptionsPopup({
         )}
         {withEdit && (
           <CustomBtn
-            leftIcon={assets.pencilIcon}
+            leftIcon={assets.pencilIconBlack}
             buttonLabel="Edit"
             onClick={() => {
               editAction?.();
@@ -113,7 +127,7 @@ function MoreOptionsPopup({
 
         {withDelete && (
           <CustomBtn
-            leftIcon={assets.binIcon}
+            leftIcon={assets.deleteBinIconBlack}
             buttonLabel="Delete"
             onClick={() => {
               deleteAction?.();

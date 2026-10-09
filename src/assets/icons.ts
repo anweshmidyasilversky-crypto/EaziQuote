@@ -128,6 +128,13 @@ import userIconSvg from "./icons/userIcon.svg";
 
 import polygonGradient from "./icons/polygonGradient.svg";
 import subsCriptionWhiteIcon from "./icons/subscriptionIconWhite.svg";
+
+import downloadIconWhite from "./icons/downloadIconWhite.svg";
+import openEyeBlackIcon from "./icons/openEyeIconBlack.png";
+import phoneIconBlack from "./icons/phoneIconBlack.png";
+import pencilIconBlack from "./icons/pencilIconBlack.png";
+import deleteBinIconBlack from "./icons/deleteBinIconBlack.png";
+
 export const assets = {
   loginHeader,
   logo,
@@ -255,4 +262,10 @@ export const assets = {
   userIconSvg,
   polygonGradient,
   subsCriptionWhiteIcon,
+
+  downloadIconWhite,
+  openEyeBlackIcon,
+  phoneIconBlack,
+  pencilIconBlack,
+  deleteBinIconBlack,
 };

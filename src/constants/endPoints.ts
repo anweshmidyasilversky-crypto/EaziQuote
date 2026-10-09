@@ -140,4 +140,10 @@ export const API_ENDPOINTS = {
     productDetails: (userId: number) =>
       `/rcbilling/v1/subscribers/${userId}/products`,
   },
+  admin: {
+    attachmentDownload: (attachmentId: number) =>
+      `/admin/sales/records/preview-quote-file/${attachmentId}/OTM2`,
+    attachmentPreview: (attachmentId: number) =>
+      `/admin/sales/records/preview-quote-file/${attachmentId}/OTM2`,
+  },
 } as const;

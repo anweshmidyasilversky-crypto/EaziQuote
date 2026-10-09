@@ -81,10 +81,10 @@ function InvoiceIndexPage() {
           setAddSignatureWarningOpen(true);
           return;
         }
-        if (!(user.is_trial_period || user.is_subscription_active)) {
-          setSubsEndWarningOpen(true);
-          return;
-        }
+        // if (!(user.is_trial_period || user.is_subscription_active)) {
+        //   setSubsEndWarningOpen(true);
+        //   return;
+        // }
         navigate(`/invoices/manage-invoice`);
       },
     },

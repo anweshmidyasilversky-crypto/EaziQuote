@@ -30,6 +30,7 @@ function SettingsIndexPage() {
       buttonLabel: "Subscribe",
       leftIcon: assets.subscriptionIconWhite,
       btncls: cn(`bg-subscription-gradient min-h-9 max-w-29.25`),
+      onClick: () => navigate("/subscribe-plan"),
     },
   ];
 

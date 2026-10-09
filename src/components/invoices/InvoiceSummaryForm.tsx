@@ -87,8 +87,10 @@ function InvoiceSummaryForm({
   });
 
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: currInvoice ? new Date(currInvoice.invoice_date) : undefined,
-    endDate: currInvoice ? new Date(currInvoice.due_date) : undefined,
+    startDate: currInvoice ? new Date(currInvoice.invoice_date) : new Date(),
+    endDate: currInvoice
+      ? new Date(currInvoice.due_date)
+      : new Date(new Date().getTime() + 860000),
   });
 
   const [quoteId, attachments] = useWatch({
@@ -99,6 +101,7 @@ function InvoiceSummaryForm({
   const { quote } = useQuoteDetails({
     quote_id: quoteId?.toString() ?? "",
     enabled: quoteId !== undefined && quoteId.toString().length >= 1,
+    refetchOnFocus: false,
   });
 
   useEffect(() => {
@@ -339,23 +342,30 @@ function InvoiceSummaryForm({
         />
         {attachments && (
           <div className="attachment-layout">
-            {attachments.map((attachment, index) => (
-              <StyledAttachments
-                key={attachment.name}
-                fileName={attachment.name}
-                deleteAction={() => {
-                  if (quote && index < (quote.attachments.length ?? 0)) {
-                    handleAttachmentDelete(
-                      quote.id,
-                      quote.attachments[index].id,
-                      attachment.name,
-                    );
-                  } else {
-                    removeAttachment(attachment.name);
-                  }
-                }}
-              />
-            ))}
+            {attachments.map((attachment, index) => {
+              const noOfPrefillAttachments = quote?.attachments.length ?? 0;
+              return (
+                <StyledAttachments
+                  key={attachment.name}
+                  fileName={attachment.name}
+                  deleteAction={() => {
+                    if (quote && index < (quote.attachments.length ?? 0)) {
+                      handleAttachmentDelete(
+                        quote.id,
+                        quote.attachments[index].id,
+                        attachment.name,
+                      );
+                    } else {
+                      removeAttachment(attachment.name);
+                    }
+                  }}
+                  attachmentId={quote?.attachments?.at(index)?.id}
+                  defaultOpenUrl={window.URL.createObjectURL(attachment)}
+                  withDownload={index < noOfPrefillAttachments}
+                  withOpen
+                />
+              );
+            })}
           </div>
         )}
 

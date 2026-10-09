@@ -97,7 +97,10 @@ export interface UpdateQuoteItems {
 }
 
 export interface UpdateQuoteApiPayload extends Partial<
-  Omit<QuoteDetails, "attachments" | "items" | "discount">
+  Omit<
+    QuoteDetails,
+    "attachments" | "items" | "discount" | "is_company_phone_number_show"
+  >
 > {
   _method: Method;
   quote_id: string | number;
@@ -107,6 +110,7 @@ export interface UpdateQuoteApiPayload extends Partial<
   items?: UpdateQuoteItems[];
   deposit_payment_method?: PaymentMethods;
   discount?: number | undefined | null;
+  is_company_phone_number_show: 0 | 1;
 }
 
 export interface ItemCreateApiPayload {

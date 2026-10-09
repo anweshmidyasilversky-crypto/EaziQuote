@@ -56,6 +56,7 @@ export interface DataTableProps<TData extends RowData> {
   rowIdSelector?: (row: TData) => string;
 
   tableOptionsCls?: string;
+  bodyCls?: string;
 }
 
 function CustomTable<TData extends RowData>({
@@ -81,6 +82,7 @@ function CustomTable<TData extends RowData>({
   rowIdSelector,
   withSelectionToggle = false,
   tableOptionsCls,
+  bodyCls,
 }: DataTableProps<TData>) {
   // console.log(renderData);
   // const currPageNo = paginationMeta?.current_page;
@@ -156,7 +158,7 @@ function CustomTable<TData extends RowData>({
         {/* Table Body */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-table-head">
+            <thead className="bg-table-head sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
@@ -211,7 +213,7 @@ function CustomTable<TData extends RowData>({
               </tbody>
             ) : (
               <>
-                <tbody>
+                <tbody className={`${bodyCls}`}>
                   {table.getRowModel().rows.length === 0 ? (
                     <tr className="hover:bg-slate-50/50 transition-colors">
                       <td
@@ -280,112 +282,6 @@ function CustomTable<TData extends RowData>({
             )}
           </table>
         </div>
-
-        {/* Table Footer only if pagination is applied*/}
-        {/* {showPaginated && pagination && (
-          <div className="flex justify-between items-center gap-2 px-6 pt-6">
-            <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
-              {" "}
-              Showing <b> {startItemNo} </b> to <b> {endItemNo} </b> of{" "}
-              {totalRecords} items{" "}
-            </span>
-
-            
-            <div className="w-fit flex justify-between gap-2 min-h-8 items-center">
-              <button
-                type="button"
-                disabled={!table.getCanPreviousPage()}
-                onClick={() => table.previousPage()}
-                className="pagination-btn flex items-center"
-              >
-                <span> Previous </span>
-              </button>
-
-              
-              {startPage > 0 && (
-                <>
-                  <button
-                    className={`table-pagination-btn-common ${
-                      currentPage === 0 ? "" : "table-pagination-btn-inactive"
-                    }`}
-                    onClick={() =>
-                      setPagination((curr) => ({
-                        ...curr,
-                        pageIndex: 0,
-                      }))
-                    }
-                  >
-                    1
-                  </button>
-
-                  {startPage > 1 && (
-                    <span className="table-pagination-btn-inactive min-w-8.5 min-h-8 rounded text-center hover:text-black-text">
-                      ...
-                    </span>
-                  )}
-                </>
-              )}
-
-              
-              {pageNumbers.map((pageIndex) => (
-                <button
-                  key={pageIndex}
-                  className={`table-pagination-btn-common ${
-                    currentPage === pageIndex
-                      ? ""
-                      : "table-pagination-btn-inactive"
-                  }`}
-                  onClick={() =>
-                    setPagination((curr) => ({
-                      ...curr,
-                      pageIndex,
-                    }))
-                  }
-                >
-                  {pageIndex + 1}
-                </button>
-              ))}
-
-              
-              {endPage < pageCount - 1 && (
-                <>
-                  {endPage < pageCount - 2 && (
-                    <span className="table-pagination-btn-inactive min-w-8.5 min-h-8 rounded text-center hover:text-black-text">
-                      ...
-                    </span>
-                  )}
-
-                  <button
-                    className={`table-pagination-btn-common ${
-                      currentPage === pageCount - 1
-                        ? ""
-                        : "table-pagination-btn-inactive"
-                    }`}
-                    onClick={() =>
-                      setPagination((curr) => ({
-                        ...curr,
-                        pageIndex: pageCount - 1,
-                      }))
-                    }
-                  >
-                    {pageCount}
-                  </button>
-                </>
-              )}
-
-              <button
-                type="button"
-                disabled={!table.getCanNextPage()}
-                onClick={() => {
-                  table.nextPage();
-                }}
-                className="pagination-btn flex items-center"
-              >
-                <span>Next</span>
-              </button>
-            </div>
-          </div>
-        )} */}
 
         {showPaginated && (
           <div className="flex justify-between items-center gap-2 px-6 py-5 pt-6">

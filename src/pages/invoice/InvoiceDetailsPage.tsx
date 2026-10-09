@@ -421,10 +421,7 @@ export function InvoiceDetailsPage() {
               )}
 
               {activeTable === "description" && (
-                <InvoiceDescriptionPage
-                  invoice={invoiceDetails}
-                  onMutate={() => refetch()}
-                />
+                <InvoiceDescriptionPage invoice={invoiceDetails} />
               )}
               {activeTable === "payments" && (
                 <InvoicePaymentsPage invoice={invoiceDetails} />

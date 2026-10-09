@@ -28,11 +28,9 @@ const featureConfig = [
 
 export function SubscriptionCard({
   productDetails,
-  checkoutUrl,
   pkg,
 }: {
   productDetails: Product;
-  checkoutUrl?: string;
   pkg: Package;
 }) {
   const { purchasePackage } = usePurchases();

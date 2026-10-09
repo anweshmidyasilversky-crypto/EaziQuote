@@ -12,6 +12,11 @@ import { Spinner } from "@/components/ui/spinner";
 import useInvoiceDetails from "@/hooks/apis/invoices/useInvoiceDetails";
 import InvoiceSummaryForm from "@/components/invoices/InvoiceSummaryForm";
 import InvoiceItemSelectForm from "@/components/invoices/InvoiceItemSelectForm";
+import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
+import { saveToDevice } from "@/lib/utils";
+import { showErrorToast } from "@/api/axiosInstance";
+import { toast } from "react-toastify";
+import { ShareOptions } from "@/components/common/ShareOptions";
 
 enum toggleId {
   Summary = "summary",
@@ -30,6 +35,7 @@ export function CreateInvoicePage() {
   const params = useParams<{ id: string | undefined }>();
   const location = useLocation();
   const { quoteId } = (location.state ?? {}) as CreateInvoicePageLocationProps;
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const {
     invoiceDetails,
@@ -38,17 +44,54 @@ export function CreateInvoicePage() {
   } = useInvoiceDetails({
     id: params.id ?? "",
     enabled: params.id !== undefined,
+    refetchOnFocus: false,
   });
+
+  const { sendInvoiceEmailMutation, downloadInvoicePdfMutation } =
+    useInvoiceMutations();
+
+  const handleDownload = () => {
+    if (!invoiceDetails) {
+      return;
+    }
+    downloadInvoicePdfMutation.mutate(invoiceDetails.id, {
+      onSuccess: (blob) => {
+        saveToDevice(blob, `invoice - ${invoiceDetails.invoice_number}.pdf`);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
+  const handleEmailSend = () => {
+    if (!invoiceDetails) {
+      return;
+    }
+    sendInvoiceEmailMutation.mutate(invoiceDetails.id, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        setShareModalOpen(false);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
 
   const btnConfigList: CustomBtnProps[] = [
     {
       buttonLabel: "Download",
-      leftIcon: assets.plusIcon,
+      leftIcon: downloadInvoicePdfMutation.isPending ? "" : assets.plusIcon,
+      onClick: handleDownload,
+      isSubmitting: downloadInvoicePdfMutation.isPending,
+      disabled: downloadInvoicePdfMutation.isPending,
     },
     {
       buttonLabel: "share",
       leftIcon: assets.shareIconWhite,
       className: `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
+      onClick: () => setShareModalOpen(true),
     },
   ];
 
@@ -76,7 +119,7 @@ export function CreateInvoicePage() {
         <div className="p-5 flex flex-col gap-6">
           <CustomHeader
             header={`${params.id ? `Edit` : `New`} Invoice`}
-            btnConfigList={btnConfigList}
+            btnConfigList={params.id ? btnConfigList : []}
           />
 
           <div className="flex gap-6 overflow-x-auto rounded-[7px]">
@@ -107,6 +150,14 @@ export function CreateInvoicePage() {
           </div>
         </div>
       )}
+
+      <ShareOptions
+        isOpen={shareModalOpen}
+        toggleIsOpen={setShareModalOpen}
+        clientEmail={invoiceDetails?.client.email ?? ""}
+        sendEmailAction={handleEmailSend}
+        isEmailSending={sendInvoiceEmailMutation.isPending}
+      />
     </React.Fragment>
   );
 }

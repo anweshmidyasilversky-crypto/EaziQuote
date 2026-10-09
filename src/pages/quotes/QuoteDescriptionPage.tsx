@@ -45,7 +45,11 @@ export function QuoteDescriptionPage({ quote }: QuoteDescriptionPageProps) {
             {attachments.map((att, idx) => (
               <StyledAttachments
                 key={att.id ?? idx}
-                fileName={att.id.toString()}
+                fileName={`${att.id.toString()}.${att.type}`}
+                withDelete={false}
+                attachmentId={att.id}
+                withDownload
+                withOpen
               />
             ))}
           </div>

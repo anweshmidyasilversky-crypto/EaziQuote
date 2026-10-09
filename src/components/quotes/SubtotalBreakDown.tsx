@@ -5,7 +5,7 @@ import type {
   TableFeatures,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
-import { formatCurrency } from "../../lib/utils";
+import { cn, formatCurrency } from "../../lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import CustomDialog from "../common/CustomDialog";
 import { CustomDataTable } from "../common/CustomTable";
@@ -520,11 +520,13 @@ export function SubtotalBreakDown({
         header="Margin"
         withFooter
       >
-        <CustomDataTable
-          columns={marginColumns}
-          data={marginData}
-          showPaginated={marginData.length > 5}
-        />
+        <div className="max-h-[60vh] overflow-y-auto">
+          <CustomDataTable
+            columns={marginColumns}
+            data={marginData}
+            bodyCls={cn(`overflow-auto`)}
+          />
+        </div>
       </CustomDialog>
 
       <AddDeposite
@@ -536,9 +538,7 @@ export function SubtotalBreakDown({
         defaultValues={{
           paymentMethod:
             paymentMethod ??
-            (isStripeConnected
-              ? PaymentMethods.stripe
-              : PaymentMethods.cash),
+            (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash),
           deposite: deposite ?? undefined,
         }}
         handleDepositeType={handleDepositeType}

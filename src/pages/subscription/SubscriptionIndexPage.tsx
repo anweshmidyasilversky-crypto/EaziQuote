@@ -20,10 +20,11 @@ function SubscriptionIndexPage() {
       </div>
 
       {products.length > 0 ? (
-        <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+        <div className="w-full flex gap-4 items-center justify-center flex-wrap">
           {products.map((product) => {
             return (
               <SubscriptionCard
+                key={product.product.identifier}
                 productDetails={product.product}
                 pkg={product}
               />

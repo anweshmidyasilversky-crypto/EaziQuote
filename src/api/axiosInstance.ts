@@ -3,9 +3,10 @@ import { API_ENDPOINTS } from "@/constants/endPoints";
 import { PUBLIC_ONLY_ROUTES } from "@/constants/routes";
 import axios, { isAxiosError } from "axios";
 import { toast } from "react-toastify";
+import { BASE_URL } from "@/constants/urls";
 
 export const axiosInstance = axios.create({
-  baseURL: "https://sandbox.eaziquote.com/api",
+  baseURL: BASE_URL,
   timeout: 5 * 1000,
   headers: {
     "x-api-key": import.meta.env.VITE_X_API_KEY,

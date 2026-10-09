@@ -132,6 +132,7 @@ export function ShareOptions({
             <CustomBtn
               buttonLabel="Send Email"
               onClick={sendEmailAction}
+              disabled={isEmailSending}
               isSubmitting={isEmailSending}
             />
           </div>

@@ -234,20 +234,24 @@ export function DashboardLayout() {
           <div className="w-full min-h-fit flex justify-between gap-2 items-center">
             {/* Subscription end detail */}
             <div className="w-80.25 min-h-8 flex gap-3 items-center">
-              <span className="max-h-4.75 w-auto max-w-53 font-sans text-xs md:text-sm text-placeholder-text flex items-center min-w-20 py-2">
-                {user.is_trial_period &&
-                  `Free trial ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
-                {!user.is_trial_period &&
-                  `${user.is_subscription_active ? `Plan ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}` : "Your subscription has expired"} `}
-              </span>
+              {!user.is_subscription_active && (
+                <>
+                  <span className="max-h-4.75 w-auto max-w-53 font-sans text-xs md:text-sm text-placeholder-text flex items-center min-w-20 py-2">
+                    {user.is_trial_period &&
+                      `Free trial ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}`}
+                    {!user.is_trial_period &&
+                      `${user.is_subscription_active ? `Plan ends on ${endDate.toLocaleString("en-Gb", { dateStyle: "medium" })}` : "Your subscription has expired"} `}
+                  </span>
 
-              <button
-                className="btn-auth flex items-center justify-center h-full min-h-8 w-fit md:min-w-24.25 md:max-w-24.25 py-2 px-3 gap-2 rounded-0.5 bg-sidebar-btn"
-                onClick={() => navigate(`/subscribe-plan`)}
-              >
-                <span className="font-sans text-sm">Subscribe</span>
-                <img src={assets.arrowRight} className="max-h-2 max-w-1" />
-              </button>
+                  <button
+                    className="btn-auth flex items-center justify-center h-full min-h-8 w-fit md:min-w-24.25 md:max-w-24.25 py-2 px-3 gap-2 rounded-0.5 bg-sidebar-btn"
+                    onClick={() => navigate(`/subscribe-plan`)}
+                  >
+                    <span className="font-sans text-sm">Subscribe</span>
+                    <img src={assets.arrowRight} className="max-h-2 max-w-1" />
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="h-full w-auto max-w-67.5 flex md:gap-6 items-center">
