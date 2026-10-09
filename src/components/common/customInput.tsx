@@ -223,7 +223,7 @@ export function CustomInput<T extends FieldValues>({
                     onChange={onChange}
                     rows={5}
                     style={{ resize: "vertical", overflowY: "auto" }}
-                    className={`min-h-32 w-full rounded-[7px] border border-input-field-border bg-white p-3 transition-all duration-200 ${className} ${error ? `input-error` : `focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100`}`}
+                    className={`min-h-32 w-full rounded-[7px] border border-input-field-border bg-white p-3 transition-all duration-200 ${className} ${error ? `input-error!` : `focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100`}`}
                     placeholder={placeholder}
                   />
                 )}

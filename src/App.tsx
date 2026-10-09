@@ -35,7 +35,7 @@ function App() {
       dispatch(
         updateUser({
           ...userDetails,
-          phone: userDetails.phone.replaceAll(" ", ""),
+          phone: userDetails.phone?.replaceAll(" ", ""),
         }),
       );
     }

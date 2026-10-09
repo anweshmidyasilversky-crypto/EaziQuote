@@ -11,18 +11,13 @@ import { releaseToken } from "@/redux/slices/auth.slice";
 import { removeUser } from "@/redux/slices/user.slice";
 import { showErrorToast } from "@/api/axiosInstance";
 import { Spinner } from "../ui/spinner";
-import useSupportMutation from "@/hooks/apis/support/useSupportMutation";
-import type { SupportTicketCreatePayload } from "@/types/api.requests.type";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { supportTicketCreateSchema } from "@/validation/supportTicket.create.payload.schema";
 import CustomDialog from "../common/CustomDialog";
-import { CustomCombobox } from "../common/CustomCombobox";
 import { cn } from "@/lib/utils";
-import { CustomInput } from "../common/CustomInput";
 import { CircleArrowOutUpLeft, Menu, X } from "lucide-react";
 import { CustomBtn } from "../common/CustomBtn";
 import DeleteDialog from "../common/DeleteDialog";
+import { removeQuote } from "@/redux/slices/quotes.slice";
+import ContactSupportBox from "../common/ContactSupportBox";
 export function DashboardLayout() {
   const { logoutMutation, userDeleteMutation } = useAuthMutation();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -33,28 +28,9 @@ export function DashboardLayout() {
   const [ticketCreateDialogOpen, setTicketCreateDialogOpen] = useState(false);
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
-  const config = useAppSelector((state) => state.appConfig);
   const endDate = new Date(user.subscription_ended_at ?? new Date());
   const btnIcon = (btnId: string, activeIcon: string, inActiveIcon: string) =>
     btnId === activeBtn ? activeIcon : inActiveIcon;
-  const { ticketCreateMutation } = useSupportMutation();
-
-  const [ticketAreaSearchTerm, setTicketAreaSearchTerm] = useState("");
-  const {
-    control,
-    reset,
-    clearErrors,
-    formState: { errors },
-    handleSubmit,
-    setValue,
-  } = useForm<SupportTicketCreatePayload>({
-    defaultValues: {
-      support_ticket_area_id: undefined,
-      description: undefined,
-      other_area: undefined,
-    },
-    resolver: yupResolver(supportTicketCreateSchema),
-  });
 
   const btnConfig: {
     id: string;
@@ -139,22 +115,9 @@ export function DashboardLayout() {
         toast.success(response.message);
         dispatch(releaseToken());
         dispatch(removeUser());
+        dispatch(removeQuote());
         persistor.purge();
         navigate("/");
-      },
-      onError: (error) => {
-        showErrorToast(error);
-      },
-    });
-  };
-
-  const handleTicketCreation = (payload: SupportTicketCreatePayload) => {
-    ticketCreateMutation.mutate(payload, {
-      onSuccess: (response) => {
-        toast.success(response.message);
-        setTicketCreateDialogOpen(false);
-        reset();
-        setTicketAreaSearchTerm("");
       },
       onError: (error) => {
         showErrorToast(error);
@@ -330,75 +293,10 @@ export function DashboardLayout() {
         </div>
       </div>
 
-      <CustomDialog
-        dialogOpen={ticketCreateDialogOpen}
-        toggleDialogOpen={setTicketCreateDialogOpen}
-        header="Support"
-        withFooter={true}
-        showFooterSeparator={false}
-        footerBtnLabel="Submit"
-        footerBtnAction={handleSubmit(handleTicketCreation)}
-        closeOnSubmit={false}
-        isSubmitting={ticketCreateMutation.isPending}
-        closeAction={() => {
-          reset();
-          setTicketCreateDialogOpen(false);
-          setTicketAreaSearchTerm("");
-        }}
-      >
-        <div className="min-w-125 flex flex-col gap-6 px-5 py-6">
-          <div className="input-non-oriented flex-col gap-2">
-            <label className="input-label"> {"Area"} </label>
-            <CustomCombobox
-              items={config.support_ticket_areas}
-              getItemLabel={(ticketConfig) => ticketConfig?.label}
-              getItemId={(ticketConfig) => ticketConfig?.id}
-              filterFn={(item, query) => {
-                return Object.values(item).some((val) =>
-                  val
-                    .toString()
-                    .toLocaleLowerCase()
-                    .includes(query.toString().toLocaleLowerCase()),
-                );
-              }}
-              onValueChange={(item) => {
-                if (item) {
-                  setTicketAreaSearchTerm(item.label);
-                  setValue("support_ticket_area_id", item.id);
-                  clearErrors("support_ticket_area_id");
-                }
-              }}
-              inptFieldValue={ticketAreaSearchTerm}
-              inptFieldChange={setTicketAreaSearchTerm}
-              className={cn(
-                `input-field ${errors.support_ticket_area_id ? `input-error!` : ``}`,
-              )}
-              placeholder="Select Support area"
-            />
-            {errors.support_ticket_area_id && (
-              <p className="error-text">
-                {" "}
-                {errors.support_ticket_area_id.message}{" "}
-              </p>
-            )}
-          </div>
-
-          <CustomInput
-            control={control}
-            name="other_area"
-            fieldName="Be Specific"
-            placeholder="Enter email"
-          />
-
-          <CustomInput
-            control={control}
-            name="description"
-            fieldName="Description"
-            inptType="textarea"
-            placeholder="Enter support description"
-          />
-        </div>
-      </CustomDialog>
+      <ContactSupportBox
+        isOpen={ticketCreateDialogOpen}
+        toggleIsOpen={setTicketCreateDialogOpen}
+      />
 
       {/* Logout modal */}
       <CustomDialog

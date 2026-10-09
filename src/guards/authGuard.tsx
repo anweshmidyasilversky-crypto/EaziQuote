@@ -13,9 +13,10 @@ export function AuthGuard() {
     "/business-profile",
     "/business-address",
   ];
-  const authenticatedLanding = user.is_company_address_setup
-    ? "/dashboard"
-    : "/profile-setup";
+  const authenticatedLanding =
+    user.is_profile_setup && user.is_company_address_setup
+      ? "/dashboard"
+      : "/profile-setup";
 
   if (location.pathname === "/email-verified") {
     return <Outlet />;
@@ -54,7 +55,7 @@ export function AuthGuard() {
   }
 
   if (
-    !user.is_company_address_setup &&
+    !(user.is_company_address_setup || user.is_profile_setup) &&
     !profileSetupRoutes.includes(location.pathname)
   ) {
     return <Navigate to="/profile-setup" replace />;

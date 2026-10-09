@@ -8,13 +8,6 @@ import {
   type QuoteDetails,
 } from "@/types/api.responses.type";
 
-// {
-//     id: 0,
-//     status: QuoteStatus.draft,
-//     display_name: "",
-//     color: null,
-//   }
-
 const initialState: QuoteDetails = {
   id: 0,
   title: "",

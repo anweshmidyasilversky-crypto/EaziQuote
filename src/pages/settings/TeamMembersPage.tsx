@@ -89,7 +89,7 @@ function TeamMembersPage() {
       cell: (info) => {
         const name = info.getValue<string>();
         return (
-          <ClientNameBadge name={name} imgSrc={assets.userImgFemale} textWrap />
+          <ClientNameBadge name={name} imgSrc={assets.userIcon} textWrap />
         );
       },
       enableSorting: false,
