@@ -35,8 +35,11 @@ import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 import useInvoicePdf from "@/hooks/apis/invoices/useInvoicePdf";
 import { InvoiceDescriptionPage } from "./InvoiceDescriptionPage";
 import InvoicePaymentsPage from "./InvoicePaymentsPage";
+import { useAppSelector } from "@/redux/store";
+import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 
 export function InvoiceDetailsPage() {
+  const user = useAppSelector((state) => state.user);
   const params = useParams() as { id: string };
   const navigate = useNavigate();
   const { invoiceDetails, isFetching, refetch } = useInvoiceDetails({
@@ -51,6 +54,7 @@ export function InvoiceDetailsPage() {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const [invoicePreviewOpen, toggleinvoicePreviewOpen] = useState(false);
   const [shareExportPopupOpen, toggleShareExportPopup] = useState(false);
+  const [subscriptionWarningOpen, setSubsEndWarningOpen] = useState(false);
 
   const {
     invoiceStatusMutation,
@@ -152,7 +156,13 @@ export function InvoiceDetailsPage() {
       isPopupOpen={moreOptionsOpen}
       togglePopupOpen={toggleMoreOptionsOpen}
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
-      editAction={() => navigate(`/invoices/manage-invoice/${params?.id}`)}
+      editAction={() => {
+        if (user.is_subscription_active || user.is_trial_period) {
+          navigate(`/invoices/manage-invoice/${params?.id}`);
+        } else {
+          setSubsEndWarningOpen(true);
+        }
+      }}
     >
       <span
         className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
@@ -168,7 +178,7 @@ export function InvoiceDetailsPage() {
       withDelete={false}
       withEdit={false}
       withDownload
-      withShare
+      withShare={invoiceDetails?.status !== InvoiceStatus.paid}
       shareAction={() => toggleShareBoxOpen(true)}
       downloadAction={handleInvoiceDownload}
     >
@@ -471,6 +481,12 @@ export function InvoiceDetailsPage() {
           </div>
         </FormLayout>
       </div>
+
+      <SubscriptionWarningModal
+        isOpen={subscriptionWarningOpen}
+        toggleOpen={setSubsEndWarningOpen}
+        action={() => navigate(`/subscribe-plan`)}
+      />
     </React.Fragment>
   );
 }

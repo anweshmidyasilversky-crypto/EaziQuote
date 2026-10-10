@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type UserSignInPayload } from "../../types/user.signIn.payload.type";
 import { CustomInput } from "../../components/common/CustomInput";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { userSignInSchema } from "../../validation/user.signIn.payload.schema";
 import { toast } from "react-toastify";
 import { Spinner } from "../../components/ui/spinner";
@@ -14,11 +14,15 @@ import { deviceType } from "@/types/api.requests.type";
 import { setToken } from "@/redux/slices/auth.slice";
 import useAuthMutation from "@/hooks/apis/auth/useAuthMutation";
 import { showErrorToast } from "@/api/axiosInstance";
+import AccessDeniedModal from "@/components/common/AccessDeniedModal";
+import ContactSupportBox from "@/components/common/ContactSupportBox";
 
 export function SignInPage() {
   const rememberMe = useRef(0);
   const navigate = useNavigate();
-  const dispath = useAppDispatch();
+  const dispatch = useAppDispatch();
+  const [accessDeniedModalOpen, setAccessDeniedModalOpen] = useState(false);
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
   const { control, handleSubmit } = useForm<UserSignInPayload>({
     defaultValues: {
       email: "",
@@ -47,9 +51,13 @@ export function SignInPage() {
               },
             });
           } else {
-            console.log(loginResponse.payload.company?.address);
-            dispath(setToken(loginResponse.payload.access_token));
-            dispath(
+            if (!loginResponse.payload.is_active) {
+              setAccessDeniedModalOpen(true);
+              return;
+            }
+
+            dispatch(setToken(loginResponse.payload.access_token));
+            dispatch(
               updateUser({
                 ...loginResponse.payload,
                 is_company_address_setup: loginResponse.payload.company?.address
@@ -144,6 +152,20 @@ export function SignInPage() {
           </div>
         </CardContent>
       </Card>
+
+      <AccessDeniedModal
+        isOpen={accessDeniedModalOpen}
+        toggleOpen={setAccessDeniedModalOpen}
+        supportBtnAction={() => {
+          setAccessDeniedModalOpen(false);
+          setSupportModalOpen(true);
+        }}
+      />
+
+      <ContactSupportBox
+        isOpen={supportModalOpen}
+        toggleIsOpen={setSupportModalOpen}
+      />
     </div>
   );
 }

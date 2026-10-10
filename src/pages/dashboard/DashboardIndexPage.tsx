@@ -39,6 +39,9 @@ import {
   SettingsPaymentPageReason,
   type SettingsLocationProps,
 } from "@/types/common.types";
+import BankDetailsWarningModal from "@/components/common/BankDetailsWarningModal";
+import SignatureWarningModal from "@/components/common/SignatureWarningModal";
+import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
@@ -379,24 +382,16 @@ export function DashboardIndexPage() {
         }
       />
 
-      <WarningDialog
-        open={addBankDetailsDialog}
+      <BankDetailsWarningModal
+        isOpen={addBankDetailsDialog}
         toggleOpen={setAddBankDetailsDialog}
-        warningHeader="Complete Your Setup"
-        warningContent="Add your bank details and signature to ensure your quotes look professional and include payment information."
-        acceptBtnLabel="Complete Setup"
-        acceptAction={() => navigate(`/settings/payments-and-invoicing`)}
-        withCancelBtn={false}
+        action={() => navigate(`/settings/payments-and-invoicing`)}
       />
 
-      <WarningDialog
-        open={addSignatureWarningOpen}
+      <SignatureWarningModal
+        isOpen={addSignatureWarningOpen}
         toggleOpen={setAddSignatureWarningOpen}
-        warningHeader="Add Your Signature"
-        warningContent="Adding a signature helps build trust and makes your quote feel complete and professional."
-        withCancelBtn={false}
-        acceptBtnLabel="Add Signature"
-        acceptAction={() =>
+        action={() =>
           navigate(`/settings/payments-and-invoicing`, {
             state: {
               reason: SettingsPaymentPageReason.addSignature,
@@ -405,23 +400,10 @@ export function DashboardIndexPage() {
         }
       />
 
-      <WarningDialog
-        open={subsEndWarningOpen}
+      <SubscriptionWarningModal
+        isOpen={subsEndWarningOpen}
         toggleOpen={setSubsEndWarningOpen}
-        warningHeader="Subscription Required"
-        warningContent="To continue using EaziQuote, please activate or renew your subscription."
-        acceptBtnLabel="Activate Subscription"
-        acceptAction={() => navigate(`/subscribe-plan`)}
-        withCancelBtn={false}
-        warningImgElement={
-          <div className="relative flex items-center justify-center">
-            <img src={assets.polygonGradient} className="h-20 aspect-auto" />
-            <img
-              src={assets.subsCriptionWhiteIcon}
-              className="h-7.5 aspect-auto z-10 absolute"
-            />
-          </div>
-        }
+        action={() => navigate(`/subscribe-plan`)}
       />
     </div>
   );

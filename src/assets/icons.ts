@@ -134,6 +134,7 @@ import openEyeBlackIcon from "./icons/openEyeIconBlack.png";
 import phoneIconBlack from "./icons/phoneIconBlack.png";
 import pencilIconBlack from "./icons/pencilIconBlack.png";
 import deleteBinIconBlack from "./icons/deleteBinIconBlack.png";
+import accessDeniedIcon from "./icons/accessDeniedIcon.png";
 
 export const assets = {
   loginHeader,
@@ -268,4 +269,6 @@ export const assets = {
   phoneIconBlack,
   pencilIconBlack,
   deleteBinIconBlack,
+
+  accessDeniedIcon,
 };

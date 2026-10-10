@@ -43,6 +43,7 @@ import useQuotePreview from "@/hooks/apis/quotes/useQuotePreview";
 import { FormLayout } from "@/components/common/FormLayout";
 import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 import type { CreateInvoicePageLocationProps } from "../invoice/CreateInvoicePage";
+import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 
 export function QuotesDetailsPage() {
   const params = useParams() as { id: string };
@@ -71,6 +72,7 @@ export function QuotesDetailsPage() {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const [quotePreviewOpen, toggleQuotePreviewOpen] = useState(false);
   const [shareExportPopupOpen, toggleShareExportPopup] = useState(false);
+  const [subscriptionWarningOpen, setSubscriptionWarningOpen] = useState(false);
 
   const {
     quoteDuplicateMutation,
@@ -173,12 +175,18 @@ export function QuotesDetailsPage() {
     {
       leftIcon: assets.plusIcon,
       buttonLabel: "Invoice",
-      onClick: () =>
+      onClick: () => {
+        if (!(user.is_trial_period || user.is_subscription_active)) {
+          setSubscriptionWarningOpen(true);
+          return;
+        }
+
         navigate(`/invoices/manage-invoice`, {
           state: {
             quoteId: quote?.id,
           } as CreateInvoicePageLocationProps,
-        }),
+        });
+      },
     },
     {
       leftIcon: assets.previewIcon,
@@ -524,6 +532,12 @@ export function QuotesDetailsPage() {
           </div>
         </FormLayout>
       </div>
+
+      <SubscriptionWarningModal
+        isOpen={subscriptionWarningOpen}
+        toggleOpen={setSubscriptionWarningOpen}
+        action={() => navigate(`/subscribe-plan`)}
+      />
     </React.Fragment>
   );
 }
