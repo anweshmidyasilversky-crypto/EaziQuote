@@ -34,7 +34,7 @@ export function ClientNameBadge({
           className={cn(`min-h-4.25 ${textWrap ? `text-wrap` : `text-nowrap`}`)}
         >
           {" "}
-          {name}{" "}
+          {name ? (name === "" ? "-" : name) : "-"}{" "}
         </span>
       )}
     </div>

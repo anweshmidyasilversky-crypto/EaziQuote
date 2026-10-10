@@ -47,7 +47,9 @@ function AddDiscount({
       closeOnSubmit={false}
       footerRightNode={
         <CustomBtn
-          btncls={cn(`bg-custom-dialog-primary hover:bg-custom-dialog-primary`)}
+          btncls={cn(
+            `bg-custom-dialog-primary hover:bg-custom-dialog-primary text-black-text`,
+          )}
           buttonLabel="Clear"
           onClick={reset}
         />

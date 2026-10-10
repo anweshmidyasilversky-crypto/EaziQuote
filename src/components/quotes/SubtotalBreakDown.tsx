@@ -525,6 +525,7 @@ export function SubtotalBreakDown({
             columns={marginColumns}
             data={marginData}
             bodyCls={cn(`overflow-auto`)}
+            contentScrollable
           />
         </div>
       </CustomDialog>

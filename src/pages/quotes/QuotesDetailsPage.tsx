@@ -502,6 +502,9 @@ export function QuotesDetailsPage() {
             clientEmail={quote?.client?.email ?? ""}
             sendEmailAction={handleEmailSend}
             isEmailSending={sendEmailMutation.isPending}
+            downloadLink={`${quote?.url}?download=1`}
+            shareLink={quote?.route_url}
+            title={`${quote?.reference_number} - ${quote?.id}`}
           />
         </div>
         <DeleteDialog

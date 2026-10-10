@@ -57,6 +57,7 @@ export interface DataTableProps<TData extends RowData> {
 
   tableOptionsCls?: string;
   bodyCls?: string;
+  contentScrollable?: boolean;
 }
 
 function CustomTable<TData extends RowData>({
@@ -83,6 +84,7 @@ function CustomTable<TData extends RowData>({
   withSelectionToggle = false,
   tableOptionsCls,
   bodyCls,
+  contentScrollable,
 }: DataTableProps<TData>) {
   // console.log(renderData);
   // const currPageNo = paginationMeta?.current_page;
@@ -156,7 +158,12 @@ function CustomTable<TData extends RowData>({
         )}
 
         {/* Table Body */}
-        <div className="overflow-x-auto">
+        <div
+          className={cn(
+            `overflow-x-auto`,
+            contentScrollable ? "max-h-[50vh] overflow-auto" : "",
+          )}
+        >
           <table className="w-full text-left border-collapse">
             <thead className="bg-table-head sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -233,16 +240,27 @@ function CustomTable<TData extends RowData>({
                         key={row.id}
                         className="hover:bg-slate-50/50 transition-colors"
                       >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            className="px-6 text-wrap h-fit! min-w-30! py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
-                          >
-                            <div className="flex items-center text-wrap wrap-break-word">
-                              {<table.FlexRender cell={cell} />}
-                            </div>
-                          </td>
-                        ))}
+                        {row.getVisibleCells().map((cell) => {
+                          const cellRenderer = cell.column.columnDef.cell;
+                          //console.log(cellRenderer, cell.id);
+                          return (
+                            <td
+                              key={cell.id}
+                              className="px-6 text-wrap h-fit! min-w-30! py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                            >
+                              <div className="flex items-center text-wrap wrap-break-word">
+                                {typeof cellRenderer === "function" &&
+                                ![null, "", " "].includes(
+                                  cellRenderer(cell.getContext()),
+                                ) ? (
+                                  <table.FlexRender cell={cell} />
+                                ) : (
+                                  "-"
+                                )}
+                              </div>
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))
                   )}

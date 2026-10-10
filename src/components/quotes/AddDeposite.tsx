@@ -17,10 +17,7 @@ import {
 import { cn, formatCurrency } from "../../lib/utils";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomBtn } from "../common/CustomBtn";
-import {
-  PaymentMethods,
-  StripAccountStatus,
-} from "@/types/api.responses.type";
+import { PaymentMethods, StripAccountStatus } from "@/types/api.responses.type";
 import { DepositeTypes } from "@/types/api.requests.type";
 import { useAppSelector } from "@/redux/store";
 
@@ -92,10 +89,7 @@ function AddDeposite({
   });
 
   const submitHanler = (data: AddDepositePayload) => {
-    if (
-      data.paymentMethod === PaymentMethods.stripe &&
-      !isStripeConnected
-    ) {
+    if (data.paymentMethod === PaymentMethods.stripe && !isStripeConnected) {
       toggleStripPopup(true);
       toggleOpen(false);
     } else {
@@ -177,9 +171,7 @@ function AddDeposite({
             items={Object.values(PaymentMethods)}
             selected={
               defaultValues.paymentMethod ??
-              (isStripeConnected
-                ? PaymentMethods.stripe
-                : PaymentMethods.cash)
+              (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash)
             }
             onValueChange={(method) => {
               method ? setValue("paymentMethod", method) : undefined;

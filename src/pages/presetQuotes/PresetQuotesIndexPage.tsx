@@ -52,7 +52,7 @@ function PresetQuotesIndexPage() {
         return (
           <p className="truncate max-w-40 md:max-w-80 lg:max-w-180">
             {" "}
-            {description}{" "}
+            {description ?? "-"}{" "}
           </p>
         );
       },

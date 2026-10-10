@@ -136,6 +136,8 @@ import pencilIconBlack from "./icons/pencilIconBlack.png";
 import deleteBinIconBlack from "./icons/deleteBinIconBlack.png";
 import accessDeniedIcon from "./icons/accessDeniedIcon.png";
 
+import shareMoreIcon from "./icons/shareMoreIcon.svg";
+
 export const assets = {
   loginHeader,
   logo,
@@ -271,4 +273,5 @@ export const assets = {
   deleteBinIconBlack,
 
   accessDeniedIcon,
+  shareMoreIcon,
 };

@@ -9,6 +9,7 @@ import {
 import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
 import { XIcon } from "lucide-react";
 import { CustomBtn } from "./CustomBtn";
+import { toast } from "react-toastify";
 
 export type ShareOptionsProps = {
   isOpen: boolean;
@@ -16,6 +17,10 @@ export type ShareOptionsProps = {
   clientEmail: string;
   sendEmailAction?: () => void;
   isEmailSending?: boolean;
+  shareLink?: string;
+  downloadLink?: string;
+  appId?: string | number;
+  title?: string;
 };
 
 type sharOptions = {
@@ -30,23 +35,63 @@ export function ShareOptions({
   clientEmail,
   sendEmailAction,
   isEmailSending,
+  shareLink,
+  downloadLink,
+  appId,
+  title,
 }: ShareOptionsProps) {
+  const shareMessage = encodeURIComponent(
+    `Hi, please find your quote here: View: ${shareLink} Download: ${downloadLink} Thank you.`,
+  );
   const options: sharOptions[] = [
     {
       imgPath: assets.whatsAppIcon,
       name: "WhatsApp",
+      onClick: () =>
+        window.open(`https://wa.me/send?text=${shareMessage}`, "_blank"),
     },
     {
       imgPath: assets.facebooksIcon,
       name: "Facebook",
-    },
-    {
-      imgPath: assets.twitterIcon,
-      name: "X",
+      onClick: () =>
+        window.open(
+          `https://www.facebook.com/share_as_message/?link=${downloadLink}&app_id=${appId}`,
+          `_blank`,
+        ),
     },
     {
       imgPath: assets.gmailIcon,
       name: "Gmail",
+      onClick: () =>
+        window.open(
+          `mailto:?subject=${encodeURIComponent(title ?? "")}&body=${shareMessage}`,
+        ),
+    },
+    {
+      imgPath: assets.shareMoreIcon,
+      name: "Share",
+      onClick: async () => {
+        const shareData: ShareData = {
+          title: title, // This becomes the subject line if shared via Email/Outlook
+          text: shareMessage, // This populates the main text message body
+        };
+        if (
+          navigator.share &&
+          navigator.canShare &&
+          navigator.canShare(shareData)
+        ) {
+          try {
+            // Trigger the system menu shown in your screenshot
+            await navigator.share(shareData);
+            console.log("Quote shared successfully!");
+          } catch (error) {
+            // Handle when a user cancels/closes the share menu manually
+            console.log("Share menu closed or failed:", error);
+          }
+        } else {
+          toast.error(`This Browser doesn't support Web Share API`);
+        }
+      },
     },
   ];
   return (
@@ -71,22 +116,22 @@ export function ShareOptions({
             }}
             className="relative w-full"
           >
-            <CarouselContent className="ml-0 gap-3">
-              {options.concat(options).map((option, index) => (
+            <CarouselContent className="ml-0 gap-2">
+              {options.map((option, index) => (
                 <CarouselItem
                   key={`${option.name}-${index}`}
-                  className="basis-auto pl-4"
+                  className="min-w-0 flex-1 basis-0 pl-0"
                 >
                   <button
                     type="button"
                     onClick={option.onClick}
-                    className="flex w-14 flex-col items-center gap-1.5"
+                    className="mx-auto flex w-14 max-w-full flex-col items-center gap-1.5 translate-y-0!"
                   >
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                    <div className="h-14 w-14 max-w-full shrink-0 overflow-hidden rounded-full hover:shadow-2xl hover:-translate-y-0.2 transform delay-200 transition-all">
                       <img
                         src={option.imgPath}
                         alt={option.name}
-                        className="h-full w-full object-contain"
+                        className="h-full w-full object-contain "
                       />
                     </div>
 
@@ -98,33 +143,9 @@ export function ShareOptions({
               ))}
             </CarouselContent>
 
-            <CarouselPrevious
-              className="
-                absolute -left-4.5 -top-1
-                h-7 w-7
-                translate-y-0
-                rounded-full
-                border-none
-                bg-[#89909D]
-                shadow-sm
-                hover:bg-gray-300
-                disabled:hidden
-                "
-            />
+            <CarouselPrevious className="absolute -left-4.5 -top-1 h-7 w-7 translate-y-0 rounded-full border-none bg-placeholder-text shadow-sm hover:bg-gray-300 disabled:hidden" />
 
-            <CarouselNext
-              className="
-                absolute -right-4.5 -top-1
-                h-7 w-7
-                translate-y-0
-                rounded-full
-                border-none
-                bg-[#89909D]
-                shadow-sm
-                hover:bg-gray-300
-                disabled:hidden
-                "
-            />
+            <CarouselNext className="absolute -right-4.5 -top-1 h-7 w-7 translate-y-0 rounded-full border-none bg-placeholder-text shadow-sm hover:bg-gray-300 disabled:hidden" />
           </Carousel>
 
           <div className="min-h-13 rounded-[7px] py-3 px-2 flex gap-3 border border-searchbox-border justify-between items-center">

@@ -205,6 +205,9 @@ export function CreateQuotePage() {
         sendEmailAction={handleEmailSend}
         isEmailSending={sendEmailMutation.isPending}
         clientEmail={quote?.client.email ?? ""}
+        downloadLink={`${quote?.url}?download=1`}
+        shareLink={quote?.route_url}
+        title={`${quote?.reference_number} - ${quote?.id}`}
       />
     </React.Fragment>
   );
