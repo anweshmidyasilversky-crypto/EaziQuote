@@ -85,7 +85,9 @@ export function CreateInvoicePage() {
   const btnConfigList: CustomBtnProps[] = [
     {
       buttonLabel: "Download",
-      leftIcon: downloadInvoicePdfMutation.isPending ? "" : assets.plusIcon,
+      leftIcon: downloadInvoicePdfMutation.isPending
+        ? ""
+        : assets.downloadIconWhite,
       onClick: handleDownload,
       isSubmitting: downloadInvoicePdfMutation.isPending,
       disabled: downloadInvoicePdfMutation.isPending,

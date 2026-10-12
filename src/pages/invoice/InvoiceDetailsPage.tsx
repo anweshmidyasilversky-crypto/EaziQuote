@@ -143,6 +143,9 @@ export function InvoiceDetailsPage() {
         link.parentNode?.removeChild(link);
         window.URL.revokeObjectURL(blobUrl);
       },
+      onError: (error) => {
+        showErrorToast(error);
+      },
     });
   };
 

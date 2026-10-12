@@ -83,7 +83,7 @@ function BusinessInfoPage() {
         country: data.country,
         brand_color: data.brandColor,
         is_company_name_show: data.showBusinessName ? 1 : 0,
-        vat_number: data.vatNumber,
+        vat_number: isVatRegistered ? data.vatNumber : undefined,
       },
       {
         onSuccess: (response) => {

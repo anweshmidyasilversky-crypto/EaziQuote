@@ -30,10 +30,12 @@ function usePaymentsList({ filters }: usePaymentsByClientProps) {
     showErrorToast(error);
   }
 
+  const paymentList = useMemo(() => data?.payload.data ?? [], [data]);
+
   useMemo(() => setPageNo(1), [filters, debouncedSearchTerm]);
 
   return {
-    paymentList: data?.payload.data ?? [],
+    paymentList,
     isFetching,
     paymentPaginationMeta: data?.payload.meta,
     setPageNo,

@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import usePaymentDetails from "@/hooks/apis/payments/usePaymentDetails";
 import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, dateToDdMonYyyy, formatCurrency } from "@/lib/utils";
 import {
   PaymentStatus,
   type PaymentAllocation,
@@ -75,7 +75,7 @@ function PaymentsDetailsPage() {
     {
       summaryTitle: "Date",
       summaryIcon: assets.calenderIconBlue,
-      summary: formatDate(
+      summary: dateToDdMonYyyy(
         paymentDetails?.date ??
           `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}`,
       ),
@@ -111,7 +111,7 @@ function PaymentsDetailsPage() {
         cell: (info) => {
           const dateString = info.getValue<string | null>();
           if (dateString !== null) {
-            return formatDate(dateString);
+            return dateToDdMonYyyy(dateString);
           }
         },
       },
