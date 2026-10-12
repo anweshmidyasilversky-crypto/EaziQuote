@@ -21,7 +21,10 @@ import { SubtotalBreakDown } from "../../components/quotes/SubtotalBreakDown";
 import { CustomInfoCard } from "../../components/quotes/CustomInfoCard";
 import { StatusDropDown } from "../../components/quotes/StatusDropDown";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
-import { ShareOptions } from "../../components/common/ShareOptions";
+import {
+  ShareOptions,
+  ShareOptionType,
+} from "../../components/common/ShareOptions";
 import { InvoiceStatus, type ItemDetails } from "@/types/api.responses.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
 import DeleteDialog from "@/components/common/DeleteDialog";
@@ -451,6 +454,10 @@ export function InvoiceDetailsPage() {
             clientEmail={invoiceDetails?.client?.email ?? ""}
             sendEmailAction={handleInvoiceEmail}
             isEmailSending={sendInvoiceEmailMutation.isPending}
+            shareLink={invoiceDetails?.route_url}
+            downloadLink={`${invoiceDetails?.url}?download=1`}
+            title={`Invoice - ${invoiceDetails?.invoice_number}`}
+            type={ShareOptionType.invoice}
           />
         </div>
         <DeleteDialog

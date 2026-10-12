@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
     paymentsDetails: (id: string | number) => `/payments/deposits/${id}`,
     createPayment: `/payments`,
     sendPaymentEmail: (id: string | number) => `/payments/${id}/share`,
+    paymentLink: (id: number | string) => `/payments/${id}/link`,
   },
   quotes: {
     getQutoeDetails: (quote_id: string | number) => `/quotes/${quote_id}`,

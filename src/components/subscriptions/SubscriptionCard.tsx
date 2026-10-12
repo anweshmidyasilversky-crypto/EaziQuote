@@ -68,7 +68,7 @@ export function SubscriptionCard({
         </span>
       </div>
 
-      <Separator className="bg-separator" />
+      <Separator className="bg-subscription-card-separator " />
 
       <div className="flex flex-col gap-8 p-6">
         {/* Product Name */}

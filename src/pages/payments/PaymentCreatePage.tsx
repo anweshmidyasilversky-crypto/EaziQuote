@@ -87,8 +87,8 @@ function PaymentCreatePage() {
     defaultValues: {
       payment_method:
         user.stripe_account_status === StripAccountStatus.active
-        ? PaymentMethods.stripe
-        : PaymentMethods.cash,
+          ? PaymentMethods.stripe
+          : PaymentMethods.cash,
       payment_date: new Date().toISOString(),
     },
     resolver: yupResolver(paymentSchemaBase),
@@ -169,7 +169,7 @@ function PaymentCreatePage() {
     if (paymentMethod === PaymentMethods.cash) {
       toggleWarningOpen(true);
     } else {
-      handleSubmit(handlePaymentCreate);
+      handleSubmit(handlePaymentCreate)();
     }
   };
 
@@ -374,7 +374,6 @@ function PaymentCreatePage() {
             <DatePicker
               dateSetter={(date) => {
                 if (date) {
-                  console.log(date);
                   setValue("payment_date", date.toISOString());
                 } else {
                   if (paymentDate) {

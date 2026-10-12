@@ -10,7 +10,10 @@ import {
   type CustomHeaderProps,
 } from "@/components/common/CustomHeader";
 import { CustomDataTable } from "@/components/common/CustomTable";
-import { ShareOptions } from "@/components/common/ShareOptions";
+import {
+  ShareOptions,
+  ShareOptionType,
+} from "@/components/common/ShareOptions";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import usePaymentDetails from "@/hooks/apis/payments/usePaymentDetails";
@@ -21,7 +24,7 @@ import {
   type PaymentAllocation,
 } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "react-router";
 import { toast } from "react-toastify";
 
@@ -38,18 +41,23 @@ const formatDate = (dateString: string) => {
 function PaymentsDetailsPage() {
   const params = useParams<{ id: string }>();
   const [shareModalOpen, toggleShareModalOpen] = useState(false);
-
+  const paymentLink = useRef<string | undefined>(undefined);
   const { paymentDetails, isFetching } = usePaymentDetails({
     id: params.id ?? "",
   });
 
-  const { paymentLinkShareMutation } = usePaymentMutations();
+  const { paymentLinkShareMutation, linkGenerateMutation } =
+    usePaymentMutations();
 
   const btnConfigList: CustomHeaderProps["btnConfigList"] = [
     <CustomBtn
       buttonLabel="Share"
-      leftIcon={assets.shareIconWhite}
-      onClick={() => toggleShareModalOpen(true)}
+      leftIcon={linkGenerateMutation.isPending ? `` : assets.shareIconWhite}
+      onClick={() => {
+        getPaymentShareLink();
+      }}
+      isSubmitting={linkGenerateMutation.isPending}
+      disabled={linkGenerateMutation.isPending}
     />,
   ];
 
@@ -132,6 +140,28 @@ function PaymentsDetailsPage() {
     }
   };
 
+  const getPaymentShareLink = () => {
+    if (!params.id) {
+      toast.error(`No payment found to share`);
+      return;
+    }
+    linkGenerateMutation.mutate(params.id, {
+      onSuccess: (response) => {
+        if (!response.payload) {
+          toast.error(response.message);
+        } else {
+          paymentLink.current =
+            response.payload.stripe_payment_link_url ??
+            response.payload.payment_link_url;
+          toggleShareModalOpen(true);
+        }
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
+  };
+
   return (
     <>
       {isFetching ? (
@@ -175,6 +205,9 @@ function PaymentsDetailsPage() {
             clientEmail={paymentDetails?.client_email ?? ""}
             sendEmailAction={handleShare}
             isEmailSending={paymentLinkShareMutation.isPending}
+            paymentLink={paymentLink.current}
+            type={ShareOptionType.payment}
+            title={`Payment - ${params.id}`}
           />
         </div>
       )}

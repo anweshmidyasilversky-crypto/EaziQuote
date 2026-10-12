@@ -1,4 +1,5 @@
 import { assets } from "../../assets/icons";
+import { Spinner } from "../ui/spinner";
 
 export type CustomActionGroupProps = {
   openFn?: () => void;
@@ -10,6 +11,8 @@ export type CustomActionGroupProps = {
   withEdit?: boolean;
   withShare?: boolean;
 
+  sharePending?: boolean;
+  shareDisabled?: boolean;
   paymentActionGroup?: boolean;
   paymentPending?: boolean;
   shareAction?: () => void;
@@ -21,6 +24,8 @@ export type ActionBtnList = Array<{
   id: string;
   icon: string;
   action?: () => void;
+  disabled?: boolean;
+  isPending?: boolean;
 }>;
 
 export function CustomActionGroup({
@@ -31,6 +36,8 @@ export function CustomActionGroup({
   withOpen = true,
   downloadOnly,
   downloadFn,
+  shareDisabled,
+  sharePending,
   withDelete = true,
   withShare = false,
   withEdit = true,
@@ -77,6 +84,8 @@ export function CustomActionGroup({
       id: "share",
       icon: assets.shareIcon,
       action: shareAction,
+      disabled: shareDisabled,
+      isPending: sharePending,
     });
   }
 
@@ -89,8 +98,13 @@ export function CustomActionGroup({
               key={btn.id}
               onClick={btn.action}
               className="flex w-4 shrink-0 items-center justify-center"
+              disabled={btn.disabled}
             >
-              <img src={btn.icon} className="w-4 aspect-square" />
+              {btn.isPending ? (
+                <Spinner className="text-brand-dark" />
+              ) : (
+                <img src={btn.icon} className="w-4 aspect-square" />
+              )}
             </button>
           );
         })}

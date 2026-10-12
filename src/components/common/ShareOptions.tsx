@@ -11,6 +11,12 @@ import { XIcon } from "lucide-react";
 import { CustomBtn } from "./CustomBtn";
 import { toast } from "react-toastify";
 
+export enum ShareOptionType {
+  quote = "quote",
+  invoice = "invoice",
+  payment = "payment",
+}
+
 export type ShareOptionsProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,6 +25,8 @@ export type ShareOptionsProps = {
   isEmailSending?: boolean;
   shareLink?: string;
   downloadLink?: string;
+  paymentLink?: string;
+  type?: ShareOptionType;
   appId?: string | number;
   title?: string;
 };
@@ -39,10 +47,31 @@ export function ShareOptions({
   downloadLink,
   appId,
   title,
+  paymentLink,
+  type = ShareOptionType.quote,
 }: ShareOptionsProps) {
-  const shareMessage = encodeURIComponent(
-    `Hi, please find your quote here: View: ${shareLink} Download: ${downloadLink} Thank you.`,
-  );
+  let shareMessage = "";
+  switch (type) {
+    case ShareOptionType.quote:
+      shareMessage = encodeURIComponent(
+        `Hi, please find your quote here: View: ${shareLink} Download: ${downloadLink} Thank you.`,
+      );
+      break;
+    case ShareOptionType.payment:
+      shareMessage = encodeURIComponent(
+        `Hi Manoj C, here is your payment link: ${paymentLink} Thank you.`,
+      );
+      break;
+
+    case ShareOptionType.invoice:
+      shareMessage = encodeURIComponent(
+        `Hi, please find your invoice here: View: ${shareLink} Download: ${downloadLink} Thank you.`,
+      );
+      break;
+    default:
+      shareMessage = `Dummy Message`;
+      break;
+  }
   const options: sharOptions[] = [
     {
       imgPath: assets.whatsAppIcon,
@@ -55,7 +84,7 @@ export function ShareOptions({
       name: "Facebook",
       onClick: () =>
         window.open(
-          `https://www.facebook.com/share_as_message/?link=${downloadLink}&app_id=${appId}`,
+          `https://www.facebook.com/share_as_message/?link=${type === ShareOptionType.payment ? paymentLink : downloadLink}&app_id=${appId}`,
           `_blank`,
         ),
     },
@@ -64,12 +93,12 @@ export function ShareOptions({
       name: "Gmail",
       onClick: () =>
         window.open(
-          `mailto:?subject=${encodeURIComponent(title ?? "")}&body=${shareMessage}`,
+          `mailto:${clientEmail ?? ``}?subject=${encodeURIComponent(title ?? "")}&body=${shareMessage}`,
         ),
     },
     {
       imgPath: assets.shareMoreIcon,
-      name: "Share",
+      name: "More",
       onClick: async () => {
         const shareData: ShareData = {
           title: title, // This becomes the subject line if shared via Email/Outlook

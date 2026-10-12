@@ -16,7 +16,10 @@ import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import { saveToDevice } from "@/lib/utils";
 import { showErrorToast } from "@/api/axiosInstance";
 import { toast } from "react-toastify";
-import { ShareOptions } from "@/components/common/ShareOptions";
+import {
+  ShareOptions,
+  ShareOptionType,
+} from "@/components/common/ShareOptions";
 
 enum toggleId {
   Summary = "summary",
@@ -157,6 +160,10 @@ export function CreateInvoicePage() {
         clientEmail={invoiceDetails?.client.email ?? ""}
         sendEmailAction={handleEmailSend}
         isEmailSending={sendInvoiceEmailMutation.isPending}
+        shareLink={invoiceDetails?.route_url}
+        downloadLink={`${invoiceDetails?.url}?download=1`}
+        title={`Invoice - ${invoiceDetails?.invoice_number}`}
+        type={ShareOptionType.invoice}
       />
     </React.Fragment>
   );
