@@ -25,6 +25,7 @@ import { SubtotalBreakDown } from "./SubtotalBreakDown";
 import {
   DepositeTypes,
   type PageFilters,
+  type UpdateQuoteApiPayload,
   type UpdateQuoteItems,
 } from "@/types/api.requests.type";
 import useItemsList from "@/hooks/apis/items/useItemsList";
@@ -305,36 +306,38 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   const { quoteUpdateMutation } = useQuotesMutations();
 
   const handleSave = () => {
-    console.log(depositePaymentMethod.current);
     const itemPatches = Object.values(itemQty);
     if (itemPatches.length <= 0) {
       toast.error(`Select at least one item to continue`);
       return;
     }
     const amount = Number(depositeAmount.current);
-    quoteUpdateMutation.mutate(
-      {
-        _method: "put",
-        quote_id: currQuote.id,
-        items: itemPatches,
-        vat_setting_id: vatSettingsId.current,
-        deposit_required: !Number.isNaN(amount),
-        deposit_type: depositeTypeRef.current,
-        deposit_amount: Number.isNaN(amount) ? undefined : amount,
-        deposit_payment_method: depositePaymentMethod.current,
-        discount: discount.current,
+    let payload: UpdateQuoteApiPayload = {
+      _method: "put",
+      quote_id: currQuote.id,
+      items: itemPatches,
+      vat_setting_id: vatSettingsId.current,
+      deposit_payment_method: depositePaymentMethod.current,
+    };
+    if (!isNaN(amount) && amount > 0) {
+      payload["deposit_amount"] = amount;
+      payload["deposit_type"] = depositeTypeRef.current;
+      payload["deposit_required"] = 1;
+    }
+    if (discount.current) {
+      payload["discount"] = discount.current;
+    }
+    console.log(payload);
+    quoteUpdateMutation.mutate(payload, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        dispatch(updateQuoteRedux(response.payload));
+        submitAction();
       },
-      {
-        onSuccess: (response) => {
-          toast.success(response.message);
-          dispatch(updateQuoteRedux(response.payload));
-          submitAction();
-        },
-        onError: (error) => {
-          showErrorToast(error);
-        },
+      onError: (error) => {
+        showErrorToast(error);
       },
-    );
+    });
   };
 
   return (
@@ -388,9 +391,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
           <SubtotalBreakDown
             items={Object.values(itemQty)}
             paymentMethod={
-              isStripeConnected
-                ? PaymentMethods.stripe
-                : PaymentMethods.cash
+              isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash
             }
             vatSettings={vat_settings}
             discountPercentage={discount.current ?? 0}

@@ -200,7 +200,8 @@ function PaymentCreatePage() {
           invoice_id: selectedInvoice.id,
           amount_type: PaymentAmountType.invoice,
           amount:
-            selectedInvoice.total_due - (selectedInvoice.deposit_amount ?? 0),
+            selectedInvoice.total_due -
+            (selectedInvoice.deposit_available ?? 0),
         } as CreatePaymentInvoice);
       }
     }
@@ -226,6 +227,10 @@ function PaymentCreatePage() {
       setClientSearchTerm(prefillClient.name);
     }
   }, [location.state]);
+
+  useEffect(() => {
+    console.log(selectedInvoice);
+  }, [selectedInvoice]);
   return (
     <div className="p-6 flex flex-col gap-6">
       <CustomHeader header="Record Payment" btnConfigList={[]} />
@@ -352,7 +357,7 @@ function PaymentCreatePage() {
                   {" "}
                   {`Amount Due: £ ${
                     selectedInvoice.total_due -
-                    (selectedInvoice.deposit_amount ?? 0)
+                    (selectedInvoice.deposit_available ?? 0)
                   }`}{" "}
                 </p>
               )}
@@ -424,7 +429,7 @@ function PaymentCreatePage() {
                     </span>
                     <span className="subtotal-value">
                       {" "}
-                      {`${formatCurrency(selectedInvoice.deposit_amount ?? 0)}`}{" "}
+                      {`${formatCurrency(selectedInvoice.deposit_available ?? 0)}`}{" "}
                     </span>
                   </div>
 
@@ -435,7 +440,7 @@ function PaymentCreatePage() {
                     </span>
                     <span className="subtotal-value">
                       {" "}
-                      {`${formatCurrency(selectedInvoice.total_due - (selectedInvoice.deposit_amount ?? 0))}`}{" "}
+                      {`${formatCurrency(selectedInvoice.total_due - (selectedInvoice.deposit_available ?? 0))}`}{" "}
                     </span>
                   </div>
 

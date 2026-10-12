@@ -272,7 +272,10 @@ function ItemsPage() {
 
       <FormLayout
         isFormOpen={csvFormOpen}
-        formCloseAction={() => toggleCsvFormOpen(false)}
+        formCloseAction={() => {
+          toggleCsvFormOpen(false);
+          setCsvFile(undefined);
+        }}
         formHeading="Import Items"
         sumbitBtnLabel="Upload"
         isSubmitting={itemsImportMutation.isPending}

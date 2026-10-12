@@ -34,14 +34,14 @@ function ProfilePage() {
   const user = useAppSelector((state) => state.user);
   const [activeId, toggleActiveId] = useState<string>(toggle.personal);
   const [userImg, setUserImg] = useState<File | undefined>(undefined);
-  const profilePicUrl = useRef<string>(user.avatar ?? assets.userImg);
+  const profilePicUrl = useRef<string>(user.avatar ?? assets.userIconSvg);
 
   const { profileSetupMutation } = useUserMutations();
 
   const { control, handleSubmit } = useForm<UserProfilePayload>({
     defaultValues: {
       name: user.name,
-      phoneNo: user.phone.startsWith("(+44)")
+      phoneNo: user.phone?.startsWith("(+44)")
         ? user.phone.slice(5)
         : user.phone,
     },
@@ -119,12 +119,12 @@ function ProfilePage() {
                   <div className="flex items-start">
                     <ImageInput
                       imgUrl={profilePicUrl.current}
+                      imgFile={userImg}
                       setImgFile={(img) => {
                         profilePicUrl.current = URL.createObjectURL(img);
                         setUserImg(img);
                       }}
-                      alt={assets.userImg}
-                      altClass={cn(`object-contain`)}
+                      alt={assets.userIconSvg}
                       withEditIcon
                       iconBadgeCls={cn(`h-9 w-9`)}
                     />

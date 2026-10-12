@@ -87,9 +87,13 @@ function TeamMembersPage() {
       accessorKey: "name",
       header: "USER",
       cell: (info) => {
-        const name = info.getValue<string>();
+        const { name, avatar } = info.row.original;
         return (
-          <ClientNameBadge name={name} imgSrc={assets.userIcon} textWrap />
+          <ClientNameBadge
+            name={name}
+            imgSrc={avatar ?? assets.userIcon}
+            textWrap
+          />
         );
       },
       enableSorting: false,

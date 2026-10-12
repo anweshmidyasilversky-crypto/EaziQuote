@@ -9,6 +9,30 @@ import {
 } from "../constants/messages";
 import { ATTACHMENTS } from "../constants/limits";
 import { ALLOWED_ATTACHMENT_TYPES } from "../constants/types";
+
+export const attachmentsSchema = yup
+  .array()
+  .of(yup.mixed<File>().required())
+  .optional()
+  .defined()
+  .test("attachments", function (attachments) {
+    if (!attachments?.length) return true;
+    for (const file of attachments) {
+      if (file.size / (1024 * 1024) > ATTACHMENTS.maxsize) {
+        return this.createError({
+          message: ExccedFileSizeLimit("Attachment", ATTACHMENTS.maxsize),
+        });
+      }
+
+      if (!ALLOWED_ATTACHMENT_TYPES.includes(file.type)) {
+        return this.createError({
+          message: InvalidType(ALLOWED_ATTACHMENT_TYPES),
+        });
+      }
+    }
+    return true;
+  });
+
 export const quoteSummarySchema: yup.ObjectSchema<QuoteSummary> = yup.object({
   quoteTitle: yup
     .string()
@@ -26,28 +50,5 @@ export const quoteSummarySchema: yup.ObjectSchema<QuoteSummary> = yup.object({
   clientId: yup.string().trim().required(notSelectedMsg("Client")),
   jobDescription: yup.string().trim().required(emptyMsg("Job description")),
   notes: yup.string().trim().optional(),
-  attachments: yup
-    .array()
-    .of(yup.mixed<File>().required())
-    .optional()
-    .defined()
-    .test("attachments", function (attachments) {
-      if (!attachments?.length) return true;
-
-      for (const file of attachments) {
-        if (file.size / (1024 * 1024) > ATTACHMENTS.maxsize) {
-          return this.createError({
-            message: ExccedFileSizeLimit("Attachment", ATTACHMENTS.maxsize),
-          });
-        }
-
-        if (!ALLOWED_ATTACHMENT_TYPES.includes(file.type)) {
-          return this.createError({
-            message: InvalidType(ALLOWED_ATTACHMENT_TYPES),
-          });
-        }
-      }
-
-      return true;
-    }),
+  attachments: attachmentsSchema,
 });

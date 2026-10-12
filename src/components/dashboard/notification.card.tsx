@@ -4,6 +4,7 @@ import { getFormattedTimeDiff } from "../../lib/utils";
 import { Separator } from "../ui/separator";
 import { Spinner } from "../ui/spinner";
 import type { Notification } from "@/types/api.responses.type";
+import { nanoid } from "@reduxjs/toolkit";
 
 export type NotificationCardProps = {
   notifications: Notification[];
@@ -42,7 +43,7 @@ export function NotificationCard({
         ) : (
           notifications.map((n) => (
             <div
-              key={n.id ?? n.created_at}
+              key={n.id ?? nanoid()}
               className="w-full flex justify-between gap-5"
             >
               <span className="text-[16px] text-black-text text-wrap wrap-break-word">

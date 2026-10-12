@@ -6,6 +6,7 @@ import {
   type ItemDetails,
 } from "@/types/api.responses.type";
 import * as yup from "yup";
+import { attachmentsSchema } from "./quote.summary.schema";
 
 export const createInvoiceSchema: yup.ObjectSchema<InvoiceCreateApiPayload> =
   yup.object({
@@ -13,7 +14,7 @@ export const createInvoiceSchema: yup.ObjectSchema<InvoiceCreateApiPayload> =
     invoice_date: yup.string().trim().required(emptyMsg("Invoice Date")),
     due_date: yup.string().trim().required(emptyMsg("Due date")),
     message: yup.string().optional(),
-    attachments: yup.array<File>().optional(),
+    attachments: attachmentsSchema,
     notes: yup.string().optional(),
     template: yup.mixed<QuoteTemplate>().optional(),
     categorised: yup.mixed<DocumentCategories>().optional(),

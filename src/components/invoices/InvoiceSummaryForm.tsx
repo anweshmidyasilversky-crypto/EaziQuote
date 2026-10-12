@@ -18,6 +18,8 @@ import type { InvoiceCreateApiPayload } from "@/types/api.requests.type";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
+import { ALLOWED_ATTACHMENT_TYPES } from "@/constants/types";
+import { maxLengthMsg } from "@/constants/messages";
 
 export type InvoiceSummaryFormProps = {
   mode: "create" | "edit";
@@ -195,6 +197,15 @@ function InvoiceSummaryForm({
     }
   }, [prefillQuoteId]);
 
+  useEffect(() => {
+    if (!attachments) {
+      return;
+    }
+    if (attachments.length > 5) {
+      toast.error(`Only 5 attachments can be added`);
+      setValue("attachments", attachments.slice(0, 5));
+    }
+  }, [attachments]);
   return (
     <React.Fragment>
       <div className="px-5 flex flex-col gap-8">
@@ -334,40 +345,53 @@ function InvoiceSummaryForm({
 
         <Separator className={`bg-separator`} />
 
-        <CustomInput
-          control={control}
-          name="attachments"
-          fieldName="Attachments"
-          inptType="file"
-        />
-        {attachments && (
-          <div className="attachment-layout">
-            {attachments.map((attachment, index) => {
-              const noOfPrefillAttachments = quote?.attachments.length ?? 0;
-              return (
-                <StyledAttachments
-                  key={attachment.name}
-                  fileName={attachment.name}
-                  deleteAction={() => {
-                    if (quote && index < (quote.attachments.length ?? 0)) {
+        <div className="flex flex-col gap-2">
+          <CustomInput
+            control={control}
+            name="attachments"
+            fieldName="Attachments"
+            inptType="file"
+            allowedFileTypes={ALLOWED_ATTACHMENT_TYPES}
+          />
+          {(attachments?.length ?? 0) > 5 && (
+            <p className="error-text"> {maxLengthMsg("Attachments", 5)} </p>
+          )}
+          {attachments && (
+            <div className="attachment-layout">
+              {quote?.attachments?.map((attachment) => {
+                return (
+                  <StyledAttachments
+                    key={attachment.id}
+                    fileName={`${attachment.id}.${attachment.type}`}
+                    deleteAction={() => {
                       handleAttachmentDelete(
                         quote.id,
-                        quote.attachments[index].id,
-                        attachment.name,
+                        attachment.id,
+                        `${attachment.id}.${attachment.type}`,
                       );
-                    } else {
-                      removeAttachment(attachment.name);
-                    }
-                  }}
-                  attachmentId={quote?.attachments?.at(index)?.id}
-                  defaultOpenUrl={window.URL.createObjectURL(attachment)}
-                  withDownload={index < noOfPrefillAttachments}
-                  withOpen
-                />
-              );
-            })}
-          </div>
-        )}
+                    }}
+                    attachmentId={attachment.id}
+                    withDownload
+                    withOpen
+                  />
+                );
+              })}
+              {attachments
+                .slice(quote?.attachments.length ?? 0)
+                .map((attachment) => {
+                  return (
+                    <StyledAttachments
+                      key={attachment.name}
+                      fileName={attachment.name}
+                      deleteAction={() => removeAttachment(attachment.name)}
+                      defaultOpenUrl={window.URL.createObjectURL(attachment)}
+                      withOpen
+                    />
+                  );
+                })}
+            </div>
+          )}
+        </div>
 
         <CustomBtn
           buttonLabel="Save"

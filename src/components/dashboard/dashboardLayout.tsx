@@ -101,6 +101,7 @@ export function DashboardLayout() {
         dispatch(releaseToken());
         dispatch(removeUser());
         persistor.purge();
+        localStorage.clear();
         navigate("/");
       },
       onError: (error) => {
@@ -310,7 +311,7 @@ export function DashboardLayout() {
 
           <div className="flex flex-col gap-2 items-center justify-center">
             <h1 className="text-black text-2xl"> {"Logout"} </h1>
-            <span className="text-placeholder-text text-sm [@media(min-width:375px)_and_(max-width:767px)]:text-center">
+            <span className="text-placeholder-text text-sm [@media(min-width:375px)_and_(max-width:767px)]:text-center px-5">
               {" "}
               {"Are you sure you want to logout?"}{" "}
             </span>

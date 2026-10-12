@@ -422,7 +422,7 @@ export function QuotesIndexPage() {
             }{" "}
           </span>
 
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4 justify-center px-5">
             <div
               className="bg-custom-dialog-primary flex flex-col items-center min-w-55 gap-4 rounded-lg py-4 cursor-pointer"
               onClick={() => {

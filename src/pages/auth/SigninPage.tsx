@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type UserSignInPayload } from "../../types/user.signIn.payload.type";
 import { CustomInput } from "../../components/common/CustomInput";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { userSignInSchema } from "../../validation/user.signIn.payload.schema";
 import { toast } from "react-toastify";
 import { Spinner } from "../../components/ui/spinner";
@@ -18,18 +18,30 @@ import AccessDeniedModal from "@/components/common/AccessDeniedModal";
 import ContactSupportBox from "@/components/common/ContactSupportBox";
 
 export function SignInPage() {
-  const rememberMe = useRef(0);
+  const [rememberMe, setRememberMe] = useState(0);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [accessDeniedModalOpen, setAccessDeniedModalOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
-  const { control, handleSubmit } = useForm<UserSignInPayload>({
+  const { setValue, control, handleSubmit } = useForm<UserSignInPayload>({
     defaultValues: {
       email: "",
       password: "",
     },
     resolver: yupResolver(userSignInSchema),
   });
+
+  useEffect(() => {
+    const [email, password] = [
+      localStorage.getItem("rememberMeEmail"),
+      localStorage.getItem("rememberMePassword"),
+    ];
+    if (email !== null || password !== null) {
+      setRememberMe(1);
+    }
+    setValue("email", email ?? "");
+    setValue("password", password ?? "");
+  }, []);
 
   const { loginMutation } = useAuthMutation();
 
@@ -55,7 +67,13 @@ export function SignInPage() {
               setAccessDeniedModalOpen(true);
               return;
             }
-
+            if (rememberMe) {
+              localStorage.setItem("rememberMeEmail", data.email);
+              localStorage.setItem("rememberMePassword", data.password);
+            } else {
+              (localStorage.removeItem("rememberMeEmail"),
+                localStorage.removeItem("rememberMePassword"));
+            }
             dispatch(setToken(loginResponse.payload.access_token));
             dispatch(
               updateUser({
@@ -118,9 +136,13 @@ export function SignInPage() {
                   <input
                     type="checkbox"
                     id="rememberMe"
-                    value={rememberMe.current}
+                    value={rememberMe}
                     className="h-5 w-5"
-                    onClick={() => (rememberMe.current ^= 1)}
+                    checked={Boolean(rememberMe)}
+                    onChange={(curr) => {
+                      const checked = curr.currentTarget.checked;
+                      setRememberMe(checked ? 1 : 0);
+                    }}
                   />
                   <label htmlFor="rememberMe">Remember me</label>
                 </div>
@@ -139,7 +161,7 @@ export function SignInPage() {
               >
                 {loginMutation.isPending ? <Spinner /> : "Sign in"}
               </button>
-              <p className="flex gap-1 items-center h-4.75 font-sans font-normal text-[16px] leading-4.75 text-[#89909D] flex-none">
+              <p className="flex gap-1 items-center h-4.75 font-sans font-normal text-[16px] leading-4.75 text-placeholder-text flex-none">
                 Don’t have an account?{" "}
                 <a
                   onClick={() => navigate("/signup")}

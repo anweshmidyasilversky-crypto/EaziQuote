@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import useNotificationList from "@/hooks/apis/notifications/useNotificationList";
 import { cn, getFormattedTimeDiff } from "@/lib/utils";
+import { nanoid } from "@reduxjs/toolkit";
 import React from "react";
 
 function NotificationsPage() {
@@ -23,7 +24,7 @@ function NotificationsPage() {
           {notifications && (notifications?.length ?? 0) > 0 && (
             <>
               {notifications.map((notification, index) => (
-                <React.Fragment key={notification.id}>
+                <React.Fragment key={notification.id ?? nanoid()}>
                   <div className="flex justify-between">
                     <span> {notification.message} </span>
                     <span>

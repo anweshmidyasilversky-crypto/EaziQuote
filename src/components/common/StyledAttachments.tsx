@@ -68,7 +68,7 @@ function StyledAttachments({
         <div className="bg-table-head w-8 rounded-xs aspect-square flex items-center justify-center cursor-pointer">
           <img src={assets.attachmentIcon} className="w-4 aspect-square" />
         </div>
-        <span> {`${fileName}`} </span>
+        <span className="text-wrap wrap-anywhere"> {`${fileName}`} </span>
       </div>
 
       <MoreOptionsPopup

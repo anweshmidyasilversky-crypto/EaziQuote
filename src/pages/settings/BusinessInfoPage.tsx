@@ -48,7 +48,7 @@ function BusinessInfoPage() {
       postCode: companyAddress.postcode,
       brandColor: brand_color,
       businessName: businessName,
-      businessPhoneNo: businessPhone.startsWith(`(+44)`)
+      businessPhoneNo: businessPhone?.startsWith(`(+44)`)
         ? businessPhone.slice(5)
         : businessPhone,
       vatRegistered: vat_number ? true : false,

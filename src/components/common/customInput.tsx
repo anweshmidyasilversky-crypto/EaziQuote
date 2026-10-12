@@ -36,6 +36,7 @@ export type CustomInputProps<T extends FieldValues> = {
   textInputFormatter?: (val: string) => string;
   labelRightNode?: React.ReactNode;
   containerCls?: string;
+  allowedFileTypes?: string[];
 };
 
 function formatLabel(fieldName: string) {
@@ -66,6 +67,7 @@ export function CustomInput<T extends FieldValues>({
   textInputFormatter,
   labelRightNode,
   containerCls,
+  allowedFileTypes,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
@@ -221,7 +223,7 @@ export function CustomInput<T extends FieldValues>({
                   <>
                     <label
                       htmlFor={fieldName}
-                      className={`flex h-11 w-full cursor-pointer items-center overflow-hidden rounded-[7px] border border-input-field-border bg-white text-sm ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+                      className={`flex h-11 w-full cursor-pointer items-center overflow-hidden rounded-[7px] border border-input-field-border bg-white text-sm ${disabled ? "cursor-not-allowed opacity-60" : ""} ${className} bg-white!`}
                     >
                       <span className="flex h-full items-center border-r border-input-field-border bg-table-head px-3 text-black-text">
                         Choose File
@@ -243,6 +245,7 @@ export function CustomInput<T extends FieldValues>({
                       disabled={disabled}
                       multiple
                       className="hidden"
+                      accept={allowedFileTypes?.join(",")}
                       onChange={(event) => {
                         const fileList = event.target.files;
                         const prev = (value ? [...value] : []) as File[];

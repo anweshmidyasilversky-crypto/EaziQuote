@@ -116,7 +116,7 @@ export function CustomCombobox<T, V = T>({
     <Combobox<T>
       items={items}
       onValueChange={(item) => handleValueChange?.(item)}
-      value={value as T}
+      value={(value ?? "") as T}
       itemToStringValue={(item) => {
         return getItemLabel(item);
       }}

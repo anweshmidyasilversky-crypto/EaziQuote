@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { quoteSummarySchema } from "../../validation/quote.summary.schema";
 import { CustomInput } from "../common/CustomInput";
 import { DateRangePicker, type DateRange } from "../common/DateRangePicker";
@@ -28,6 +28,8 @@ import { useNavigate } from "react-router";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import useClientMutations from "@/hooks/apis/clients/useClientMutations";
 import useClients from "@/hooks/apis/clients/useClients";
+import { ALLOWED_ATTACHMENT_TYPES } from "@/constants/types";
+import { maxLengthMsg } from "@/constants/messages";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
@@ -72,14 +74,13 @@ function QuoteSummaryForm({
     quoteDate: new Date().toISOString(),
     expiryDate: new Date(new Date().getTime() + 860000).toISOString(),
     hidePhoneNumber: true,
-    clientId: "0",
+    clientId: "",
     jobDescription: "",
     attachments: [],
   };
 
   const {
     control,
-    watch,
     setValue,
     handleSubmit,
     formState: { errors },
@@ -151,7 +152,10 @@ function QuoteSummaryForm({
     clearErrors("expiryDate");
   }, [dateRange.endDate]);
 
-  const attachments = watch().attachments;
+  const [attachments] = useWatch({
+    control,
+    name: ["attachments"],
+  });
 
   const removeAttachment = (fileName: string) => {
     setValue(
@@ -205,7 +209,12 @@ function QuoteSummaryForm({
   };
 
   const submitHandler = (data: QuoteSummary) => {
+    console.log(data);
     if (currQuote) {
+      if (!data.clientId || data.clientId === "0") {
+        toast.error(`Please select a client`);
+        return;
+      }
       quoteUpdateMutation.mutate(
         {
           _method: "put",
@@ -239,6 +248,10 @@ function QuoteSummaryForm({
         },
       );
     } else {
+      if (!data.clientId || data.clientId === "") {
+        toast.error(`Please select a client`);
+        return;
+      }
       quoteCreateMutation.mutate(
         {
           ...data,
@@ -271,6 +284,13 @@ function QuoteSummaryForm({
       setValue("clientId", defaultClient.id?.toString());
     }
   }, [defaultClient]);
+
+  useEffect(() => {
+    if ((attachments?.length ?? 0) > 5) {
+      toast.error(`Max 5 attachments can be added`);
+      setValue("attachments", attachments?.slice(0, 5));
+    }
+  }, [attachments]);
 
   return (
     <React.Fragment>
@@ -349,14 +369,17 @@ function QuoteSummaryForm({
                 items={clientList ?? []}
                 getItemLabel={(client) => client?.name ?? ""}
                 onValueChange={(client) => {
-                  setValue("clientId", (client?.id ?? 0)?.toString());
-                  setClientSearchTerm(client?.name ?? "");
+                  if (!client) {
+                    return;
+                  }
+                  setValue("clientId", client.id.toString());
+                  setClientSearchTerm(client.name);
                   clearErrors("clientId");
                 }}
                 placeholder="Search or select a client"
                 emptyMessage="Consider adding this client"
                 className={cn(
-                  `min-h-11 ${errors.clientId ? `input-error` : ``}`,
+                  `min-h-11 ${errors.clientId ? `input-error!` : ``}`,
                 )}
                 inptFieldValue={clientSearchTerm}
                 inptFieldChange={(val) => setClientSearchTerm(val)}
@@ -388,44 +411,54 @@ function QuoteSummaryForm({
 
         <Separator className={`bg-separator`} />
 
-        <CustomInput
-          control={control}
-          name="attachments"
-          fieldName="Attachments"
-          inptType="file"
-        />
-        {attachments && (
-          <div className="attachment-layout">
-            {attachments.map((attachment, index) => {
-              const noOfPrefilAttachments = currQuote?.attachments.length ?? 0;
+        <div className="flex flex-col gap-2">
+          <CustomInput
+            control={control}
+            name="attachments"
+            fieldName="Attachments"
+            inptType="file"
+            allowedFileTypes={ALLOWED_ATTACHMENT_TYPES}
+            className={cn(
+              `${(attachments?.length ?? 0) > 5 ? `input-error!` : ``}`,
+            )}
+          />
+          {(attachments?.length ?? 0) > 5 && (
+            <p className="error-text"> {maxLengthMsg("Attachments", 5)} </p>
+          )}
+          {attachments && (
+            <div className="attachment-layout">
+              {attachments.map((attachment, index) => {
+                const noOfPrefilAttachments =
+                  currQuote?.attachments.length ?? 0;
 
-              return (
-                <StyledAttachments
-                  key={attachment.name}
-                  fileName={attachment.name}
-                  deleteAction={() => {
-                    if (
-                      currQuote &&
-                      index < (currQuote.attachments.length ?? 0)
-                    ) {
-                      handleAttachmentDelete(
-                        currQuote.id,
-                        currQuote.attachments[index].id,
-                        attachment.name,
-                      );
-                    } else {
-                      removeAttachment(attachment.name);
-                    }
-                  }}
-                  withDownload={index < noOfPrefilAttachments}
-                  attachmentId={currQuote?.attachments?.at(index)?.id}
-                  withOpen
-                  defaultOpenUrl={window.URL.createObjectURL(attachment)}
-                />
-              );
-            })}
-          </div>
-        )}
+                return (
+                  <StyledAttachments
+                    key={attachment.name}
+                    fileName={attachment.name}
+                    deleteAction={() => {
+                      if (
+                        currQuote &&
+                        index < (currQuote.attachments.length ?? 0)
+                      ) {
+                        handleAttachmentDelete(
+                          currQuote.id,
+                          currQuote.attachments[index].id,
+                          attachment.name,
+                        );
+                      } else {
+                        removeAttachment(attachment.name);
+                      }
+                    }}
+                    withDownload={index < noOfPrefilAttachments}
+                    attachmentId={currQuote?.attachments?.at(index)?.id}
+                    withOpen
+                    defaultOpenUrl={window.URL.createObjectURL(attachment)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <CustomBtn
           buttonLabel="Save"
