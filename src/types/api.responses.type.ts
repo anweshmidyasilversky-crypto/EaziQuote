@@ -798,3 +798,20 @@ export interface OfferingProductDetails {
   subscription_options: Record<string, OfferingProductOption>;
   title: string;
 }
+
+export interface PaymentLinkResponse {
+  id: number;
+  payment_method: PaymentMethods;
+  amount_type: PaymentTypes;
+  status: PaymentStatus;
+  amount: number;
+  amount_formatted: string;
+  allocated: string;
+  credit: string;
+  currency: string;
+  payment_date: string;
+  stripe_payment_link_url: string;
+  client_name: string;
+  client_email: string;
+  payment_link_url: string;
+}

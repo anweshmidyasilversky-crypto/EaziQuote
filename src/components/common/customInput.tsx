@@ -116,17 +116,7 @@ export function CustomInput<T extends FieldValues>({
                           value={selectOption.value}
                           key={selectOption.value}
                         >
-                          {" "}
-                          <li className="flex items-center gap-2">
-                            {" "}
-                            {selectOption.icon && (
-                              <img
-                                src={selectOption.icon}
-                                className="w-5 aspect-auto"
-                              />
-                            )}{" "}
-                            {selectOption.label}
-                          </li>{" "}
+                          {selectOption.label}
                         </option>
                       );
                     })}

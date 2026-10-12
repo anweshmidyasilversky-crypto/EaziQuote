@@ -3,6 +3,7 @@ import {
   type ApiResponse,
   type ListResponse,
   type Payment,
+  type PaymentLinkResponse,
 } from "@/types/api.responses.type";
 import { axiosInstance } from "../axiosInstance";
 import type {
@@ -70,6 +71,17 @@ export const sendPaymentLink = async (paymentId: string | number) => {
       API_ENDPOINTS.payments.sendPaymentEmail(paymentId),
     );
     return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPaymentLink = async (paymentId: number | string) => {
+  try {
+    const res = await axiosInstance.post<
+      ApiResponse<PaymentLinkResponse | null>
+    >(API_ENDPOINTS.payments.paymentLink(paymentId));
+    return res.data;
   } catch (error) {
     throw error;
   }

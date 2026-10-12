@@ -9,7 +9,10 @@ import {
 import { CustomDataTable } from "@/components/common/CustomTable";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import SearchInputGruop from "@/components/common/SearchInputGruop";
-import { ShareOptions } from "@/components/common/ShareOptions";
+import {
+  ShareOptions,
+  ShareOptionType,
+} from "@/components/common/ShareOptions";
 import StatusBadge from "@/components/common/StatusBadge";
 import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
 import usePaymentsList from "@/hooks/apis/payments/usePaymentsList";
@@ -31,12 +34,16 @@ function PaymentsIndexPage() {
     refetch,
   } = usePaymentsList({});
 
-  const { paymentDeleteMutation, paymentLinkShareMutation } =
-    usePaymentMutations();
+  const {
+    paymentDeleteMutation,
+    paymentLinkShareMutation,
+    linkGenerateMutation,
+  } = usePaymentMutations();
   const [deleteModalOpen, toggleDeleteModal] = useState(false);
   const [shareModalOpen, toggleShareModal] = useState(false);
   const targetPaymentId = useRef<number | undefined>(undefined);
   const targetClientEmail = useRef<string | undefined>(undefined);
+  const paymentLink = useRef<string | undefined>(undefined);
 
   const handlePaymentDelete = () => {
     if (targetPaymentId.current) {
@@ -56,12 +63,31 @@ function PaymentsIndexPage() {
       paymentLinkShareMutation.mutate(targetPaymentId.current, {
         onSuccess: (response) => {
           toast.success(response.message);
+          toggleShareModal(false);
         },
         onError: (error) => {
           showErrorToast(error);
         },
       });
     }
+  };
+
+  const generatePaymentLink = () => {
+    if (!targetPaymentId.current) {
+      toast.error(`No payment Selected to share`);
+      return;
+    }
+    linkGenerateMutation.mutate(targetPaymentId.current, {
+      onSuccess: (response) => {
+        paymentLink.current =
+          response.payload?.stripe_payment_link_url ??
+          response.payload?.payment_link_url;
+        toggleShareModal(true);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   const navigate = useNavigate();
@@ -148,8 +174,12 @@ function PaymentsIndexPage() {
             shareAction={() => {
               targetPaymentId.current = id;
               targetClientEmail.current = client_email;
-              toggleShareModal((curr) => !curr);
+              generatePaymentLink();
             }}
+            shareDisabled={linkGenerateMutation.isPending}
+            sharePending={
+              linkGenerateMutation.isPending && id === targetPaymentId.current
+            }
           />
         );
       },
@@ -196,6 +226,9 @@ function PaymentsIndexPage() {
         clientEmail={targetClientEmail.current ?? ""}
         sendEmailAction={handlePaymentLinkShare}
         isEmailSending={paymentLinkShareMutation.isPending}
+        paymentLink={paymentLink.current}
+        title={`Payment - ${targetPaymentId.current}`}
+        type={ShareOptionType.payment}
       />
     </div>
   );

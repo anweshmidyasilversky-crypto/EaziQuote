@@ -1,6 +1,7 @@
 import {
   createPayment,
   deletePayment,
+  getPaymentLink,
   sendPaymentLink,
 } from "@/api/services/payments.api";
 import type {
@@ -26,10 +27,16 @@ function usePaymentMutations() {
     mutationFn: (paymentId: string | number) => sendPaymentLink(paymentId),
   });
 
+  const linkGenerateMutation = useMutation({
+    mutationKey: ["payment_link"],
+    mutationFn: (paymentId: number | string) => getPaymentLink(paymentId),
+  });
+
   return {
     createPaymentMutation,
     paymentDeleteMutation,
     paymentLinkShareMutation,
+    linkGenerateMutation,
   };
 }
 
