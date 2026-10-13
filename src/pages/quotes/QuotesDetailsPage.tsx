@@ -352,6 +352,7 @@ export function QuotesDetailsPage() {
                           searchPlaceHolder="Search here"
                         />
                       }
+                      contentScrollable
                     />
 
                     {/* Subtotal Breakdown */}

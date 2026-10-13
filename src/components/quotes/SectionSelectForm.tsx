@@ -29,9 +29,6 @@ export type SectionSelectFormProps = {
   submitAction?: () => void;
 };
 
-/**
- * @param submitAction action upon submit
- */
 function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
   const currQuote = useAppSelector((state) => state.quote);
   const sectionListFilters = useMemo(
@@ -55,7 +52,6 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
     undefined,
   );
 
-  const selectedRowIds: string[] = [];
   const defaultValues = useRef<
     DefaultValues<Partial<QuoteSection>> | undefined
   >(undefined);
@@ -76,9 +72,6 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
         );
       },
       cell: (info) => {
-        if (info.row.original.is_added) {
-          selectedRowIds.push(info.row.id);
-        }
         return (
           <input
             type="checkbox"
@@ -218,10 +211,12 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
   };
 
   useEffect(() => {
-    selectedRowIds.forEach((rowId) => {
-      tableRef.current?.getRow(rowId).toggleSelected();
+    sectionList.forEach((section) => {
+      if (section.is_added) {
+        tableRef.current?.getRow(section.id.toString())?.toggleSelected();
+      }
     });
-  }, [selectedRowIds]);
+  }, [sectionList]);
 
   return (
     <>

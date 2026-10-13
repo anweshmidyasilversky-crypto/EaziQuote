@@ -121,6 +121,7 @@ function ItemsPage() {
         toast.success(response.message);
         toggleCsvFormOpen(false);
         refetchItemsList();
+        setCsvFile(undefined);
       },
       onError: (error) => {
         showErrorToast(error);

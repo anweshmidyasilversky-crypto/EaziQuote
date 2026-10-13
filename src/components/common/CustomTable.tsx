@@ -161,7 +161,7 @@ function CustomTable<TData extends RowData>({
         <div
           className={cn(
             `overflow-x-auto`,
-            contentScrollable ? "max-h-[50vh] overflow-auto" : "",
+            contentScrollable ? "max-h-[60vh] overflow-auto" : "",
           )}
         >
           <table className="w-full text-left border-collapse">

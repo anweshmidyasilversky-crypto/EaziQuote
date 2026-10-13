@@ -278,7 +278,7 @@ export function DashboardIndexPage() {
   return (
     <div className="h-full w-full">
       {/* Main container */}
-      <div className="px-6 pt-6 flex pb-5 flex-col gap-6">
+      <div className="p-5 pt-6 flex flex-col gap-6">
         {/* Heading */}
         <div className="flex w-full min-h-13.5 flex-col md:flex-row md:justify-between">
           {/* Date and greeting */}

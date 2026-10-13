@@ -326,7 +326,7 @@ export function QuotesIndexPage() {
 
   return (
     <React.Fragment>
-      <div className="p-6 pb-7.5 flex flex-col gap-6">
+      <div className="p-5 pb-7.5 flex flex-col gap-6">
         {/* Header */}
         <CustomHeader
           header="Quotes"

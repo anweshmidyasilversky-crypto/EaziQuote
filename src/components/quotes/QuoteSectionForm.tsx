@@ -57,17 +57,20 @@ function QuoteSectionForm({
   useEffect(() => {
     if (mode === "updation" && defaultValues) {
       console.log(`Setting Default Values`);
-      if (defaultValues?.sort) {
+      if (defaultValues.sort) {
         setValue("sort", defaultValues.sort);
         setComboboxSearchTerm(defaultValues.sort.toString());
       }
       setValue("content", defaultValues.content);
-      if (defaultValues?.title) {
+      if (defaultValues.title) {
         setValue("title", defaultValues.title);
       }
-      setValue("id", (defaultValues as QuoteSectionUpdatePayload).id);
+      if (defaultValues.id) {
+        setValue("id", defaultValues.id);
+      }
     } else {
       setComboboxSearchTerm("");
+      reset();
     }
   }, [mode, defaultValues]);
 
@@ -92,7 +95,6 @@ function QuoteSectionForm({
       footerBtnLabel={mode === "creation" ? "Add Section" : "Save Changes"}
       footerBtnAction={handleSubmit(submitHandler)}
       showFooterSeparator={false}
-      xIconAction={() => reset()}
       isSubmitting={isSubmitting}
     >
       <div className="flex flex-col gap-5 p-5">

@@ -520,14 +520,12 @@ export function SubtotalBreakDown({
         header="Margin"
         withFooter
       >
-        <div className="max-h-[60vh] overflow-y-auto">
-          <CustomDataTable
-            columns={marginColumns}
-            data={marginData}
-            bodyCls={cn(`overflow-auto`)}
-            contentScrollable
-          />
-        </div>
+        <CustomDataTable
+          columns={marginColumns}
+          data={marginData}
+          bodyCls={cn(`overflow-auto`)}
+          contentScrollable
+        />
       </CustomDialog>
 
       <AddDeposite
