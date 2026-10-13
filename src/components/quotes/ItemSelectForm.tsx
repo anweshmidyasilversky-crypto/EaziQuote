@@ -504,6 +504,8 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
         toggleIsOpen={toggleEditItemModal}
         currItem={editingItem.current}
         editFn={itemEditHandler}
+        categorySelectDisabled
+        subcategorySelectDisabled
         isPending={updateItemMutation.isPending}
       />
 

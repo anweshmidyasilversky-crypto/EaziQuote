@@ -389,7 +389,7 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
           <SubtotalBreakDown
             paymentMethod={
               (currInvoice?.payment_method ??
-                (user.stripe_account_status === StripAccountStatus.active))
+              user.stripe_account_status === StripAccountStatus.active)
                 ? PaymentMethods.stripe
                 : PaymentMethods.cash
             }
@@ -509,6 +509,8 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
         toggleIsOpen={toggleEditItemModal}
         currItem={targetItem.current}
         editFn={itemEditHandler}
+        categorySelectDisabled
+        subcategorySelectDisabled
         isPending={updateItemMutation.isPending}
       />
 

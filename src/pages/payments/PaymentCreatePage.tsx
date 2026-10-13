@@ -244,7 +244,7 @@ function PaymentCreatePage() {
               activeId={activeToggle}
               toggleActive={setActiveToggle}
               containerCls={cn(
-                `border border-client-creation-secondary rounded-[7px] p-1.5 max-w-fit max-h-11`,
+                `border border-client-creation-secondary rounded-[7px] p-1.5 max-w-fit `,
               )}
               btnCls={cn(`rounded-[7px]! max-h-8 max-w-20 text-sm`)}
             />

@@ -135,6 +135,7 @@ export function CustomCombobox<T, V = T>({
         px-3.5 text-[15px] text-gray-900 placeholder:text-gray-400
         outline-none transition-colors
         focus:border-blue-600 focus:ring-2 focus:ring-blue-100
+        disabled:cursor-not-allowed
         ${className ?? ""}
           `}
             value={inptFieldValue}

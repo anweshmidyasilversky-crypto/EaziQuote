@@ -12,5 +12,5 @@ export const billingPreferenceSchema: yup.ObjectSchema<BillingPreference> =
     paymentTerms: yup
       .number()
       .required(emptyMsg("Payment Terms"))
-      .min(1, `Payment Terms Should be atleast 1`),
+      .min(0, `Payment Terms Should be atleast 0`),
   });

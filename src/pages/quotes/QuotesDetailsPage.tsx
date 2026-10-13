@@ -198,6 +198,8 @@ export function QuotesDetailsPage() {
       withContactInfo={false}
       withCopyOption
       isPopupOpen={moreOptionsOpen}
+      withEdit={quote?.is_editable}
+      withDelete={quote?.is_editable}
       togglePopupOpen={toggleMoreOptionsOpen}
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
       editAction={() => navigate(`/quotes/manage-quotes/${quote?.id}`)}

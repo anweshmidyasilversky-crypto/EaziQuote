@@ -12,7 +12,7 @@ export const itemCreationSchema: yup.ObjectSchema<ItemCreationPayload> =
     pricePerUnit: yup
       .number()
       .required(emptyMsg("Price per unit"))
-      .min(0, "Must be greater than 0"),
+      .min(1, "Must be greater than 1"),
     unitPrice: yup
       .number()
       .required(emptyMsg("Price per unit"))

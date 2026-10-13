@@ -42,6 +42,10 @@ export type ItemFormProps = {
   withAddSubCategory?: boolean;
   currItem?: ItemDetails;
   isPending?: boolean;
+  categorySelectDisabled?: boolean;
+  subcategorySelectDisabled?: boolean;
+  categoryReadonly?: boolean;
+  subCategoryReadonly?: boolean;
 };
 
 function ItemForm({
@@ -55,6 +59,10 @@ function ItemForm({
   withAddSubCategory = true,
   currItem,
   isPending,
+  categorySelectDisabled,
+  subcategorySelectDisabled,
+  categoryReadonly,
+  subCategoryReadonly,
 }: ItemFormProps) {
   const [categoryForm, toggleCategoryForm] = useState(false);
   const [subCategoryForm, toggleSubCategoryForm] = useState(false);
@@ -216,6 +224,8 @@ function ItemForm({
                 clearErrors("catId");
               }
             }}
+            inptDisabled={categorySelectDisabled}
+            inptReadonly={categoryReadonly}
             placeholder="Search or select a category"
             className={errors.catId ? `input-error!` : ``}
             inputRightNode={
@@ -258,7 +268,9 @@ function ItemForm({
                 clearErrors("subCatId");
               }
             }}
-            className={errors.subCatId ? `input-error!` : ``}
+            inptDisabled={subcategorySelectDisabled}
+            inptReadonly={subCategoryReadonly}
+            className={cn(errors.subCatId ? `input-error!` : ``)}
             placeholder="Search or select a subcategory"
             inputRightNode={
               withAddSubCategory ? (

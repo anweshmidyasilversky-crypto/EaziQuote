@@ -229,7 +229,7 @@ function InvoiceIndexPage() {
   };
 
   return (
-    <div className="p-5 h-full flex flex-col gap-6">
+    <div className="p-5 h-full flex flex-col gap-6 overflow-y-auto">
       <>
         <div>
           <CustomHeader

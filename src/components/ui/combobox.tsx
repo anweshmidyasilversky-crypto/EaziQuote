@@ -65,27 +65,43 @@ function ComboboxInput({
       className={cn(
         "w-auto",
         "ring-0! focus-within:ring-1! focus-within:ring-black! focus-within:border-black!",
+        // Prevents fading and forces the not-allowed cursor on the wrapper when disabled
+        "has-disabled:opacity-100! has-disabled:cursor-not-allowed!",
         className,
       )}
     >
       <ComboboxPrimitive.Input
-        render={<InputGroupInput disabled={disabled} />}
+        render={
+          <InputGroupInput
+            disabled={disabled}
+            // Forces black text, full opacity, and not-allowed cursor on the input element
+            className="disabled:text-black disabled:opacity-100! disabled:cursor-not-allowed!"
+          />
+        }
         {...props}
       />
 
-      <InputGroupAddon align="inline-end">
+      <InputGroupAddon
+        align="inline-end"
+        className="group-data-[disabled=true]/input-group:opacity-100! group-data-[disabled=true]/input-group:cursor-not-allowed!"
+      >
         {showTrigger && (
           <InputGroupButton
             size="icon-xs"
             variant="ghost"
             render={<ComboboxTrigger />}
             data-slot="input-group-button"
-            className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
+            className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent disabled:opacity-100! disabled:cursor-not-allowed!"
             disabled={disabled}
           />
         )}
 
-        {showClear && <ComboboxClear disabled={disabled} />}
+        {showClear && (
+          <ComboboxClear
+            disabled={disabled}
+            className="disabled:cursor-not-allowed!"
+          />
+        )}
       </InputGroupAddon>
 
       {children}
@@ -152,7 +168,7 @@ function ComboboxItem({
     <ComboboxPrimitive.Item
       data-slot="combobox-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex w-full cursor-default items-center gap-2 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -253,7 +269,7 @@ function ComboboxChip({
     <ComboboxPrimitive.Chip
       data-slot="combobox-chip"
       className={cn(
-        "flex h-[calc(--spacing(5.25))] w-fit items-center justify-center gap-1 rounded-sm bg-muted px-1.5 text-xs font-medium whitespace-nowrap text-foreground has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-data-[slot=combobox-chip-remove]:pr-0",
+        "flex h-[calc(--spacing(5.25))] w-fit items-center justify-center gap-1 rounded-sm bg-muted px-1.5 text-xs font-medium whitespace-nowrap text-foreground has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-data-[slot=combobox-chip-remove]:pr-0",
         className,
       )}
       {...props}

@@ -19,7 +19,6 @@ import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
 import { ALLOWED_ATTACHMENT_TYPES } from "@/constants/types";
-import { maxLengthMsg } from "@/constants/messages";
 
 export type InvoiceSummaryFormProps = {
   mode: "create" | "edit";
@@ -124,9 +123,13 @@ function InvoiceSummaryForm({
 
   const handleAttachmentDelete = (
     quote_id: string | number,
-    attachment_id: string | number,
     fileName: string,
+    attachment_id?: number,
   ) => {
+    if (!attachment_id) {
+      toast.error(`Please select one attachment to delete`);
+      return;
+    }
     attachmentDeleteMutation.mutate(
       {
         quote_id,
@@ -134,8 +137,8 @@ function InvoiceSummaryForm({
       },
       {
         onSuccess: (response) => {
-          removeAttachment(fileName);
           toast.success(response.message);
+          removeAttachment(fileName);
         },
         onError: (error) => {
           showErrorToast(error);
@@ -167,16 +170,23 @@ function InvoiceSummaryForm({
         },
       );
     } else {
-      invoiceCreateMutation.mutate(data as InvoiceCreateApiPayload, {
-        onSuccess: (response) => {
-          submitAction?.();
-          navigate(`/invoices/manage-invoice/${response.payload.id}`);
-          toast.success(response.message);
+      invoiceCreateMutation.mutate(
+        {
+          ...data,
+          attachments:
+            data.attachments?.slice(quote?.attachments.length ?? 0) ?? [],
+        } as InvoiceCreateApiPayload,
+        {
+          onSuccess: (response) => {
+            submitAction?.();
+            navigate(`/invoices/manage-invoice/${response.payload.id}`);
+            toast.success(response.message);
+          },
+          onError: (error) => {
+            showErrorToast(error);
+          },
         },
-        onError: (error) => {
-          showErrorToast(error);
-        },
-      });
+      );
     }
   };
 
@@ -190,6 +200,24 @@ function InvoiceSummaryForm({
       );
     }
   }, [currInvoice]);
+
+  useEffect(() => {
+    if (!quote) {
+      return;
+    }
+    setValue(
+      "attachments",
+      quote.attachments.map(
+        (attachment) =>
+          new File([], `${attachment.id}.${attachment.type}`, {
+            type:
+              attachment.type === "pdf"
+                ? `application/pdf`
+                : `image/${attachment.type}`,
+          }),
+      ),
+    );
+  }, [quote]);
 
   useEffect(() => {
     if (quote) {
@@ -353,49 +381,41 @@ function InvoiceSummaryForm({
             inptType="file"
             allowedFileTypes={ALLOWED_ATTACHMENT_TYPES}
           />
-          {(attachments?.length ?? 0) > 5 && (
-            <p className="error-text"> {maxLengthMsg("Attachments", 5)} </p>
-          )}
           {attachments && (
             <div className="attachment-layout">
-              {quote?.attachments?.map((attachment) => {
+              {attachments.map((attachment, index) => {
+                const noOfQuoteAttachments = quote?.attachments.length ?? 0;
                 return (
                   <StyledAttachments
-                    key={attachment.id}
-                    fileName={`${attachment.id}.${attachment.type}`}
+                    key={attachment.name}
+                    fileName={attachment.name}
                     deleteAction={() => {
-                      handleAttachmentDelete(
-                        quote.id,
-                        attachment.id,
-                        `${attachment.id}.${attachment.type}`,
-                      );
+                      if (quote && index < noOfQuoteAttachments) {
+                        handleAttachmentDelete(
+                          quote?.id,
+                          attachment.name,
+                          quote.attachments.at(index)?.id,
+                        );
+                      } else {
+                        removeAttachment(attachment.name);
+                      }
                     }}
-                    attachmentId={attachment.id}
-                    withDownload
+                    attachmentId={quote?.attachments?.at(index)?.id}
+                    withDownload={index < noOfQuoteAttachments}
+                    defaultOpenUrl={window.URL.createObjectURL(attachment)}
                     withOpen
                   />
                 );
               })}
-              {attachments
-                .slice(quote?.attachments.length ?? 0)
-                .map((attachment) => {
-                  return (
-                    <StyledAttachments
-                      key={attachment.name}
-                      fileName={attachment.name}
-                      deleteAction={() => removeAttachment(attachment.name)}
-                      defaultOpenUrl={window.URL.createObjectURL(attachment)}
-                      withOpen
-                    />
-                  );
-                })}
             </div>
           )}
         </div>
 
         <CustomBtn
           buttonLabel="Save"
-          onClick={handleSubmit(submitHandler)}
+          onClick={() => {
+            handleSubmit(submitHandler)();
+          }}
           type="submit"
           isSubmitting={
             invoiceCreateMutation.isPending || invoiceUpdateMutation.isPending

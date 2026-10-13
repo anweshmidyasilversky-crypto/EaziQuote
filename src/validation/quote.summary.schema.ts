@@ -25,6 +25,8 @@ export const attachmentsSchema = yup
       }
 
       if (!ALLOWED_ATTACHMENT_TYPES.includes(file.type)) {
+        console.log(file.type);
+        console.log(ALLOWED_ATTACHMENT_TYPES);
         return this.createError({
           message: InvalidType(ALLOWED_ATTACHMENT_TYPES),
         });
