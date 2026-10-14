@@ -295,7 +295,7 @@ function QuoteSummaryForm({
   return (
     <React.Fragment>
       <div className="px-5 flex flex-col gap-8">
-        <div className="w-full flex gap-4">
+        <div className="w-full max-md:flex-col flex gap-4">
           <CustomInput
             control={control}
             name="quoteTitle"
@@ -357,11 +357,13 @@ function QuoteSummaryForm({
 
         <div className="input-non-oriented flex-col">
           <label className="input-label"> Client </label>
-          <div className="flex gap-2 w-full h-full">
+          <div className="flex max-md:grid max-md:grid-rows-2 gap-2 w-full h-full">
             <CustomBtn
               buttonLabel="New Client"
               leftIcon={assets.plusIconBlack}
-              btncls="min-h-11! py-3 bg-transparent text-black-text border border-black-text hover:bg-transparent"
+              btncls={cn(
+                "max-md:row-start-2 max-md:w-full min-h-11! py-3 bg-transparent text-black-text border border-black-text hover:bg-transparent",
+              )}
               onClick={() => toggleClientFormOpen((curr) => !curr)}
             />
             <div className="flex flex-col gap-2 w-full h-full">

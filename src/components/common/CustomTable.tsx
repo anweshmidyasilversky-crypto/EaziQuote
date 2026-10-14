@@ -135,7 +135,7 @@ function CustomTable<TData extends RowData>({
       {/* Table Options */}
       {(tableOptionsLeft || tableOptionsRight) && (
         <div
-          className={`flex justify-between min-h-9.5 px-5 ${tableOptionsCls}`}
+          className={`flex justify-between min-h-9.5 max-md:gap-2 max-md:text-[12px] px-5 ${tableOptionsCls}`}
         >
           {tableOptionsLeft}
           {tableOptionsRight}
@@ -145,7 +145,7 @@ function CustomTable<TData extends RowData>({
       {/* Table */}
       <div className="w-full h-fit overflow-x-auto">
         {(title || headerSlot) && (
-          <div className="p-4 flex items-center justify-between">
+          <div className="p-4 flex items-center justify-between max-md:gap-2">
             {title ? (
               <h2 className="text-base font-medium text-placeholder-text">
                 {title}

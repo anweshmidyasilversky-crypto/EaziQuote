@@ -65,7 +65,7 @@ export function DateRangePicker({
   }, [dateRange.startDate]);
 
   return (
-    <div className="flex w-full flex-1 flex-row items-center gap-4">
+    <div className="flex w-full flex-1 flex-col md:flex-row items-center gap-4">
       {Object.keys(dateRange).map((dateKey) => {
         const key = dateKey as keyof DateRange;
 

@@ -513,7 +513,7 @@ export function ClientDetailsPage() {
         {/* Client info & summary */}
         <div className="flex flex-col lg:flex-row gap-6 min-h-27.75">
           {/* Client info */}
-          <div className="flex justify-between items-center p-6 gap-6 bg-white rounded-[10px]">
+          <div className="flex justify-between items-center p-6 gap-2 md:gap-6 bg-white rounded-[10px]">
             <div className="flex gap-4">
               <div className="flex justify-center items-center rounded-full bg-transparent-liquid-lava min-h-15 min-w-15">
                 <span className="min-h-7.25 lg:text-6 font-medium uppercase text-center">
@@ -565,7 +565,7 @@ export function ClientDetailsPage() {
         />
 
         <div className="flex flex-col py-4.5 gap-4.5 bg-white rounded-[7px]">
-          <div className="flex items-center justify-between px-5">
+          <div className="flex items-center justify-between px-5 max-md:gap-2">
             <span className="font-medium text-xs md:text-[16px] min-h-4.75">
               {" "}
               {isActivityTable ? "Recent Activity" : "Payments"}{" "}

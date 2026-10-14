@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
 import { XIcon } from "lucide-react";
 import { CustomBtn } from "./CustomBtn";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
 
 export enum ShareOptionType {
   quote = "quote",
@@ -59,7 +60,7 @@ export function ShareOptions({
       break;
     case ShareOptionType.payment:
       shareMessage = encodeURIComponent(
-        `Hi Manoj C, here is your payment link: ${paymentLink} Thank you.`,
+        `Hi, here is your payment link: ${paymentLink} Thank you.`,
       );
       break;
 
@@ -126,7 +127,7 @@ export function ShareOptions({
   return (
     <Dialog open={isOpen} onOpenChange={toggleIsOpen}>
       <DialogContent
-        className={`ring-0 w-fit! bg-white p-0 min-w-125 flex flex-col`}
+        className={`ring-0 w-fit! bg-white p-0 min-w-[80vw] md:min-w-125 flex flex-col`}
         showCloseButton={false}
       >
         <DialogHeader className="bg-table-head rounded-[7px]">
@@ -178,12 +179,13 @@ export function ShareOptions({
           </Carousel>
 
           <div className="min-h-13 rounded-[7px] py-3 px-2 flex gap-3 border border-searchbox-border justify-between items-center">
-            <span className="text-base"> {clientEmail} </span>
+            <span className="max-md:text-sm text-base"> {clientEmail} </span>
             <CustomBtn
               buttonLabel="Send Email"
               onClick={sendEmailAction}
               disabled={isEmailSending}
               isSubmitting={isEmailSending}
+              btncls={cn(`max-md:[&_span]:text-[12px] max-md:p-2 max-md:h-fit`)}
             />
           </div>
         </div>

@@ -122,7 +122,7 @@ export function CustomCombobox<T, V = T>({
       }}
       filter={filterFn ?? null}
     >
-      <div className="relative flex gap-2 h-11 items-center w-full">
+      <div className="relative flex max-md:flex-col gap-2 h-11 items-center w-full">
         {inputLeftNode}
         <div ref={inputAnchorRef} className="min-w-0 grow">
           <ComboboxInput

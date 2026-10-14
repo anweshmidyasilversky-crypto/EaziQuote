@@ -280,7 +280,7 @@ export function InvoiceDetailsPage() {
           ) : (
             <>
               {activeTable === "summary" && (
-                <div className="flex gap-6">
+                <div className="flex gap-6 flex-col lg:flex-row">
                   {/* Items Table */}
                   <div className="table-theme! overflow-hidden grow">
                     <CustomDataTable

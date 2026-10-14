@@ -25,10 +25,10 @@ export function CustomToggleGroup({
       className={`w-full min-h-8.75 overflow-x-auto border-b border-b-client-detail-secondary ${containerCls}`}
     >
       {/* Table Toggles */}
-      <div className={`flex ${className}`}>
+      <div className={`flex max-md:gap-5 ${className}`}>
         {toggleConfig.map((toggleBtn) => (
           <button
-            className={` ${isActive(toggleBtn.btnId) ? "btn-auth btnActive transform transition-all duration-300 delay-200" : ""} rounded-b-none w-34.5 min-h-4.75 ${btnCls}`}
+            className={` ${isActive(toggleBtn.btnId) ? "btn-auth btnActive transform transition-all duration-300 delay-200" : "btn-auth bg-transparent hover:bg-transparent text-black-text"} rounded-b-none w-34.5 min-h-4.75 max-md:text-[12px] max-md:w-fit max-md:h-fit ${btnCls}`}
             onClick={() => toggleActive(toggleBtn.btnId)}
             key={toggleBtn.btnId}
             disabled={toggleBtn.disabled || false}

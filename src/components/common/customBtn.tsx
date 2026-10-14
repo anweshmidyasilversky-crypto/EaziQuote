@@ -48,7 +48,7 @@ export function CustomBtn({
           />
         </span>
       )}
-      <span className="flex flex-none min-h-4.25 w-fit font-sans font-normal text-[14px] text-nowrap">
+      <span className="flex flex-none min-h-4.25 w-fit font-sans font-normal text-[14px] text-nowrap max-md:text-wrap max-md:text-[12px]">
         {isSubmitting ? <Spinner /> : buttonLabel}
       </span>
       {rightIcon && (

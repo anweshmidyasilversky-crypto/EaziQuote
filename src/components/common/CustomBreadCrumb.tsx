@@ -1,21 +1,29 @@
+import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 
 export type HeaderBreadCrumbProps = {
   pageName: string;
   parentPagePath?: string;
+  containerCls?: string;
 };
 
 export function HeaderBreadCrumb({
   pageName,
   parentPagePath,
+  containerCls,
 }: HeaderBreadCrumbProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const parentPageName = location.pathname.split("/")[1];
   const parentPage = location.pathname.split("/").toSpliced(-1, 1).join("/");
   return (
-    <div className="min-h-10.75 bg-white w-full flex justify-between dashboard-card-theme py-3 px-6">
+    <div
+      className={cn(
+        "min-h-10.75 bg-white w-full flex justify-between dashboard-card-theme py-3 px-6",
+        containerCls,
+      )}
+    >
       <span className="font-semibold uppercase text-[16px]">{pageName}</span>
       <div className="flex  items-center">
         <span

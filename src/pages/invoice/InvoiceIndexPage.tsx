@@ -239,7 +239,9 @@ function InvoiceIndexPage() {
           />
         </div>
 
-        <ActivitySummary summaryConfig={summaryConfig} />
+        <div>
+          <ActivitySummary summaryConfig={summaryConfig} />
+        </div>
 
         <div className="flex flex-col gap-5 bg-table pt-5 rounded-[10px]">
           <CustomDataTable

@@ -1,6 +1,7 @@
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  cn,
   formatCurrency,
   formatDisplayDate,
   getInitials,
@@ -307,7 +308,10 @@ export function QuotesDetailsPage() {
   return (
     <React.Fragment>
       <div>
-        <HeaderBreadCrumb pageName="Quote Detail" />
+        <HeaderBreadCrumb
+          pageName="Quote Detail"
+          containerCls={cn(`max-md:p-1 max-md:items-center`)}
+        />
         <div className="flex flex-col gap-6 px-6 pt-6 pb-8.5">
           <CustomHeader
             header={quote?.title ?? ""}
@@ -323,6 +327,7 @@ export function QuotesDetailsPage() {
             toggleConfig={toggleGroupConfig}
             activeId={activeTable}
             toggleActive={toggleActiveTable}
+            containerCls="max-md:gap-5"
           />
 
           {isFetching ? (
@@ -332,7 +337,7 @@ export function QuotesDetailsPage() {
           ) : (
             <>
               {activeTable === "summary" && (
-                <div className="flex gap-6">
+                <div className="flex max-md:flex-col gap-6">
                   {/* Items Table */}
                   <div className="table-theme! overflow-hidden grow">
                     <CustomDataTable
@@ -352,7 +357,6 @@ export function QuotesDetailsPage() {
                           searchPlaceHolder="Search here"
                         />
                       }
-                      contentScrollable
                     />
 
                     {/* Subtotal Breakdown */}
