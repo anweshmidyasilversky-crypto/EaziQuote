@@ -380,6 +380,7 @@ export function QuotesDetailsPage() {
                               ? PaymentMethods.stripe
                               : PaymentMethods.cash
                           }
+                          depositPaymentMethod={quote?.deposit_payment_method}
                           items={quote?.items ?? []}
                         />
                       </div>

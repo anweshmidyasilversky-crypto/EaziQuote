@@ -414,7 +414,7 @@ export function QuotesIndexPage() {
         header="Create a New Quote"
         headerCls={cn(`border-0!`)}
       >
-        <div className="flex flex-col gap-6 py-5 mt-6 max-w-125!">
+        <div className="flex flex-col gap-6 py-5 mt-6 max-w-125! max-md:min-w-[80vw]">
           <span className="text-sm text-placeholder-text px-5 min-h-8.5">
             {" "}
             {
@@ -424,22 +424,25 @@ export function QuotesIndexPage() {
 
           <div className="flex gap-4 justify-center px-5">
             <div
-              className="bg-custom-dialog-primary flex flex-col items-center min-w-55 gap-4 rounded-lg py-4 cursor-pointer"
+              className="bg-custom-dialog-primary flex flex-col items-center min-w-55 gap-4 rounded-lg py-4 cursor-pointer max-md:min-w-[30vw]"
               onClick={() => {
                 dispatch(removeQuoteRedux());
                 navigate(`/quotes/manage-quotes/`);
               }}
             >
               <img src={assets.pencilFilledIcon} className="w-8 h-8" />
-              <span> {"Start from Scratch"} </span>
+              <span className="max-md:text-[12px]">
+                {" "}
+                {"Start from Scratch"}{" "}
+              </span>
             </div>
 
             <div
-              className="bg-custom-dialog-primary flex flex-col items-center min-w-55 rounded-lg gap-4 py-4 cursor-pointer"
+              className="bg-custom-dialog-primary flex flex-col items-center min-w-55 rounded-lg gap-4 py-4 cursor-pointer max-md:min-w-[30vw]"
               onClick={() => togglePresetSelectionOpen((curr) => !curr)}
             >
               <img src={assets.thunderBoltIcon} className="w-8 h-8" />
-              <span> {"Use Preset Quote"} </span>
+              <span className="max-md:text-[12px]"> {"Use Preset Quote"} </span>
             </div>
           </div>
         </div>

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CustomDialog from "../common/CustomDialog";
 import {
   CustomToggleGroup,
   type CustomToggleGroupProps,
 } from "../common/CustomToggleGroup";
 import { CustomInput } from "../common/CustomInput";
-import { useForm, type DefaultValues } from "react-hook-form";
+import { useForm, useWatch, type DefaultValues } from "react-hook-form";
 import { type AddDepositePayload } from "../../types/addDeposite.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -34,8 +34,8 @@ export type AddDepositeProps = {
   defaultValues: DefaultValues<AddDepositePayload>;
   handleDepositeType?: (depositeType: DepositeTypes) => void;
   handleDepositePercentage?: (depositePercentage: number) => void;
-
   toggleStripPopup: React.Dispatch<React.SetStateAction<boolean>>;
+  depositeType?: DepositeTypes;
 };
 
 function AddDeposite({
@@ -49,6 +49,7 @@ function AddDeposite({
   handleDepositePercentage,
 
   toggleStripPopup,
+  depositeType,
 }: AddDepositeProps) {
   const user = useAppSelector((state) => state.user);
   const isStripeConnected =
@@ -63,7 +64,9 @@ function AddDeposite({
       btnLabel: "Percentage (%)",
     },
   ];
-  const [activeToggle, toggleActive] = useState(DepositeTypes.fixed);
+  const [activeToggle, toggleActive] = useState(
+    depositeType ?? DepositeTypes.fixed,
+  );
   const [selectedMethod, setSelectedMethod] = useState(
     defaultValues.paymentMethod ?? "",
   );
@@ -76,7 +79,8 @@ function AddDeposite({
     reset,
     handleSubmit,
   } = useForm<AddDepositePayload>({
-    defaultValues: defaultValues,
+    defaultValues,
+
     resolver: yupResolver(
       yup.object({
         deposite:
@@ -86,6 +90,11 @@ function AddDeposite({
         paymentMethod: paymentMethodSchema,
       }),
     ),
+  });
+
+  const [currPaymentMethod] = useWatch({
+    control,
+    name: ["paymentMethod"],
   });
 
   const submitHanler = (data: AddDepositePayload) => {
@@ -101,11 +110,20 @@ function AddDeposite({
         setDeposite(data.deposite);
       }
       setPaymentMode(data.paymentMethod);
-      reset();
       toggleActive(DepositeTypes.fixed);
       toggleOpen(false);
     }
   };
+
+  useEffect(() => {
+    if (defaultValues.deposite) {
+      setValue("deposite", defaultValues.deposite);
+    }
+    if (defaultValues.paymentMethod) {
+      setValue("paymentMethod", defaultValues.paymentMethod);
+    }
+    toggleActive(depositeType ?? DepositeTypes.fixed);
+  }, [isOpen]);
 
   return (
     <CustomDialog
@@ -121,7 +139,6 @@ function AddDeposite({
           btncls={cn(
             `bg-custom-dialog-primary hover:bg-custom-dialog-primary text-black-text`,
           )}
-          onClick={reset}
         />
       }
       closeOnSubmit={false}
@@ -132,9 +149,13 @@ function AddDeposite({
           <span> Deposite Type </span>
           <div className="border rounded-[7px] p-1.5 border-input-field-border">
             <CustomToggleGroup
-              toggleActive={
-                toggleActive as React.Dispatch<React.SetStateAction<string>>
-              }
+              toggleActive={(toggle) => {
+                reset({
+                  deposite: "" as any,
+                  paymentMethod: currPaymentMethod,
+                });
+                toggleActive(toggle as DepositeTypes);
+              }}
               activeId={activeToggle}
               toggleConfig={DepositeTypesConfig}
               containerCls={cn(`border-0! `)}
@@ -170,7 +191,7 @@ function AddDeposite({
           <CustomCombobox
             items={Object.values(PaymentMethods)}
             selected={
-              defaultValues.paymentMethod ??
+              watch("paymentMethod") ??
               (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash)
             }
             onValueChange={(method) => {
@@ -183,7 +204,7 @@ function AddDeposite({
               setSelectedMethod(val);
             }}
           />
-          {watch().paymentMethod === PaymentMethods.cash && (
+          {watch("paymentMethod") === PaymentMethods.cash && (
             <span className="text-warning-text text-wrap wrap-break-word text-xs">
               {" "}
               {`You are about to record a cash payment. Please ensure the amount has been physically received before proceeding.`}{" "}

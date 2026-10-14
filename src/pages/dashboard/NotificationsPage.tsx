@@ -11,7 +11,47 @@ function NotificationsPage() {
   const { notifications, isFetching, pagiantionMeta, setPageNo } =
     useNotificationList();
 
-  const paginationBtns = pagiantionMeta?.links;
+  let paginationBtns = pagiantionMeta?.links ?? [];
+  const lastPage = pagiantionMeta?.last_page ?? 0;
+  const currentPage = pagiantionMeta?.current_page ?? 0;
+  if (paginationBtns.length > 7) {
+    const firstButtons = paginationBtns.slice(0, 2);
+    const lastButtons = paginationBtns.slice(-2);
+
+    const pageButtons = paginationBtns.slice(2, -2);
+
+    const createEllipsis = () => ({
+      url: null,
+      label: "...",
+      active: false,
+    });
+
+    let visiblePages;
+
+    if (currentPage <= 3) {
+      visiblePages = [
+        ...pageButtons.slice(0, 3),
+        createEllipsis(),
+        ...pageButtons.slice(-3),
+      ];
+    } else if (currentPage >= lastPage - 2) {
+      visiblePages = [
+        ...pageButtons.slice(0, 3),
+        createEllipsis(),
+        ...pageButtons.slice(-3),
+      ];
+    } else {
+      visiblePages = [
+        pageButtons[0],
+        createEllipsis(),
+        ...pageButtons.slice(currentPage - 2, currentPage + 1),
+        createEllipsis(),
+        ...pageButtons.slice(-1),
+      ];
+    }
+
+    paginationBtns = [...firstButtons, ...visiblePages, ...lastButtons];
+  }
 
   return (
     <>
@@ -45,14 +85,14 @@ function NotificationsPage() {
         </div>
 
         {pagiantionMeta && (
-          <div className="flex w-full justify-between items-center p-5">
+          <div className="flex max-md:flex-col max-md:gap-2 w-full justify-between items-center p-5">
             <span className="text-placeholder-text text-sm">
               {" "}
               {`Showing ${pagiantionMeta.from ?? 0} to ${pagiantionMeta.to ?? 0} of ${pagiantionMeta.total} Results`}{" "}
             </span>
 
             {paginationBtns && (
-              <div className="w-fit flex justify-between gap-2 min-h-8 items-center">
+              <div className="w-fit flex flex-wrap justify-between gap-2 min-h-8 items-center">
                 {paginationBtns?.map((paginationBtn, index) => {
                   let label = paginationBtn.label;
                   if (index === 0) {

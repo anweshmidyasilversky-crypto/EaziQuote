@@ -377,6 +377,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   url: string;
   status: QuoteStatus;
   deposit_required: boolean;
+  deposit_payment_method?: PaymentMethods | null;
   deposit_type: DepositeTypes | null;
   deposit_amount: null | number;
   deposit_percentage: null | number;

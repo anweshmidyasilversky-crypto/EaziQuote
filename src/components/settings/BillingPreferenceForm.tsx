@@ -86,6 +86,7 @@ function BillingPreferenceForm({
           getItemLabel={(vat) => vat.name ?? null}
           onValueChange={(vat) => {
             if (vat) {
+              setVatSearchTerm(vat.name);
               setValue("vatRate", vat.id);
               clearErrors("vatRate");
             }

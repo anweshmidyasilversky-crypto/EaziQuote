@@ -1,24 +1,41 @@
 import type { Vat } from "@/types/api.responses.type";
 import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type AddTaxProps = {
   isOpen: boolean;
   toggleIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   vatSettings: Vat[];
   setTaxId: (num: Vat | undefined) => void;
+  prefillTax?: Vat;
 };
 
-function AddTax({ isOpen, toggleIsOpen, vatSettings, setTaxId }: AddTaxProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const selectedTaxRate = useRef<Vat | undefined>(undefined);
+function AddTax({
+  isOpen,
+  toggleIsOpen,
+  vatSettings,
+  setTaxId,
+  prefillTax,
+}: AddTaxProps) {
+  const [searchTerm, setSearchTerm] = useState(prefillTax?.name ?? "");
+  const selectedTaxRate = useRef<Vat | undefined>(prefillTax);
 
   const handleTax = (vat: Vat | undefined) => {
     if (vat) {
       setTaxId(vat);
     }
   };
+
+  useEffect(() => {
+    if (prefillTax) {
+      setSearchTerm(prefillTax.name);
+      selectedTaxRate.current = prefillTax;
+    } else {
+      setSearchTerm("");
+      selectedTaxRate.current = undefined;
+    }
+  }, [prefillTax]);
 
   return (
     <CustomDialog

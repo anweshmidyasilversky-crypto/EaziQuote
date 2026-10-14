@@ -49,6 +49,7 @@ function PaymentMethodSelectDialog({
         <div className="p-5">
           <select
             className="input-field min-w-125"
+            value={method}
             onChange={(e) => {
               const selectedMethod = e.currentTarget.value;
               setMethod(selectedMethod);
@@ -57,9 +58,8 @@ function PaymentMethodSelectDialog({
           >
             {Object.keys(PaymentMethods).map((key) => {
               return (
-                <option key={key} value={key} selected={key === selectedMethod}>
-                  {" "}
-                  {key[0].toUpperCase() + key.slice(1)}{" "}
+                <option key={key} value={key}>
+                  {key[0].toUpperCase() + key.slice(1)}
                 </option>
               );
             })}

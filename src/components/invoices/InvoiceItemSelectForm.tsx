@@ -388,10 +388,7 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
         <div className="max-w-75">
           <SubtotalBreakDown
             paymentMethod={
-              (currInvoice?.payment_method ??
-              user.stripe_account_status === StripAccountStatus.active)
-                ? PaymentMethods.stripe
-                : PaymentMethods.cash
+              paymentMethod ? (paymentMethod as PaymentMethods) : undefined
             }
             items={addedItems}
             taxEditabled={false}

@@ -91,12 +91,15 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
 
   const editingItem = useRef<ItemDetails | undefined>(undefined);
 
-  const vatSettingsId = useRef<number | undefined>(currQuote.vat_setting_id);
+  const vatSettingsId = useRef<number | undefined>(
+    Number(currQuote.vat_setting_id),
+  );
   const discount = useRef<number | null>(
     Number(currQuote.discount?.amount ?? "0"),
   );
   const depositePaymentMethod = useRef<PaymentMethods>(
-    isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash,
+    currQuote.deposit_payment_method ??
+      (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash),
   );
   const depositePercentageRef = useRef<number | null>(
     currQuote.deposit_percentage,
@@ -339,7 +342,6 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
       },
     });
   };
-
   return (
     <>
       <CustomDataTable
@@ -393,6 +395,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
             paymentMethod={
               isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash
             }
+            depositPaymentMethod={currQuote.deposit_payment_method}
             vatSettings={vat_settings}
             discountPercentage={discount.current ?? 0}
             taxPercentage={currQuote.vat}
@@ -403,6 +406,9 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
             depositeAmountRef={depositeAmount}
             depositeTypeRef={depositeTypeRef}
             depositePercentageRef={depositePercentageRef}
+            prefilTax={vat_settings?.find(
+              (vat) => vat.id === vatSettingsId.current,
+            )}
           />
         </div>
       </div>
