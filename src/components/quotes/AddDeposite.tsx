@@ -78,6 +78,7 @@ function AddDeposite({
     setValue,
     reset,
     handleSubmit,
+    unregister,
   } = useForm<AddDepositePayload>({
     defaultValues,
 
@@ -118,6 +119,8 @@ function AddDeposite({
   useEffect(() => {
     if (defaultValues.deposite) {
       setValue("deposite", defaultValues.deposite);
+    } else {
+      unregister("deposite");
     }
     if (defaultValues.paymentMethod) {
       setValue("paymentMethod", defaultValues.paymentMethod);
