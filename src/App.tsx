@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import useUserDetails from "./hooks/apis/user/useUserDetails.ts";
 import { updateUser } from "./redux/slices/user.slice.ts";
 import { RevenueCatProvider } from "./context/RevenueCatContext.tsx";
+import { SubtotalFieldsProvider } from "./context/SubtotalFieldsContext.tsx";
 
 const routes = [...authRoutes, ...dashboardRoutes];
 
@@ -43,8 +44,9 @@ function App() {
 
   return (
     <RevenueCatProvider appUserId={userDetails?.id}>
-      {" "}
-      <RouterProvider router={router} />{" "}
+      <SubtotalFieldsProvider>
+        <RouterProvider router={router} />
+      </SubtotalFieldsProvider>
     </RevenueCatProvider>
   );
 }

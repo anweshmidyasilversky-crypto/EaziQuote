@@ -85,10 +85,7 @@ function PaymentCreatePage() {
     formState: { errors },
   } = useForm<Omit<CreatePaymentBase, "amount" | "amount_type">>({
     defaultValues: {
-      payment_method:
-        user.stripe_account_status === StripAccountStatus.active
-          ? PaymentMethods.stripe
-          : PaymentMethods.cash,
+      payment_method: PaymentMethods.cash,
       payment_date: new Date().toISOString(),
     },
     resolver: yupResolver(paymentSchemaBase),
@@ -396,7 +393,9 @@ function PaymentCreatePage() {
                 fieldName="Method"
                 placeholder="Select a input method"
                 inptType="select"
+                disabled
                 selectOptions={paymentMethodSelectOptions}
+                className="py-0! disabled:text-black-text"
               />
               {paymentMethod === PaymentMethods.cash && (
                 <p className="text-warning-text text-sm">

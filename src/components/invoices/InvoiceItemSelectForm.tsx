@@ -1,6 +1,5 @@
 import {
   PaymentMethods,
-  StripAccountStatus,
   type Category,
   type InvoiceDetails,
   type ItemDetails,
@@ -19,7 +18,7 @@ import { CustomDataTable } from "../common/CustomTable";
 import useItemsList from "@/hooks/apis/items/useItemsList";
 import SearchInputGruop from "../common/SearchInputGruop";
 import type { PageFilters } from "@/types/api.requests.type";
-import { SubtotalBreakDown } from "../quotes/SubtotalBreakDown";
+import SubtotalBreakDown from "../quotes/SubtotalBreakDown";
 import { useAppSelector } from "@/redux/store";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import { useNavigate } from "react-router";
@@ -35,14 +34,17 @@ import { RenderMultiSelectCheckbox } from "../common/RenderMultiSelectCheckbox";
 import { Spinner } from "../ui/spinner";
 import DeleteDialog from "../common/DeleteDialog";
 import ItemForm from "../items/ItemForm";
+import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
 
 export type InvoiceItemSelectFormProps = {
   currInvoice?: InvoiceDetails;
 };
 
 function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
+  const { setDiscount, setVat, discount, paymentMethod, setPaymentMethod } =
+    useSubtotalFields();
   const navigate = useNavigate();
-  const user = useAppSelector((state) => state.user);
+  const { vat_settings } = useAppSelector((state) => state.appConfig);
   const { invoiceUpdateMutation } = useInvoiceMutations();
   const { createItemMutation, updateItemMutation, deleteItemMutation } =
     useItemsMutations();
@@ -54,12 +56,6 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
   const targetItem = useRef<ItemDetails | undefined>(undefined);
   const [filters, setFilters] = useState<string[]>([]);
   const targetSubCategory = useRef<string[] | undefined>(undefined);
-  const discountRef = useRef<number | null>(
-    currInvoice?.quote ? Number(currInvoice.quote.discount?.amount ?? "0") : 0,
-  );
-  const [paymentMethod, setPaymentMethod] = useState<string | undefined | null>(
-    currInvoice?.payment_method,
-  );
   const itemListFilter = useMemo(
     () =>
       ({
@@ -312,14 +308,13 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
   ];
 
   const submitHandler = ({ items }: { items: ItemDetails[] }) => {
-    console.log(items);
     invoiceUpdateMutation.mutate(
       {
         invoice_id: currInvoice?.id ?? "",
         _method: "put",
         items: items,
-        payment_method: (paymentMethod as PaymentMethods) ?? undefined,
-        discount: discountRef.current ?? 0,
+        payment_method: paymentMethod,
+        discount,
       },
       {
         onSuccess: (response) => {
@@ -338,6 +333,30 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
       toast.error(errors.items.message);
     }
   }, [errors.items]);
+
+  useEffect(() => {
+    if (currInvoice?.quote.vat_setting_id) {
+      setVat(
+        vat_settings.find(
+          (vatConfig) =>
+            vatConfig.id === Number(currInvoice.quote.vat_setting_id),
+        ),
+      );
+    } else {
+      setVat(undefined);
+    }
+    if (currInvoice?.quote.discount?.amount) {
+      setDiscount(Number(currInvoice.quote.discount.amount));
+    } else {
+      setDiscount(undefined);
+    }
+
+    if (currInvoice?.payment_method) {
+      setPaymentMethod(currInvoice.payment_method);
+    } else {
+      setPaymentMethod(PaymentMethods.cash);
+    }
+  }, [currInvoice]);
 
   return (
     <div className="bg-table flex flex-col gap-5">
@@ -386,27 +405,7 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
           isSubmitting={invoiceUpdateMutation.isPending}
         />
         <div className="max-w-75">
-          <SubtotalBreakDown
-            paymentMethod={
-              paymentMethod ? (paymentMethod as PaymentMethods) : undefined
-            }
-            items={addedItems}
-            taxEditabled={false}
-            taxPercentage={currInvoice?.quote.vat}
-            discountPercentage={
-              currInvoice?.quote
-                ? Number(currInvoice.quote.discount?.amount ?? "0")
-                : 0
-            }
-            discountRef={discountRef}
-            toggleSelectedPaymentMethod={(paymentMethod) => {
-              setPaymentMethod(paymentMethod);
-            }}
-            creditAmount={currInvoice?.payments.reduce(
-              (acc, currPayment) => acc + currPayment.allocated,
-              0,
-            )}
-          />
+          <SubtotalBreakDown items={addedItems} />
         </div>
       </div>
 

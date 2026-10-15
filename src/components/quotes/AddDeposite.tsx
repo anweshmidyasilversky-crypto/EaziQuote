@@ -203,7 +203,14 @@ function AddDeposite({
               setValue("paymentMethod", val as PaymentMethods);
               setSelectedMethod(val);
             }}
+            placeholder="Select a payment method"
+            className={cn(
+              errors.paymentMethod ? `input-error!` : `input-field!`,
+            )}
           />
+          {errors.paymentMethod && (
+            <p className="error-text"> {errors.paymentMethod.message} </p>
+          )}
           {watch("paymentMethod") === PaymentMethods.cash && (
             <span className="text-warning-text text-wrap wrap-break-word text-xs">
               {" "}

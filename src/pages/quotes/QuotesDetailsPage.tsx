@@ -18,7 +18,7 @@ import {
 import { CustomDataTable } from "@/components/common/CustomTable";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import { useDebounce } from "../../hooks/useDebounce";
-import { SubtotalBreakDown } from "../../components/quotes/SubtotalBreakDown";
+import SubtotalBreakDown from "../../components/quotes/SubtotalBreakDown";
 import { CustomInfoCard } from "../../components/quotes/CustomInfoCard";
 import { StatusDropDown } from "../../components/quotes/StatusDropDown";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
@@ -29,7 +29,6 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import {
   PaymentMethods,
   QuoteStatus,
-  StripAccountStatus,
   type ItemDetails,
 } from "@/types/api.responses.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
@@ -45,8 +44,17 @@ import { FormLayout } from "@/components/common/FormLayout";
 import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 import type { CreateInvoicePageLocationProps } from "../invoice/CreateInvoicePage";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
+import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
 
 export function QuotesDetailsPage() {
+  const {
+    setDiscount,
+    setDepositAmount,
+    setDepositPercentage,
+    setVat,
+    setPaymentMethod,
+  } = useSubtotalFields();
+  const { vat_settings } = useAppSelector((state) => state.appConfig);
   const params = useParams() as { id: string };
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user);
@@ -303,6 +311,25 @@ export function QuotesDetailsPage() {
     if (quote) {
       dispatch(updateQuoteRedux(quote));
     }
+    if (quote?.deposit_percentage) {
+      setDepositPercentage(quote.deposit_percentage);
+      setDepositAmount(undefined);
+    }
+    if (quote?.deposit_amount) {
+      setDepositAmount(quote?.deposit_amount);
+    } else {
+      setDepositAmount(undefined);
+      setDepositPercentage(undefined);
+    }
+    setDiscount(Number(quote?.discount?.amount ?? "0"));
+    setVat(
+      vat_settings.find(
+        (vatConfig) => vatConfig.id === Number(quote?.vat_setting_id),
+      ),
+    );
+    setPaymentMethod(
+      quote?.deposit_payment?.payment_method ?? PaymentMethods.cash,
+    );
   }, [quote]);
 
   return (
@@ -367,21 +394,10 @@ export function QuotesDetailsPage() {
                     <div className="w-full flex justify-end">
                       <div className="max-w-75">
                         <SubtotalBreakDown
-                          taxPercentage={quote?.financial_summary.tax}
-                          discountPercentage={quote?.financial_summary.discount}
-                          reqDeposite={
-                            quote?.deposit_amount
-                              ? quote?.deposit_amount
-                              : undefined
-                          }
-                          paymentMethod={
-                            user.stripe_account_status ===
-                            StripAccountStatus.active
-                              ? PaymentMethods.stripe
-                              : PaymentMethods.cash
-                          }
-                          depositPaymentMethod={quote?.deposit_payment_method}
                           items={quote?.items ?? []}
+                          depositReceived={
+                            quote?.deposit_payment?.status === "received"
+                          }
                         />
                       </div>
                     </div>

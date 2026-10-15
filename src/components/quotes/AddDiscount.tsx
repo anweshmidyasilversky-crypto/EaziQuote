@@ -1,10 +1,10 @@
 import * as yup from "yup";
-import React from "react";
+import React, { useEffect } from "react";
 import CustomDialog from "../common/CustomDialog";
 import { useForm, type DefaultValues } from "react-hook-form";
 import { type AddDiscountPayload } from "@/types/addDiscount.payload";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { amountSchema } from "@/validation/addDeposite.payload.schema";
+import { discountSchema } from "@/validation/addDeposite.payload.schema";
 import { CustomInput } from "../common/CustomInput";
 import { CustomBtn } from "../common/CustomBtn";
 import { cn } from "@/lib/utils";
@@ -28,10 +28,14 @@ function AddDiscount({
     defaultValues,
     resolver: yupResolver(
       yup.object({
-        discount: amountSchema,
+        discount: discountSchema,
       }),
     ),
   });
+
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues]);
 
   const submitHandler = (data: AddDiscountPayload) => {
     setDiscount(data.discount);
@@ -51,7 +55,7 @@ function AddDiscount({
             `bg-custom-dialog-primary hover:bg-custom-dialog-primary text-black-text`,
           )}
           buttonLabel="Clear"
-          onClick={reset}
+          onClick={() => reset({ discount: undefined })}
         />
       }
       withFooter

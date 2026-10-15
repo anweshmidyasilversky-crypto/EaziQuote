@@ -400,7 +400,12 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   created_at: string;
   updated_at: string;
   route_url: string;
-  deposit_payment: null | string;
+  deposit_payment: null | {
+    id: number;
+    amount: number;
+    status: PaymentStatus;
+    payment_method: PaymentMethods;
+  };
 }
 
 export interface Category {

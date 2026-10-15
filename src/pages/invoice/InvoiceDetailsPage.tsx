@@ -1,5 +1,5 @@
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   formatCurrency,
   formatDisplayDate,
@@ -17,7 +17,7 @@ import {
 import { CustomDataTable } from "@/components/common/CustomTable";
 import SearchInputGruop from "../../components/common/SearchInputGruop";
 import { useDebounce } from "../../hooks/useDebounce";
-import { SubtotalBreakDown } from "../../components/quotes/SubtotalBreakDown";
+import SubtotalBreakDown from "../../components/quotes/SubtotalBreakDown";
 import { CustomInfoCard } from "../../components/quotes/CustomInfoCard";
 import { StatusDropDown } from "../../components/quotes/StatusDropDown";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
@@ -25,7 +25,11 @@ import {
   ShareOptions,
   ShareOptionType,
 } from "../../components/common/ShareOptions";
-import { InvoiceStatus, type ItemDetails } from "@/types/api.responses.type";
+import {
+  InvoiceStatus,
+  PaymentMethods,
+  type ItemDetails,
+} from "@/types/api.responses.type";
 import MoreOptionsPopup from "@/components/clients/MoreOptionsPopup";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import { toast } from "react-toastify";
@@ -40,8 +44,11 @@ import { InvoiceDescriptionPage } from "./InvoiceDescriptionPage";
 import InvoicePaymentsPage from "./InvoicePaymentsPage";
 import { useAppSelector } from "@/redux/store";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
+import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
 
 export function InvoiceDetailsPage() {
+  const { setDiscount, setVat, setPaymentMethod } = useSubtotalFields();
+  const { vat_settings } = useAppSelector((state) => state.appConfig);
   const user = useAppSelector((state) => state.user);
   const params = useParams() as { id: string };
   const navigate = useNavigate();
@@ -256,6 +263,34 @@ export function InvoiceDetailsPage() {
     });
   };
 
+  useEffect(() => {
+    if (invoiceDetails?.quote.vat_setting_id) {
+      setVat(
+        vat_settings.find(
+          (vatConfig) =>
+            vatConfig.id === Number(invoiceDetails.quote.vat_setting_id),
+        ),
+      );
+    } else {
+      setVat(undefined);
+    }
+    if (invoiceDetails?.quote.discount?.amount) {
+      setDiscount(Number(invoiceDetails.quote.discount.amount));
+    } else {
+      setDiscount(undefined);
+    }
+
+    if (invoiceDetails?.payment_method) {
+      setPaymentMethod(invoiceDetails.payment_method);
+    } else {
+      setPaymentMethod(
+        user.stripe_account_status === "active"
+          ? PaymentMethods.stripe
+          : PaymentMethods.cash,
+      );
+    }
+  }, [invoiceDetails]);
+
   return (
     <React.Fragment>
       <div>
@@ -310,22 +345,7 @@ export function InvoiceDetailsPage() {
                     <div className="w-full flex justify-end">
                       <div className="max-w-75">
                         <SubtotalBreakDown
-                          taxPercentage={invoiceDetails?.quote.vat}
-                          discountPercentage={
-                            invoiceDetails
-                              ? Number(
-                                  invoiceDetails.quote.discount?.amount ?? "0",
-                                )
-                              : 0
-                          }
-                          paymentMethod={
-                            invoiceDetails?.payment_method ?? undefined
-                          }
                           items={invoiceDetails?.items ?? []}
-                          creditAmount={invoiceDetails?.payments.reduce(
-                            (acc, currPayment) => acc + currPayment.allocated,
-                            0,
-                          )}
                         />
                       </div>
                     </div>

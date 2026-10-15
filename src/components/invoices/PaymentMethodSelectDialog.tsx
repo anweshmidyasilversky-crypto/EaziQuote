@@ -21,9 +21,6 @@ function PaymentMethodSelectDialog({
   const [isStripAdvisoryOpen, toggleStripAdvisoryOpen] = useState(false);
   const [method, setMethod] = useState<string>(selectedMethod);
   const handlePaymentMethodSelect = () => {
-    console.log(
-      `Selected method: ${method}, strip connected: ${isStipeConnected}`,
-    );
     if (method === PaymentMethods.stripe && !isStipeConnected) {
       toggleOpen(false);
       setMethod(PaymentMethods.cash);
@@ -46,9 +43,9 @@ function PaymentMethodSelectDialog({
         footerBtnAction={handlePaymentMethodSelect}
         closeOnSubmit={false}
       >
-        <div className="p-5">
+        <div className="p-5 flex flex-col gap-2 w-[40vw]">
           <select
-            className="input-field min-w-125"
+            className="input-field w-full"
             value={method}
             onChange={(e) => {
               const selectedMethod = e.currentTarget.value;
@@ -64,6 +61,13 @@ function PaymentMethodSelectDialog({
               );
             })}
           </select>
+
+          {method === PaymentMethods.cash && (
+            <span className="text-warning-text text-wrap wrap-anywhere text-xs">
+              {" "}
+              {`You are about to record a cash payment. Please ensure the amount has been physically received before proceeding.`}{" "}
+            </span>
+          )}
         </div>
       </CustomDialog>
       <StripeAdvisoryDialog

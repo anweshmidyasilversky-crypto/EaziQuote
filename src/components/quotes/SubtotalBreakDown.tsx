@@ -1,520 +1,268 @@
-import React from "react";
-import type {
-  ColumnDef,
-  HeaderContext,
-  TableFeatures,
-} from "@tanstack/react-table";
-import { assets } from "../../assets/icons";
-import { cn, formatCurrency } from "../../lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
+import {
+  applyPercentage,
+  calcMarginPercentage,
+  cn,
+  formatCurrency,
+} from "@/lib/utils";
+import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
+import { useMemo, useState } from "react";
+import { Separator } from "../ui/separator";
 import CustomDialog from "../common/CustomDialog";
 import { CustomDataTable } from "../common/CustomTable";
-import AddDeposite from "./AddDeposite";
+import {
+  DepositeTypes,
+  type UpdateQuoteItems,
+} from "@/types/api.requests.type";
 import { useLocation } from "react-router";
 import { CustomActionGroup } from "../common/CustomActionGroup";
-import AddDiscount from "./AddDiscount";
-import {
-  PaymentMethods,
-  StripAccountStatus,
-  type Vat,
-} from "@/types/api.responses.type";
 import AddTax from "./AddTax";
-import { DepositeTypes } from "@/types/api.requests.type";
 import { useAppSelector } from "@/redux/store";
+import AddDiscount from "./AddDiscount";
+import AddDeposite from "./AddDeposite";
 import StripeAdvisoryDialog from "@/pages/settings/StripeAdvisoryDialog";
+import { PaymentMethods } from "@/types/api.responses.type";
 import PaymentMethodSelectDialog from "../invoices/PaymentMethodSelectDialog";
-import { nanoid } from "@reduxjs/toolkit";
+import { assets } from "@/assets/icons";
 
 export type SubtotalBreakDownProps = {
-  paymentMethod?: PaymentMethods;
-  depositPaymentMethod?: PaymentMethods | null;
-  items: {
-    quantity: number;
-    type: string;
-    price: number;
-    cost: number;
-    name: string;
-  }[];
-  taxPercentage?: number;
-  discountPercentage?: number;
-  reqDeposite?: number;
-  vatSettings?: Vat[];
-
-  taxIdRef?: React.RefObject<number | undefined>;
-  discountRef?: React.RefObject<number | null>;
-  depositePaymentMethodRef?: React.RefObject<PaymentMethods>;
-  depositeAmountRef?: React.RefObject<number | null>;
-  depositeTypeRef?: React.RefObject<DepositeTypes | null>;
-  depositePercentageRef?: React.RefObject<number | null>;
-
-  taxEditabled?: boolean;
-  toggleSelectedPaymentMethod?: (paymentMethod: string) => void;
-  creditAmount?: number;
-
-  prefilTax?: Vat;
+  items: UpdateQuoteItems[];
+  depositReceived?: boolean;
 };
 
-type MarginSplit = {
+export interface Margin {
   itemName: string;
-  revenew: number;
+  revenue: number;
   margin: number;
   costs: number;
-};
+}
 
-export function SubtotalBreakDown({
-  taxPercentage,
-  discountPercentage: initialDiscountPercentage,
-  reqDeposite,
-  items: renderItems,
-  paymentMethod: paymentMode,
-  depositPaymentMethod: initialDepositPaymentMethod,
-  vatSettings,
-
-  taxIdRef,
-  discountRef,
-  depositePaymentMethodRef,
-  depositeAmountRef,
-  depositeTypeRef,
-  depositePercentageRef,
-  taxEditabled = true,
-  toggleSelectedPaymentMethod,
-  creditAmount,
-  prefilTax,
-}: SubtotalBreakDownProps) {
-  const location = useLocation();
-  const items = renderItems ?? [];
-  const [tableOpen, toggleTableOpen] = useState(false);
-  const [depositeDialog, toggleDepositeDialog] = useState(false);
-
-  const [discountDialog, toggleDiscountDialog] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(paymentMode);
-  const [discountPercentage, setDiscountPercentage] = useState(
-    initialDiscountPercentage,
-  );
+function SubtotalBreakDown({ items, depositReceived }: SubtotalBreakDownProps) {
+  const {
+    creditAmount,
+    vat,
+    discount,
+    depositAmount,
+    paymentMethod,
+    depositType,
+    depositPercentage,
+    setDepositPercentage,
+    setDepositType,
+    setDepositAmount,
+    setVat,
+    setDiscount,
+    setPaymentMethod,
+  } = useSubtotalFields();
   const user = useAppSelector((state) => state.user);
-  const isStripeConnected =
-    user.stripe_account_status === StripAccountStatus.active;
-  const [tax, setTax] = useState(taxPercentage);
-  const [depositPaymentMethod, setDepositPaymentMethod] = useState(
-    depositePaymentMethodRef?.current ??
-      initialDepositPaymentMethod ??
-      (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash),
-  );
-  const [stripConnectPopupOpen, toggleStripConnectPopup] = useState(false);
-  const [taxModalOpen, toggleTaxModalOpen] = useState(false);
-
-  const [methodSelectOpen, toggleMethodSelectOpen] = useState(false);
-  const applyPercentage = (base: number, percentage: number) =>
-    (base * percentage) / 100;
-
-  const subtotal = useMemo(
-    () => items.reduce((acc, prev) => acc + prev.price * prev.quantity, 0),
-    [items],
-  );
-  const overallCost = useMemo(
-    () => items.reduce((acc, prev) => acc + prev.quantity * prev.cost, 0),
-    [items],
-  );
-  const marginPercentage = useMemo(() => {
-    if (subtotal === 0) {
-      return 0;
-    }
-    return Math.round(((subtotal - overallCost) / subtotal) * 10000) / 100;
-  }, [subtotal, overallCost]);
-  let extraCharges = 0;
-
-  const grandTotal =
-    subtotal -
-    (creditAmount ?? 0) +
-    applyPercentage(subtotal, tax ?? 0) +
-    extraCharges -
-    applyPercentage(subtotal, discountPercentage ?? 0);
-  const [deposite, setDeposite] = useState(reqDeposite);
-
-  // One-time sync on mount: the parent creates these refs with their own
-  // defaults/derived values, which may not match this component's actual
-  // first-render state. After mount, each ref is kept in sync directly at
-  // the point where its own modal changes its value (see handlers below) —
-  // not through a shared effect keyed on multiple unrelated values.
-  useEffect(() => {
-    if (depositeAmountRef) {
-      depositeAmountRef.current = deposite ?? null;
-    }
-    if (depositePaymentMethodRef) {
-      depositePaymentMethodRef.current = depositPaymentMethod;
-    }
-    if (discountRef) {
-      discountRef.current = discountPercentage ?? null;
-    }
-  }, []);
-
+  const { vat_settings } = useAppSelector((state) => state.appConfig);
+  const location = useLocation();
   const isEditPage =
     location.pathname.split("/").includes("manage-quotes") ||
     location.pathname.split("/").includes("manage-invoice");
+  const quotePage = location.pathname.split("/").includes("quotes");
+  const invoicePage = location.pathname.split("/").includes("invoices");
 
-  const quotesPage = location.pathname.includes("quotes");
-  const invoicePage = location.pathname.includes("invoices");
+  {
+    /* Modal Open handling states */
+  }
+  const [tableOpen, setTableOpen] = useState(false);
+  const [taxAddModalOpen, setTaxAddModalOpen] = useState(false);
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [depositModalOpen, setDepositModalOpen] = useState(false);
+  const [stripeModalOpen, setStripeModalOpen] = useState(false);
+  const [paymentMethodModalOpen, setPaymentMethodModalOpen] = useState(false);
 
-  const getSum = (
-    info: HeaderContext<TableFeatures, MarginSplit>,
-    col: string,
-  ) => {
-    return info.table
-      .getFilteredRowModel()
-      .rows.reduce((acc, row) => acc + (row.getValue<number>(col) || 0), 0);
-  };
+  const subtotal = useMemo(() => {
+    return items.reduce((curr, item) => curr + item.price * item.quantity, 0);
+  }, [items]);
 
-  const marginColumns: ColumnDef<TableFeatures, MarginSplit>[] = useMemo(
-    () =>
-      [
-        {
-          accessorKey: "itemName",
-          header: "ITEM NAME",
-          enableSorting: false,
-          footer: () => <span className="font-bold"> Total </span>,
-        },
-        {
-          accessorKey: "revenew",
-          header: "REVENUE",
-          enableSorting: false,
-          cell: (info) => formatCurrency(info.getValue<number>()),
-          footer: (info) => formatCurrency(getSum(info, "revenew")),
-        },
-        {
-          accessorKey: "costs",
-          header: "COSTS",
-          cell: (info) => formatCurrency(info.row.getValue<number>("costs")),
-          enableSorting: false,
-          footer: (info) => formatCurrency(getSum(info, "costs")),
-        },
-        {
-          id: "margin",
-          header: "MARGIN",
-          accessorFn: (row) =>
-            row.revenew > 0
-              ? ((row.revenew - row.costs) / row.revenew) * 100
-              : 0,
-          cell: (info) => {
-            const row = info.row;
-            const margin =
-              row.original.revenew > 0
-                ? ((row.original.revenew - row.original.costs) /
-                    row.original.revenew) *
-                  100
-                : 0;
-            return (
-              formatCurrency(row.original.revenew - row.original.costs) +
-              ` (${Math.round(margin * 10) / 10}%)`
-            );
-          },
-          footer: (info) => {
-            const sum = getSum(info, "costs");
-            const revenue = getSum(info, "revenew");
-            const percentage =
-              revenue > 0 ? ((revenue - sum) * 100) / revenue : 0;
-            return `${formatCurrency(sum)} (${percentage.toFixed(1)}%)`;
-          },
-          enableSorting: false,
-        },
-      ] as ColumnDef<TableFeatures, MarginSplit>[],
-    [],
-  );
+  const totalCost = useMemo(() => {
+    return items.reduce((curr, item) => curr + item.cost * item.quantity, 0);
+  }, [items]);
 
-  // Build margin data from QuoteLineItem — use unitCost to derive margin %
-  const marginData: MarginSplit[] = items.map((item) => {
-    const revenue = item.price * item.quantity; // pricePerUnit × quantity
-    const cost = (item.cost ?? 0) * item.quantity;
-    const margin =
-      revenue > 0 ? Math.round(((revenue - cost) / revenue) * 100) : 0;
-    return { itemName: item.name, revenew: revenue, margin, costs: cost };
-  });
+  const grandTotal = useMemo(() => {
+    return (
+      subtotal +
+      applyPercentage(subtotal, Number(vat?.value ?? "0")) -
+      applyPercentage(subtotal, discount ?? 0) -
+      (creditAmount ?? 0)
+    );
+  }, [vat, discount, creditAmount, subtotal]);
 
-  function calcPercentage(part: number | undefined, total: number | undefined) {
-    // Check if either parameter is missing, undefined, null, or 0
-    if (!part || !total) {
+  const discountAmount = useMemo(() => {
+    if (!discount || discount === 0) {
       return 0;
     }
+    return applyPercentage(
+      subtotal +
+        applyPercentage(subtotal, Number(vat?.value ?? "0")) -
+        (creditAmount ?? 0),
+      discount,
+    );
+  }, [subtotal, vat, discount]);
 
-    // Calculate percentage
-    return (part / total) * 100;
-  }
+  const marginColumns: ColumnDef<TableFeatures, UpdateQuoteItems>[] = [
+    {
+      id: "itemName",
+      header: "Item Name",
+      accessorFn: (item) => item.name,
+      enableSorting: false,
+    },
+    {
+      id: "revenue",
+      header: "revenue",
+      accessorFn: (item) => item.price * item.quantity,
+      enableSorting: false,
+    },
+    {
+      id: "cost",
+      header: "cost",
+      accessorFn: (item) => item.cost * item.quantity,
+      enableSorting: false,
+    },
+    {
+      id: "margin",
+      header: "Margin",
+      cell: (info) => {
+        const { price, quantity, cost } = info.row.original;
+        const revenue = price * quantity;
+        if (revenue > 0) {
+          const margin = Math.round(((price - cost) / price) * 100);
+          return `${formatCurrency((price - cost) * quantity)} (${margin}%)`;
+        }
+        return `${formatCurrency(0)} (0%)`;
+      },
+    },
+  ];
 
-  const renderProps = {
-    subtotal,
-    credit: calcPercentage(creditAmount, subtotal),
-    margin: Number.isNaN(marginPercentage) ? 0 : marginPercentage,
-  };
-
-  // --- Deposit: ref writes happen where the deposit modal actually
-  // changes the value, instead of via a shared effect. ---
-  const handleSetDeposite = (amount: number | undefined) => {
-    setDeposite(amount);
-    if (depositeAmountRef) {
-      depositeAmountRef.current = amount ?? null;
-    }
-  };
-
-  const handleSetPaymentMethod = (method: PaymentMethods) => {
-    setDepositPaymentMethod(method);
-    if (depositePaymentMethodRef) {
-      depositePaymentMethodRef.current = method;
-    }
-    setPaymentMethod?.(method);
-  };
-
-  const handleRemoveDeposite = () => {
-    setDeposite(undefined);
-    if (depositeAmountRef) {
-      depositeAmountRef.current = null;
-    }
-    if (depositeTypeRef) {
-      depositeTypeRef.current = null;
-    }
-    if (depositePercentageRef) {
-      depositePercentageRef.current = null;
-    }
-  };
-
-  const handleDepositeType = (depositeType: DepositeTypes) => {
-    if (depositeTypeRef) {
-      depositeTypeRef.current = depositeType;
-    }
-  };
-
-  const handleDepositePercentage = (percentage: number | null) => {
-    if (depositePercentageRef) {
-      depositePercentageRef.current = percentage;
-    }
-  };
-
-  // --- Discount: same pattern. ---
-  const handleSetDiscount = (percentage: number | undefined) => {
-    setDiscountPercentage(percentage);
-    if (discountRef) {
-      discountRef.current = percentage ?? 0;
-    }
-  };
-
-  // --- Tax: same pattern. Ref only tracks an actively-selected tax id,
-  // consistent with how it's looked up upstream (find-by-id with a
-  // fallback), so removing the tax clears local state but intentionally
-  // leaves the last known id ref alone. ---
-  const handleSetTax = (vat: Vat | undefined) => {
-    if (vat) {
-      setTax(Number(vat.value));
-      if (taxIdRef) {
-        taxIdRef.current = vat.id;
-      }
-    } else {
-      if (taxIdRef) {
-        setTax(0);
-        taxIdRef.current = undefined;
-      }
-    }
-    console.log(`Deletion completed`);
-  };
   return (
-    <>
-      <div className="flex flex-col p-5 gap-4">
-        {Object.keys(renderProps).map((field) => {
-          const key = field as keyof typeof renderProps;
-          if (!["subtotal", "margin", "credit"].includes(key)) {
-            extraCharges += applyPercentage(subtotal, renderProps[key]);
-          }
-          if (field === "credit" && (!creditAmount || !invoicePage)) {
-            return <React.Fragment key={nanoid()}></React.Fragment>;
-          }
-          return (
-            <div className="flex justify-between gap-4" key={field}>
-              <span
-                className={`subtotal-field ${field === "credit" ? `text-paid-text` : ``}`}
-              >
-                {" "}
-                {field[0].toUpperCase() + field.slice(1)}{" "}
-                {field !== "subtotal" && `(${renderProps[key]}%)`}{" "}
-              </span>
-              <span
-                className={`subtotal-value ${field === "credit" ? `text-paid-text` : ``}`}
-              >
-                {field === "subtotal" && formatCurrency(subtotal)}
-                {field === "margin" && (
-                  <a
-                    className="underline cursor-pointer"
-                    onClick={() => toggleTableOpen((curr) => !curr)}
-                  >
-                    {" "}
-                    Check Margin{" "}
-                  </a>
-                )}
-                {!["subtotal", "margin"].includes(field) &&
-                  formatCurrency(applyPercentage(subtotal, renderProps[key]))}
-              </span>
-            </div>
-          );
-        })}
-        <div className="flex justify-between items-center gap-4">
-          <span className="subtotal-field"> {`Tax(${tax ?? 0}%)`} </span>
-          <div className="flex gap-2 items-center">
-            {tax !== undefined ? (
-              <span className="subtotal-value">
-                {" "}
-                {formatCurrency(applyPercentage(subtotal, tax ?? 0))}{" "}
-              </span>
-            ) : (
-              <>
-                {taxEditabled && (
-                  <a
-                    className="subtotal-value"
-                    onClick={() => toggleTaxModalOpen((curr) => !curr)}
-                  >
-                    {`+ Select Tax Rate`}
-                  </a>
-                )}
-              </>
-            )}
-            {isEditPage && taxEditabled && tax !== undefined && (
-              <CustomActionGroup
-                withOpen={false}
-                editFn={() => toggleTaxModalOpen((curr) => !curr)}
-                deleteFn={() => handleSetTax(undefined)}
-              />
-            )}
-          </div>
-        </div>
+    <div className="flex flex-col px-5 gap-4 [&>div]:subtotal-row [&_#field]:subtotal-field [&_#value]:subtotal-value">
+      {/* Subtotal */}
+      <div>
+        <span id="field"> {`Subtotal`} </span>
+        <span id="value"> {formatCurrency(subtotal)} </span>
+      </div>
 
-        <div className="flex gap-4 items-center justify-between">
-          <span className="subtotal-field">
+      {/* Margin */}
+      <div>
+        <span id="field">
+          {" "}
+          {`Margin (${calcMarginPercentage(subtotal, totalCost)}%)`}{" "}
+        </span>
+        <a
+          onClick={() => setTableOpen(true)}
+          className="text-brand-dark text-[14px] underline decoration-brand-dark"
+        >
+          {" "}
+          {"Check Margin"}{" "}
+        </a>
+      </div>
+
+      {/* Tax */}
+      <div>
+        <span id="field"> {`Tax ${vat ? `(${vat.value}%)` : ``}`} </span>
+        <span id="value">
+          {" "}
+          {vat
+            ? formatCurrency(applyPercentage(subtotal, Number(vat.value)))
+            : formatCurrency(0)}{" "}
+          {isEditPage && quotePage && (
+            <CustomActionGroup
+              withOpen={false}
+              editFn={() => setTaxAddModalOpen(true)}
+              withDelete={false}
+            />
+          )}
+        </span>
+      </div>
+
+      {/* Discount */}
+      <div>
+        <span id="field">
+          {" "}
+          {`Discount ${discount ? `(${discount})%` : ``}`}{" "}
+        </span>
+        <span id="value">
+          {" "}
+          {formatCurrency(discountAmount)}
+          {isEditPage && (
+            <CustomActionGroup
+              withOpen={false}
+              editFn={() => setDiscountModalOpen(true)}
+              withDelete={false}
+            />
+          )}
+        </span>
+      </div>
+
+      <Separator className={`dashed-y-separators`} />
+
+      {/* Grand total */}
+      <div>
+        <span id="field"> {`Grand Total`} </span>
+        <span id="value"> {formatCurrency(grandTotal)} </span>
+      </div>
+
+      {/* Deposit */}
+      {(isEditPage || (quotePage && depositAmount)) && quotePage && (
+        <div>
+          <span id="field">
             {" "}
-            {`Discount` +
-              (discountPercentage ? `(${discountPercentage}%)` : ``)}{" "}
+            {`Deposit ${depositReceived ? `Received` : `Required`}`}{" "}
           </span>
-
-          <div className="flex gap-2 items-center">
-            {discountPercentage !== undefined ? (
-              <span className="subtotal-value">
-                {" "}
-                {formatCurrency(
-                  applyPercentage(subtotal, discountPercentage),
-                )}{" "}
-              </span>
-            ) : (
-              <a
-                className="subtotal-value"
-                onClick={() => toggleDiscountDialog((curr) => !curr)}
-              >
-                {" "}
-                {`+ Add Discount`}{" "}
-              </a>
-            )}
-
-            {isEditPage && discountPercentage !== undefined && (
-              <CustomActionGroup
-                withOpen={false}
-                editFn={() => toggleDiscountDialog((curr) => !curr)}
-                deleteFn={() => handleSetDiscount(undefined)}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="dashed-y-separators" />
-
-        <div className="flex flex-col [&_div]:flex [&_div]:justify-between gap-4">
-          <div>
-            <span className="subtotal-field"> Grand Total </span>
-            <span className="font-bold subtotal-value">
-              {formatCurrency(grandTotal)}
-            </span>
-          </div>
-          <div className="dashed-y-separators" />
-          {quotesPage && (
-            <>
+          {depositAmount ? (
+            <span id="value">
               {" "}
-              <div className="w-full justify-between gap-4 items-center">
-                <span className="subtotal-field">
-                  {" "}
-                  {deposite
-                    ? `Deposit Required`
-                    : isEditPage
-                      ? `Deposite`
-                      : ``}{" "}
-                </span>
-
-                <div className="flex gap-2 items-center">
-                  {deposite ? (
-                    <span className="subtotal-value">
-                      {" "}
-                      {formatCurrency(deposite)}{" "}
-                    </span>
-                  ) : (
-                    <>
-                      {isEditPage && (
-                        <a
-                          className="cursor-pointer subtotal-value"
-                          onClick={() => toggleDepositeDialog((curr) => !curr)}
-                        >
-                          {`+ Add Deposit`}
-                        </a>
-                      )}
-                    </>
-                  )}
-
-                  {isEditPage && !!deposite && (
-                    <CustomActionGroup
-                      withOpen={false}
-                      editFn={() => toggleDepositeDialog((curr) => !curr)}
-                      deleteFn={handleRemoveDeposite}
-                    />
-                  )}
-                </div>
-              </div>
-              {!!deposite && (
-                <div>
-                  <span className="subtotal-field"> Payment Method </span>
-                  <span className="subtotal-value">
-                    {" "}
-                    {depositPaymentMethod ??
-                      paymentMethod ??
-                      depositePaymentMethodRef?.current ??
-                      initialDepositPaymentMethod ??
-                      (isStripeConnected
-                        ? PaymentMethods.stripe
-                        : PaymentMethods.cash)}{" "}
-                  </span>
-                </div>
-              )}{" "}
-            </>
-          )}
-
-          {invoicePage && (
-            <div className="flex justify-between item-center">
-              {(paymentMethod || isEditPage) && (
-                <span className="subtotal-field"> {"Payment Method"} </span>
+              {formatCurrency(depositAmount)}
+              {isEditPage && (
+                <CustomActionGroup
+                  withOpen={false}
+                  editFn={() => setDepositModalOpen(true)}
+                  deleteFn={() => {
+                    setDepositAmount(undefined);
+                    setDepositPercentage(undefined);
+                    setDepositType(undefined);
+                  }}
+                />
               )}
-
-              <div className="flex item-center gap-2">
-                {(paymentMethod || isEditPage) && (
-                  <span className="subtotal-value"> {paymentMethod} </span>
-                )}
-                {isEditPage && (
-                  <CustomActionGroup
-                    withOpen={false}
-                    withDelete={false}
-                    editFn={() => toggleMethodSelectOpen(true)}
-                  />
-                )}
-              </div>
-            </div>
+            </span>
+          ) : (
+            <a
+              className="text-brand-dark underline decoration-brand-dark text-[14px]"
+              onClick={() => setDepositModalOpen(true)}
+            >
+              {" "}
+              {"+ Add Deposit"}{" "}
+            </a>
           )}
         </div>
-        {(paymentMethod === PaymentMethods.cash ||
-          depositPaymentMethod === PaymentMethods.cash) && (
-          <div className="flex gap-1.5 justify-start items-start h-fit">
+      )}
+
+      {((depositAmount && paymentMethod) || invoicePage) && (
+        <div className="subtotal-row">
+          <span id={`field`}> {"Payment Method"} </span>
+          <span id={`value`}>
+            {" "}
+            {paymentMethod}{" "}
+            {isEditPage && invoicePage && (
+              <CustomActionGroup
+                withDelete={false}
+                withOpen={false}
+                editFn={() => setPaymentMethodModalOpen(true)}
+              />
+            )}{" "}
+          </span>
+        </div>
+      )}
+
+      {((depositAmount && paymentMethod) || invoicePage) &&
+        paymentMethod === PaymentMethods.cash && (
+          <div className="flex gap-1.5 h-fit items-center">
             <img
               src={assets.warningIcon}
-              className="w-4 h-4 aspect-square mt-1"
+              className="w-4 h-4 aspect-square self-start mt-1"
             />
-            <span className="text-wrap wrap-break-word text-warning-text mt-0">
+            <span className="text-wrap wrap-break-word text-warning-text text-[14px]">
               {" "}
               {
                 "Cash or offline payments should be completed directly and are not processed online."
@@ -522,80 +270,76 @@ export function SubtotalBreakDown({
             </span>
           </div>
         )}
-      </div>
 
+      {/* Margin Table */}
       <CustomDialog
         dialogOpen={tableOpen}
-        toggleDialogOpen={toggleTableOpen}
+        toggleDialogOpen={setTableOpen}
         header="Margin"
         withFooter
       >
         <CustomDataTable
           columns={marginColumns}
-          data={marginData}
+          data={items}
           bodyCls={cn(`overflow-auto`)}
           contentScrollable
         />
       </CustomDialog>
 
-      <AddDeposite
-        isOpen={depositeDialog}
-        toggleOpen={toggleDepositeDialog}
-        totalAmount={grandTotal}
-        setDeposite={handleSetDeposite}
-        setPaymentMode={handleSetPaymentMethod}
-        defaultValues={{
-          paymentMethod:
-            depositPaymentMethod ??
-            depositePaymentMethodRef?.current ??
-            initialDepositPaymentMethod ??
-            (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash),
-          deposite:
-            depositeTypeRef?.current === DepositeTypes.percentage
-              ? (depositePercentageRef?.current ?? reqDeposite ?? undefined)
-              : (deposite ?? undefined),
-        }}
-        handleDepositeType={handleDepositeType}
-        handleDepositePercentage={handleDepositePercentage}
-        toggleStripPopup={toggleStripConnectPopup}
-        depositeType={depositeTypeRef?.current ?? undefined}
+      {/* Tax modal */}
+      <AddTax
+        isOpen={taxAddModalOpen}
+        toggleIsOpen={setTaxAddModalOpen}
+        vatSettings={vat_settings}
+        setTaxId={setVat}
+        prefillTax={vat}
       />
 
       <AddDiscount
-        isOpen={discountDialog}
-        toggleIsOpen={toggleDiscountDialog}
-        setDiscount={handleSetDiscount}
+        isOpen={discountModalOpen}
+        toggleIsOpen={setDiscountModalOpen}
+        setDiscount={setDiscount}
         defaultValues={{
-          discount:
-            (discountRef?.current ?? 0) <= 0
-              ? undefined
-              : (discountRef?.current ?? undefined),
+          discount,
         }}
       />
 
-      <AddTax
-        isOpen={taxModalOpen}
-        toggleIsOpen={toggleTaxModalOpen}
-        vatSettings={vatSettings ?? []}
-        setTaxId={handleSetTax}
-        prefillTax={prefilTax}
-      />
-
-      <StripeAdvisoryDialog
-        isOpen={stripConnectPopupOpen}
-        toggleIsOpen={toggleStripConnectPopup}
-        type="connect"
+      <AddDeposite
+        isOpen={depositModalOpen}
+        toggleOpen={setDepositModalOpen}
+        setDeposite={setDepositAmount}
+        totalAmount={grandTotal}
+        setPaymentMode={setPaymentMethod}
+        toggleStripPopup={setStripeModalOpen}
+        defaultValues={{
+          paymentMethod: paymentMethod ?? PaymentMethods.cash,
+          deposite:
+            depositType === DepositeTypes.fixed
+              ? depositAmount
+              : depositPercentage,
+        }}
+        depositeType={depositType}
+        handleDepositeType={setDepositType}
+        handleDepositePercentage={setDepositPercentage}
       />
 
       <PaymentMethodSelectDialog
-        selectedMethod={
-          isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash
+        isOpen={paymentMethodModalOpen}
+        toggleOpen={setPaymentMethodModalOpen}
+        selectedMethod={paymentMethod ?? PaymentMethods.cash}
+        toggleSelectedMethod={(method) =>
+          setPaymentMethod(method as PaymentMethods)
         }
-        isOpen={methodSelectOpen}
-        toggleOpen={toggleMethodSelectOpen}
-        toggleSelectedMethod={(method) => toggleSelectedPaymentMethod?.(method)}
-        isStipeConnected={isStripeConnected}
+        isStipeConnected={user.stripe_account_status === "active"}
       />
-    </>
+
+      <StripeAdvisoryDialog
+        isOpen={stripeModalOpen}
+        toggleIsOpen={setStripeModalOpen}
+        type="connect"
+      />
+    </div>
   );
 }
+
+export default SubtotalBreakDown;

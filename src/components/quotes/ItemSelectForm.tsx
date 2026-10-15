@@ -16,14 +16,12 @@ import type { ItemEditPayload } from "../../types/itemEdit.payload.type";
 import { toast } from "react-toastify";
 import {
   PaymentMethods,
-  StripAccountStatus,
   type Category,
   type ItemDetails,
 } from "@/types/api.responses.type";
 import { showErrorToast } from "@/api/axiosInstance";
-import { SubtotalBreakDown } from "./SubtotalBreakDown";
+import SubtotalBreakDown from "./SubtotalBreakDown";
 import {
-  DepositeTypes,
   type PageFilters,
   type UpdateQuoteApiPayload,
   type UpdateQuoteItems,
@@ -36,6 +34,7 @@ import { Spinner } from "../ui/spinner";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 import DeleteDialog from "../common/DeleteDialog";
+import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
 
 export type ItemSelectFormProps = {
   submitAction: () => void;
@@ -43,10 +42,21 @@ export type ItemSelectFormProps = {
 };
 
 function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
+  const {
+    depositAmount,
+    setDepositPercentage,
+    setDepositAmount,
+    depositType,
+    depositPercentage,
+    paymentMethod,
+    setDepositType,
+    discount,
+    vat,
+    setPaymentMethod,
+    setVat,
+    setDiscount,
+  } = useSubtotalFields();
   const currQuote = useAppSelector((state) => state.quote);
-  const user = useAppSelector((state) => state.user);
-  const isStripeConnected =
-    user.stripe_account_status === StripAccountStatus.active;
   const dispatch = useAppDispatch();
   const {
     searchTerm: categorySearch,
@@ -90,22 +100,6 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   }, [currQuote, presetItems]);
 
   const editingItem = useRef<ItemDetails | undefined>(undefined);
-
-  const vatSettingsId = useRef<number | undefined>(
-    Number(currQuote.vat_setting_id),
-  );
-  const discount = useRef<number | null>(
-    Number(currQuote.discount?.amount ?? "0"),
-  );
-  const depositePaymentMethod = useRef<PaymentMethods>(
-    currQuote.deposit_payment_method ??
-      (isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash),
-  );
-  const depositePercentageRef = useRef<number | null>(
-    currQuote.deposit_percentage,
-  );
-  const depositeAmount = useRef<number | null>(currQuote.deposit_amount);
-  const depositeTypeRef = useRef<DepositeTypes>(currQuote.deposit_type);
 
   const itemsFilter = useMemo(
     () =>
@@ -314,23 +308,22 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
       toast.error(`Select at least one item to continue`);
       return;
     }
-    const amount = Number(depositeAmount.current);
     let payload: UpdateQuoteApiPayload = {
       _method: "put",
       quote_id: currQuote.id,
       items: itemPatches,
-      vat_setting_id: vatSettingsId.current,
-      deposit_payment_method: depositePaymentMethod.current,
+      vat_setting_id: vat?.id,
+      deposit_payment_method: paymentMethod,
+      discount,
     };
-    if (!isNaN(amount) && amount > 0) {
-      payload["deposit_amount"] = amount;
-      payload["deposit_type"] = depositeTypeRef.current;
+    if (depositAmount && depositAmount > 0) {
+      payload["deposit_amount"] = depositAmount;
+      payload["deposit_type"] = depositType;
       payload["deposit_required"] = 1;
     }
-    if (discount.current) {
-      payload["discount"] = discount.current;
+    if (depositPercentage) {
+      payload["deposit_percentage"] = depositPercentage;
     }
-    console.log(payload);
     quoteUpdateMutation.mutate(payload, {
       onSuccess: (response) => {
         toast.success(response.message);
@@ -342,6 +335,32 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
       },
     });
   };
+
+  {
+    /* Setting all required subtotal breakdown fields */
+  }
+  useEffect(() => {
+    setDepositType(currQuote.deposit_type ?? undefined);
+    if (currQuote.deposit_percentage) {
+      setDepositPercentage(currQuote.deposit_percentage);
+    }
+    if (currQuote.deposit_amount) {
+      setDepositAmount(currQuote.deposit_amount);
+    } else {
+      setDepositAmount(undefined);
+      setDepositPercentage(undefined);
+    }
+    setDiscount(Number(currQuote.discount?.amount ?? "0"));
+    setVat(
+      vat_settings.find(
+        (vatConfig) => vatConfig.id === Number(currQuote.vat_setting_id),
+      ),
+    );
+    setPaymentMethod(
+      currQuote.deposit_payment?.payment_method ?? PaymentMethods.cash,
+    );
+  }, [currQuote]);
+
   return (
     <>
       <CustomDataTable
@@ -390,26 +409,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
           isSubmitting={quoteUpdateMutation.isPending}
         />
         <div className="max-w-75">
-          <SubtotalBreakDown
-            items={Object.values(itemQty)}
-            paymentMethod={
-              isStripeConnected ? PaymentMethods.stripe : PaymentMethods.cash
-            }
-            depositPaymentMethod={currQuote.deposit_payment_method}
-            vatSettings={vat_settings}
-            discountPercentage={discount.current ?? 0}
-            taxPercentage={currQuote.vat}
-            reqDeposite={currQuote?.deposit_amount ?? undefined}
-            taxIdRef={vatSettingsId}
-            discountRef={discount}
-            depositePaymentMethodRef={depositePaymentMethod}
-            depositeAmountRef={depositeAmount}
-            depositeTypeRef={depositeTypeRef}
-            depositePercentageRef={depositePercentageRef}
-            prefilTax={vat_settings?.find(
-              (vat) => vat.id === vatSettingsId.current,
-            )}
-          />
+          <SubtotalBreakDown items={Object.values(itemQty)} />
         </div>
       </div>
 

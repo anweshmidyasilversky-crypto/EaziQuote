@@ -6,7 +6,7 @@ export const amountSchema = yup
   .number()
   .typeError("Amount must be a valid number")
   .required(emptyMsg("Amount"))
-  .moreThan(0, "Must be greater than 0");
+  .moreThan(0, "Must be atleast 1");
 
 export const paymentMethodSchema = yup
   .mixed<PaymentMethods>()
@@ -19,3 +19,10 @@ export const percentageSchema = yup
   .required(emptyMsg("Percentage"))
   .moreThan(0, "Must be greater than 0")
   .max(100, "Can't exceed 100");
+
+export const discountSchema = yup
+  .number()
+  .typeError("Amount must be a valid number")
+  .required(emptyMsg("Amount"))
+  .moreThan(-1, "Must be atleast 0")
+  .lessThan(101, "Must be less than or equal to 100");
