@@ -114,7 +114,10 @@ export function CreateInvoicePage() {
 
   return (
     <React.Fragment>
-      <HeaderBreadCrumb pageName={`${params.id ? `Edit` : `New`} Invoice`} />
+      <HeaderBreadCrumb
+        pageName={`${params.id ? `Edit` : `New`} Invoice`}
+        parentPagePath={location.pathname.split("/").toSpliced(-2).join("/")}
+      />
 
       {isInvoiceFetching ? (
         <div className="flex w-full h-full items-center justify-center">
