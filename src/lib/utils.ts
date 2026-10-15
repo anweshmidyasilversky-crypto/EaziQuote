@@ -101,7 +101,14 @@ export const getInitials = (fullName: string) => {
   return fname[0].toUpperCase() + (lname ? lname[0].toUpperCase() : "");
 };
 
-export const formatCurrency = (value: number) => {
+export const formatCurrency = (value: number | string) => {
+  // If it's already a string, strip any existing '£' and prepend a single '£'
+  if (typeof value === "string") {
+    const cleanString = value.replace(/£/g, "").trim();
+    return `£${cleanString}`;
+  }
+
+  // Fallback for raw numeric values
   return new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: "GBP",

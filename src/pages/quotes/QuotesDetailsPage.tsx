@@ -211,8 +211,18 @@ export function QuotesDetailsPage() {
       withDelete={quote?.is_editable}
       togglePopupOpen={toggleMoreOptionsOpen}
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
-      editAction={() => navigate(`/quotes/manage-quotes/${quote?.id}`)}
+      editAction={() => {
+        if (!user.is_trial_period && !user.is_subscription_active) {
+          setSubscriptionWarningOpen(true);
+          return;
+        }
+        navigate(`/quotes/manage-quotes/${quote?.id}`);
+      }}
       copyAction={() => {
+        if (!user.is_trial_period && !user.is_subscription_active) {
+          setSubscriptionWarningOpen(true);
+          return;
+        }
         quoteDuplicateMutation.mutate(quote?.id ?? "", {
           onSuccess: (response) => {
             toast.success(response.message);

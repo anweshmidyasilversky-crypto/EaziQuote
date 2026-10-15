@@ -127,7 +127,9 @@ function PaymentsIndexPage() {
     },
     {
       accessorKey: "allocated",
-      cell: (info) => formatCurrency(info.getValue<number>()),
+      cell: (info) => {
+        return formatCurrency(info.getValue<string>());
+      },
       enableSorting: false,
       enableGlobalFilter: false,
     },
