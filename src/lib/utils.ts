@@ -53,6 +53,22 @@ export const formatOrdinalDate = (date: Date): string => {
   return `${weekday}, ${day}${suffix} ${month}`;
 };
 
+export function previewDateFormatter(date: Date) {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  // Parts returns an array of objects ({ type: 'day', value: '16' }, etc.)
+  const parts = formatter.formatToParts(date);
+  const day = parts?.find((p) => p.type === "day")?.value;
+  const month = parts?.find((p) => p.type === "month")?.value;
+  const year = parts?.find((p) => p.type === "year")?.value;
+
+  return `${day}-${month}-${year}`;
+}
+
 export function getFormattedTimeDiff(
   timestamp: string | number | Date,
 ): string {

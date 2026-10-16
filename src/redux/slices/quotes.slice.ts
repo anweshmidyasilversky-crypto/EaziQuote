@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
   DocumentCategories,
   QuoteStatus,
-  QuoteTemplate,
+  DocumentTemplate,
   type ClientDetails,
   type Quote,
   type QuoteDetails,
@@ -16,7 +16,7 @@ const initialState: QuoteDetails = {
   deposit_amount: null,
   deposit_percentage: null,
   categorised: DocumentCategories.byItem,
-  template: QuoteTemplate.classic,
+  template: DocumentTemplate.classic,
   notes: "",
   job_description: "",
   reference_number: "",

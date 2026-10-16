@@ -11,17 +11,24 @@ import QuoteSummaryForm from "../../components/quotes/QuoteSummaryForm";
 import ItemSelectForm from "../../components/quotes/ItemSelectForm";
 import { useLocation, useNavigate, useParams } from "react-router";
 import SectionSelectForm from "@/components/quotes/SectionSelectForm";
+import { type QuoteSummary } from "../../types/quoteCreation.payload.type";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
-import type { ClientDetails } from "@/types/api.responses.type";
+import {
+  DocumentTemplate,
+  type ClientDetails,
+  type ItemDetails,
+  type QuoteSection,
+} from "@/types/api.responses.type";
 import usePresetQuoteDetails from "@/hooks/apis/quotes/usePresetQuoteDetails";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
-import { saveToDevice } from "@/lib/utils";
+import { previewDateFormatter, saveToDevice } from "@/lib/utils";
 import { showErrorToast } from "@/api/axiosInstance";
 import { toast } from "react-toastify";
 import { ShareOptions } from "@/components/common/ShareOptions";
+import Preview, { type PreviewPropsSection } from "@/components/pdf/Preview";
 
 enum toggleId {
   Summary = "summary",
@@ -39,6 +46,15 @@ export function CreateQuotePage() {
   const dispatch = useAppDispatch();
   const location = useLocation();
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [summaryPreview, setSummaryPreview] = useState<Partial<QuoteSummary>>(
+    {},
+  );
+  const [clientPreview, setClientPreview] = useState<ClientDetails>();
+  const [itemsPreview, setItemsPreview] = useState<ItemDetails[]>([]);
+  const [quoteSectionPreview, setQuoteSectionPreview] = useState<
+    QuoteSection[]
+  >([]);
+
   const { defaultClient, presetQuoteId } = (location.state ??
     {}) as CreateQuotePageLocationProps;
 
@@ -158,43 +174,66 @@ export function CreateQuotePage() {
             btnConfigList={quote ? btnConfigList : []}
           />
 
-          <div className="flex gap-6 overflow-x-auto rounded-[7px]">
-            <div className="bg-white rounded-[7px] grow">
-              <div className="flex flex-col gap-5 py-5">
-                <CustomToggleGroup
-                  toggleConfig={toggleConfig}
-                  activeId={formCurrSection}
-                  toggleActive={changeFormCurrSection}
-                  className={`bg-transparent! text-black-text [&_button]:disabled:text-muted create-quote-toggle [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark [&_.btnActive]:text-brand-dark [&_.btnActive]:bg-transparent [&_button]:max-w-22.75! px-2`}
-                />
-                {formCurrSection === toggleId.Summary && (
-                  <QuoteSummaryForm
-                    refNo={refNo}
-                    currQuote={params.id ? quoteRedux : undefined}
-                    submitAction={() => changeFormCurrSection(toggleId.Items)}
-                    prefillClient={isClientFetched}
-                    defaultClient={defaultClient}
-                    presetQuote={presetQuoteId ? presetQuote : undefined}
+          <div className="flex gap-2 rounded-[7px] lg:grid lg:grid-cols-[60%_40%] flex-col">
+            <div className="w-full flex gap-2 overflow-x-auto">
+              <div className="bg-white rounded-[7px] grow">
+                <div className="flex flex-col gap-5 py-5">
+                  <CustomToggleGroup
+                    toggleConfig={toggleConfig}
+                    activeId={formCurrSection}
+                    toggleActive={changeFormCurrSection}
+                    className={`bg-transparent! text-black-text [&_button]:disabled:text-muted create-quote-toggle [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark [&_.btnActive]:text-brand-dark [&_.btnActive]:bg-transparent [&_button]:max-w-22.75! px-2`}
                   />
-                )}
-                {formCurrSection === toggleId.Items && (
-                  <ItemSelectForm
-                    submitAction={() =>
-                      changeFormCurrSection(toggleId.Sections)
-                    }
-                    presetItems={presetQuote?.items}
-                  />
-                )}
+                  {formCurrSection === toggleId.Summary && (
+                    <QuoteSummaryForm
+                      refNo={refNo}
+                      currQuote={params.id ? quoteRedux : undefined}
+                      submitAction={() => changeFormCurrSection(toggleId.Items)}
+                      prefillClient={isClientFetched}
+                      defaultClient={defaultClient}
+                      presetQuote={presetQuoteId ? presetQuote : undefined}
+                      setSummaryPreview={setSummaryPreview}
+                      setClientDetails={setClientPreview}
+                    />
+                  )}
+                  {formCurrSection === toggleId.Items && (
+                    <ItemSelectForm
+                      submitAction={() =>
+                        changeFormCurrSection(toggleId.Sections)
+                      }
+                      presetItems={presetQuote?.items}
+                      setItemPreview={setItemsPreview}
+                    />
+                  )}
 
-                {formCurrSection === toggleId.Sections && (
-                  <SectionSelectForm
-                    submitAction={() =>
-                      navigate(`/quotes/${quote?.id}`, { replace: true })
-                    }
-                  />
-                )}
+                  {formCurrSection === toggleId.Sections && (
+                    <SectionSelectForm
+                      submitAction={() =>
+                        navigate(`/quotes/${quote?.id}`, { replace: true })
+                      }
+                    />
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Preview Section */}
+            <Preview
+              documentTemplate={DocumentTemplate.classic}
+              section={formCurrSection as PreviewPropsSection}
+              quoteRefNo={summaryPreview.referenceNumber}
+              quoteTitle={summaryPreview.quoteTitle}
+              client={clientPreview ?? quote?.client}
+              issueDate={previewDateFormatter(
+                new Date(summaryPreview.quoteDate ?? new Date()),
+              )}
+              dueDate={previewDateFormatter(
+                new Date(summaryPreview.expiryDate ?? new Date()),
+              )}
+              jobDescription={summaryPreview.jobDescription}
+              showCompanyNumber={!summaryPreview.hidePhoneNumber}
+              items={itemsPreview}
+            />
           </div>
         </div>
       )}

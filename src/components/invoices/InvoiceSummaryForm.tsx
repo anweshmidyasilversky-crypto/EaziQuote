@@ -263,6 +263,7 @@ function InvoiceSummaryForm({
                 getItemLabel={(quote) =>
                   `${quote.title} - ${quote.reference_number}`
                 }
+                inptDisabled={currInvoice !== undefined}
                 className={`${errors?.quote_id ? `input-error!` : ``}`}
                 placeholder="search or select a quote"
                 isFetching={isQuoteListFetching}

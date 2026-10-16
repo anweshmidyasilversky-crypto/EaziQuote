@@ -38,6 +38,14 @@ export type QuoteSummaryFormProps = {
   prefillClient: boolean;
   defaultClient?: ClientDetails;
   presetQuote?: PresetQuote;
+  setSummaryPreview?: React.Dispatch<
+    React.SetStateAction<Partial<QuoteSummary>>
+  >;
+  setClientDetails?: React.Dispatch<
+    React.SetStateAction<ClientDetails | undefined>
+  >;
+  setIssueDate?: React.Dispatch<React.SetStateAction<string>>;
+  setEndDate?: React.Dispatch<React.SetStateAction<string>>;
 };
 
 function QuoteSummaryForm({
@@ -47,6 +55,8 @@ function QuoteSummaryForm({
   prefillClient,
   defaultClient,
   presetQuote,
+  setSummaryPreview,
+  setClientDetails,
 }: QuoteSummaryFormProps) {
   const user = useAppSelector((state) => state.user);
   const navigate = useNavigate();
@@ -90,6 +100,12 @@ function QuoteSummaryForm({
     defaultValues: initialValue,
     resolver: yupResolver(quoteSummarySchema),
   });
+
+  const watcher = useWatch({ control });
+
+  useEffect(() => {
+    setSummaryPreview?.(watcher);
+  }, [watcher]);
 
   useEffect(() => {
     if (currQuote) {
@@ -374,6 +390,7 @@ function QuoteSummaryForm({
                   if (!client) {
                     return;
                   }
+                  setClientDetails?.(client);
                   setValue("clientId", client.id.toString());
                   setClientSearchTerm(client.name);
                   clearErrors("clientId");
@@ -383,6 +400,7 @@ function QuoteSummaryForm({
                 className={cn(
                   `min-h-11 ${errors.clientId ? `input-error!` : ``}`,
                 )}
+                inptDisabled={currQuote !== undefined}
                 inptFieldValue={clientSearchTerm}
                 inptFieldChange={(val) => setClientSearchTerm(val)}
                 isFetching={isClientFetching}

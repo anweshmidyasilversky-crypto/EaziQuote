@@ -51,12 +51,14 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
 
 function ComboboxInput({
   className,
+  inputClassName,
   children,
   disabled = false,
   showTrigger = true,
   showClear = false,
   ...props
 }: ComboboxPrimitive.Input.Props & {
+  inputClassName?: React.ComponentProps<typeof InputGroupInput>["className"];
   showTrigger?: boolean;
   showClear?: boolean;
 }) {
@@ -75,7 +77,10 @@ function ComboboxInput({
           <InputGroupInput
             disabled={disabled}
             // Forces black text, full opacity, and not-allowed cursor on the input element
-            className="disabled:text-black disabled:opacity-100! disabled:cursor-not-allowed!"
+            className={cn(
+              "disabled:text-black disabled:opacity-100! disabled:cursor-not-allowed!",
+              inputClassName,
+            )}
           />
         }
         {...props}

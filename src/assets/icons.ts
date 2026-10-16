@@ -138,6 +138,11 @@ import accessDeniedIcon from "./icons/accessDeniedIcon.png";
 
 import shareMoreIcon from "./icons/shareMoreIcon.svg";
 
+import classicTemplate from "./icons/classicTemplate.png";
+import modernTemplate from "./icons/modernTemplate.png";
+import elegentTemplate from "./icons/elegentTemplate.png";
+import selectedTickBlue from "./icons/selectedTickBlue.svg";
+
 export const assets = {
   loginHeader,
   logo,
@@ -274,4 +279,9 @@ export const assets = {
 
   accessDeniedIcon,
   shareMoreIcon,
+
+  classicTemplate,
+  modernTemplate,
+  elegentTemplate,
+  selectedTickBlue,
 };

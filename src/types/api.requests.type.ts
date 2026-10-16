@@ -5,7 +5,7 @@ import type {
   PaymentAmountType,
   PaymentMethods,
   QuoteDetails,
-  QuoteTemplate,
+  DocumentTemplate,
 } from "./api.responses.type";
 
 export enum deviceType {
@@ -207,7 +207,7 @@ export interface InvoiceCreateApiPayload {
   message?: string;
   attachments?: File[];
   notes?: string;
-  template?: QuoteTemplate;
+  template?: DocumentTemplate;
   categorised?: DocumentCategories;
   is_company_phone_number_show?: boolean;
 }

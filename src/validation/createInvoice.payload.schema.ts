@@ -2,7 +2,7 @@ import { emptyMsg } from "@/constants/messages";
 import type { InvoiceCreateApiPayload } from "@/types/api.requests.type";
 import {
   DocumentCategories,
-  QuoteTemplate,
+  DocumentTemplate,
   type ItemDetails,
 } from "@/types/api.responses.type";
 import * as yup from "yup";
@@ -16,7 +16,7 @@ export const createInvoiceSchema: yup.ObjectSchema<InvoiceCreateApiPayload> =
     message: yup.string().optional(),
     attachments: attachmentsSchema,
     notes: yup.string().optional(),
-    template: yup.mixed<QuoteTemplate>().optional(),
+    template: yup.mixed<DocumentTemplate>().optional(),
     categorised: yup.mixed<DocumentCategories>().optional(),
     is_company_phone_number_show: yup.boolean().optional(),
   });

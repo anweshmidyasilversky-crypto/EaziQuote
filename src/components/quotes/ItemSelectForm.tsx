@@ -24,7 +24,6 @@ import SubtotalBreakDown from "./SubtotalBreakDown";
 import {
   type PageFilters,
   type UpdateQuoteApiPayload,
-  type UpdateQuoteItems,
 } from "@/types/api.requests.type";
 import useItemsList from "@/hooks/apis/items/useItemsList";
 import useItemsMutations from "@/hooks/apis/items/useItemsMutations";
@@ -39,9 +38,14 @@ import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
 export type ItemSelectFormProps = {
   submitAction: () => void;
   presetItems?: ItemDetails[];
+  setItemPreview?: React.Dispatch<React.SetStateAction<ItemDetails[]>>;
 };
 
-function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
+function ItemSelectForm({
+  submitAction,
+  presetItems,
+  setItemPreview,
+}: ItemSelectFormProps) {
   const {
     depositAmount,
     setDepositPercentage,
@@ -83,7 +87,7 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
   const [createItemModal, toggleCreateItemModal] = useState(false);
   const [editItemModal, toggleEditItemModal] = useState(false);
 
-  const [itemQty, setItemQty] = useState<Record<string, UpdateQuoteItems>>({});
+  const [itemQty, setItemQty] = useState<Record<number, ItemDetails>>({});
   useEffect(() => {
     currQuote?.items.forEach((item) => {
       setItemQty((curr) => ({
@@ -216,33 +220,33 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
         return itemQty[item.id]?.quantity ?? 0;
       },
       cell: (cell) => {
-        const { id: itemId, type, price, cost, name } = cell.row.original;
+        const item = cell.row.original;
+        const { id: itemId, price } = item;
         return (
           <CustomBtn
             className="bg-transparent! btn-auth border border-brand-dark text-black-text w-25!"
             buttonLabel={(itemQty[itemId]?.quantity ?? 0).toString()}
             leftIcon={assets.minusIconBlue}
             leftAction={() => {
-              if (Object.hasOwn(itemQty, itemId)) {
-                if (itemQty[itemId].quantity === 1) {
-                  setItemQty((curr) => {
-                    const { [itemId]: _, ...rest } = curr;
-                    return rest;
-                  });
-                } else {
-                  setItemQty((curr) => ({
-                    ...curr,
-                    [itemId]: {
-                      quantity: itemQty[itemId].quantity - 1,
-                      type,
-                      price,
-                      id: itemId,
-                      cost: cost,
-                      name: name,
-                    },
-                  }));
+              setItemQty((curr) => {
+                const selectedItem = curr[itemId];
+                if (!selectedItem) {
+                  return curr;
                 }
-              }
+
+                if (selectedItem.quantity === 1) {
+                  const { [itemId]: _, ...rest } = curr;
+                  return rest;
+                }
+
+                return {
+                  ...curr,
+                  [itemId]: {
+                    ...selectedItem,
+                    quantity: selectedItem.quantity - 1,
+                  },
+                };
+              });
             }}
             leftCls={cn("h-0.5!")}
             rightIcon={assets.plusIconBlue}
@@ -250,12 +254,8 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
               setItemQty((curr) => ({
                 ...curr,
                 [itemId]: {
-                  quantity: (itemQty[itemId]?.quantity ?? 0) + 1,
-                  price,
-                  type,
-                  id: itemId,
-                  cost: cost,
-                  name: name,
+                  ...(curr[itemId] ?? item),
+                  quantity: (curr[itemId]?.quantity ?? 0) + 1,
                 },
               }));
             }}
@@ -360,6 +360,10 @@ function ItemSelectForm({ submitAction, presetItems }: ItemSelectFormProps) {
       currQuote.deposit_payment?.payment_method ?? PaymentMethods.cash,
     );
   }, [currQuote]);
+
+  useEffect(() => {
+    setItemPreview?.(Object.values(itemQty));
+  }, [itemQty]);
 
   return (
     <>

@@ -24,7 +24,6 @@ import {
 enum toggleId {
   Summary = "summary",
   Items = "items",
-  Sections = "sections",
 }
 
 export type CreateInvoicePageLocationProps = {

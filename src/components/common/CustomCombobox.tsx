@@ -131,12 +131,19 @@ export function CustomCombobox<T, V = T>({
             readOnly={inptReadonly}
             className={`
             input-field! pl-0! h-full max-h-11 w-full!
-        rounded-lg border border-gray-300
-        px-3.5 text-[15px] text-gray-900 placeholder:text-gray-400
+        rounded-lg
         outline-none transition-colors
         focus:border-blue-600 focus:ring-2 focus:ring-blue-100
-        disabled:cursor-not-allowed
+        has-disabled:bg-table-head! has-disabled:opacity-100!
         ${className ?? ""}
+          `}
+            inputClassName={`
+            h-full min-w-0 flex-1 border-0! bg-transparent! px-3.5
+            text-[15px] text-gray-900 placeholder:text-gray-400
+            outline-none transition-colors
+            focus:border-blue-600 focus:ring-2 focus:ring-blue-100
+            disabled:cursor-not-allowed
+            ${inptDisabled ? "placeholder:text-black-text! opacity-100 disabled:opacity-100" : ""}
           `}
             value={inptFieldValue}
             onChange={(e) => inptFieldChange?.(e.target.value)}

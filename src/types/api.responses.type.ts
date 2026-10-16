@@ -128,7 +128,7 @@ export interface InvoiceActivity extends BaseActivity {
   deposit_available: number;
 }
 
-export enum QuoteTemplate {
+export enum DocumentTemplate {
   classic = "classic",
   modern = "modern",
   elegant = "elegant",
@@ -152,7 +152,7 @@ export interface QuoteActivity extends BaseActivity {
   discount: number | null;
   status: QuoteStatus;
   categorised: "by-item" | string;
-  template: QuoteTemplate;
+  template: DocumentTemplate;
 }
 
 // Discriminated union for the array
@@ -382,7 +382,7 @@ export interface QuoteDetails extends Omit<Quote, "status"> {
   deposit_amount: null | number;
   deposit_percentage: null | number;
   categorised: DocumentCategories;
-  template: QuoteTemplate;
+  template: DocumentTemplate;
   client: ClientDetails;
   items: ItemDetails[];
   is_editable: boolean;
@@ -576,7 +576,7 @@ export interface InvoiceQuote {
   discount: QuoteDiscount | null;
   status: QuoteStatus;
   categorised: DocumentCategories;
-  template: QuoteTemplate;
+  template: DocumentTemplate;
   price: number;
   expiry_date: string;
   created_at: string;
@@ -616,7 +616,7 @@ export interface InvoiceDetails {
   is_editable: boolean;
   url: string;
   categorised: DocumentCategories;
-  template: QuoteTemplate;
+  template: DocumentTemplate;
   is_company_phone_number_show: boolean;
   quote: InvoiceQuote;
   client: ClientDetails;
