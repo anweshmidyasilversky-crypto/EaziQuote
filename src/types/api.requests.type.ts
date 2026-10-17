@@ -104,6 +104,7 @@ export interface UpdateQuoteApiPayload extends Partial<
     | "discount"
     | "is_company_phone_number_show"
     | "deposit_required"
+    | "categorised"
   >
 > {
   _method: Method;
@@ -116,6 +117,7 @@ export interface UpdateQuoteApiPayload extends Partial<
   discount?: number | undefined | null;
   is_company_phone_number_show?: 0 | 1;
   deposit_required?: 0 | 1;
+  categorised?: keyof typeof DocumentCategories;
 }
 
 export interface ItemCreateApiPayload {
@@ -208,7 +210,7 @@ export interface InvoiceCreateApiPayload {
   attachments?: File[];
   notes?: string;
   template?: DocumentTemplate;
-  categorised?: DocumentCategories;
+  categorised?: keyof typeof DocumentCategories;
   is_company_phone_number_show?: boolean;
 }
 

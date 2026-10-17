@@ -174,7 +174,7 @@ export function CreateQuotePage() {
             btnConfigList={quote ? btnConfigList : []}
           />
 
-          <div className="flex gap-2 rounded-[7px] lg:grid lg:grid-cols-[60%_40%] flex-col">
+          <div className="form-with-preview-layout">
             <div className="w-full flex gap-2 overflow-x-auto">
               <div className="bg-white rounded-[7px] grow">
                 <div className="flex flex-col gap-5 py-5">
@@ -211,6 +211,7 @@ export function CreateQuotePage() {
                       submitAction={() =>
                         navigate(`/quotes/${quote?.id}`, { replace: true })
                       }
+                      setSectionPreview={setQuoteSectionPreview}
                     />
                   )}
                 </div>
@@ -219,6 +220,7 @@ export function CreateQuotePage() {
 
             {/* Preview Section */}
             <Preview
+              quoteId={quote?.id}
               documentTemplate={DocumentTemplate.classic}
               section={formCurrSection as PreviewPropsSection}
               quoteRefNo={summaryPreview.referenceNumber}
@@ -233,6 +235,7 @@ export function CreateQuotePage() {
               jobDescription={summaryPreview.jobDescription}
               showCompanyNumber={!summaryPreview.hidePhoneNumber}
               items={itemsPreview}
+              quoteSections={quoteSectionPreview}
             />
           </div>
         </div>

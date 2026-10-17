@@ -13,13 +13,16 @@ import useInvoiceDetails from "@/hooks/apis/invoices/useInvoiceDetails";
 import InvoiceSummaryForm from "@/components/invoices/InvoiceSummaryForm";
 import InvoiceItemSelectForm from "@/components/invoices/InvoiceItemSelectForm";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
-import { saveToDevice } from "@/lib/utils";
+import { previewDateFormatter, saveToDevice } from "@/lib/utils";
 import { showErrorToast } from "@/api/axiosInstance";
 import { toast } from "react-toastify";
 import {
   ShareOptions,
   ShareOptionType,
 } from "@/components/common/ShareOptions";
+import type { InvoiceCreateApiPayload } from "@/types/api.requests.type";
+import { DocumentTemplate, type ItemDetails } from "@/types/api.responses.type";
+import Preview, { type PreviewPropsSection } from "@/components/pdf/Preview";
 
 enum toggleId {
   Summary = "summary",
@@ -38,6 +41,14 @@ export function CreateInvoicePage() {
   const location = useLocation();
   const { quoteId } = (location.state ?? {}) as CreateInvoicePageLocationProps;
   const [shareModalOpen, setShareModalOpen] = useState(false);
+
+  {
+    /* For preview section */
+  }
+  const [summaryPreview, setSummaryPreview] = useState<
+    Partial<InvoiceCreateApiPayload>
+  >({});
+  const [previewItems, setPreviewItems] = useState<ItemDetails[]>([]);
 
   const {
     invoiceDetails,
@@ -129,31 +140,54 @@ export function CreateInvoicePage() {
             btnConfigList={params.id ? btnConfigList : []}
           />
 
-          <div className="flex gap-6 overflow-x-auto rounded-[7px]">
-            <div className="bg-white rounded-[7px] grow">
-              <div className="flex flex-col gap-5 py-5">
-                <CustomToggleGroup
-                  toggleConfig={toggleConfig}
-                  activeId={formCurrSection}
-                  toggleActive={changeFormCurrSection}
-                  className={`bg-transparent! text-black-text [&_button]:disabled:text-muted create-quote-toggle [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark [&_.btnActive]:text-brand-dark [&_.btnActive]:bg-transparent [&_button]:max-w-22.75! px-2`}
-                />
-                {formCurrSection === toggleId.Summary && (
-                  <InvoiceSummaryForm
-                    mode={params.id ? "edit" : "create"}
-                    currInvoice={invoiceDetails}
-                    submitAction={() => {
-                      refetch();
-                      changeFormCurrSection(toggleId.Items);
-                    }}
-                    prefillQuoteId={quoteId}
+          <div className="form-with-preview-layout">
+            <div className="flex gap-6 overflow-x-auto rounded-[7px]">
+              <div className="bg-white rounded-[7px] grow">
+                <div className="flex flex-col gap-5 py-5">
+                  <CustomToggleGroup
+                    toggleConfig={toggleConfig}
+                    activeId={formCurrSection}
+                    toggleActive={changeFormCurrSection}
+                    className={`bg-transparent! text-black-text [&_button]:disabled:text-muted create-quote-toggle [&_.btnActive]:border-b [&_.btnActive]:border-brand-dark [&_.btnActive]:text-brand-dark [&_.btnActive]:bg-transparent [&_button]:max-w-22.75! px-2`}
                   />
-                )}
-                {formCurrSection === toggleId.Items && (
-                  <InvoiceItemSelectForm currInvoice={invoiceDetails} />
-                )}
+                  {formCurrSection === toggleId.Summary && (
+                    <InvoiceSummaryForm
+                      mode={params.id ? "edit" : "create"}
+                      currInvoice={invoiceDetails}
+                      submitAction={() => {
+                        refetch();
+                        changeFormCurrSection(toggleId.Items);
+                      }}
+                      prefillQuoteId={quoteId}
+                      setSummaryPreview={setSummaryPreview}
+                    />
+                  )}
+                  {formCurrSection === toggleId.Items && (
+                    <InvoiceItemSelectForm
+                      currInvoice={invoiceDetails}
+                      setItemsPreview={setPreviewItems}
+                    />
+                  )}
+                </div>
               </div>
             </div>
+            <Preview
+              invoiceId={invoiceDetails?.id}
+              documentTemplate={
+                invoiceDetails?.template ?? DocumentTemplate.classic
+              }
+              section={formCurrSection as PreviewPropsSection}
+              quoteRefNo={invoiceDetails?.quote.reference_number}
+              client={invoiceDetails?.client}
+              issueDate={previewDateFormatter(
+                new Date(summaryPreview.invoice_date ?? new Date()),
+              )}
+              dueDate={previewDateFormatter(
+                new Date(summaryPreview.due_date ?? new Date()),
+              )}
+              showCompanyNumber={!summaryPreview.is_company_phone_number_show}
+              items={previewItems}
+            />
           </div>
         </div>
       )}

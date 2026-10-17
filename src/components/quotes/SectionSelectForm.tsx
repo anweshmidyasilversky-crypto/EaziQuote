@@ -27,9 +27,13 @@ import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 
 export type SectionSelectFormProps = {
   submitAction?: () => void;
+  setSectionPreview?: React.Dispatch<React.SetStateAction<QuoteSection[]>>;
 };
 
-function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
+function SectionSelectForm({
+  submitAction,
+  setSectionPreview,
+}: SectionSelectFormProps) {
   const currQuote = useAppSelector((state) => state.quote);
   const sectionListFilters = useMemo(
     () => ({ quote_id: currQuote.id }),
@@ -243,6 +247,7 @@ function SectionSelectForm({ submitAction }: SectionSelectFormProps) {
             />
           }
           withSelectionToggle={true}
+          onSelectionChange={setSectionPreview}
           rowIdSelector={(row) => row.id.toString()}
           isFetching={isFetching}
         />

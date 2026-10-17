@@ -6,10 +6,11 @@ import {
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { CustomDataTable } from "../common/CustomTable";
 import { useAppSelector } from "@/redux/store";
+import { useEffect } from "react";
 
 export type ItemTableByDocumentCategoryProps = {
   items: ItemDetails[];
-  categorizationMethod: DocumentCategories;
+  categorizationMethod: keyof typeof DocumentCategories;
 };
 
 interface ByItems {
@@ -220,24 +221,31 @@ function ItemTableByDocumentCategory({
     return acc;
   }, {});
 
+  useEffect(() => {
+    console.log(categorizationMethod);
+    console.log(byItemsData);
+    console.log(byCategoryData);
+    console.log(bySubcategoryData);
+  }, [categorizationMethod]);
+
   return (
-    <>
-      {categorizationMethod === DocumentCategories.byItem && (
+    <div className="rounded-xl overflow-hidden">
+      {categorizationMethod === "by-item" && (
         <CustomDataTable columns={byItemsColumns} data={byItemsData} />
       )}
 
-      {categorizationMethod === DocumentCategories.byCat && (
+      {categorizationMethod === "by-category" && (
         <CustomDataTable columns={byCategoryColumns} data={byCategoryData} />
       )}
 
-      {categorizationMethod === DocumentCategories.bySubCat && (
+      {categorizationMethod === "by-subcategory" && (
         <CustomDataTable
           columns={bySubcategoryColumns}
           data={bySubcategoryData}
         />
       )}
 
-      {categorizationMethod === DocumentCategories.all && (
+      {categorizationMethod === "by-category-subcategory-item" && (
         <div className="flex w-full flex-col gap-4">
           {Object.keys(byAllData).map((category) => {
             return (
@@ -252,7 +260,7 @@ function ItemTableByDocumentCategory({
           })}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

@@ -38,9 +38,13 @@ import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
 
 export type InvoiceItemSelectFormProps = {
   currInvoice?: InvoiceDetails;
+  setItemsPreview?: React.Dispatch<React.SetStateAction<ItemDetails[]>>;
 };
 
-function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
+function InvoiceItemSelectForm({
+  currInvoice,
+  setItemsPreview,
+}: InvoiceItemSelectFormProps) {
   const { setDiscount, setVat, discount, paymentMethod, setPaymentMethod } =
     useSubtotalFields();
   const navigate = useNavigate();
@@ -105,6 +109,10 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
       items: initialItems,
     },
     resolver: yupResolver(itemDetailsListSchema),
+  });
+  const [itemsForPreview] = useWatch({
+    control,
+    name: ["items"],
   });
 
   const [addedItems] = useWatch({
@@ -356,7 +364,15 @@ function InvoiceItemSelectForm({ currInvoice }: InvoiceItemSelectFormProps) {
     } else {
       setPaymentMethod(PaymentMethods.cash);
     }
+
+    {
+      /* For Preview */
+    }
   }, [currInvoice]);
+
+  useEffect(() => {
+    setItemsPreview?.(itemsForPreview);
+  }, [itemsForPreview]);
 
   return (
     <div className="bg-table flex flex-col gap-5">

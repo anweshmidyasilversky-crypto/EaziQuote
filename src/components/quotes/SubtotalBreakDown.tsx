@@ -28,6 +28,7 @@ import { assets } from "@/assets/icons";
 export type SubtotalBreakDownProps = {
   items: UpdateQuoteItems[];
   depositReceived?: boolean;
+  isPreview?: boolean;
 };
 
 export interface Margin {
@@ -37,7 +38,17 @@ export interface Margin {
   costs: number;
 }
 
-function SubtotalBreakDown({ items, depositReceived }: SubtotalBreakDownProps) {
+function SubtotalBreakDown({
+  items,
+  depositReceived,
+  isPreview,
+}: SubtotalBreakDownProps) {
+  const {
+    company: { brand_color },
+  } = useAppSelector((state) => state.user);
+  const previewFieldStyle: React.CSSProperties = {
+    color: brand_color,
+  };
   const {
     creditAmount,
     vat,
@@ -139,34 +150,42 @@ function SubtotalBreakDown({ items, depositReceived }: SubtotalBreakDownProps) {
     <div className="flex flex-col px-5 gap-4 [&>div]:subtotal-row [&_#field]:subtotal-field [&_#value]:subtotal-value">
       {/* Subtotal */}
       <div>
-        <span id="field"> {`Subtotal`} </span>
+        <span id="field" style={isPreview ? previewFieldStyle : {}}>
+          {" "}
+          {`Subtotal`}{" "}
+        </span>
         <span id="value"> {formatCurrency(subtotal)} </span>
       </div>
 
       {/* Margin */}
-      <div>
-        <span id="field">
-          {" "}
-          {`Margin (${calcMarginPercentage(subtotal, totalCost)}%)`}{" "}
-        </span>
-        <a
-          onClick={() => setTableOpen(true)}
-          className="text-brand-dark text-[14px] underline decoration-brand-dark"
-        >
-          {" "}
-          {"Check Margin"}{" "}
-        </a>
-      </div>
+      {!isPreview && (
+        <div>
+          <span id="field">
+            {" "}
+            {`Margin (${calcMarginPercentage(subtotal, totalCost)}%)`}{" "}
+          </span>
+          <a
+            onClick={() => setTableOpen(true)}
+            className="text-brand-dark text-[14px] underline decoration-brand-dark"
+          >
+            {" "}
+            {"Check Margin"}{" "}
+          </a>
+        </div>
+      )}
 
       {/* Tax */}
       <div>
-        <span id="field"> {`Tax ${vat ? `(${vat.value}%)` : ``}`} </span>
+        <span id="field" style={isPreview ? previewFieldStyle : {}}>
+          {" "}
+          {`Tax ${vat ? `(${vat.value}%)` : ``}`}{" "}
+        </span>
         <span id="value">
           {" "}
           {vat
             ? formatCurrency(applyPercentage(subtotal, Number(vat.value)))
             : formatCurrency(0)}{" "}
-          {isEditPage && quotePage && (
+          {isEditPage && quotePage && !isPreview && (
             <CustomActionGroup
               withOpen={false}
               editFn={() => setTaxAddModalOpen(true)}
@@ -176,16 +195,24 @@ function SubtotalBreakDown({ items, depositReceived }: SubtotalBreakDownProps) {
         </span>
       </div>
 
+      {/* Deposit for live preview section */}
+      {isPreview && depositAmount && (
+        <div>
+          <span id="field" style={previewFieldStyle}>{`Deposit`}</span>
+          <span id="value"> {formatCurrency(depositAmount)}</span>
+        </div>
+      )}
+
       {/* Discount */}
       <div>
-        <span id="field">
+        <span id="field" style={isPreview ? previewFieldStyle : {}}>
           {" "}
           {`Discount ${discount ? `(${discount})%` : ``}`}{" "}
         </span>
         <span id="value">
           {" "}
           {formatCurrency(discountAmount)}
-          {isEditPage && (
+          {isEditPage && !isPreview && (
             <CustomActionGroup
               withOpen={false}
               editFn={() => setDiscountModalOpen(true)}
@@ -195,50 +222,64 @@ function SubtotalBreakDown({ items, depositReceived }: SubtotalBreakDownProps) {
         </span>
       </div>
 
-      <Separator className={`dashed-y-separators`} />
+      <Separator
+        className={cn(
+          !isPreview ? `dashed-y-separators` : `bg-preview-section-separator`,
+        )}
+      />
 
       {/* Grand total */}
       <div>
-        <span id="field"> {`Grand Total`} </span>
+        <span
+          id="field"
+          style={isPreview ? { ...previewFieldStyle, fontWeight: "bold" } : {}}
+        >
+          {" "}
+          {isPreview ? `Total` : `Grand Total`}{" "}
+        </span>
         <span id="value"> {formatCurrency(grandTotal)} </span>
       </div>
 
-      {/* Deposit */}
-      {(isEditPage || (quotePage && depositAmount)) && quotePage && (
-        <div>
-          <span id="field">
-            {" "}
-            {`Deposit ${depositReceived ? `Received` : `Required`}`}{" "}
-          </span>
-          {depositAmount ? (
-            <span id="value">
-              {" "}
-              {formatCurrency(depositAmount)}
-              {isEditPage && (
-                <CustomActionGroup
-                  withOpen={false}
-                  editFn={() => setDepositModalOpen(true)}
-                  deleteFn={() => {
-                    setDepositAmount(undefined);
-                    setDepositPercentage(undefined);
-                    setDepositType(undefined);
-                  }}
-                />
-              )}
-            </span>
-          ) : (
-            <a
-              className="text-brand-dark underline decoration-brand-dark text-[14px]"
-              onClick={() => setDepositModalOpen(true)}
-            >
-              {" "}
-              {"+ Add Deposit"}{" "}
-            </a>
-          )}
-        </div>
-      )}
+      {isPreview && <Separator className={`bg-preview-section-separator`} />}
 
-      {((depositAmount && paymentMethod) || invoicePage) && (
+      {/* Deposit */}
+      {(isEditPage || (quotePage && depositAmount)) &&
+        quotePage &&
+        !isPreview && (
+          <div>
+            <span id="field">
+              {" "}
+              {`Deposit ${depositReceived ? `Received` : `Required`}`}{" "}
+            </span>
+            {depositAmount ? (
+              <span id="value">
+                {" "}
+                {formatCurrency(depositAmount)}
+                {isEditPage && (
+                  <CustomActionGroup
+                    withOpen={false}
+                    editFn={() => setDepositModalOpen(true)}
+                    deleteFn={() => {
+                      setDepositAmount(undefined);
+                      setDepositPercentage(undefined);
+                      setDepositType(undefined);
+                    }}
+                  />
+                )}
+              </span>
+            ) : (
+              <a
+                className="text-brand-dark underline decoration-brand-dark text-[14px]"
+                onClick={() => setDepositModalOpen(true)}
+              >
+                {" "}
+                {"+ Add Deposit"}{" "}
+              </a>
+            )}
+          </div>
+        )}
+
+      {((depositAmount && paymentMethod) || invoicePage) && !isPreview && (
         <div className="subtotal-row">
           <span id={`field`}> {"Payment Method"} </span>
           <span id={`value`}>
@@ -256,6 +297,7 @@ function SubtotalBreakDown({ items, depositReceived }: SubtotalBreakDownProps) {
       )}
 
       {((depositAmount && paymentMethod) || invoicePage) &&
+        !isPreview &&
         paymentMethod === PaymentMethods.cash && (
           <div className="flex gap-1.5 h-fit items-center">
             <img

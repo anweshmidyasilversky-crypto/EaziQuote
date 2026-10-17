@@ -25,6 +25,9 @@ export type InvoiceSummaryFormProps = {
   submitAction?: () => void;
   currInvoice?: InvoiceDetails;
   prefillQuoteId?: number;
+  setSummaryPreview?: React.Dispatch<
+    React.SetStateAction<Partial<InvoiceCreateApiPayload>>
+  >;
 };
 
 function InvoiceSummaryForm({
@@ -32,6 +35,7 @@ function InvoiceSummaryForm({
   currInvoice,
   submitAction,
   prefillQuoteId,
+  setSummaryPreview,
 }: InvoiceSummaryFormProps) {
   const navigate = useNavigate();
 
@@ -98,6 +102,7 @@ function InvoiceSummaryForm({
     control,
     name: ["quote_id", "attachments"],
   });
+  const watcher = useWatch({ control });
 
   const { quote } = useQuoteDetails({
     quote_id: quoteId?.toString() ?? "",
@@ -234,6 +239,10 @@ function InvoiceSummaryForm({
       setValue("attachments", attachments.slice(0, 5));
     }
   }, [attachments]);
+
+  useEffect(() => {
+    setSummaryPreview?.(watcher);
+  }, [currInvoice, watcher]);
   return (
     <React.Fragment>
       <div className="px-5 flex flex-col gap-8">

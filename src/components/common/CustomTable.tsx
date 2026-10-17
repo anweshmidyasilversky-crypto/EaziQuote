@@ -17,7 +17,7 @@ import {
   rowSelectionFeature,
 } from "@tanstack/react-table";
 import { assets } from "../../assets/icons";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Separator } from "../ui/separator";
 import React from "react";
 import type {
@@ -53,6 +53,7 @@ export interface DataTableProps<TData extends RowData> {
   tableOptionsRight?: React.ReactNode;
   withFooterBorder?: boolean;
   withSelectionToggle?: boolean;
+  onSelectionChange?: (selectedRows: TData[]) => void;
   rowIdSelector?: (row: TData) => string;
 
   tableOptionsCls?: string;
@@ -82,6 +83,7 @@ function CustomTable<TData extends RowData>({
   withFooterBorder,
   rowIdSelector,
   withSelectionToggle = false,
+  onSelectionChange,
   tableOptionsCls,
   bodyCls,
   contentScrollable,
@@ -129,6 +131,14 @@ function CustomTable<TData extends RowData>({
 
     getRowId: rowIdSelector ? rowIdSelector : undefined,
   });
+
+  useEffect(() => {
+    if (withSelectionToggle) {
+      onSelectionChange?.(
+        table.getSelectedRowModel().rows.map((row) => row.original),
+      );
+    }
+  }, [data, onSelectionChange, rowSelection, withSelectionToggle]);
 
   return (
     <>

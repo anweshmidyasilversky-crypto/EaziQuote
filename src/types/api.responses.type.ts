@@ -359,10 +359,10 @@ export interface PresetQuote extends PresetQuoteListing {
 }
 
 export enum DocumentCategories {
-  byItem = "by-item",
-  byCat = "by-category",
-  bySubCat = "by-subcategory",
-  all = "by-category-subcategory-item",
+  "by-item" = "By Item",
+  "by-category" = "By Category",
+  "by-subcategory" = "By Subcategory",
+  "by-category-subcategory-item" = "All",
 }
 
 export interface QuoteDiscount {
