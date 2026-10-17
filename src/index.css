@@ -189,28 +189,22 @@
   }
   html {
     -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: thin; /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: #c4c4c4 transparent;
   }
 
-/* Make the scrollbar thin */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 6px;
-}
+  ::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
 
-/* Scrollbar track */
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* Scrollbar thumb */
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
-}
-  
   ::-webkit-scrollbar-track {
-    background: transparent; /* Makes the track invisible or match background */
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    border-radius: 9999px;
   }
 
   input[type="date"]::-webkit-calendar-picker-indicator {

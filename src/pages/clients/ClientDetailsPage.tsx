@@ -665,6 +665,7 @@ export function ClientDetailsPage() {
         isOpen={contactInfoOpen}
         toggleOpen={toggleContactInfoOpen}
         currClient={client}
+        isClientPage
       />
 
       <CustomSheet

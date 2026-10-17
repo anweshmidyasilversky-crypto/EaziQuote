@@ -238,7 +238,7 @@ export function DashboardLayout() {
               {/* Logged in user */}
               <Popover>
                 <PopoverTrigger className={`translate-y-0!`}>
-                  <div className="flex flex-col md:flex-row p-4.5 gap-3 items-center bg-header-user-det overflow-hidden">
+                  <div className="flex flex-col md:flex-row p-4.5 gap-3 items-center bg-header-user-det overflow-hidden md:min-w-37">
                     <CustomAvatar
                       src={user.avatar ?? assets.userIconSvg}
                       fallback="U"
@@ -251,11 +251,16 @@ export function DashboardLayout() {
 
                 {/* Delete user & logout */}
                 <PopoverContent
-                  className={`w-fit ring-0 shadow-none dashboard-card-theme p-2 rounded-2 [&_div]:cursor-pointer`}
+                  className={`w-fit ring-0 dashboard-card-theme shadow-2xl p-0! py-2! rounded-t-xs [&_div]:cursor-pointer`}
                   align="center"
                   side="bottom"
+                  sideOffset={1}
                 >
-                  <div className="flex flex-col gap-1">
+                  <span className="text-placeholder-text text-wrap wrap-break-word px-4">
+                    {" "}
+                    {`Welcome, ${user.name}`}{" "}
+                  </span>
+                  <div className="flex flex-col gap-1 [&_span]:hover:bg-slate-300">
                     <span
                       className="py-2 px-4 flex gap-2 items-center"
                       onClick={() => setDeleteModalOpen(true)}

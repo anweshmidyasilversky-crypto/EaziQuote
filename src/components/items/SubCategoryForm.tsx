@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { type SubcategoryPayload } from "../../types/subCategory.payload.type";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -55,6 +55,11 @@ function SubCategoryForm({
     });
   };
 
+  useEffect(() => {
+    reset();
+    setCatSearchTerm("");
+  }, [isOpen]);
+
   return (
     <CustomSheet
       isOpen={isOpen}
@@ -76,7 +81,7 @@ function SubCategoryForm({
           <CustomCombobox
             items={categories}
             getItemLabel={(category) => category.name}
-            className={errors.catId ? `input-error` : ``}
+            className={errors.catId ? `input-error!` : ``}
             onValueChange={(category) => {
               if (category) {
                 setCatSearchTerm(category.name);

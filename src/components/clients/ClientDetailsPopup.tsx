@@ -8,18 +8,22 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import type { Client } from "@/types/api.responses.type";
+import { useNavigate } from "react-router";
 
 export type ClientDetailsPopupProps = {
   currClient: Client | undefined;
   isOpen: boolean;
   toggleOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isClientPage?: boolean;
 };
 
 export function ClientDetailsPopup({
   isOpen,
   toggleOpen,
   currClient,
+  isClientPage,
 }: ClientDetailsPopupProps) {
+  const navigate = useNavigate();
   return (
     <Dialog open={isOpen} onOpenChange={toggleOpen}>
       <DialogTrigger />
@@ -85,10 +89,15 @@ export function ClientDetailsPopup({
         <div className="px-4 py-2 pb-6">
           <button
             className="btn-auth w-fit min-w-17.25 text-[14px] py-2 px-4"
-            onClick={() => toggleOpen((curr) => !curr)}
+            onClick={() => {
+              if (!isClientPage) {
+                navigate(`/clients/${currClient?.id}`);
+              } else {
+                toggleOpen((curr) => !curr);
+              }
+            }}
           >
-            {" "}
-            Got it!{" "}
+            {isClientPage ? `Got it!` : `View Profile`}
           </button>
         </div>
       </DialogContent>

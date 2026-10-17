@@ -4,6 +4,7 @@ import { CustomInput } from "../common/CustomInput";
 import { cn } from "../../lib/utils";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { categorySchema } from "../../validation/itemCreation.payload.schema";
+import { useEffect } from "react";
 
 export type AddCategoryFormProps = {
   isOpen: boolean;
@@ -30,6 +31,10 @@ function AddCategoryForm({
   const submitHandler = async (data: { category: string }) => {
     createFn?.(data.category);
   };
+
+  useEffect(() => {
+    reset();
+  }, [isOpen]);
   return (
     <CustomSheet
       isOpen={isOpen}

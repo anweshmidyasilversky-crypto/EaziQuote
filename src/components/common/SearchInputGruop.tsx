@@ -15,7 +15,7 @@ export type SearchInputGruopProps = {
 const SearchInputGruop = memo(
   ({ searchTerm, searchPlaceHolder, setSearchTerm }: SearchInputGruopProps) => {
     return (
-      <InputGroup className="flex gap-2.25 rounded-[7px] min-h-9.5 max-w-75 ring-0 border border-searchbox-border focus-within:ring-0 focus-within:border focus-within:border-searchbox-border has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot=input-group-control]:focus-visible]:border-searchbox-border">
+      <InputGroup className="flex gap-2.25 rounded-[7px] min-h-9.5 max-w-75 border border-searchbox-border focus-within:border-black ring-0!">
         <InputGroupAddon className="w-4.5 h-4.5">
           <img
             src={assets.searchIcon}
