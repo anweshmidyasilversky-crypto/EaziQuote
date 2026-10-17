@@ -170,9 +170,10 @@ function CustomTable<TData extends RowData>({
         {/* Table Body */}
         <div
           className={cn(
-            `overflow-x-auto`,
+            `relative overflow-x-auto`,
             contentScrollable ? "max-h-[60vh] overflow-auto" : "",
           )}
+          aria-busy={isFetching}
         >
           <table className="w-full text-left border-collapse">
             <thead className="bg-table-head sticky top-0 z-10">
@@ -218,97 +219,102 @@ function CustomTable<TData extends RowData>({
               ))}
             </thead>
 
-            {isFetching ? (
-              <tbody>
-                <tr className="w-full">
-                  <td colSpan={table.getVisibleLeafColumns().length}>
-                    <div className="flex items-center justify-center p-2">
+            <tbody className={`${bodyCls}`}>
+              {table.getRowModel().rows.length === 0 && !isFetching ? (
+                <tr className="hover:bg-slate-50/50 transition-colors">
+                  <td
+                    colSpan={table.getVisibleLeafColumns().length}
+                    className="py-4 text-sm font-normal text-slate-600 whitespace-nowrap text-center"
+                  >
+                    <div className="flex flex-col gap-4.5">
+                      <Separator className={`bg-separator`} />
+                      No results found
+                      <Separator className={`bg-separator`} />
+                    </div>
+                  </td>
+                </tr>
+              ) : table.getRowModel().rows.length === 0 ? (
+                <tr aria-hidden="true">
+                  <td
+                    colSpan={table.getVisibleLeafColumns().length}
+                    className="h-40 p-0"
+                  >
+                    <div className="flex h-40 w-full items-center justify-center">
                       <Spinner className="text-brand-dark w-15 h-15 aspect-square" />
                     </div>
                   </td>
                 </tr>
-              </tbody>
-            ) : (
-              <>
-                <tbody className={`${bodyCls}`}>
-                  {table.getRowModel().rows.length === 0 ? (
-                    <tr className="hover:bg-slate-50/50 transition-colors">
-                      <td
-                        colSpan={table.getVisibleLeafColumns().length}
-                        className="py-4 text-sm font-normal text-slate-600 whitespace-nowrap text-center"
-                      >
-                        <div className="flex flex-col gap-4.5">
-                          <Separator className={`bg-separator`} />
-                          No results found
-                          <Separator className={`bg-separator`} />
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    table.getRowModel().rows.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="hover:bg-slate-50/50 transition-colors"
-                      >
-                        {row.getVisibleCells().map((cell) => {
-                          const cellRenderer = cell.column.columnDef.cell;
-                          //console.log(cellRenderer, cell.id);
-                          return (
-                            <td
-                              key={cell.id}
-                              className="px-6 text-wrap h-fit! min-w-30! py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
-                            >
-                              <div className="flex items-center text-wrap wrap-break-word">
-                                {typeof cellRenderer === "function" &&
-                                ![null, "", " "].includes(
-                                  cellRenderer(cell.getContext()),
-                                ) ? (
-                                  <table.FlexRender cell={cell} />
-                                ) : (
-                                  "-"
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-
-                <tfoot>
-                  {withFooterBorder && (
-                    <tr className="h-4 pointer-events-none select-none">
-                      <td colSpan={table.getVisibleFlatColumns().length}>
-                        {" "}
-                        <Separator className={`bg-separator`} />{" "}
-                      </td>
-                    </tr>
-                  )}
-                  {table.getFooterGroups().map((footerGroup) => (
-                    <tr
-                      key={footerGroup.id}
-                      className="hover:bg-slate-50/50 transition-colors"
-                    >
-                      {footerGroup.headers.map((header) => (
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-slate-50/50 transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const cellRenderer = cell.column.columnDef.cell;
+                      //console.log(cellRenderer, cell.id);
+                      return (
                         <td
-                          key={header.id}
-                          className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                          key={cell.id}
+                          className="px-6 text-wrap h-fit! min-w-30! py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.footer,
-                                header.getContext(),
-                              )}
+                          <div className="flex items-center text-wrap wrap-break-word">
+                            {typeof cellRenderer === "function" &&
+                            ![null, "", " "].includes(
+                              cellRenderer(cell.getContext()),
+                            ) ? (
+                              <table.FlexRender cell={cell} />
+                            ) : (
+                              "-"
+                            )}
+                          </div>
                         </td>
-                      ))}
-                    </tr>
+                      );
+                    })}
+                  </tr>
+                ))
+              )}
+            </tbody>
+
+            <tfoot>
+              {withFooterBorder && (
+                <tr className="h-4 pointer-events-none select-none">
+                  <td colSpan={table.getVisibleFlatColumns().length}>
+                    {" "}
+                    <Separator className={`bg-separator`} />{" "}
+                  </td>
+                </tr>
+              )}
+              {table.getFooterGroups().map((footerGroup) => (
+                <tr
+                  key={footerGroup.id}
+                  className="hover:bg-slate-50/50 transition-colors"
+                >
+                  {footerGroup.headers.map((header) => (
+                    <td
+                      key={header.id}
+                      className="px-6 py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.footer,
+                            header.getContext(),
+                          )}
+                    </td>
                   ))}
-                </tfoot>
-              </>
-            )}
+                </tr>
+              ))}
+            </tfoot>
           </table>
+          {isFetching && table.getRowModel().rows.length > 0 && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
+              <Spinner
+                className="text-brand-dark w-15 h-15 aspect-square"
+                aria-label="Loading table"
+              />
+            </div>
+          )}
         </div>
 
         {showPaginated && (

@@ -9,7 +9,7 @@ export type useClientDetailsProps = {
 };
 
 function useClientDetails({ client_id, filters }: useClientDetailsProps) {
-  const { data, isFetching, error, refetch } = useQuery({
+  const { data, isFetching, isLoading, error, refetch } = useQuery({
     queryKey: ["client_details", client_id, filters],
     queryFn: () => getClientDetails(client_id),
   });
@@ -20,6 +20,7 @@ function useClientDetails({ client_id, filters }: useClientDetailsProps) {
   return {
     clientDetails: data?.payload,
     isFetching,
+    isLoading,
     refetch,
   };
 }

@@ -130,8 +130,8 @@ export function CreateInvoicePage() {
       />
 
       {isInvoiceFetching ? (
-        <div className="flex w-full h-full items-center justify-center">
-          <Spinner className="text-brand-dark w-1/10 h-1/10" />
+        <div className="page-loading-overlay">
+          <Spinner className="text-brand-dark size-8" />
         </div>
       ) : (
         <div className="p-5 flex flex-col gap-6">

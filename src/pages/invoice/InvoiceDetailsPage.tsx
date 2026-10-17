@@ -309,8 +309,8 @@ export function InvoiceDetailsPage() {
           />
 
           {isFetching ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <Spinner className="w-1/10 h-1/10" />
+            <div className="page-loading-overlay">
+              <Spinner className="text-brand-dark size-8" />
             </div>
           ) : (
             <>

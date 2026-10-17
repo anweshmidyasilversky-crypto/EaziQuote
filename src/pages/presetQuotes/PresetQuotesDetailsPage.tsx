@@ -113,8 +113,8 @@ function PresetQuotesDetailsPage() {
   };
 
   return isFetching ? (
-    <div className="h-full w-full flex items-center justify-center">
-      <Spinner className="text-brand-dark h-1/10 w-1/10" />
+    <div className="page-loading-overlay">
+      <Spinner className="text-brand-dark size-8" />
     </div>
   ) : (
     <>

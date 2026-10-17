@@ -21,7 +21,7 @@ function DatePicker({
   dateSetter,
 }: DatePickerProps) {
   const [open, toggleOpen] = useState(false);
-  const [pickedDate, setPickedDate] = useState(selectedDate ?? new Date());
+  const [pickedDate, setPickedDate] = useState(selectedDate);
 
   const formatLocalDate = (date: Date | undefined): string => {
     if (!date) return "";
@@ -52,9 +52,16 @@ function DatePicker({
           </PopoverTrigger>
 
           <PopoverContent
-            className="bg-white opacity-100 ring-0"
+            className="relative w-fit! min-w-[280px]! max-w-[calc(100vw-2rem)]! rounded-none! bg-transparent! p-0! opacity-100 shadow-none! ring-0! before:pointer-events-none before:absolute before:-top-2 before:left-5 before:z-20 before:h-2 before:w-3.5 before:bg-brand-dark before:[clip-path:polygon(50%_0,100%_100%,0_100%)] data-[side=top]:before:top-auto data-[side=top]:before:-bottom-2 data-[side=top]:before:bg-white data-[side=top]:before:[clip-path:polygon(0_0,100%_0,50%_100%)] data-[side=left]:before:left-auto data-[side=left]:before:right-[-0.5rem] data-[side=left]:before:top-5 data-[side=left]:before:h-3.5 data-[side=left]:before:w-2 data-[side=left]:before:bg-white data-[side=left]:before:[clip-path:polygon(0_0,100%_50%,0_100%)] data-[side=right]:before:left-[-0.5rem] data-[side=right]:before:top-5 data-[side=right]:before:h-3.5 data-[side=right]:before:w-2 data-[side=right]:before:bg-white data-[side=right]:before:[clip-path:polygon(100%_0,100%_100%,0_50%)]"
             side="bottom"
             align="start"
+            sideOffset={8}
+            collisionAvoidance={{
+              side: "flip",
+              align: "shift",
+              fallbackAxisSide: "start",
+            }}
+            collisionPadding={8}
           >
             <Calendar
               mode="single"
@@ -67,11 +74,6 @@ function DatePicker({
                 }
               }}
               className="w-full h-full [&_table]:w-full [&_tr]:flex [&_tr]:justify-between [&_td]:flex-1 [&_th]:flex-1 [&_th]:text-center"
-              modifiersClassNames={{
-                selected:
-                  "bg-brand-dark text-white font-medium hover:bg-brand-dark!",
-                today: "ring-1 bg-gray text-black font-bold hover:ring-0",
-              }}
               disabled={{ before: new Date() }}
             />
           </PopoverContent>

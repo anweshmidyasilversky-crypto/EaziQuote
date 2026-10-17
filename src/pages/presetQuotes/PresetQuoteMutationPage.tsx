@@ -319,9 +319,8 @@ function PresetQuoteMutationPage() {
   return (
     <>
       {isPresetFetching ? (
-        <div className="w-full h-full flex items-center justify-center">
-          {" "}
-          <Spinner className="text-brand-dark w-1/10 h-1/10" />{" "}
+        <div className="page-loading-overlay">
+          <Spinner className="text-brand-dark size-8" />
         </div>
       ) : (
         <>

@@ -217,6 +217,10 @@
   @apply flex gap-2 rounded-[7px] lg:grid lg:grid-cols-[60%_40%] flex-col;
 }
 
+@utility page-loading-overlay {
+  @apply fixed inset-0 z-[100] flex items-center justify-center  backdrop-blur-[1px];
+}
+
 @utility attachment-layout {
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
 }

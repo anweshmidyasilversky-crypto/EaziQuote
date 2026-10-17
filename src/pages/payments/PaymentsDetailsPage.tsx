@@ -165,8 +165,8 @@ function PaymentsDetailsPage() {
   return (
     <>
       {isFetching ? (
-        <div className="flex h-full justify-center items-center">
-          <Spinner className="text-brand-dark h-1/12 w-1/12" />
+        <div className="page-loading-overlay">
+          <Spinner className="text-brand-dark size-8" />
         </div>
       ) : (
         <div className="flex flex-col gap-6 p-6">
