@@ -281,6 +281,18 @@ function PaymentCreatePage() {
     }
   }, [location.state]);
 
+  useEffect(() => {
+    if (activeToggle === PaymentTypes.deposite) {
+      setValue("payment_method", PaymentMethods.cash);
+    }
+    setQuoteSearchTerm("");
+    setClientSearchTerm("");
+    setInvoiceSearchTerm("");
+    setSelectedInvoice(undefined);
+    setSetelectedQuote(undefined);
+    setClientId(undefined);
+  }, [activeToggle]);
+
   return (
     <div className="p-6 flex flex-col gap-6">
       <CustomHeader header="Record Payment" btnConfigList={[]} />
