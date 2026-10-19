@@ -36,7 +36,10 @@ function SectionSelectForm({
 }: SectionSelectFormProps) {
   const currQuote = useAppSelector((state) => state.quote);
   const sectionListFilters = useMemo(
-    () => ({ quote_id: currQuote.id }),
+    () => ({
+      quote_id:
+        currQuote?.status !== QuoteStatus.draft ? currQuote.id : undefined,
+    }),
     [currQuote],
   );
 

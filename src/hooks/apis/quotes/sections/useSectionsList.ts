@@ -23,7 +23,10 @@ function useSectionsList({ filters }: useSectionsListProps) {
     queryFn: () =>
       getQuoteSectionList({
         ...filters,
-        search: deboucedSearchTerm,
+        search:
+          (deboucedSearchTerm?.length ?? 0) >= 1
+            ? deboucedSearchTerm
+            : undefined,
       }),
   });
 
