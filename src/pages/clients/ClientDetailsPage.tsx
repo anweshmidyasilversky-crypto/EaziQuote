@@ -322,8 +322,20 @@ export function ClientDetailsPage() {
           return (
             <div className="flex items-center">
               <CustomActionGroup
-                openFn={() => navigate(`/quotes/${activity.id}`)}
-                editFn={() => navigate(`/quotes/manage-quotes/${activity.id}`)}
+                openFn={() => {
+                  if (activity.type === ActivityType.INVOICE) {
+                    navigate(`/invoices/${activity.id}`);
+                  } else {
+                    navigate(`/quotes/${activity.id}`);
+                  }
+                }}
+                editFn={() => {
+                  if (activity.type === ActivityType.INVOICE) {
+                    navigate(`/invoices/manage-invoice/${activity.id}`);
+                  } else {
+                    navigate(`/quotes/manage-quotes/${activity.id}`);
+                  }
+                }}
                 withEdit={activity.is_editable}
                 withDelete={activity.is_editable}
                 deleteFn={() => {
