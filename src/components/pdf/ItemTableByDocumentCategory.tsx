@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils/helper";
 import {
   DocumentCategories,
   type ItemDetails,

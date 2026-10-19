@@ -6,7 +6,7 @@ import type {
 } from "@/types/api.requests.type";
 import { axiosInstance } from "../axiosInstance";
 import { API_ENDPOINTS } from "@/constants/endPoints";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 import {
   type ApiResponse,
   type ListResponse,

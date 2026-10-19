@@ -25,7 +25,7 @@ import type {
   PaginationBtnMeta,
 } from "@/types/api.responses.type";
 import { CustomBtn } from "./CustomBtn";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { Spinner } from "../ui/spinner";
 
 export interface DataTableProps<TData extends RowData> {

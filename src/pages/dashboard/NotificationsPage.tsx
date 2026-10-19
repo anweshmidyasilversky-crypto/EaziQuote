@@ -3,7 +3,8 @@ import { CustomBtn } from "@/components/common/CustomBtn";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import useNotificationList from "@/hooks/apis/notifications/useNotificationList";
-import { cn, getFormattedTimeDiff } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
+import { getFormattedTimeDiff } from "@/lib/utils/date";
 import { nanoid } from "@reduxjs/toolkit";
 import React from "react";
 

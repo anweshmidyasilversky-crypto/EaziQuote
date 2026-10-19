@@ -10,7 +10,7 @@ import type {
   TeamMember,
 } from "@/types/api.responses.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 
 export const getTeamMemberList = async (filters: PageFilters) => {
   try {

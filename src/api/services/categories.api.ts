@@ -5,7 +5,7 @@ import type {
 } from "@/types/api.responses.type";
 import { axiosInstance } from "../axiosInstance";
 import type { PageFilters } from "@/types/api.requests.type";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 import { API_ENDPOINTS } from "@/constants/endPoints";
 
 export const getCategoryList = async (filters: PageFilters) => {

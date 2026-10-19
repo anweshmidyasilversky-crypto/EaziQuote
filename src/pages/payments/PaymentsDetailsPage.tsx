@@ -18,7 +18,9 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import usePaymentDetails from "@/hooks/apis/payments/usePaymentDetails";
 import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
-import { cn, dateToDdMonYyyy, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
+import { formatCurrency } from "@/lib/utils/helper";
+import { dateToDdMonYyyy } from "@/lib/utils/date";
 import {
   PaymentStatus,
   type PaymentAllocation,

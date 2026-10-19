@@ -3,7 +3,7 @@ import CustomDialog from "../common/CustomDialog";
 import { type Card } from "@/types/cardDetails.payload.type";
 import { CustomInput } from "../common/CustomInput";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { toast } from "react-toastify";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { cardSchema } from "@/validation/cardDetails.schema";

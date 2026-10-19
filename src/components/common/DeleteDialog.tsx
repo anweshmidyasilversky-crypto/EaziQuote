@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CustomDialog from "./CustomDialog";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { Trash2Icon } from "lucide-react";
 import { CustomBtn } from "./CustomBtn";
 

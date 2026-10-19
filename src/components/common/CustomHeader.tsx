@@ -1,6 +1,6 @@
 import React from "react";
 import { CustomBtn, type CustomBtnProps } from "./CustomBtn";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 
 export type CustomHeaderProps = {
   header: string;

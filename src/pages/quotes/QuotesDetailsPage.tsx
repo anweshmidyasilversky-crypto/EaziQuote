@@ -1,11 +1,8 @@
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  cn,
-  formatCurrency,
-  formatDisplayDate,
-  getInitials,
-} from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
+import { getInitials, formatCurrency } from "@/lib/utils/helper";
+import { formatDisplayDate } from "@/lib/utils/date";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { useNavigate, useParams } from "react-router";
 import { type CustomBtnProps } from "../../components/common/CustomBtn";
@@ -234,9 +231,7 @@ export function QuotesDetailsPage() {
         });
       }}
     >
-      <span
-        className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
-      >
+      <span className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth">
         {"More Action"}
       </span>
     </MoreOptionsPopup>,
@@ -251,9 +246,7 @@ export function QuotesDetailsPage() {
       shareAction={() => toggleShareBoxOpen(true)}
       downloadAction={handleQuoteDownload}
     >
-      <span
-        className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
-      >
+      <span className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth">
         {downloadQuoteMutation.isPending ? (
           <div className="flex justify-center items-center">
             {" "}

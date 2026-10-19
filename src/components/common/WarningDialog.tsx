@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { assets } from "@/assets/icons";
 import { XIcon } from "lucide-react";
 import { CustomBtn } from "./CustomBtn";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 
 export type WarningDialogProps = {
   open: boolean;

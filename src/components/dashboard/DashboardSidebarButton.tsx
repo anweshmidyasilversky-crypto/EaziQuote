@@ -30,7 +30,7 @@ export function DashboardSidebarButton({
       }}
       className={`rounded-[7px] cursor-pointer max-w-51 w-full md:w-51 min-h-10 flex py-2 px-3 pl-7 gap-3 ${currActive === id ? "bg-sidebar-btn " : ""} flex items-center translate-y-0!`}
     >
-      <img src={leftIcon} className="h-6 w-6" />
+      <img src={leftIcon} className="h-5.5 aspect-auto" />
       <span
         className={`font-sans text-[12px] md:text-[16px] h-4.75 max-w-30 min-h-6 hover:text-brand-dark ${currActive === id ? "text-white!" : "text-inactive-btn"} min-h-fit!`}
       >

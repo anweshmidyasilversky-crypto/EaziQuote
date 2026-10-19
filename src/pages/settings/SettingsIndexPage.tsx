@@ -5,7 +5,7 @@ import {
 } from "@/components/common/CustomHeader";
 import type { SettingsCardProps } from "@/components/settings/SettingsCard";
 import SettingsCard from "@/components/settings/SettingsCard";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { useRef, useState } from "react";
 import StripeAdvisoryDialog, {
   type StripeAdvisoryDialogProps,

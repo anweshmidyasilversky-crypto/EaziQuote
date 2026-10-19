@@ -27,7 +27,7 @@ import { updateUser } from "../../redux/slices/user.slice";
 import { toast } from "react-toastify";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { CustomCombobox } from "@/components/common/CustomCombobox";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import useUserMutations from "@/hooks/apis/user/useUserMutations";
 import { showErrorToast } from "@/api/axiosInstance";
 import { useNavigate } from "react-router";

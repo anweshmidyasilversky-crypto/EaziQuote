@@ -1,7 +1,7 @@
 import { showErrorToast } from "@/api/axiosInstance";
 import CustomDialog from "@/components/common/CustomDialog";
 import useStripeMutation from "@/hooks/apis/stripe/useStripeMutation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import React from "react";
 import { useLocation } from "react-router";
 

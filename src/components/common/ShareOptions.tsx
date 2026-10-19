@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
 import { XIcon } from "lucide-react";
 import { CustomBtn } from "./CustomBtn";
 import { toast } from "react-toastify";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 
 export enum ShareOptionType {
   quote = "quote",

@@ -12,7 +12,8 @@ import DatePicker from "@/components/common/DatePicker";
 import useClients from "@/hooks/apis/clients/useClients";
 import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 import useDepositQuotes from "@/hooks/apis/quotes/useDepositQuotes";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
+import { formatCurrency } from "@/lib/utils/helper";
 import { useAppSelector } from "@/redux/store";
 import type {
   CreatePaymentBase,

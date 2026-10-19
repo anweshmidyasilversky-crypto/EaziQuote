@@ -10,7 +10,7 @@ import type {
   PageFilters,
   UpdateClientApiPayload,
 } from "@/types/api.requests.type";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 import { API_ENDPOINTS } from "@/constants/endPoints";
 
 export const createClient = async (client: ClientCreateApiPayload) => {

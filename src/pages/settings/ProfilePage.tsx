@@ -7,7 +7,7 @@ import {
   CustomToggleGroup,
   type CustomToggleGroupProps,
 } from "@/components/common/CustomToggleGroup";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { updateUser } from "@/redux/slices/user.slice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import type { UserProfilePayload } from "@/types/userProfile.payload.type";

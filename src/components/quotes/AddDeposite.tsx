@@ -14,7 +14,8 @@ import {
   paymentMethodSchema,
   percentageSchema,
 } from "../../validation/addDeposite.payload.schema";
-import { cn, formatCurrency } from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
+import { formatCurrency } from "@/lib/utils/helper";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomBtn } from "../common/CustomBtn";
 import { PaymentMethods, StripAccountStatus } from "@/types/api.responses.type";

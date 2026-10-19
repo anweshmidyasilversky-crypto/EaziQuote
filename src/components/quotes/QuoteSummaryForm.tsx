@@ -12,7 +12,7 @@ import { type QuoteSummary } from "../../types/quoteCreation.payload.type";
 import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { updateQuote as updateQuoteRedux } from "../../redux/slices/quotes.slice";
 import { toast } from "react-toastify";
 import type { ClientCreationPayload } from "../../types/clientCreation.payload.type";

@@ -13,7 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import usePresetQuoteDetails from "@/hooks/apis/quotes/usePresetQuoteDetails";
 import usePresetQuoteMutations from "@/hooks/apis/quotes/usePresetQuoteMutations";
 import { useDebounce } from "@/hooks/useDebounce";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils/helper";
 import type { ItemDetails } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useState } from "react";

@@ -10,7 +10,7 @@ import { CustomCombobox } from "../common/CustomCombobox";
 import { useAppSelector } from "../../redux/store";
 import { CustomBtn } from "../common/CustomBtn";
 import { assets } from "../../assets/icons";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
 import AddCategoryForm from "./AddCategoryForm";
 import SubCategoryForm from "./SubCategoryForm";
 import { showErrorToast } from "@/api/axiosInstance";

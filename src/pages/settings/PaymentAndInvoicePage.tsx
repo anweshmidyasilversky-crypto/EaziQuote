@@ -6,7 +6,7 @@ import {
 import BankInfoForm from "@/components/settings/BankInfoForm";
 import BillingPreferenceForm from "@/components/settings/BillingPreferenceForm";
 import QuoteSettingsForm from "@/components/settings/QuoteSettingsForm";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { useAppSelector } from "@/redux/store";
 import {
   SettingsPaymentPageReason,

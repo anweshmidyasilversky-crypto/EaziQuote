@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { CustomSheet } from "../common/CustomSheet";
 import { CustomInput } from "../common/CustomInput";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { categorySchema } from "../../validation/itemCreation.payload.schema";
 import { useEffect } from "react";

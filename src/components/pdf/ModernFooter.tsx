@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/redux/store";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import type { SVGProps } from "react";
 
 function ModernFooter({ className, ...props }: SVGProps<SVGSVGElement>) {

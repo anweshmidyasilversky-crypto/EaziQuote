@@ -26,7 +26,7 @@ import {
   type BillingDetailsResponse,
 } from "@/types/api.responses.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 
 export const signup = async (payload: SignupPayload) => {
   try {

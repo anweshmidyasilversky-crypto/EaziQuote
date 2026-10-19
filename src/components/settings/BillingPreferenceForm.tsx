@@ -4,7 +4,7 @@ import { CustomCombobox } from "../common/CustomCombobox";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { billingPreferenceSchema } from "@/validation/billingPreference.payload.schema";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { CustomInput } from "../common/CustomInput";
 import { CustomBtn } from "../common/CustomBtn";
 import { useAppDispatch } from "@/redux/store";

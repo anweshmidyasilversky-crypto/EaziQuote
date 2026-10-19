@@ -3,7 +3,7 @@ import { assets } from "../../assets/icons";
 import MoreOptionsPopup from "../clients/MoreOptionsPopup";
 import useAdminMutation from "@/hooks/apis/admin/useAdminMutation";
 import { toast } from "react-toastify";
-import { saveToDevice } from "@/lib/utils";
+import { saveToDevice } from "@/lib/utils/helper";
 import { showErrorToast } from "@/api/axiosInstance";
 import { API_ENDPOINTS } from "@/constants/endPoints";
 import { BASE_URL } from "@/constants/urls";
@@ -83,9 +83,7 @@ function StyledAttachments({
         openFn={handleAttachmentShow}
         withDelete={withDelete}
       >
-        <div
-          className="cursor-pointer w-5 h-5 flex items-center"
-        >
+        <div className="cursor-pointer w-5 h-5 flex items-center">
           <img src={assets.moreIcon} className="w-3.75 h-0.75" />
         </div>
       </MoreOptionsPopup>

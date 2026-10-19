@@ -11,7 +11,7 @@ import {
   type InvoiceList,
   InvoiceStatus,
 } from "@/types/api.responses.type";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 
 export const getInvoiceList = async (pageFilters?: PageFilters) => {
   try {

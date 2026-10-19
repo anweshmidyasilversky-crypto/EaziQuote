@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils/helper";
+
 export type CheckboxConfig = {
   id: string;
   label: string;
@@ -30,13 +32,18 @@ export function RenderMultiSelectCheckbox({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4 mt-4">
+    <div
+      className={cn(
+        "gap-4 mt-4",
+        type === "multiple" ? `grid grid-cols-2` : `flex flex-col`,
+      )}
+    >
       {checkboxconfig.map((checkbox) => (
         <div key={checkbox.id} className="flex gap-2 min-h-5">
           <input
             id={checkbox.id}
             value={checkbox.value}
-            type="checkbox"
+            type={type === "multiple" ? "checkbox" : "radio"}
             className="roudned w-5 aspect-square"
             checked={selectedFilters?.includes(checkbox.value)}
             onChange={(e) => selectHandler(e.target.value)}

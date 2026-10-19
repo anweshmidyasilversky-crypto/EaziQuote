@@ -2,7 +2,8 @@ import { assets } from "@/assets/icons";
 import { CustomActionGroup } from "@/components/common/CustomActionGroup";
 import { CustomBtn } from "@/components/common/CustomBtn";
 import { CustomDataTable } from "@/components/common/CustomTable";
-import { dateToDdMonYyyy, formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils/helper";
+import { dateToDdMonYyyy } from "@/lib/utils/date";
 import {
   InvoiceStatus,
   PaymentTypes,

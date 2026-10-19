@@ -7,7 +7,7 @@ import ReadMoreContentBox from "./ReadMoreContentBox";
 import usePresetQuotesList from "@/hooks/apis/quotes/usePresetQuotesList";
 import CustomDialog from "./CustomDialog";
 import type React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { useAppDispatch } from "@/redux/store";
 import { removeQuote as removeQuoteRedux } from "@/redux/slices/quotes.slice";
 import { useNavigate } from "react-router";

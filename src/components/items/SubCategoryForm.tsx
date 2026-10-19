@@ -6,7 +6,7 @@ import { subCategorySchema } from "../../validation/itemCreation.payload.schema"
 import { CustomSheet } from "../common/CustomSheet";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/CustomInput";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
 import type { SubCategoryCreateApiPayload } from "@/types/api.requests.type";
 import useCategoriesList from "@/hooks/apis/categories/useCategoriesList";
 

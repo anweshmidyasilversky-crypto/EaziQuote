@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/CustomInput";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import type {
   QuoteSectionCreatePayload,

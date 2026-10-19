@@ -1,7 +1,7 @@
 import ReadMoreContentBox from "@/components/common/ReadMoreContentBox";
 import StyledAttachments from "../../components/common/StyledAttachments";
 import type { InvoiceDetails } from "@/types/api.responses.type";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 
 export type InvoiceDescriptionPageProps = {
   invoice: InvoiceDetails | undefined;

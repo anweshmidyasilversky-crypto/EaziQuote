@@ -10,7 +10,8 @@ import {
 } from "../../components/clients/ActivitySummary";
 import { type CustomBtnProps } from "../../components/common/CustomBtn";
 import { useMemo, useRef, useState } from "react";
-import { formatCurrency, formatDisplayDate } from "../../lib/utils";
+import { formatCurrency } from "../../lib/utils/helper";
+import { formatDisplayDate } from "@/lib/utils/date";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";

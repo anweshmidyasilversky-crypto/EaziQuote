@@ -4,7 +4,7 @@ import type {
   subCategoryUpdateApiPayload,
 } from "@/types/api.requests.type";
 import { axiosInstance } from "../axiosInstance";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 import {
   type ListResponse,
   type ApiResponse,

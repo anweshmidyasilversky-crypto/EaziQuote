@@ -7,7 +7,7 @@ import { Separator } from "../ui/separator";
 import { CustomBtn } from "../common/CustomBtn";
 import StyledAttachments from "../common/StyledAttachments";
 import { CustomCombobox } from "../common/CustomCombobox";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
 import { QuoteStatus, type InvoiceDetails } from "@/types/api.responses.type";

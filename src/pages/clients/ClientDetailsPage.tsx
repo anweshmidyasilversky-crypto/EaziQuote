@@ -19,11 +19,9 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { Separator } from "../../components/ui/separator";
 import MoreOptionsPopup from "../../components/clients/MoreOptionsPopup";
 import type { ClientEditPayload } from "../../types/clientEdit.payload.type";
-import {
-  formatCurrency,
-  formatDisplayDate,
-  getInitials,
-} from "../../lib/utils";
+import { formatCurrency } from "../../lib/utils/helper";
+import { getInitials } from "@/lib/utils/helper";
+import { formatDisplayDate } from "@/lib/utils/date";
 import { ClientDetailsPopup } from "../../components/clients/ClientDetailsPopup";
 import type { DefaultValues } from "react-hook-form";
 import { ClientForm } from "../../components/clients/ClientForm";
@@ -553,9 +551,7 @@ export function ClientDetailsPage() {
                 withContactInfo
                 deleteAction={() => toggleDeleteModalOpen((curr) => !curr)}
               >
-                <span
-                  className="flex items-center justify-center bg-[#F5F6FB] w-9 h-9 rounded-[10px] shrink-0 cursor-pointer"
-                >
+                <span className="flex items-center justify-center bg-[#F5F6FB] w-9 h-9 rounded-[10px] shrink-0 cursor-pointer">
                   <img
                     src={assets.moreIcon}
                     alt="More options"

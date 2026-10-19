@@ -44,7 +44,7 @@ export function UnverifiedEmail() {
 
           <div className="success-text-group">
             <h1 className="h-7.25 font-sans font-semibold text-[24px] leading-7.25 text-black-text flex-none text-center">
-              "Email Unverified"
+              {"Email Unverified"}
             </h1>
             <p className="h-4.25 font-sans font-normal text-[14px] leading-4.25 text-[#89909D] flex-none text-center">
               {email
@@ -61,7 +61,7 @@ export function UnverifiedEmail() {
                 disabled={isSendingLink}
                 onClick={handleResend}
               >
-                <span className="h-4.75 font-sans font-medium text-[16px] leading-4.75 text-white flex-none text-center">
+                <span className="h-4.75 flex justify-center items-center font-sans font-medium text-[16px] leading-4.75 text-white flex-none text-center">
                   {isSendingLink ? <Spinner /> : "Resend Verification Link"}
                 </span>
               </button>

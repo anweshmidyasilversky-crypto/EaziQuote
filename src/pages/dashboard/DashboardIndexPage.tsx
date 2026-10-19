@@ -7,11 +7,9 @@ import { CustomDataTable } from "../../components/common/CustomTable";
 import { KpiCard, type KpiCardProps } from "../../components/common/kpiCard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { NotificationCard } from "../../components/dashboard/notification.card";
-import {
-  formatCurrency,
-  formatDisplayDate,
-  formatOrdinalDate,
-} from "../../lib/utils";
+import { formatCurrency } from "../../lib/utils/helper";
+import { formatOrdinalDate } from "@/lib/utils/date";
+import { formatDisplayDate } from "@/lib/utils/date";
 
 import { type ColumnDef, type TableFeatures } from "@tanstack/react-table";
 import { ClientForm } from "../../components/clients/ClientForm";

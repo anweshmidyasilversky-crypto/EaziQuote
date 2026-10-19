@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { assets } from "../../assets/icons";
-import { getFormattedTimeDiff } from "../../lib/utils";
+import { getFormattedTimeDiff } from "@/lib/utils/date";
 import { Separator } from "../ui/separator";
 import { Spinner } from "../ui/spinner";
 import type { Notification } from "@/types/api.responses.type";

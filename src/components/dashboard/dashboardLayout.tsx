@@ -12,7 +12,7 @@ import { removeUser } from "@/redux/slices/user.slice";
 import { showErrorToast } from "@/api/axiosInstance";
 import { Spinner } from "../ui/spinner";
 import CustomDialog from "../common/CustomDialog";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { CircleArrowOutUpLeft, Menu, X } from "lucide-react";
 import { CustomBtn } from "../common/CustomBtn";
 import DeleteDialog from "../common/DeleteDialog";

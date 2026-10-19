@@ -1,10 +1,7 @@
 import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
-import {
-  applyPercentage,
-  calcMarginPercentage,
-  cn,
-  formatCurrency,
-} from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
+import { formatCurrency } from "@/lib/utils/helper";
+import { applyPercentage, calcMarginPercentage } from "@/lib/utils/math";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { Separator } from "../ui/separator";

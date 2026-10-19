@@ -12,7 +12,7 @@ import { Separator } from "../ui/separator";
 import ClassicBottom from "./ClassicBottom";
 import { useEffect, useState } from "react";
 import CustomDialog from "../common/CustomDialog";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { CustomBtn } from "../common/CustomBtn";
 import ModernHeader from "./ModernHeader";
 import ModernFooter from "./ModernFooter";

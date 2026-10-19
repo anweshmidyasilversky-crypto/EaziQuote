@@ -6,7 +6,7 @@ import { CustomInput } from "@/components/common/CustomInput";
 import { PostCodeSelectComboBox } from "@/components/common/PostCodeSelectComboBox";
 import { Separator } from "@/components/ui/separator";
 import useUserMutations from "@/hooks/apis/user/useUserMutations";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { updateCompany as updateCompanyRedux } from "@/redux/slices/user.slice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import type { BusinessAddressPayload } from "@/types/businessAddress.payload.type";

@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
 import { CustomCombobox } from "./CustomCombobox";
 import { useAppSelector } from "@/redux/store";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { CustomInput } from "./CustomInput";
 
 export type ContactSupportBoxProps = {

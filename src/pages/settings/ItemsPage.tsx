@@ -12,7 +12,7 @@ import ItemForm from "@/components/items/ItemForm";
 import { Spinner } from "@/components/ui/spinner";
 import useItemsList from "@/hooks/apis/items/useItemsList";
 import useItemsMutations from "@/hooks/apis/items/useItemsMutations";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils/helper";
 import type { ItemDetails } from "@/types/api.responses.type";
 import type { ItemCreationPayload } from "@/types/itemCreation.payload.type";
 import { type ItemEditPayload } from "@/types/itemEdit.payload.type";

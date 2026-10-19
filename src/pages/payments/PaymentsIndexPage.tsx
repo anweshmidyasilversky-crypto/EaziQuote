@@ -16,7 +16,8 @@ import {
 import StatusBadge from "@/components/common/StatusBadge";
 import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
 import usePaymentsList from "@/hooks/apis/payments/usePaymentsList";
-import { formatCurrency, formatDisplayDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils/helper";
+import { formatDisplayDate } from "@/lib/utils/date";
 import { PaymentStatus, type Payment } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useRef, useState } from "react";

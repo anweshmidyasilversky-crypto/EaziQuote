@@ -1,6 +1,7 @@
 import { CustomAvatar } from "./CustomAvatar";
 import { colorThemes } from "../../constants/colors";
-import { cn, getRandomIndex } from "../../lib/utils";
+import { cn } from "@/lib/utils/helper";
+import { getRandomIndex } from "../../lib/utils/math";
 import { useRender } from "@base-ui/react/use-render";
 
 export type ClientNameBadgeProps = {

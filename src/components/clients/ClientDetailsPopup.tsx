@@ -1,6 +1,6 @@
 import { XIcon } from "lucide-react";
 import { assets } from "../../assets/icons";
-import { getInitials } from "../../lib/utils";
+import { getInitials } from "../../lib/utils/helper";
 import {
   Dialog,
   DialogContent,

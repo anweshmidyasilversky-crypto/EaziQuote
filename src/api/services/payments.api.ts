@@ -12,7 +12,7 @@ import type {
   PageFilters,
 } from "@/types/api.requests.type";
 import { API_ENDPOINTS } from "@/constants/endPoints";
-import { ObjToFormData } from "@/lib/utils";
+import { ObjToFormData } from "@/lib/utils/helper";
 
 export const getPaymentListByClient = async (filters?: PageFilters) => {
   try {

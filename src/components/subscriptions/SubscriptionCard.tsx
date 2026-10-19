@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 import { SubsctiptionPeriodLabel } from "@/types/api.responses.type";
 import { Separator } from "../ui/separator";
 import { assets } from "@/assets/icons";

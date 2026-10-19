@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { discountSchema } from "@/validation/addDeposite.payload.schema";
 import { CustomInput } from "../common/CustomInput";
 import { CustomBtn } from "../common/CustomBtn";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helper";
 
 export type AddDiscountProps = {
   isOpen: boolean;
