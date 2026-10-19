@@ -555,7 +555,6 @@ export function ClientDetailsPage() {
               >
                 <span
                   className="flex items-center justify-center bg-[#F5F6FB] w-9 h-9 rounded-[10px] shrink-0 cursor-pointer"
-                  onClick={() => toggleMoreOptions((curr) => !curr)}
                 >
                   <img
                     src={assets.moreIcon}

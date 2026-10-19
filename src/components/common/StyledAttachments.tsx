@@ -85,7 +85,6 @@ function StyledAttachments({
       >
         <div
           className="cursor-pointer w-5 h-5 flex items-center"
-          onClick={() => toggleOpenMoreAction((curr) => !curr)}
         >
           <img src={assets.moreIcon} className="w-3.75 h-0.75" />
         </div>

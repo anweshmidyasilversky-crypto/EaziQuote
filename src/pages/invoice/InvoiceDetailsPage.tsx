@@ -179,7 +179,6 @@ export function InvoiceDetailsPage() {
     >
       <span
         className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
-        onClick={() => toggleMoreOptionsOpen((curr) => !curr)}
       >
         {"More Action"}
       </span>
@@ -197,7 +196,6 @@ export function InvoiceDetailsPage() {
     >
       <span
         className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth"
-        onClick={() => toggleShareExportPopup((curr) => !curr)}
       >
         {downloadInvoicePdfMutation.isPending ? (
           <div className="flex justify-center items-center">

@@ -57,6 +57,7 @@ function MoreOptionsPopup({
       <PopoverTrigger> {children} </PopoverTrigger>
       <PopoverContent
         className={`popup-theme flex flex-col gap-1  w-fit ring-0`}
+        animateOnClose={false}
         side={side ?? "bottom"}
         align={align ?? "start"}
         popoverTarget={popoverTarget}
