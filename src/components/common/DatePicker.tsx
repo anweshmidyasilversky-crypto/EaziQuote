@@ -72,6 +72,7 @@ function DatePicker({
                 if (value) {
                   setPickedDate(value);
                 }
+                toggleOpen(false);
               }}
               className="w-full h-full [&_table]:w-full [&_tr]:flex [&_tr]:justify-between [&_td]:flex-1 [&_th]:flex-1 [&_th]:text-center"
               disabled={{ before: new Date() }}

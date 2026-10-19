@@ -28,16 +28,6 @@ import { useRef, useState } from "react";
 import { useParams } from "react-router";
 import { toast } from "react-toastify";
 
-const formatDate = (dateString: string) => {
-  const [year, month, date] = dateString.split("-").map(Number);
-  const formatter = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  return formatter.format(new Date(year, month, date)).toLowerCase();
-};
-
 function PaymentsDetailsPage() {
   const params = useParams<{ id: string }>();
   const [shareModalOpen, toggleShareModalOpen] = useState(false);
@@ -171,7 +161,7 @@ function PaymentsDetailsPage() {
       ) : (
         <div className="flex flex-col gap-6 p-6">
           <CustomHeader
-            header={`Payment ID: ${paymentDetails?.id}`}
+            header={`Payment ID: PMT${paymentDetails?.id}`}
             btnConfigList={
               paymentDetails?.status === PaymentStatus.Received
                 ? []

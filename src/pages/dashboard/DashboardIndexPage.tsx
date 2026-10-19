@@ -41,6 +41,7 @@ import {
 import BankDetailsWarningModal from "@/components/common/BankDetailsWarningModal";
 import SignatureWarningModal from "@/components/common/SignatureWarningModal";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
+import QuoteCreateOptionsModal from "@/components/common/QuoteCreateOptionsModal";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
@@ -53,6 +54,8 @@ export function DashboardIndexPage() {
   const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
   const targetActivityType = useRef<ActivityType>(ActivityType.QUOTE);
   const targetId = useRef<number | undefined>(undefined);
+  const [quoteCreateOptionsOpen, setQuoteCreateOptionsOpen] =
+    useState<boolean>(false);
 
   const {
     data: homePage,
@@ -300,7 +303,7 @@ export function DashboardIndexPage() {
               leftIcon={assets.plusIcon}
               onClick={() => {
                 if (canUsercreateRecord()) {
-                  navigate(`/quotes/manage-quotes/`);
+                  setQuoteCreateOptionsOpen(true);
                 }
               }}
             />
@@ -403,6 +406,11 @@ export function DashboardIndexPage() {
         isOpen={subsEndWarningOpen}
         toggleOpen={setSubsEndWarningOpen}
         action={() => navigate(`/subscribe-plan`)}
+      />
+
+      <QuoteCreateOptionsModal
+        isOpen={quoteCreateOptionsOpen}
+        toggleOpen={setQuoteCreateOptionsOpen}
       />
     </div>
   );

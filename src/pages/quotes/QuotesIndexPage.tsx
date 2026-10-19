@@ -10,7 +10,7 @@ import {
 } from "../../components/clients/ActivitySummary";
 import { type CustomBtnProps } from "../../components/common/CustomBtn";
 import { useMemo, useRef, useState } from "react";
-import { cn, formatCurrency, formatDisplayDate } from "../../lib/utils";
+import { formatCurrency, formatDisplayDate } from "../../lib/utils";
 import { CustomActionGroup } from "../../components/common/CustomActionGroup";
 import StatusBadge from "../../components/common/StatusBadge";
 import { CustomDataTable } from "../../components/common/CustomTable";
@@ -29,23 +29,14 @@ import {
 import { CustomHeader } from "../../components/common/CustomHeader";
 import { useNavigate } from "react-router";
 import React from "react";
-import CustomDialog from "../../components/common/CustomDialog";
-import type {
-  PresetQuoteListing,
-  Quote,
-  QuoteStatus,
-} from "@/types/api.responses.type";
+import type { Quote, QuoteStatus } from "@/types/api.responses.type";
 import type { PageFilters } from "@/types/api.requests.type";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
-import usePresetQuotesList from "@/hooks/apis/quotes/usePresetQuotesList";
-import { useAppDispatch, useAppSelector } from "@/redux/store";
-import { removeQuote as removeQuoteRedux } from "@/redux/slices/quotes.slice";
+import { useAppSelector } from "@/redux/store";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
-import ReadMoreContentBox from "@/components/common/ReadMoreContentBox";
-import type { CreateQuotePageLocationProps } from "./CreateQuotePage";
 import {
   SettingsPaymentPageReason,
   type SettingsLocationProps,
@@ -53,6 +44,7 @@ import {
 import BankDetailsWarningModal from "@/components/common/BankDetailsWarningModal";
 import SignatureWarningModal from "@/components/common/SignatureWarningModal";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
+import QuoteCreateOptionsModal from "@/components/common/QuoteCreateOptionsModal";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
@@ -63,15 +55,14 @@ export function QuotesIndexPage() {
     endDate: undefined,
   });
   const [filters, setFilters] = useState<string[]>([]);
-  const [quoteDialogOpen, toggleQuoteDialogOpen] = useState(false);
-  const [presetSelectionOpen, togglePresetSelectionOpen] = useState(false);
   const pageFilters = useRef<PageFilters>({});
-  const dispatch = useAppDispatch();
   const [deleteModalOpen, toggleDeleteModal] = useState(false);
   const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
   const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
   const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
   const targetQuoteId = useRef<number | undefined>(undefined);
+  const [quoteCreateOptionsOpen, setQuoteCreateOptionsOpen] =
+    useState<boolean>(false);
 
   const {
     quoteList,
@@ -85,15 +76,6 @@ export function QuotesIndexPage() {
   } = useQuoteList({
     filters: pageFilters.current,
   });
-
-  const {
-    presetQuoteList: presetQuotes,
-    isFetching: isPresetQuoteFetching,
-    setPageNo: setPresetPageNo,
-    searchTerm: presetSearchTerm,
-    setSearchTerm: setPresetSearchTerm,
-    paginationMeta: presetQuotePaginationMeta,
-  } = usePresetQuotesList();
 
   const { quoteDeleteMutation } = useQuotesMutations();
 
@@ -217,53 +199,6 @@ export function QuotesIndexPage() {
     [],
   );
 
-  const [selectedPreset, setSelectedPreset] = useState<number>();
-
-  const presetQuotesColumns = [
-    {
-      id: "action",
-      header: "ACTION",
-      cell: (info) => (
-        <input
-          type="radio"
-          multiple
-          value={info.row.original.id}
-          checked={info.row.original.id === selectedPreset}
-          onChange={(e) => {
-            setSelectedPreset(Number(e.target.value));
-          }}
-        />
-      ),
-      enableSorting: false,
-    },
-
-    {
-      accessorKey: "name",
-      header: "TEMPLATE NAME",
-      enableSorting: false,
-    },
-
-    {
-      accessorKey: "items_count",
-      header: "ITEMS",
-      enableSorting: false,
-    },
-
-    {
-      accessorKey: "description",
-      header: "Description",
-      cell: (info) => {
-        const desc = info.getValue<string>();
-        return (
-          <ReadMoreContentBox lines={4} contentBoxCls="bg-transparent!">
-            <span className="text-wrap">{desc}</span>
-          </ReadMoreContentBox>
-        );
-      },
-      enableSorting: false,
-    },
-  ] as ColumnDef<TableFeatures, PresetQuoteListing>[];
-
   const checkboxConfig: CheckboxConfig = useMemo(
     () => [
       { id: "draft", label: "Draft", value: "draft" },
@@ -294,7 +229,7 @@ export function QuotesIndexPage() {
           setSubsEndWarningOpen(true);
           return;
         }
-        toggleQuoteDialogOpen((curr) => !curr);
+        setQuoteCreateOptionsOpen(true);
       },
     },
   ];
@@ -314,14 +249,6 @@ export function QuotesIndexPage() {
     } else {
       toast.error(`No Quote Selected to delete`);
     }
-  };
-
-  const handlePresetQuoteSelect = () => {
-    navigate(`/quotes/manage-quotes/`, {
-      state: {
-        presetQuoteId: selectedPreset,
-      } as CreateQuotePageLocationProps,
-    });
   };
 
   return (
@@ -407,82 +334,10 @@ export function QuotesIndexPage() {
         </CustomSheet>
       </div>
 
-      {/* Dialog to choose between track from scratch or with preset */}
-      <CustomDialog
-        dialogOpen={quoteDialogOpen}
-        toggleDialogOpen={toggleQuoteDialogOpen}
-        header="Create a New Quote"
-        headerCls={cn(`border-0!`)}
-      >
-        <div className="flex flex-col gap-6 py-5 mt-6 max-w-125! max-md:min-w-[80vw]">
-          <span className="text-sm text-placeholder-text px-5 min-h-8.5">
-            {" "}
-            {
-              "Choose how you'd like to begin. You can start fresh and build your quote step by step, or save time by using one of your preset quote templates."
-            }{" "}
-          </span>
-
-          <div className="flex gap-4 justify-center px-5">
-            <div
-              className="bg-custom-dialog-primary flex flex-col items-center min-w-55 gap-4 rounded-lg py-4 cursor-pointer max-md:min-w-[30vw]"
-              onClick={() => {
-                dispatch(removeQuoteRedux());
-                navigate(`/quotes/manage-quotes/`);
-              }}
-            >
-              <img src={assets.pencilFilledIcon} className="w-8 h-8" />
-              <span className="max-md:text-[12px]">
-                {" "}
-                {"Start from Scratch"}{" "}
-              </span>
-            </div>
-
-            <div
-              className="bg-custom-dialog-primary flex flex-col items-center min-w-55 rounded-lg gap-4 py-4 cursor-pointer max-md:min-w-[30vw]"
-              onClick={() => togglePresetSelectionOpen((curr) => !curr)}
-            >
-              <img src={assets.thunderBoltIcon} className="w-8 h-8" />
-              <span className="max-md:text-[12px]"> {"Use Preset Quote"} </span>
-            </div>
-          </div>
-        </div>
-      </CustomDialog>
-
-      {/* Preset Quote Selection Table */}
-      <CustomDialog
-        dialogOpen={presetSelectionOpen}
-        toggleDialogOpen={togglePresetSelectionOpen}
-        header="Select Preset Quote"
-        withFooter
-        footerBtnLabel="Continue"
-        footerBtnAction={() => {
-          handlePresetQuoteSelect();
-        }}
-        closeAction={() => {
-          if (selectedPreset) {
-            setSelectedPreset(undefined);
-          }
-        }}
-      >
-        <div className="lg:min-w-250 flex flex-col gap-4.5 mt-6 max-h-120 overflow-y-auto">
-          <div className="px-5">
-            <SearchInputGruop
-              searchTerm={presetSearchTerm}
-              setSearchTerm={setPresetSearchTerm}
-              searchPlaceHolder="Search preset quotes"
-            />
-          </div>
-          <CustomDataTable
-            columns={presetQuotesColumns}
-            data={presetQuotes}
-            showPaginated
-            paginationMeta={presetQuotePaginationMeta}
-            paginationBtns={presetQuotePaginationMeta?.links}
-            setPageNo={setPresetPageNo}
-            isFetching={isPresetQuoteFetching}
-          />
-        </div>
-      </CustomDialog>
+      <QuoteCreateOptionsModal
+        isOpen={quoteCreateOptionsOpen}
+        toggleOpen={setQuoteCreateOptionsOpen}
+      />
 
       <DeleteDialog
         isOpen={deleteModalOpen}

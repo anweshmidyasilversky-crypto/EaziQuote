@@ -60,7 +60,6 @@ import { ShareOptions } from "@/components/common/ShareOptions";
 import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
-import type { CreateQuotePageLocationProps } from "../quotes/CreateQuotePage";
 import type { PaymentCreatePageLocationProps } from "../payments/PaymentCreatePage";
 import {
   SettingsPaymentPageReason,
@@ -71,6 +70,7 @@ import BankDetailsWarningModal from "@/components/common/BankDetailsWarningModal
 import SignatureWarningModal from "@/components/common/SignatureWarningModal";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 import { Spinner } from "@/components/ui/spinner";
+import QuoteCreateOptionsModal from "@/components/common/QuoteCreateOptionsModal";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
@@ -103,6 +103,8 @@ export function ClientDetailsPage() {
   const targetQuoteId = useRef<number | undefined>(undefined);
   const targetInvoiceId = useRef<number | undefined>(undefined);
   const currActivityType = useRef<ActivityType>(ActivityType.QUOTE);
+  const [quoteCreateOptionsOpen, setQuoteCreateOptionsOpen] =
+    useState<boolean>(false);
 
   const {
     clientDetails: client,
@@ -601,11 +603,7 @@ export function ClientDetailsPage() {
                         setSubsEndWarningOpen(true);
                         return;
                       }
-                      navigate(`/quotes/manage-quotes/`, {
-                        state: {
-                          defaultClient: client,
-                        } as CreateQuotePageLocationProps,
-                      });
+                      setQuoteCreateOptionsOpen(true);
                     } else {
                       navigate(`/payments/record-payment`, {
                         state: {
@@ -783,6 +781,12 @@ export function ClientDetailsPage() {
           <Spinner className="text-brand-dark size-8" />
         </div>
       )}
+
+      <QuoteCreateOptionsModal
+        isOpen={quoteCreateOptionsOpen}
+        toggleOpen={setQuoteCreateOptionsOpen}
+        defaultClient={client}
+      />
     </>
   );
 }

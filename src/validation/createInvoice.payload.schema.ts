@@ -17,11 +17,14 @@ export const createInvoiceSchema: yup.ObjectSchema<InvoiceCreateApiPayload> =
     attachments: attachmentsSchema,
     notes: yup.string().optional(),
     template: yup.mixed<DocumentTemplate>().optional(),
-    categorised: yup.mixed<DocumentCategories>().optional(),
+    categorised: yup.mixed<keyof typeof DocumentCategories>().optional(),
     is_company_phone_number_show: yup.boolean().optional(),
   });
 
 export const itemDetailsListSchema: yup.ObjectSchema<{ items: ItemDetails[] }> =
   yup.object({
-    items: yup.array<ItemDetails>().required(emptyMsg("Item")),
+    items: yup
+      .array<ItemDetails>()
+      .required(emptyMsg("Item"))
+      .min(1, `At least one item should be selected`),
   });
