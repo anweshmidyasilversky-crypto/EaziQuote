@@ -4,6 +4,7 @@ import {
   type ListResponse,
   type Payment,
   type PaymentLinkResponse,
+  type PaymentCreateResponse,
 } from "@/types/api.responses.type";
 import { axiosInstance } from "../axiosInstance";
 import type {
@@ -55,10 +56,9 @@ export const createPayment = async (
   payload: CreatePaymentDeposit | CreatePaymentInvoice,
 ) => {
   try {
-    const response = await axiosInstance.post<ApiResponse<Payment>>(
-      API_ENDPOINTS.payments.createPayment,
-      ObjToFormData(payload),
-    );
+    const response = await axiosInstance.post<
+      ApiResponse<PaymentCreateResponse>
+    >(API_ENDPOINTS.payments.createPayment, ObjToFormData(payload));
     return response.data;
   } catch (error) {
     throw error;

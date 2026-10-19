@@ -819,3 +819,18 @@ export interface PaymentLinkResponse {
   client_email: string;
   payment_link_url: string;
 }
+
+export enum InvoicePaymentStatus {
+  settled = "settled",
+  partially_settled = "partially_settled",
+}
+
+export interface PaymentCreateResponse {
+  amount_due: number;
+  deposit_adjustments: { deposit_id: number; amount: number }[];
+  amount: number;
+  deposit_id: number;
+  deposit_covered: number;
+  invoice_status: keyof typeof InvoicePaymentStatus;
+  payment: Payment;
+}

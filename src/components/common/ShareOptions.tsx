@@ -30,6 +30,8 @@ export type ShareOptionsProps = {
   type?: ShareOptionType;
   appId?: string | number;
   title?: string;
+  navigateTo?: string;
+  onClose?: () => void;
 };
 
 type sharOptions = {
@@ -50,7 +52,15 @@ export function ShareOptions({
   title,
   paymentLink,
   type = ShareOptionType.quote,
+  onClose,
 }: ShareOptionsProps) {
+  const handleOpenChange = (open: boolean) => {
+    toggleIsOpen(open);
+    if (!open && isOpen) {
+      onClose?.();
+    }
+  };
+
   let shareMessage = "";
   switch (type) {
     case ShareOptionType.quote:
@@ -125,7 +135,7 @@ export function ShareOptions({
     },
   ];
   return (
-    <Dialog open={isOpen} onOpenChange={toggleIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className={`ring-0 w-fit! bg-white p-0 min-w-[80vw] md:min-w-125 flex flex-col`}
         showCloseButton={false}
@@ -135,7 +145,7 @@ export function ShareOptions({
             <span className="font-medium text-sm"> Share </span>
             <XIcon
               className="text-muted hover:text-black-text"
-              onClick={() => toggleIsOpen(false)}
+              onClick={() => handleOpenChange(false)}
             />
           </div>
         </DialogHeader>

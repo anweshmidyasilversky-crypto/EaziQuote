@@ -1,4 +1,4 @@
-import { emptyMsg, minLengthMsg, notSelectedMsg } from "@/constants/messages";
+import { emptyMsg, notSelectedMsg } from "@/constants/messages";
 import type {
   CreatePaymentBase,
   CreatePaymentDeposit,
@@ -19,7 +19,7 @@ export const paymentSchemaBase: yup.ObjectSchema<
 const amountSchema = yup
   .number()
   .required(emptyMsg("Amount"))
-  .min(1, minLengthMsg("Amount", 1));
+  .min(1, `Amount must be at least 1`);
 
 const amountTypeSchema = yup
   .mixed<PaymentAmountType>()

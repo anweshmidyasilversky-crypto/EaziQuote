@@ -32,7 +32,7 @@ import {
 } from "@/types/api.responses.type";
 import { paymentSchemaBase } from "@/validation/createPaymentApi.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import StripeAdvisoryDialog from "../settings/StripeAdvisoryDialog";
 import { Separator } from "@/components/ui/separator";
@@ -42,6 +42,10 @@ import usePaymentMutations from "@/hooks/apis/payments/usePaymentMutations";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router";
 import { showErrorToast } from "@/api/axiosInstance";
+import {
+  ShareOptions,
+  ShareOptionType,
+} from "@/components/common/ShareOptions";
 
 export type PaymentCreatePageLocationProps = {
   paymentType?: PaymentTypes;
@@ -52,10 +56,13 @@ export type PaymentCreatePageLocationProps = {
 function PaymentCreatePage() {
   const user = useAppSelector((state) => state.user);
   const location = useLocation();
+  const paymentIdRef = useRef<number | undefined>(undefined);
+  const [shareOptionsOpen, setShareOptionsOpen] = useState<boolean>(false);
   const { paymentType, invoice, prefillClient } = (location.state ??
     {}) as PaymentCreatePageLocationProps;
   const navigate = useNavigate();
-  const { createPaymentMutation } = usePaymentMutations();
+  const { createPaymentMutation, paymentLinkShareMutation } =
+    usePaymentMutations();
   const [clientId, setClientId] = useState<number | undefined>(undefined);
   const [selectedQuote, setSetelectedQuote] = useState<
     DepositQuote | undefined
@@ -63,6 +70,8 @@ function PaymentCreatePage() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(
     undefined,
   );
+  const clientEmailRef = useRef<string | undefined>(undefined);
+  const paymentLinkRef = useRef<string | undefined>(undefined);
   const [stripDialogOpen, toggleStripDialogOpen] = useState(false);
   const [warningOpen, toggleWarningOpen] = useState(false);
   const [activeToggle, setActiveToggle] = useState<string>(
@@ -164,11 +173,38 @@ function PaymentCreatePage() {
   }, [paymentMethod]);
 
   const submitBtnAction = () => {
+    if (activeToggle === PaymentTypes.deposite) {
+      if (!selectedQuote) {
+        toast.error(`For Deposit client and quote both must be selected`);
+        return;
+      }
+      if (selectedQuote && !selectedQuote.deposit_amount) {
+        toast.error(`Deposit amount should be greater than 0`);
+        return;
+      }
+    }
     if (paymentMethod === PaymentMethods.cash) {
       toggleWarningOpen(true);
     } else {
       handleSubmit(handlePaymentCreate)();
     }
+  };
+
+  const sendPaymentLink = () => {
+    if (!paymentIdRef.current) {
+      toast.error(`No payment link set to be shared`);
+      return;
+    }
+    paymentLinkShareMutation.mutate(paymentIdRef.current, {
+      onSuccess: (response) => {
+        toast.success(response.message);
+        setShareOptionsOpen(false);
+        navigate(`/payments`);
+      },
+      onError: (error) => {
+        showErrorToast(error);
+      },
+    });
   };
 
   const handlePaymentCreate = (
@@ -207,7 +243,26 @@ function PaymentCreatePage() {
     createPaymentMutation.mutate(payload, {
       onSuccess: (response) => {
         toast.success(response.message);
-        navigate(`/payments`);
+        if (
+          activeToggle === PaymentTypes.invoice &&
+          paymentMethod === PaymentMethods.stripe
+        ) {
+          clientEmailRef.current = response.payload.payment.client_email;
+          paymentIdRef.current = response.payload.payment.id;
+          paymentLinkRef.current =
+            response.payload.payment.stripe_payment_link_url ??
+            response.payload.payment.payment_link_url;
+          if (!clientEmailRef.current) {
+            toast.error(`Client Email not set`);
+            return;
+          } else if (!paymentLinkRef.current) {
+            toast.error(`Payment link not found`);
+            return;
+          }
+          setShareOptionsOpen(true);
+        } else {
+          navigate(`/payments`);
+        }
       },
       onError: (error) => {
         showErrorToast(error);
@@ -226,9 +281,6 @@ function PaymentCreatePage() {
     }
   }, [location.state]);
 
-  useEffect(() => {
-    console.log(selectedInvoice);
-  }, [selectedInvoice]);
   return (
     <div className="p-6 flex flex-col gap-6">
       <CustomHeader header="Record Payment" btnConfigList={[]} />
@@ -384,6 +436,7 @@ function PaymentCreatePage() {
                   }
                 }
               }}
+              selectedDate={new Date(paymentDate)}
               errorMsg={errors?.payment_date?.message}
             />
 
@@ -394,7 +447,7 @@ function PaymentCreatePage() {
                 fieldName="Method"
                 placeholder="Select a input method"
                 inptType="select"
-                disabled
+                disabled={activeToggle === PaymentTypes.deposite}
                 selectOptions={paymentMethodSelectOptions}
                 className="py-0! disabled:text-black-text"
               />
@@ -483,6 +536,17 @@ function PaymentCreatePage() {
         warningContent="By continuing, you confirm that the payment has already been received. This action will only record the payment in the system. Once recorded, it cannot be reversed or edited."
         acceptAction={handleSubmit(handlePaymentCreate)}
         isAccepting={createPaymentMutation.isPending}
+      />
+
+      <ShareOptions
+        isOpen={shareOptionsOpen}
+        toggleIsOpen={setShareOptionsOpen}
+        type={ShareOptionType.payment}
+        paymentLink={paymentLinkRef.current}
+        clientEmail={clientEmailRef.current ?? ""}
+        onClose={() => navigate(`/payments`)}
+        sendEmailAction={sendPaymentLink}
+        isEmailSending={paymentLinkShareMutation.isPending}
       />
     </div>
   );
