@@ -28,6 +28,10 @@ export type InvoiceSummaryFormProps = {
   setSummaryPreview?: React.Dispatch<
     React.SetStateAction<Partial<InvoiceCreateApiPayload>>
   >;
+  setJobDescriptionPreview?: React.Dispatch<
+    React.SetStateAction<string | undefined>
+  >;
+  setRefNoPreview?: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
 function InvoiceSummaryForm({
@@ -36,6 +40,8 @@ function InvoiceSummaryForm({
   submitAction,
   prefillQuoteId,
   setSummaryPreview,
+  setJobDescriptionPreview,
+  setRefNoPreview,
 }: InvoiceSummaryFormProps) {
   const navigate = useNavigate();
 
@@ -222,6 +228,8 @@ function InvoiceSummaryForm({
           }),
       ),
     );
+    setJobDescriptionPreview?.(quote.job_description);
+    setRefNoPreview?.(quote.reference_number);
   }, [quote]);
 
   useEffect(() => {

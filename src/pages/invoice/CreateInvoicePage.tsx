@@ -49,6 +49,12 @@ export function CreateInvoicePage() {
     Partial<InvoiceCreateApiPayload>
   >({});
   const [previewItems, setPreviewItems] = useState<ItemDetails[]>([]);
+  const [jobDescriptionPreview, setJobDescriptionPreview] = useState<
+    string | undefined
+  >(undefined);
+  const [refNoPreview, setRefNoPreview] = useState<string | undefined>(
+    undefined,
+  );
 
   const {
     invoiceDetails,
@@ -160,6 +166,8 @@ export function CreateInvoicePage() {
                       }}
                       prefillQuoteId={quoteId}
                       setSummaryPreview={setSummaryPreview}
+                      setJobDescriptionPreview={setJobDescriptionPreview}
+                      setRefNoPreview={setRefNoPreview}
                     />
                   )}
                   {formCurrSection === toggleId.Items && (
@@ -177,7 +185,7 @@ export function CreateInvoicePage() {
                 invoiceDetails?.template ?? DocumentTemplate.classic
               }
               section={formCurrSection as PreviewPropsSection}
-              quoteRefNo={invoiceDetails?.quote.reference_number}
+              quoteRefNo={refNoPreview}
               client={invoiceDetails?.client}
               issueDate={previewDateFormatter(
                 new Date(summaryPreview.invoice_date ?? new Date()),
@@ -187,6 +195,7 @@ export function CreateInvoicePage() {
               )}
               showCompanyNumber={!summaryPreview.is_company_phone_number_show}
               items={previewItems}
+              jobDescription={jobDescriptionPreview}
             />
           </div>
         </div>

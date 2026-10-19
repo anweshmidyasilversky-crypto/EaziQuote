@@ -15,7 +15,7 @@ const initialState: QuoteDetails = {
   deposit_type: null,
   deposit_amount: null,
   deposit_percentage: null,
-  categorised: DocumentCategories.byItem,
+  categorised: DocumentCategories["by-item"],
   template: DocumentTemplate.classic,
   notes: "",
   job_description: "",

@@ -221,7 +221,7 @@ function ItemSelectForm({
       },
       cell: (cell) => {
         const item = cell.row.original;
-        const { id: itemId, price } = item;
+        const { id: itemId } = item;
         return (
           <CustomBtn
             className="bg-transparent! btn-auth border border-brand-dark text-black-text w-25!"

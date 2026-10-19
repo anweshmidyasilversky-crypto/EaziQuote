@@ -138,9 +138,7 @@ export enum QuoteStatus {
   approved = "approved",
   sent = "sent",
   draft = "draft",
-  accepted = "accepted",
   completed = "completed",
-  paid = "paid",
   rejected = "rejected",
   cancelled = "cancelled",
 }

@@ -228,14 +228,9 @@ export function DashboardIndexPage() {
     {
       title: "Quotes Accepted ",
       titleExtra: "(Last 30 Days)",
-      value: formatCurrency(
-        homePage?.payload.recentActivities.reduce(
-          (acc, activity) =>
-            acc +
-            Number(activity.type === "quote" && activity.status === "accepted"),
-          0,
-        ) ?? 0,
-      ),
+      value:
+        homePage?.payload.financialSummary.quotes_accepted_not_invoiced?.toString() ??
+        "",
       kpiIcon: assets.invoiceColored,
       iconCls: "bg-transparent-royal-blue",
       onClick: () => navigate(`/quotes`),
