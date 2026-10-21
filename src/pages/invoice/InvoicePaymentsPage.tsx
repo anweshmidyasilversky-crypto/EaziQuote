@@ -24,7 +24,7 @@ function InvoicePaymentsPage({ invoice }: InvoicePaymentsPageProps) {
   const navigate = useNavigate();
 
   const { invoiceList, isFetching } = useInvoiceList({
-    enabled: invoice !== undefined,
+    enabled: invoice !== undefined && invoice.status !== InvoiceStatus.paid,
     initialSearchTerm: invoice?.invoice_number,
   });
 
