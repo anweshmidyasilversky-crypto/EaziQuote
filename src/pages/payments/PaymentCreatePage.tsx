@@ -273,9 +273,10 @@ function PaymentCreatePage() {
   useEffect(() => {
     if (invoice) {
       setSelectedInvoice(invoice);
-      setInvoiceSearchTerm(`${invoice.reference_number} - ${invoice.title}`);
+      setInvoiceSearchTerm(`${invoice?.reference_number} - ${invoice?.title}`);
     }
     if (prefillClient) {
+      console.log(prefillClient);
       setClientId(prefillClient.id);
       setClientSearchTerm(prefillClient.name);
     }
@@ -285,12 +286,14 @@ function PaymentCreatePage() {
     if (activeToggle === PaymentTypes.deposite) {
       setValue("payment_method", PaymentMethods.cash);
     }
-    setQuoteSearchTerm("");
-    setClientSearchTerm("");
-    setInvoiceSearchTerm("");
-    setSelectedInvoice(undefined);
-    setSetelectedQuote(undefined);
-    setClientId(undefined);
+    if (activeToggle !== paymentType) {
+      setQuoteSearchTerm("");
+      setClientSearchTerm("");
+      setInvoiceSearchTerm("");
+      setSelectedInvoice(undefined);
+      setSetelectedQuote(undefined);
+      setClientId(undefined);
+    }
   }, [activeToggle]);
 
   return (

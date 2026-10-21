@@ -31,7 +31,6 @@ import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import { formatCurrency } from "@/lib/utils/helper";
 import { dateToDdMonYyyy } from "@/lib/utils/date";
-import { useAppSelector } from "@/redux/store";
 import { type PageFilters } from "@/types/api.requests.type";
 import { InvoiceStatus, type Invoice } from "@/types/api.responses.type";
 import {
@@ -42,10 +41,10 @@ import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import useHasSubscription from "@/hooks/useHasSubscription";
 
 function InvoiceIndexPage() {
   const navigate = useNavigate();
-  const user = useAppSelector((state) => state.user);
   const [filterSheetOpen, toggleFilterSheetOpen] = useState(false);
   const [filters, selectFilters] = useState<string[]>([]);
   const selectedFilters = useRef<PageFilters | undefined>(undefined);
@@ -54,9 +53,17 @@ function InvoiceIndexPage() {
     endDate: undefined,
   });
   const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
-  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
-  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
-  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
+
+  const {
+    signatureWarningOpen,
+    setSignatureWarningOpen,
+    bankdetailsWarningOpen,
+    setBankdetailsWarningOpen,
+    subsEndWarningOpen,
+    setSubsEndWarningOpen,
+    checkCanCreateRecord,
+  } = useHasSubscription();
+
   const {
     invoiceList,
     InvoiceSummary,
@@ -76,19 +83,9 @@ function InvoiceIndexPage() {
       buttonLabel: "Invoice",
       leftIcon: assets.plusIcon,
       onClick: () => {
-        if (!user.hasBankAccountDetailAdded) {
-          setAddBankDetailsDialog(true);
-          return;
+        if (checkCanCreateRecord()) {
+          navigate(`/invoices/manage-invoice`);
         }
-        if (!user.hasSignatureAdded) {
-          setAddSignatureWarningOpen(true);
-          return;
-        }
-        if (!(user.is_trial_period || user.is_subscription_active)) {
-          setSubsEndWarningOpen(true);
-          return;
-        }
-        navigate(`/invoices/manage-invoice`);
       },
     },
   ];
@@ -194,11 +191,9 @@ function InvoiceIndexPage() {
           <CustomActionGroup
             openFn={() => navigate(`/invoices/${id}`)}
             editFn={() => {
-              if (!(user.is_trial_period || user.is_subscription_active)) {
-                setSubsEndWarningOpen(true);
-                return;
+              if (checkCanCreateRecord()) {
+                navigate(`/invoices/manage-invoice/${id}`);
               }
-              navigate(`/invoices/manage-invoice/${id}`);
             }}
             withEdit={is_editable}
             withDelete={is_editable}
@@ -321,14 +316,14 @@ function InvoiceIndexPage() {
       </>
 
       <BankDetailsWarningModal
-        isOpen={addBankDetailsDialog}
-        toggleOpen={setAddBankDetailsDialog}
+        isOpen={bankdetailsWarningOpen}
+        toggleOpen={setBankdetailsWarningOpen}
         action={() => navigate(`/settings/payments-and-invoicing`)}
       />
 
       <SignatureWarningModal
-        isOpen={addSignatureWarningOpen}
-        toggleOpen={setAddSignatureWarningOpen}
+        isOpen={signatureWarningOpen}
+        toggleOpen={setSignatureWarningOpen}
         action={() =>
           navigate(`/settings/payments-and-invoicing`, {
             state: {

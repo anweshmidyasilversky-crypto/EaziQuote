@@ -1,11 +1,14 @@
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { formatCurrency } from "../../lib/utils/helper";
 import { getInitials } from "@/lib/utils/helper";
 import { formatDisplayDate } from "@/lib/utils/date";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
 import { useNavigate, useParams } from "react-router";
-import { type CustomBtnProps } from "../../components/common/CustomBtn";
+import {
+  CustomBtn,
+  type CustomBtnProps,
+} from "../../components/common/CustomBtn";
 import { assets } from "../../assets/icons";
 import { CustomHeader } from "../../components/common/CustomHeader";
 import {
@@ -43,6 +46,9 @@ import InvoicePaymentsPage from "./InvoicePaymentsPage";
 import { useAppSelector } from "@/redux/store";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
+import useHasSubscription from "@/hooks/useHasSubscription";
+import CustomDialog from "@/components/common/CustomDialog";
+import { XIcon } from "lucide-react";
 
 export function InvoiceDetailsPage() {
   const { setDiscount, setVat, setPaymentMethod } = useSubtotalFields();
@@ -62,7 +68,10 @@ export function InvoiceDetailsPage() {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const [invoicePreviewOpen, toggleinvoicePreviewOpen] = useState(false);
   const [shareExportPopupOpen, toggleShareExportPopup] = useState(false);
-  const [subscriptionWarningOpen, setSubsEndWarningOpen] = useState(false);
+
+  const { subsEndWarningOpen, setSubsEndWarningOpen, checkCanCreateRecord } =
+    useHasSubscription();
+  const [confirmPaymentModalOpen, setConfirmPaymentModalOpen] = useState(false);
 
   const {
     invoiceStatusMutation,
@@ -168,10 +177,8 @@ export function InvoiceDetailsPage() {
       togglePopupOpen={toggleMoreOptionsOpen}
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
       editAction={() => {
-        if (user.is_subscription_active || user.is_trial_period) {
+        if (checkCanCreateRecord()) {
           navigate(`/invoices/manage-invoice/${params?.id}`);
-        } else {
-          setSubsEndWarningOpen(true);
         }
       }}
     >
@@ -225,15 +232,22 @@ export function InvoiceDetailsPage() {
     });
   };
 
-  const handleStatusUpdate = (status: InvoiceStatus) => {
+  const nextStatusRef = useRef<InvoiceStatus | undefined>(undefined);
+
+  const updateStatus = () => {
+    if (!nextStatusRef.current) {
+      toast.error(`No status selected to update`);
+      return;
+    }
     invoiceStatusMutation.mutate(
       {
-        status,
+        status: nextStatusRef.current,
         invoice_id: params.id,
       },
       {
         onSuccess: (response) => {
           toast.success(response.message);
+          setConfirmPaymentModalOpen(false);
           refetch();
         },
         onError: (error) => {
@@ -241,6 +255,11 @@ export function InvoiceDetailsPage() {
         },
       },
     );
+  };
+
+  const handleStatusUpdate = (status: InvoiceStatus) => {
+    setConfirmPaymentModalOpen(true);
+    nextStatusRef.current = status;
   };
 
   const handleInvoiceEmail = () => {
@@ -505,10 +524,46 @@ export function InvoiceDetailsPage() {
       </div>
 
       <SubscriptionWarningModal
-        isOpen={subscriptionWarningOpen}
+        isOpen={subsEndWarningOpen}
         toggleOpen={setSubsEndWarningOpen}
         action={() => navigate(`/subscribe-plan`)}
       />
+
+      {/* status update confirmation dialog */}
+      <CustomDialog
+        dialogOpen={confirmPaymentModalOpen}
+        toggleDialogOpen={setConfirmPaymentModalOpen}
+        withHeader={false}
+        withFooter
+        showFooterSeparator={false}
+        footerRightNode={
+          <CustomBtn
+            buttonLabel="Cancel"
+            className="grow bg-dialog-cancel-btn-bg hover:bg-dialog-cancel-btn-bg text-warning-dialog-cancel-text"
+            onClick={() => setConfirmPaymentModalOpen(false)}
+          />
+        }
+        footerBtnLabel="Confirm"
+        footerBtnAction={updateStatus}
+        footerBtnCls="grow"
+        closeOnSubmit={false}
+        isSubmitting={invoiceStatusMutation.isPending}
+        contentCls=""
+      >
+        <div className="max-md:min-w-fit relative flex flex-col p-8 pb-0 gap-2 text-center text-wrap wrap-break-word max-w-[35vw]">
+          <XIcon
+            className="absolute top-2 right-2 text-muted hover:text-black-text"
+            onClick={() => setConfirmPaymentModalOpen(false)}
+          />
+          <h2 className="md:text-2xl font-semibold">
+            {" "}
+            {`Are you sure you want to mark this invoice as paid?`}{" "}
+          </h2>
+          <span className="text-placeholder-text text-sm">
+            {`Please confirm that you have received the payment from the client before marking it as paid.`}
+          </span>
+        </div>
+      </CustomDialog>
     </React.Fragment>
   );
 }

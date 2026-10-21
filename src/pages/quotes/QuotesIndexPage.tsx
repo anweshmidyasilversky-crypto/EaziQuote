@@ -33,7 +33,6 @@ import React from "react";
 import type { Quote, QuoteStatus } from "@/types/api.responses.type";
 import type { PageFilters } from "@/types/api.requests.type";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
-import { useAppSelector } from "@/redux/store";
 import DeleteDialog from "@/components/common/DeleteDialog";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { toast } from "react-toastify";
@@ -46,10 +45,10 @@ import BankDetailsWarningModal from "@/components/common/BankDetailsWarningModal
 import SignatureWarningModal from "@/components/common/SignatureWarningModal";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 import QuoteCreateOptionsModal from "@/components/common/QuoteCreateOptionsModal";
+import useHasSubscription from "@/hooks/useHasSubscription";
 
 export function QuotesIndexPage() {
   const navigate = useNavigate();
-  const user = useAppSelector((state) => state.user);
   const [filerOpen, toggleFilterOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: undefined,
@@ -58,12 +57,19 @@ export function QuotesIndexPage() {
   const [filters, setFilters] = useState<string[]>([]);
   const pageFilters = useRef<PageFilters>({});
   const [deleteModalOpen, toggleDeleteModal] = useState(false);
-  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
-  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
-  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
   const targetQuoteId = useRef<number | undefined>(undefined);
   const [quoteCreateOptionsOpen, setQuoteCreateOptionsOpen] =
     useState<boolean>(false);
+
+  const {
+    signatureWarningOpen,
+    setSignatureWarningOpen,
+    bankdetailsWarningOpen,
+    setBankdetailsWarningOpen,
+    subsEndWarningOpen,
+    setSubsEndWarningOpen,
+    checkCanCreateRecord,
+  } = useHasSubscription();
 
   const {
     quoteList,
@@ -178,11 +184,9 @@ export function QuotesIndexPage() {
             <CustomActionGroup
               openFn={() => navigate(`/quotes/${quote.id}`)}
               editFn={() => {
-                if (!(user.is_trial_period || user.is_subscription_active)) {
-                  setSubsEndWarningOpen(true);
-                  return;
+                if (checkCanCreateRecord()) {
+                  navigate(`/quotes/manage-quotes/${quote.id}`);
                 }
-                navigate(`/quotes/manage-quotes/${quote.id}`);
               }}
               withEdit={row.original.is_editable}
               withDelete={row.original.is_editable}
@@ -218,19 +222,9 @@ export function QuotesIndexPage() {
       leftIcon: assets.plusIcon,
       buttonLabel: "New Quote",
       onClick: () => {
-        if (!user.hasBankAccountDetailAdded) {
-          setAddBankDetailsDialog(true);
-          return;
+        if (checkCanCreateRecord()) {
+          setQuoteCreateOptionsOpen(true);
         }
-        if (!user.hasSignatureAdded) {
-          setAddSignatureWarningOpen(true);
-          return;
-        }
-        if (!(user.is_trial_period || user.is_subscription_active)) {
-          setSubsEndWarningOpen(true);
-          return;
-        }
-        setQuoteCreateOptionsOpen(true);
       },
     },
   ];
@@ -348,14 +342,14 @@ export function QuotesIndexPage() {
       />
 
       <BankDetailsWarningModal
-        isOpen={addBankDetailsDialog}
-        toggleOpen={setAddBankDetailsDialog}
+        isOpen={bankdetailsWarningOpen}
+        toggleOpen={setBankdetailsWarningOpen}
         action={() => navigate(`/settings/payments-and-invoicing`)}
       />
 
       <SignatureWarningModal
-        isOpen={addSignatureWarningOpen}
-        toggleOpen={setAddSignatureWarningOpen}
+        isOpen={signatureWarningOpen}
+        toggleOpen={setSignatureWarningOpen}
         action={() =>
           navigate(`/settings/payments-and-invoicing`, {
             state: {

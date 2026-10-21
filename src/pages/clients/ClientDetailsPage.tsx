@@ -45,6 +45,7 @@ import { toast } from "react-toastify";
 import {
   ActivityType,
   PaymentStatus,
+  PaymentTypes,
   type InvoiceActivity,
   type Payment,
   type QuoteActivity,
@@ -63,18 +64,17 @@ import {
   SettingsPaymentPageReason,
   type SettingsLocationProps,
 } from "@/types/common.types";
-import { useAppSelector } from "@/redux/store";
 import BankDetailsWarningModal from "@/components/common/BankDetailsWarningModal";
 import SignatureWarningModal from "@/components/common/SignatureWarningModal";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 import { Spinner } from "@/components/ui/spinner";
 import QuoteCreateOptionsModal from "@/components/common/QuoteCreateOptionsModal";
+import useHasSubscription from "@/hooks/useHasSubscription";
 
 export function ClientDetailsPage() {
   const navigate = useNavigate();
   const param = useParams<{ id: string }>();
 
-  const user = useAppSelector((state) => state.user);
   const [currTable, toggleCurrTable] = useState<string>("activity");
   const [searchTearm, setSearchTerm] = useState<string>("");
   const debouncedVal = useDebounce({ value: searchTearm, delay: 500 });
@@ -92,9 +92,15 @@ export function ClientDetailsPage() {
   const [filters, setFilters] = useState<string[]>([]);
   const activityTableFilters = useRef<ColumnFiltersState>([]);
 
-  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
-  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
-  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
+  const {
+    signatureWarningOpen,
+    setSignatureWarningOpen,
+    bankdetailsWarningOpen,
+    setBankdetailsWarningOpen,
+    subsEndWarningOpen,
+    setSubsEndWarningOpen,
+    checkCanCreateRecord,
+  } = useHasSubscription();
 
   const [deleteModalOpen, toggleDeleteModalOpen] = useState(false);
   const targetPaymentId = useRef<number | undefined>(undefined);
@@ -596,25 +602,14 @@ export function ClientDetailsPage() {
                   }
                   onClick={() => {
                     if (isActivityTable) {
-                      if (!user.hasBankAccountDetailAdded) {
-                        setAddBankDetailsDialog(true);
-                        return;
+                      if (checkCanCreateRecord()) {
+                        setQuoteCreateOptionsOpen(true);
                       }
-                      if (!user.hasSignatureAdded) {
-                        setAddSignatureWarningOpen(true);
-                        return;
-                      }
-                      if (
-                        !(user.is_trial_period || user.is_subscription_active)
-                      ) {
-                        setSubsEndWarningOpen(true);
-                        return;
-                      }
-                      setQuoteCreateOptionsOpen(true);
                     } else {
                       navigate(`/payments/record-payment`, {
                         state: {
                           prefillClient: client,
+                          paymentType: PaymentTypes.deposite,
                         } as PaymentCreatePageLocationProps,
                       });
                     }
@@ -760,14 +755,14 @@ export function ClientDetailsPage() {
         />
 
         <BankDetailsWarningModal
-          isOpen={addBankDetailsDialog}
-          toggleOpen={setAddBankDetailsDialog}
+          isOpen={bankdetailsWarningOpen}
+          toggleOpen={setBankdetailsWarningOpen}
           action={() => navigate(`/settings/payments-and-invoicing`)}
         />
 
         <SignatureWarningModal
-          isOpen={addSignatureWarningOpen}
-          toggleOpen={setAddSignatureWarningOpen}
+          isOpen={signatureWarningOpen}
+          toggleOpen={setSignatureWarningOpen}
           action={() =>
             navigate(`/settings/payments-and-invoicing`, {
               state: {

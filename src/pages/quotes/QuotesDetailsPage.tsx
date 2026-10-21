@@ -42,8 +42,12 @@ import useInvoiceList from "@/hooks/apis/invoices/useInvoiceList";
 import type { CreateInvoicePageLocationProps } from "../invoice/CreateInvoicePage";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
+import useHasSubscription from "@/hooks/useHasSubscription";
 
 export function QuotesDetailsPage() {
+  const { subsEndWarningOpen, setSubsEndWarningOpen, checkCanCreateRecord } =
+    useHasSubscription();
+
   const {
     setDiscount,
     setDepositAmount,
@@ -54,7 +58,6 @@ export function QuotesDetailsPage() {
   const { vat_settings } = useAppSelector((state) => state.appConfig);
   const params = useParams() as { id: string };
   const navigate = useNavigate();
-  const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const { quote, isFetching, refetch } = useQuoteDetails({
     quote_id: params.id,
@@ -78,7 +81,6 @@ export function QuotesDetailsPage() {
   const [deleteDialogOpen, toggleDeleteDialogOpen] = useState(false);
   const [quotePreviewOpen, toggleQuotePreviewOpen] = useState(false);
   const [shareExportPopupOpen, toggleShareExportPopup] = useState(false);
-  const [subscriptionWarningOpen, setSubscriptionWarningOpen] = useState(false);
 
   const {
     quoteDuplicateMutation,
@@ -182,16 +184,13 @@ export function QuotesDetailsPage() {
       leftIcon: assets.plusIcon,
       buttonLabel: "Invoice",
       onClick: () => {
-        if (!(user.is_trial_period || user.is_subscription_active)) {
-          setSubscriptionWarningOpen(true);
-          return;
+        if (checkCanCreateRecord()) {
+          navigate(`/invoices/manage-invoice`, {
+            state: {
+              quoteId: quote?.id,
+            } as CreateInvoicePageLocationProps,
+          });
         }
-
-        navigate(`/invoices/manage-invoice`, {
-          state: {
-            quoteId: quote?.id,
-          } as CreateInvoicePageLocationProps,
-        });
       },
     },
     {
@@ -209,26 +208,22 @@ export function QuotesDetailsPage() {
       togglePopupOpen={toggleMoreOptionsOpen}
       deleteAction={() => toggleDeleteDialogOpen((curr) => !curr)}
       editAction={() => {
-        if (!user.is_trial_period && !user.is_subscription_active) {
-          setSubscriptionWarningOpen(true);
-          return;
+        if (checkCanCreateRecord()) {
+          navigate(`/quotes/manage-quotes/${quote?.id}`);
         }
-        navigate(`/quotes/manage-quotes/${quote?.id}`);
       }}
       copyAction={() => {
-        if (!user.is_trial_period && !user.is_subscription_active) {
-          setSubscriptionWarningOpen(true);
-          return;
+        if (checkCanCreateRecord()) {
+          quoteDuplicateMutation.mutate(quote?.id ?? "", {
+            onSuccess: (response) => {
+              toast.success(response.message);
+              navigate(`/quotes`);
+            },
+            onError: (error) => {
+              showErrorToast(error);
+            },
+          });
         }
-        quoteDuplicateMutation.mutate(quote?.id ?? "", {
-          onSuccess: (response) => {
-            toast.success(response.message);
-            navigate(`/quotes`);
-          },
-          onError: (error) => {
-            showErrorToast(error);
-          },
-        });
       }}
     >
       <span className="h-9 w-fit flex rounded-[7px] py-2 px-4 gap-2.75 items-center btn-auth">
@@ -562,8 +557,8 @@ export function QuotesDetailsPage() {
       </div>
 
       <SubscriptionWarningModal
-        isOpen={subscriptionWarningOpen}
-        toggleOpen={setSubscriptionWarningOpen}
+        isOpen={subsEndWarningOpen}
+        toggleOpen={setSubsEndWarningOpen}
         action={() => navigate(`/subscribe-plan`)}
       />
     </React.Fragment>

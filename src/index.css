@@ -163,6 +163,9 @@
   --background-image-auth: linear-gradient(222.9deg, #f2eeec 0%, #e8e8f2 100%);
   --background-image-subscription-gradient: linear-gradient(270deg, #082B60 0%, #000000 100%);
   --background-image-subscription-card-separator: linear-gradient(to right, transparent, #E4E6F4, transparent);
+
+  --color-dialog-cancel-btn-bg: #FEF2F1;
+  
 }
 
 @layer base {

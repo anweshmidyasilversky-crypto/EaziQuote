@@ -22,7 +22,7 @@ import {
 } from "@/types/api.responses.type";
 import type { ClientCreationPayload } from "@/types/clientCreation.payload.type";
 import { toast } from "react-toastify";
-import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { useAppDispatch } from "@/redux/store";
 import { updateConfig } from "@/redux/slices/settings.slice";
 import useAppConfig from "@/hooks/apis/appConfig/useAppConfig";
 import useNotifications from "@/hooks/apis/notifications/useNotifications";
@@ -40,20 +40,27 @@ import BankDetailsWarningModal from "@/components/common/BankDetailsWarningModal
 import SignatureWarningModal from "@/components/common/SignatureWarningModal";
 import SubscriptionWarningModal from "@/components/common/SubscriptionWarningModal";
 import QuoteCreateOptionsModal from "@/components/common/QuoteCreateOptionsModal";
+import useHasSubscription from "@/hooks/useHasSubscription";
 
 export function DashboardIndexPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
   const [deleteModalOpen, toggleDeleteModal] = useState(false);
-  const [addBankDetailsDialog, setAddBankDetailsDialog] = useState(false);
-  const [addSignatureWarningOpen, setAddSignatureWarningOpen] = useState(false);
-  const [subsEndWarningOpen, setSubsEndWarningOpen] = useState(false);
   const targetActivityType = useRef<ActivityType>(ActivityType.QUOTE);
   const targetId = useRef<number | undefined>(undefined);
   const [quoteCreateOptionsOpen, setQuoteCreateOptionsOpen] =
     useState<boolean>(false);
+
+  const {
+    signatureWarningOpen,
+    setSignatureWarningOpen,
+    bankdetailsWarningOpen,
+    setBankdetailsWarningOpen,
+    subsEndWarningOpen,
+    setSubsEndWarningOpen,
+    checkCanCreateRecord,
+  } = useHasSubscription();
 
   const {
     data: homePage,
@@ -255,22 +262,6 @@ export function DashboardIndexPage() {
     );
   };
 
-  const canUsercreateRecord = () => {
-    if (!user.hasBankAccountDetailAdded) {
-      setAddBankDetailsDialog(true);
-      return false;
-    }
-    if (!user.hasSignatureAdded) {
-      setAddSignatureWarningOpen(true);
-      return false;
-    }
-    if (!(user.is_trial_period || user.is_subscription_active)) {
-      setSubsEndWarningOpen(true);
-      return false;
-    }
-    return true;
-  };
-
   return (
     <div className="h-full w-full">
       {/* Main container */}
@@ -295,7 +286,7 @@ export function DashboardIndexPage() {
               buttonLabel="New Quote"
               leftIcon={assets.plusIcon}
               onClick={() => {
-                if (canUsercreateRecord()) {
+                if (checkCanCreateRecord()) {
                   setQuoteCreateOptionsOpen(true);
                 }
               }}
@@ -305,7 +296,7 @@ export function DashboardIndexPage() {
               buttonLabel="New Invoice"
               leftIcon={assets.plusIcon}
               onClick={() => {
-                if (canUsercreateRecord()) {
+                if (checkCanCreateRecord()) {
                   navigate(`/invoices/manage-invoice`);
                 }
               }}
@@ -378,14 +369,14 @@ export function DashboardIndexPage() {
       />
 
       <BankDetailsWarningModal
-        isOpen={addBankDetailsDialog}
-        toggleOpen={setAddBankDetailsDialog}
+        isOpen={bankdetailsWarningOpen}
+        toggleOpen={setBankdetailsWarningOpen}
         action={() => navigate(`/settings/payments-and-invoicing`)}
       />
 
       <SignatureWarningModal
-        isOpen={addSignatureWarningOpen}
-        toggleOpen={setAddSignatureWarningOpen}
+        isOpen={signatureWarningOpen}
+        toggleOpen={setSignatureWarningOpen}
         action={() =>
           navigate(`/settings/payments-and-invoicing`, {
             state: {
