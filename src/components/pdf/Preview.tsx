@@ -393,10 +393,10 @@ function Preview({
             </div>
           )}
           {currTemplate === DocumentTemplate.classic && (
-            <ClassicBottom className="w-full" />
+            <ClassicBottom className="w-full min-h-40" />
           )}
           {currTemplate === DocumentTemplate.modern && (
-            <ModernFooter className="w-full" />
+            <ModernFooter className="w-full min-h-10" />
           )}
           {currTemplate === DocumentTemplate.elegant && (
             <ElegentFooter className="w-full h-1.5" />
