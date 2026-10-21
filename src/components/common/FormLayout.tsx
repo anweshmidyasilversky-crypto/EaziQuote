@@ -28,7 +28,7 @@ export function FormLayout({
       {isFormOpen && (
         <div
           data-open
-          className="animate-fade-in fixed inset-0 z-50 overflow-y-auto bg-black/30"
+          className="animate-fade-in fixed inset-0 z-50 overflow-y-auto bg-black/50"
         >
           <div className="flex min-h-screen py-8 items-center justify-center">
             <div

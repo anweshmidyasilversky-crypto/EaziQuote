@@ -2,6 +2,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { XIcon } from "lucide-react";
 import { CustomBtn } from "./CustomBtn";
+import { cn } from "@/lib/utils/helper";
 
 export type CustomDialogProps = {
   dialogOpen: boolean;
@@ -23,6 +24,7 @@ export type CustomDialogProps = {
   isSubmitting?: boolean;
   closeAction?: () => void;
   withHeader?: boolean;
+  overlayClassName?: string;
 };
 
 function CustomDialog({
@@ -45,6 +47,7 @@ function CustomDialog({
   isSubmitting,
   closeAction,
   withHeader = true,
+  overlayClassName,
 }: CustomDialogProps) {
   return (
     <Dialog
@@ -57,6 +60,7 @@ function CustomDialog({
       <DialogTrigger />
       <DialogContent
         className={`dashboard-card-theme bg-white w-fit! max-w-screen! ring-0 p-0 gap-0 ${contentCls}`}
+        overlayClassName={cn(`bg-black/50`, overlayClassName)}
         showCloseButton={false}
       >
         {withHeader && (

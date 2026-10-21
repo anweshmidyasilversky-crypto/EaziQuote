@@ -18,6 +18,7 @@ export type WarningDialogProps = {
   isAccepting?: boolean;
   withCancelBtn?: boolean;
   warningImgElement?: React.ReactNode;
+  closeOnBackdropClick?: boolean;
 };
 
 function WarningDialog({
@@ -33,13 +34,26 @@ function WarningDialog({
   isAccepting,
   withCancelBtn = true,
   warningImgElement,
+  closeOnBackdropClick,
 }: WarningDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={toggleOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open, eventDetails) => {
+        if (!open && eventDetails.reason === "outside-press") {
+          if (closeOnBackdropClick) {
+            toggleOpen(open);
+          }
+          return;
+        }
+        toggleOpen(open);
+      }}
+    >
       <DialogTrigger />
       <DialogContent
         className={`dashboard-card-theme bg-white min-h-85 ring-0 p-8 gap-0 rounded-xl md:min-w-112.5 ${contentCls}`}
         showCloseButton={false}
+        overlayClassName="bg-black/50"
       >
         <div className="flex w-full justify-end">
           <XIcon

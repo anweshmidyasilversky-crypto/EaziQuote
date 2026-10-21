@@ -18,7 +18,7 @@ export function CustomInfoCard({
   xIconAction,
 }: CustomInfoCardProps) {
   return (
-    <Card className="bg-white dashboard-card-theme ring-0 flex flex-col gap-5 md:min-w-85">
+    <Card className="bg-white dashboard-card-theme ring-0 flex flex-col gap-5 md:min-w-55">
       <CardHeader className="border-b border-separator!">
         <div className="flex justify-between">
           <span className="font-medium text-base"> {header} </span>

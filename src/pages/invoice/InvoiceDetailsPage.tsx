@@ -524,6 +524,7 @@ export function InvoiceDetailsPage() {
         withHeader={false}
         withFooter
         showFooterSeparator={false}
+        overlayClassName="bg-black/50"
         footerRightNode={
           <CustomBtn
             buttonLabel="Cancel"
@@ -538,7 +539,7 @@ export function InvoiceDetailsPage() {
         isSubmitting={invoiceStatusMutation.isPending}
         contentCls=""
       >
-        <div className="max-md:min-w-fit relative flex flex-col p-8 pb-0 gap-2 text-center text-wrap wrap-break-word max-w-[35vw]">
+        <div className="max-md:min-w-fit relative flex flex-col p-8 pb-0 gap-2 text-center text-wrap wrap-break-word max-w-[30vw]">
           <XIcon
             className="absolute top-2 right-2 text-muted hover:text-black-text"
             onClick={() => setConfirmPaymentModalOpen(false)}
