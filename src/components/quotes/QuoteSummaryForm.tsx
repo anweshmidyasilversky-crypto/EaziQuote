@@ -298,6 +298,7 @@ function QuoteSummaryForm({
     if (defaultClient) {
       setClientSearchTerm(defaultClient.name);
       setValue("clientId", defaultClient.id?.toString());
+      setClientDetails?.(defaultClient);
     }
   }, [defaultClient]);
 

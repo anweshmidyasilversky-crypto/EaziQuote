@@ -121,7 +121,11 @@ function QuoteCreateOptionsModal({
               className="bg-custom-dialog-primary flex flex-col items-center min-w-55 gap-4 rounded-lg py-4 cursor-pointer max-md:min-w-[30vw]"
               onClick={() => {
                 dispatch(removeQuoteRedux());
-                navigate(`/quotes/manage-quotes/`);
+                navigate(`/quotes/manage-quotes/`, {
+                  state: {
+                    defaultClient,
+                  } as CreateQuotePageLocationProps,
+                });
               }}
             >
               <img src={assets.pencilFilledIcon} className="w-8 h-8" />

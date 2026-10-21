@@ -189,10 +189,11 @@ function SubCategoriesPage() {
 
   useEffect(() => {
     if (defaultvalue.current) {
-      console.log(defaultvalue.current);
       setValue("catId", defaultvalue.current.category?.id?.toString() ?? "");
       setValue("subCategory", defaultvalue.current.name ?? "");
       setCategorySearchTerm(defaultvalue.current.category?.name ?? "");
+    } else {
+      setCategorySearchTerm("");
     }
   }, [defaultvalue.current]);
 

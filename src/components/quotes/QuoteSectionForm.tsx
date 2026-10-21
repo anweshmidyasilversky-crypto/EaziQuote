@@ -55,24 +55,28 @@ function QuoteSectionForm({
   });
 
   useEffect(() => {
+    if (!isOpen) return;
+
     if (mode === "updation" && defaultValues) {
-      console.log(`Setting Default Values`);
-      if (defaultValues.sort) {
-        setValue("sort", defaultValues.sort);
-        setComboboxSearchTerm(defaultValues.sort.toString());
-      }
-      setValue("content", defaultValues.content);
-      if (defaultValues.title) {
-        setValue("title", defaultValues.title);
-      }
-      if (defaultValues.id) {
-        setValue("id", defaultValues.id);
-      }
-    } else {
-      setComboboxSearchTerm("");
-      reset();
+      reset({
+        id: defaultValues.id,
+        sort: defaultValues.sort,
+        title: defaultValues.title ?? "",
+        content: defaultValues.content ?? "",
+      });
+      setComboboxSearchTerm(
+        defaultValues.sort != null ? defaultValues.sort.toString() : "",
+      );
+      return;
     }
-  }, [mode, defaultValues]);
+
+    reset({
+      sort: undefined,
+      title: "",
+      content: "",
+    });
+    setComboboxSearchTerm("");
+  }, [isOpen, mode, defaultValues, reset]);
 
   const submitHandler = (
     data: QuoteSectionCreatePayload | QuoteSectionUpdatePayload,
