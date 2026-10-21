@@ -108,13 +108,13 @@ function QuoteSectionForm({
             <CustomCombobox
               items={Array.from({ length: 11 }, (_, i) => i)}
               onValueChange={(val) => {
-                if (val) {
+                if (val !== null) {
                   setComboboxSearchTerm(val.toString());
-                  setValue("sort", val);
+                  setValue("sort", val, { shouldValidate: true });
                 }
               }}
               placeholder="Select sort"
-              className={cn(`${errors.sort ? `input-error` : `input-valid`} `)}
+              className={cn(`${errors.sort ? `input-error!` : `input-valid`} `)}
               getItemLabel={(sort) => sort.toString()}
               getItemId={(sort) => sort}
               getItemValue={(sort) => sort}

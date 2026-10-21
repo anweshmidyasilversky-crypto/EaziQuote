@@ -252,7 +252,7 @@ function SubCategoriesPage() {
             items={categoryList}
             getItemLabel={(category) => category?.name}
             getItemId={(category) => category?.id}
-            className={errors.catId ? `input-error` : ``}
+            className={errors.catId ? `input-error!` : ``}
             onValueChange={(category) => {
               if (category) {
                 setValue("catId", category?.id?.toString());

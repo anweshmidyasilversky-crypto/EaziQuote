@@ -123,6 +123,7 @@ function QuoteSummaryForm({
       if (prefillClient) {
         setValue("clientId", currQuote.client.id?.toString());
         setClientSearchTerm(currQuote.client?.name);
+        setClientDetails?.(currQuote.client);
       }
       setValue("jobDescription", currQuote.job_description);
       const attachmentList: File[] = [];
@@ -389,6 +390,9 @@ function QuoteSummaryForm({
                 getItemLabel={(client) => client?.name ?? ""}
                 onValueChange={(client) => {
                   if (!client) {
+                    setClientDetails?.(undefined);
+                    setValue("clientId", "");
+                    setClientSearchTerm("");
                     return;
                   }
                   setClientDetails?.(client);
