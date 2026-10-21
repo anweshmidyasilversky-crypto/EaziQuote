@@ -1,6 +1,6 @@
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { formatCurrency } from "../../lib/utils/helper";
+import { formatCurrency, saveToDevice } from "../../lib/utils/helper";
 import { getInitials } from "@/lib/utils/helper";
 import { formatDisplayDate } from "@/lib/utils/date";
 import { HeaderBreadCrumb } from "../../components/common/CustomBreadCrumb";
@@ -140,22 +140,10 @@ export function InvoiceDetailsPage() {
   const handleInvoiceDownload = () => {
     downloadInvoicePdfMutation.mutate(params.id, {
       onSuccess: (response) => {
-        const blobUrl: string = window.URL.createObjectURL(
-          new Blob([response], { type: "application/pdf" }),
-        );
-
-        const link: HTMLAnchorElement = document.createElement("a");
-        link.href = blobUrl;
-        link.setAttribute(
-          "download",
+        saveToDevice(
+          response,
           `Invoice - ${invoiceDetails?.invoice_number}.pdf`,
         );
-
-        document.body.appendChild(link);
-        link.click();
-
-        link.parentNode?.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
       },
       onError: (error) => {
         showErrorToast(error);
