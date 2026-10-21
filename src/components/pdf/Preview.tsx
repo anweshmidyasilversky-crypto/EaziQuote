@@ -10,7 +10,7 @@ import { useAppSelector } from "@/redux/store";
 import { assets } from "@/assets/icons";
 import { Separator } from "../ui/separator";
 import ClassicBottom from "./ClassicBottom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CustomDialog from "../common/CustomDialog";
 import { cn } from "@/lib/utils/helper";
 import { CustomBtn } from "../common/CustomBtn";
@@ -164,10 +164,6 @@ function Preview({
     }
   };
 
-  useEffect(() => {
-    console.log(categorisedBy);
-  }, [categorisedBy]);
-
   return (
     <div className="h-fit rounded-[7px] bg-white p-4 dashboard-card-theme">
       <div className="flex pb-5 gap-2 items-center">
@@ -226,10 +222,12 @@ function Preview({
                 <div className="flex gap-2 items-center ">
                   {section === "summary" && (
                     <>
-                      <img
-                        src={logo ?? assets.logo}
-                        className="w-12 aspect-auto"
-                      />
+                      {logo && (
+                        <img
+                          src={logo ?? assets.logo}
+                          className="w-12 aspect-auto"
+                        />
+                      )}
                       <span> {companyName} </span>
                     </>
                   )}

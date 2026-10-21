@@ -15,13 +15,9 @@ function useHasSubscription() {
 
     if (!hasBankDetails) {
       setBankdetailsWarningOpen(true);
-    }
-
-    if (!hasSignature) {
+    } else if (!hasSignature) {
       setSignatureWarningOpen(true);
-    }
-
-    if (!hasSubscription) {
+    } else if (!hasSubscription) {
       setSubsEndWarningOpen(true);
     }
 

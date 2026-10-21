@@ -32,7 +32,7 @@ function BusinessInfoPage() {
   } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const [companyLogo, setCompanyLogo] = useState<File | undefined>(undefined);
-  const companyLogoURl = useRef<string>(logo ?? assets.cameraIcon);
+  const companyLogoURl = useRef<string | undefined>(logo ?? undefined);
   const { companyUpdateMutation } = useUserMutations();
   const {
     control,
@@ -114,8 +114,8 @@ function BusinessInfoPage() {
                 companyLogoURl.current = URL.createObjectURL(img);
                 setCompanyLogo(img);
               }}
-              alt={assets.userImg}
-              altClass={cn(`object-contain`)}
+              alt={assets.cameraIcon}
+              altClass={cn(`object-contain! h-10 w-10 self-center`)}
               withEditIcon
               iconBadgeCls={cn(`h-9 w-9`)}
             />
