@@ -163,10 +163,12 @@ export function CustomCombobox<T, V = T>({
           dashboard-card-theme
           ${contentBoxCls}
         `}
-        align="center"
-        alignOffset={20}
+        side="bottom"
+        sideOffset={14}
+        align="start"
         style={{
           width: inputWidth > 0 ? `${inputWidth}px` : undefined,
+          minWidth: inputWidth > 0 ? `${inputWidth}px` : undefined,
         }}
       >
         <ComboboxEmpty className="px-4 py-3 text-sm text-gray-400">

@@ -53,7 +53,7 @@ export function ImageInput({
                   className={` object-center ${
                     imgFile || imgUrl
                       ? "h-full w-full object-cover"
-                      : (altClass ?? " h-21 w-21 ")
+                      : (altClass ?? " h-10! w-10! ")
                   }  border-none outline-none`}
                   alt={altText ?? "User Placeholder"}
                 />

@@ -378,43 +378,45 @@ function InvoiceItemSelectForm({
 
   return (
     <div className="bg-table flex flex-col gap-5">
-      <CustomDataTable
-        columns={itemColumns}
-        data={itemsList}
-        showPaginated
-        isFetching={isFetching}
-        setPageNo={setPageNo}
-        paginationMeta={paginationMeta}
-        paginationBtns={paginationMeta?.links}
-        tableOptionsLeft={
-          <SearchInputGruop
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            searchPlaceHolder="Search items"
-          />
-        }
-        tableOptionsRight={
-          <div className="flex gap-3">
-            <CustomBtn
-              leftIcon={assets.filterIcon}
-              buttonLabel="Filter"
-              btncls={cn(
-                `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
-              )}
-              onClick={() => toggleFilterOpen((curr) => !curr)}
+      <div className="w-0 min-w-full flex flex-col gap-5">
+        <CustomDataTable
+          columns={itemColumns}
+          data={itemsList}
+          showPaginated
+          isFetching={isFetching}
+          setPageNo={setPageNo}
+          paginationMeta={paginationMeta}
+          paginationBtns={paginationMeta?.links}
+          tableOptionsLeft={
+            <SearchInputGruop
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              searchPlaceHolder="Search items"
             />
+          }
+          tableOptionsRight={
+            <div className="flex gap-3">
+              <CustomBtn
+                leftIcon={assets.filterIcon}
+                buttonLabel="Filter"
+                btncls={cn(
+                  `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
+                )}
+                onClick={() => toggleFilterOpen((curr) => !curr)}
+              />
 
-            <CustomBtn
-              leftIcon={assets.plusIcon}
-              buttonLabel="New Item"
-              onClick={() => {
-                targetItem.current = undefined;
-                toggleCreateItemModal((curr) => !curr);
-              }}
-            />
-          </div>
-        }
-      />
+              <CustomBtn
+                leftIcon={assets.plusIcon}
+                buttonLabel="New Item"
+                onClick={() => {
+                  targetItem.current = undefined;
+                  toggleCreateItemModal((curr) => !curr);
+                }}
+              />
+            </div>
+          }
+        />
+      </div>
 
       <div className="flex justify-between pl-5">
         <CustomBtn

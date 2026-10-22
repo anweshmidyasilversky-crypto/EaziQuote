@@ -155,6 +155,9 @@ export function DashboardIndexPage() {
               }
             }}
             editFn={() => {
+              if (!checkCanCreateRecord()) {
+                return;
+              }
               if (type === ActivityType.QUOTE) {
                 navigate(`/quotes/manage-quotes/${id}`);
               } else {

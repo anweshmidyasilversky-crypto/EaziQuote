@@ -160,6 +160,9 @@
   --color-live-preview-bold: #389C7B;
   --color-live-preview-border: rgba(56, 156, 123, 0.25);
 
+  --background-image-auth-gradient: linear-gradient(222.9deg, #F2EEEC 0%, #E8E8F2 100%);
+  --background-image-dashboard-gradient: linear-gradient(222.9deg, #F2EEEC 0%, #E8E8F2 100%);
+
   --background-image-auth: linear-gradient(222.9deg, #f2eeec 0%, #e8e8f2 100%);
   --background-image-subscription-gradient: linear-gradient(270deg, #082B60 0%, #000000 100%);
   --background-image-subscription-card-separator: linear-gradient(to right, transparent, #E4E6F4, transparent);
@@ -190,15 +193,19 @@
   a {
     @apply text-brand-dark cursor-pointer;
   }
-  html {
-    -ms-overflow-style: none; /* IE and Edge */
+  * {
     scrollbar-width: thin;
     scrollbar-color: #c4c4c4 transparent;
   }
 
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+  }
+
   ::-webkit-scrollbar {
-    width: 2px;
-    height: 2px;
+    width: 4px;
+    height: 4px;
   }
 
   ::-webkit-scrollbar-track {

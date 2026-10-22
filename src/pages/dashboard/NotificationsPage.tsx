@@ -6,53 +6,16 @@ import useNotificationList from "@/hooks/apis/notifications/useNotificationList"
 import { cn } from "@/lib/utils/helper";
 import { getFormattedTimeDiff } from "@/lib/utils/date";
 import { nanoid } from "@reduxjs/toolkit";
+import { getPageItems } from "@/lib/utils/pagination";
 import React from "react";
 
 function NotificationsPage() {
   const { notifications, isFetching, pagiantionMeta, setPageNo } =
     useNotificationList();
 
-  let paginationBtns = pagiantionMeta?.links ?? [];
-  const lastPage = pagiantionMeta?.last_page ?? 0;
-  const currentPage = pagiantionMeta?.current_page ?? 0;
-  if (paginationBtns.length > 7) {
-    const firstButtons = paginationBtns.slice(0, 2);
-    const lastButtons = paginationBtns.slice(-2);
-
-    const pageButtons = paginationBtns.slice(2, -2);
-
-    const createEllipsis = () => ({
-      url: null,
-      label: "...",
-      active: false,
-    });
-
-    let visiblePages;
-
-    if (currentPage <= 3) {
-      visiblePages = [
-        ...pageButtons.slice(0, 3),
-        createEllipsis(),
-        ...pageButtons.slice(-3),
-      ];
-    } else if (currentPage >= lastPage - 2) {
-      visiblePages = [
-        ...pageButtons.slice(0, 3),
-        createEllipsis(),
-        ...pageButtons.slice(-3),
-      ];
-    } else {
-      visiblePages = [
-        pageButtons[0],
-        createEllipsis(),
-        ...pageButtons.slice(currentPage - 2, currentPage + 1),
-        createEllipsis(),
-        ...pageButtons.slice(-1),
-      ];
-    }
-
-    paginationBtns = [...firstButtons, ...visiblePages, ...lastButtons];
-  }
+  const lastPage = Number(pagiantionMeta?.last_page ?? 0);
+  const currentPage = Number(pagiantionMeta?.current_page ?? 0);
+  const pageItems = getPageItems(currentPage, lastPage);
 
   return (
     <>
@@ -86,55 +49,50 @@ function NotificationsPage() {
         </div>
 
         {pagiantionMeta && (
-          <div className="flex max-md:flex-col max-md:gap-2 w-full justify-between items-center p-5">
-            <span className="text-placeholder-text text-sm">
-              {" "}
-              {`Showing ${pagiantionMeta.from ?? 0} to ${pagiantionMeta.to ?? 0} of ${pagiantionMeta.total} Results`}{" "}
-            </span>
-
-            {paginationBtns && (
-              <div className="w-fit flex flex-wrap justify-between gap-2 min-h-8 items-center">
-                {paginationBtns?.map((paginationBtn, index) => {
-                  let label = paginationBtn.label;
-                  if (index === 0) {
-                    label = "Previous";
-                  } else if (index === paginationBtns?.length - 1) {
-                    label = "Next";
-                  }
-                  return (
-                    <CustomBtn
-                      key={label}
-                      buttonLabel={label}
-                      onClick={() => {
-                        if (index === 0) {
-                          setPageNo?.((curr) => Math.max(1, curr - 1));
-                        } else if (index === paginationBtns?.length - 1) {
-                          setPageNo?.((curr) =>
-                            Math.min(
-                              Number(pagiantionMeta?.last_page ?? 1),
-                              curr + 1,
-                            ),
-                          );
-                        } else {
-                          if (!Number.isNaN(Number(label))) {
-                            setPageNo?.(Number(label));
-                          }
-                        }
-                      }}
-                      btncls={cn(
-                        `table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text
-                      ${paginationBtn.active ? `bg-brand-dark! text-white! max-w-8.5!` : ``}
-                      ${
-                        ["Previous", "Next"].includes(label)
-                          ? `table-pagination-btn-common!`
-                          : ``
-                      } `,
-                      )}
-                    />
-                  );
-                })}
-              </div>
+          <div className="w-full flex justify-end items-center pb-5 px-5">
+            {pagiantionMeta.from && pagiantionMeta.to && (
+              <span className="w-full self-stretch text-sm text-placeholder-text flex items-center">
+                {" "}
+                {`Showing ${pagiantionMeta.to} of ${pagiantionMeta.total} Results`}{" "}
+              </span>
             )}
+            <div className="flex gap-2 items-center">
+              <CustomBtn
+                buttonLabel="Previous"
+                onClick={() => currentPage > 1 && setPageNo(currentPage - 1)}
+                btncls="table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text"
+              />
+
+              {pageItems.map((item) =>
+                typeof item === "string" ? (
+                  <span
+                    key={item}
+                    className="px-2 text-placeholder-text select-none"
+                  >
+                    ...
+                  </span>
+                ) : (
+                  <CustomBtn
+                    key={item}
+                    buttonLabel={String(item)}
+                    onClick={() => setPageNo(item)}
+                    btncls={cn(
+                      "table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text",
+                      item === currentPage &&
+                        "bg-brand-dark! text-white! max-w-8.5!",
+                    )}
+                  />
+                ),
+              )}
+
+              <CustomBtn
+                buttonLabel="Next"
+                onClick={() =>
+                  currentPage < lastPage && setPageNo(currentPage + 1)
+                }
+                btncls="table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text"
+              />
+            </div>
           </div>
         )}
       </div>

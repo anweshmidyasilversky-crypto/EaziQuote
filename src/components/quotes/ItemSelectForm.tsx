@@ -368,43 +368,45 @@ function ItemSelectForm({
 
   return (
     <>
-      <CustomDataTable
-        columns={itemSelectColumns}
-        data={itemsList}
-        showPaginated
-        paginationMeta={itemListMeta}
-        setPageNo={setPageNo}
-        paginationBtns={itemListMeta?.links}
-        tableOptionsLeft={
-          <SearchInputGruop
-            searchTerm={searchTerm}
-            searchPlaceHolder="Search items"
-            setSearchTerm={setSearchTerm}
-          />
-        }
-        tableOptionsRight={
-          <div className="flex gap-3">
-            <CustomBtn
-              leftIcon={assets.filterIcon}
-              buttonLabel="Filter"
-              btncls={cn(
-                `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
-              )}
-              onClick={() => toggleFilterOpen((curr) => !curr)}
+      <div className="w-0 min-w-full flex flex-col gap-5">
+        <CustomDataTable
+          columns={itemSelectColumns}
+          data={itemsList}
+          showPaginated
+          paginationMeta={itemListMeta}
+          setPageNo={setPageNo}
+          paginationBtns={itemListMeta?.links}
+          tableOptionsLeft={
+            <SearchInputGruop
+              searchTerm={searchTerm}
+              searchPlaceHolder="Search items"
+              setSearchTerm={setSearchTerm}
             />
+          }
+          tableOptionsRight={
+            <div className="flex gap-3">
+              <CustomBtn
+                leftIcon={assets.filterIcon}
+                buttonLabel="Filter"
+                btncls={cn(
+                  `bg-manage-quote-secondary hover:bg-manage-quote-secondary`,
+                )}
+                onClick={() => toggleFilterOpen((curr) => !curr)}
+              />
 
-            <CustomBtn
-              leftIcon={assets.plusIcon}
-              buttonLabel="New Item"
-              onClick={() => {
-                editingItem.current = undefined;
-                toggleCreateItemModal((curr) => !curr);
-              }}
-            />
-          </div>
-        }
-        isFetching={isItemsFetching}
-      />
+              <CustomBtn
+                leftIcon={assets.plusIcon}
+                buttonLabel="New Item"
+                onClick={() => {
+                  editingItem.current = undefined;
+                  toggleCreateItemModal((curr) => !curr);
+                }}
+              />
+            </div>
+          }
+          isFetching={isItemsFetching}
+        />
+      </div>
       <div className="dashed-y-separators" />
 
       <div className="flex w-full px-5 justify-between">

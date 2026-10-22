@@ -34,7 +34,7 @@ function ProfilePage() {
   const user = useAppSelector((state) => state.user);
   const [activeId, toggleActiveId] = useState<string>(toggle.personal);
   const [userImg, setUserImg] = useState<File | undefined>(undefined);
-  const profilePicUrl = useRef<string>(user.avatar ?? assets.userIconSvg);
+  const profilePicUrl = useRef<string | undefined>(user.avatar ?? undefined);
 
   const { profileSetupMutation } = useUserMutations();
 
@@ -42,7 +42,7 @@ function ProfilePage() {
     defaultValues: {
       name: user.name,
       phoneNo: user.phone?.startsWith("(+44)")
-        ? user.phone.slice(5)
+        ? user.phone?.slice(5)
         : user.phone,
     },
     resolver: yupResolver(userProfileSchema),
@@ -84,7 +84,7 @@ function ProfilePage() {
       dispatch(
         updateUser({
           ...userDetails,
-          phone: userDetails.phone.slice(5).replaceAll(" ", ""),
+          phone: userDetails.phone?.slice(5).replaceAll(" ", ""),
         }),
       );
     }

@@ -179,10 +179,14 @@ function CustomTable<TData extends RowData>({
             <thead className="bg-table-head sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
+                  {headerGroup.headers.map((header, index) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider"
+                      className={cn(
+                        "px-3 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider",
+                        index === 0 ? `pl-6!` : ``,
+                        index === headerGroup.headers.length - 1 ? `pr-6` : ``,
+                      )}
                     >
                       {header.isPlaceholder ? null : (
                         <div
@@ -250,13 +254,19 @@ function CustomTable<TData extends RowData>({
                     key={row.id}
                     className="hover:bg-slate-50/50 transition-colors"
                   >
-                    {row.getVisibleCells().map((cell) => {
+                    {row.getVisibleCells().map((cell, index) => {
                       const cellRenderer = cell.column.columnDef.cell;
                       //console.log(cellRenderer, cell.id);
                       return (
                         <td
                           key={cell.id}
-                          className="px-6 text-wrap h-fit! min-w-30! py-4 text-sm font-normal text-slate-600 whitespace-nowrap"
+                          className={cn(
+                            "px-3 text-wrap h-fit! py-4 text-sm font-normal text-slate-600 whitespace-nowrap truncate",
+                            index === 0 ? `pl-6!` : ``,
+                            index === row.getVisibleCells().length - 1
+                              ? `pr-6`
+                              : ``,
+                          )}
                         >
                           <div className="flex items-center text-wrap wrap-break-word">
                             {typeof cellRenderer === "function" &&

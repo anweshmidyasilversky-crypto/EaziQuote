@@ -243,7 +243,7 @@ export function DashboardLayout() {
                       src={user.avatar ?? assets.userIconSvg}
                       fallback="U"
                     />
-                    <span className="font-sans font-medium text-[14px] min-h-4.25 max-w-21.5 text-wrap">
+                    <span className="font-sans font-medium text-[14px] min-h-4.25 max-w-21.5 text-wrap wrap-anywhere">
                       {user.name}
                     </span>
                   </div>
@@ -294,7 +294,7 @@ export function DashboardLayout() {
           </div>
         </div>
 
-        <div className="bg-dashboard w-full flex-1 min-h-0 overflow-y-auto">
+        <div className="bg-dashboard-gradient w-full flex-1 min-h-0 overflow-y-auto">
           <Outlet />
         </div>
       </div>

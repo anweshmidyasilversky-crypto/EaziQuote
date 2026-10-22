@@ -14,7 +14,7 @@ import type { BusinessProfilePayload } from "@/types/businessProfile.payload.typ
 import { businessAddressSchema } from "@/validation/businessAddress.payload.schema";
 import { BusinessProfilePayloadSchema } from "@/validation/businessProfile.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -34,13 +34,9 @@ function BusinessInfoPage() {
   const [companyLogo, setCompanyLogo] = useState<File | undefined>(undefined);
   const companyLogoURl = useRef<string | undefined>(logo ?? undefined);
   const { companyUpdateMutation } = useUserMutations();
-  const {
-    control,
-    setValue,
-    handleSubmit,
-    formState: { errors },
-    clearErrors,
-  } = useForm<Omit<BusinessProfilePayload & BusinessAddressPayload, "trade">>({
+  const { control, setValue, handleSubmit, clearErrors } = useForm<
+    Omit<BusinessProfilePayload & BusinessAddressPayload, "trade">
+  >({
     defaultValues: {
       street: companyAddress.address,
       country: companyAddress.country,
@@ -97,11 +93,11 @@ function BusinessInfoPage() {
     );
   };
 
-  useEffect(() => {
-    if (errors) {
-      console.log(errors);
-    }
-  }, [errors]);
+  // useEffect(() => {
+  //   if (errors) {
+  //     console.log(errors);
+  //   }
+  // }, [errors]);
 
   return (
     <div className="p-5 flex flex-col gap-5">

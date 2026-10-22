@@ -15,7 +15,7 @@ export function AuthLayout() {
           <img className="max-w-[10.34rem] h-8" src={assets.logo} alt="Logo" />
         </div>
       </div>
-      <div className="">
+      <div className="bg-auth-gradient">
         <Outlet />
       </div>
     </div>
