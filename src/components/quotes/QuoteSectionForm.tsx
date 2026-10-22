@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import CustomDialog from "../common/CustomDialog";
 import { CustomCombobox } from "../common/CustomCombobox";
 import { CustomInput } from "../common/CustomInput";
@@ -89,6 +89,14 @@ function QuoteSectionForm({
     }
   };
 
+  const watcher = useWatch({
+    control,
+  });
+
+  useEffect(() => {
+    console.log(watcher.content);
+  }, [watcher.content]);
+
   return (
     <CustomDialog
       dialogOpen={isOpen}
@@ -148,7 +156,7 @@ function QuoteSectionForm({
           name="content"
           fieldName="content"
           className="min-h-80"
-          inptType="textarea"
+          inptType="richText"
           placeholder="Enter content"
         />
       </div>

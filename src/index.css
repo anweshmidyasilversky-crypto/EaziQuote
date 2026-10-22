@@ -198,6 +198,22 @@
     scrollbar-color: #c4c4c4 transparent;
   }
 
+  .rich-text-editor {
+    @apply w-full overflow-hidden border-input-field-border rounded-[7px] bg-white;
+  }
+
+  .rich-text-editor .ql-toolbar.ql-snow {
+    @apply border-0 border-b border-input-field-border;
+  }
+
+  .rich-text-editor .ql-container.ql-snow {
+    @apply border-0 font-sans text-[15px];
+  }
+
+  .rich-text-editor .ql-editor {
+    min-height: 12rem;
+  }
+
   .table-responsive {
     -webkit-overflow-scrolling: touch;
     overflow-x: auto;

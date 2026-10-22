@@ -21,7 +21,7 @@ export function QuoteDescriptionPage({ quote }: QuoteDescriptionPageProps) {
       <ReadMoreContentBox
         title={"Job Description"}
         lines={9}
-        contentBoxCls="p-0!"
+        contentBoxCls="p-0! text-placeholder-text"
       >
         {jobDescription}
       </ReadMoreContentBox>
@@ -31,7 +31,7 @@ export function QuoteDescriptionPage({ quote }: QuoteDescriptionPageProps) {
       <ReadMoreContentBox
         title={"Notes (Not visible on quote)"}
         lines={9}
-        contentBoxCls="p-0!"
+        contentBoxCls="p-0! text-placeholder-text"
       >
         {notes}
       </ReadMoreContentBox>

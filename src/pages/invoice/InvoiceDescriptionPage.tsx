@@ -19,7 +19,7 @@ export function InvoiceDescriptionPage({
       <ReadMoreContentBox
         title="Project / Services Notes"
         lines={9}
-        contentBoxCls={cn(`p-0!`)}
+        contentBoxCls={cn(`p-0! text-placeholder-text`)}
       >
         {jobDescription}
       </ReadMoreContentBox>
@@ -29,7 +29,7 @@ export function InvoiceDescriptionPage({
       <ReadMoreContentBox
         title="Notes (Not visible on invoice)"
         lines={9}
-        contentBoxCls={cn(`p-0!`)}
+        contentBoxCls={cn(`p-0! text-placeholder-text`)}
       >
         {notes}
       </ReadMoreContentBox>

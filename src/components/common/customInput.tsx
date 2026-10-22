@@ -9,6 +9,8 @@ import { Eye, EyeOff, type LucideIcon } from "lucide-react";
 import { Switch } from "../ui/switch";
 import { ImageInput } from "../auth/imageInput";
 import { assets } from "../../assets/icons";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 
 export type SelectOptions = {
   value: string;
@@ -72,6 +74,12 @@ export function CustomInput<T extends FieldValues>({
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
   const labelText = formatLabel(fieldName);
+  const modules = {
+    toolbar: [
+      ["bold", "italic", "underline"], // toggled buttons
+      [{ list: "bullet" }, { list: "ordered" }],
+    ],
+  };
 
   return (
     <div
@@ -265,6 +273,17 @@ export function CustomInput<T extends FieldValues>({
                   >
                     {error.message}
                   </p>
+                )}
+                {inptType === "richText" && (
+                  <ReactQuill
+                    value={fieldValue}
+                    onChange={(content) => onChange(content)}
+                    modules={modules}
+                    readOnly={disabled}
+                    className={`rich-text-editor ${className ?? ""} ${
+                      error ? "input-error" : ""
+                    }`}
+                  />
                 )}
               </div>
             );

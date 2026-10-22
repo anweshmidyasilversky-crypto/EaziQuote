@@ -19,6 +19,7 @@ import { type QuoteSection } from "@/types/api.responses.type";
 import type { ColumnDef, TableFeatures } from "@tanstack/react-table";
 import { useRef, useState } from "react";
 import { toast } from "react-toastify";
+import "react-quill-new/dist/quill.snow.css";
 
 function SectionsPage() {
   const { sectionList, searchTerm, setSearchTerm, refetch, isFetching } =
@@ -93,7 +94,12 @@ function SectionsPage() {
       enableSorting: false,
       cell: (info) => {
         const desc = info.getValue<string>();
-        return <p className="max-w-125 truncate"> {desc} </p>;
+        return (
+          <div
+            className="max-w-125 [&_ul]:list-disc [&_ul]:ml-4 [&_li]:list-item [&_ol]:list-decimal [&_ol]:ml-4 [&_p:empty]:min-h-4"
+            dangerouslySetInnerHTML={{ __html: desc }}
+          />
+        );
       },
     },
     {
