@@ -191,7 +191,7 @@ function InvoiceIndexPage() {
           <CustomActionGroup
             openFn={() => navigate(`/invoices/${id}`)}
             editFn={() => {
-              if (checkCanCreateRecord()) {
+              if (true || checkCanCreateRecord()) {
                 navigate(`/invoices/manage-invoice/${id}`);
               }
             }}

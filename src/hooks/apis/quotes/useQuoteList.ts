@@ -107,6 +107,7 @@ function useQuoteList({ filters }: useQuoteListProps) {
 
     // Summary
     quoteSummary,
+    queryKey: ["quotes_list", filters, pageNo, debouncedSearchTerm],
   };
 }
 

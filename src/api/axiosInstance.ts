@@ -7,7 +7,7 @@ import { BASE_URL } from "@/constants/urls";
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 5 * 1000,
+  timeout: 10 * 1000,
   headers: {
     "x-api-key": import.meta.env.VITE_X_API_KEY,
   },

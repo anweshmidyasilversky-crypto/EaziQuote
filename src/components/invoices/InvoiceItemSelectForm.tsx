@@ -99,8 +99,13 @@ function InvoiceItemSelectForm({
       enabled: filterCategory !== "",
     });
 
-  const initialItems: ItemDetails[] =
-    currInvoice?.items?.filter((item) => item.quantity >= 1) ?? [];
+  const initialItems: InvoiceDetails["items"] =
+    currInvoice?.items?.map((item) => {
+      return {
+        ...item,
+        is_added: true,
+      } as ItemDetails;
+    }) ?? [];
   const {
     control,
     setValue,

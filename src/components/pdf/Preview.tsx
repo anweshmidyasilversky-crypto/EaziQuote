@@ -188,7 +188,11 @@ function Preview({
             >
               {Object.keys(DocumentCategories).map((catMetod) => {
                 return (
-                  <option key={catMetod} value={catMetod}>
+                  <option
+                    key={catMetod}
+                    value={catMetod}
+                    selected={catMetod === categorisationMethod}
+                  >
                     {
                       DocumentCategories[
                         catMetod as keyof typeof DocumentCategories

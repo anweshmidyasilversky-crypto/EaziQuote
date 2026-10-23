@@ -197,6 +197,7 @@ export function CreateInvoicePage() {
               showCompanyNumber={!summaryPreview.is_company_phone_number_show}
               items={previewItems}
               jobDescription={jobDescriptionPreview}
+              categorisationMethod={invoiceDetails?.categorised ?? "by-item"}
             />
           </div>
         </div>

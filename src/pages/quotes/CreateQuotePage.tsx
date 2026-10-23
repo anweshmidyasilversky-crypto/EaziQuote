@@ -68,6 +68,7 @@ export function CreateQuotePage() {
     quote,
     isFetching: isQuoteFetching,
     isFetched: isClientFetched,
+    queryKey,
   } = useQuoteDetails({
     quote_id: params.id as string,
     enabled: params.id ? true : false,
@@ -195,6 +196,7 @@ export function CreateQuotePage() {
                       presetQuote={presetQuoteId ? presetQuote : undefined}
                       setSummaryPreview={setSummaryPreview}
                       setClientDetails={setClientPreview}
+                      quoteDetailsQueryKey={queryKey}
                     />
                   )}
                   {formCurrSection === toggleId.Items && (
@@ -222,7 +224,8 @@ export function CreateQuotePage() {
             {/* Preview Section */}
             <Preview
               quoteId={quote?.id}
-              documentTemplate={DocumentTemplate.classic}
+              documentTemplate={quote?.template ?? DocumentTemplate.classic}
+              categorisationMethod={quote?.categorised}
               section={formCurrSection as PreviewPropsSection}
               quoteRefNo={summaryPreview.referenceNumber}
               quoteTitle={summaryPreview.quoteTitle}

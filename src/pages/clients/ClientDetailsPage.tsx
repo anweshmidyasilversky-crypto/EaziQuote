@@ -336,6 +336,9 @@ export function ClientDetailsPage() {
                   }
                 }}
                 editFn={() => {
+                  if (!checkCanCreateRecord()) {
+                    return;
+                  }
                   if (activity.type === ActivityType.INVOICE) {
                     navigate(`/invoices/manage-invoice/${activity.id}`);
                   } else {

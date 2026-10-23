@@ -10,7 +10,12 @@ import { CustomCombobox } from "../common/CustomCombobox";
 import { cn } from "@/lib/utils/helper";
 import { toast } from "react-toastify";
 import { showErrorToast } from "@/api/axiosInstance";
-import { QuoteStatus, type InvoiceDetails } from "@/types/api.responses.type";
+import {
+  QuoteStatus,
+  type ApiResponse,
+  type InvoiceDetails,
+  type QuoteDetails,
+} from "@/types/api.responses.type";
 import { useNavigate } from "react-router";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { createInvoiceSchema } from "@/validation/createInvoice.payload.schema";
@@ -19,6 +24,7 @@ import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
 import useQuoteList from "@/hooks/apis/quotes/useQuoteList";
 import useQuoteDetails from "@/hooks/apis/quotes/useQuoteDetails";
 import { ALLOWED_ATTACHMENT_TYPES } from "@/constants/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type InvoiceSummaryFormProps = {
   mode: "create" | "edit";
@@ -44,7 +50,7 @@ function InvoiceSummaryForm({
   setRefNoPreview,
 }: InvoiceSummaryFormProps) {
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   const {
     quoteList,
     isFetching: isQuoteListFetching,
@@ -110,7 +116,7 @@ function InvoiceSummaryForm({
   });
   const watcher = useWatch({ control });
 
-  const { quote } = useQuoteDetails({
+  const { quote, queryKey } = useQuoteDetails({
     quote_id: quoteId?.toString() ?? "",
     enabled: quoteId !== undefined && quoteId.toString().length >= 1,
     refetchOnFocus: false,
@@ -150,6 +156,24 @@ function InvoiceSummaryForm({
         onSuccess: (response) => {
           toast.success(response.message);
           removeAttachment(fileName);
+          {
+            /* Remove the attachment entry from the stale cache */
+          }
+          queryClient.setQueryData(
+            queryKey,
+            (oldData: ApiResponse<QuoteDetails>) => {
+              if (!oldData) return oldData;
+              return {
+                ...oldData,
+                payload: {
+                  ...oldData.payload,
+                  attachments: oldData.payload.attachments.filter(
+                    (attachment) => attachment.id !== attachment_id,
+                  ),
+                },
+              };
+            },
+          );
         },
         onError: (error) => {
           showErrorToast(error);

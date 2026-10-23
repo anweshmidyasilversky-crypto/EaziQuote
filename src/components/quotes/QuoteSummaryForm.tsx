@@ -20,6 +20,7 @@ import { showErrorToast } from "@/api/axiosInstance";
 import {
   PaymentMethods,
   StripAccountStatus,
+  type ApiResponse,
   type ClientDetails,
   type PresetQuote,
   type QuoteDetails,
@@ -30,6 +31,7 @@ import useClientMutations from "@/hooks/apis/clients/useClientMutations";
 import useClients from "@/hooks/apis/clients/useClients";
 import { ALLOWED_ATTACHMENT_TYPES } from "@/constants/types";
 import { maxLengthMsg } from "@/constants/messages";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
@@ -46,6 +48,7 @@ export type QuoteSummaryFormProps = {
   >;
   setIssueDate?: React.Dispatch<React.SetStateAction<string>>;
   setEndDate?: React.Dispatch<React.SetStateAction<string>>;
+  quoteDetailsQueryKey?: any[];
 };
 
 function QuoteSummaryForm({
@@ -57,7 +60,9 @@ function QuoteSummaryForm({
   presetQuote,
   setSummaryPreview,
   setClientDetails,
+  quoteDetailsQueryKey,
 }: QuoteSummaryFormProps) {
+  const queryClient = useQueryClient();
   const user = useAppSelector((state) => state.user);
   const navigate = useNavigate();
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
@@ -217,6 +222,28 @@ function QuoteSummaryForm({
         onSuccess: (response) => {
           removeAttachment(fileName);
           toast.success(response.message);
+          if (!quoteDetailsQueryKey) {
+            toast.error(`Query key is not properly set`);
+            return;
+          }
+          queryClient.setQueryData(
+            quoteDetailsQueryKey,
+            (oldData: ApiResponse<QuoteDetails>) => {
+              const basePayload = oldData?.payload ?? currQuote;
+              if (!basePayload) {
+                return oldData;
+              }
+              return {
+                ...oldData,
+                payload: {
+                  ...basePayload,
+                  attachments: basePayload.attachments.filter(
+                    (attachment) => attachment.id !== attachment_id,
+                  ),
+                },
+              };
+            },
+          );
         },
         onError: (error) => {
           showErrorToast(error);

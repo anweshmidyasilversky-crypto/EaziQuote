@@ -90,52 +90,53 @@ export function InvoiceDetailsPage() {
     enabled: invoicePreviewOpen,
   });
 
-  const itemColumns: ColumnDef<TableFeatures, ItemDetails>[] = useMemo(
-    () => [
-      {
-        accessorKey: "name",
-        header: "ITEM NAME",
-        enableSorting: false,
-      },
-      {
-        accessorKey: "category_name",
-        header: "CATEGORY",
-        enableSorting: false,
-      },
-      {
-        accessorKey: "subcategory_name",
-        header: "SUBCATEGORY",
-        enableSorting: false,
-      },
-      {
-        accessorFn: (row) => `${row.quantity} ${row.unit}`,
-        header: "QUANTITY",
-        enableSorting: false,
-      },
-      {
-        accessorKey: "price",
-        header: "PRICE/UNIT",
-        cell: (info) => formatCurrency(info.getValue<number>()),
-        enableSorting: false,
-      },
-      {
-        accessorKey: "cost",
-        header: () => <span className="whitespace-nowrap">UNIT COST</span>,
-        cell: (info) => formatCurrency(info.getValue<number>()),
-        enableSorting: false,
-      },
-      {
-        id: "total",
-        header: "TOTAL",
-        cell: (info) => {
-          const { price, quantity } = info.row.original;
-          return formatCurrency(price * quantity);
+  const itemColumns: ColumnDef<TableFeatures, Omit<ItemDetails, "is_added">>[] =
+    useMemo(
+      () => [
+        {
+          accessorKey: "name",
+          header: "ITEM NAME",
+          enableSorting: false,
         },
-        enableSorting: false,
-      },
-    ],
-    [],
-  );
+        {
+          accessorKey: "category_name",
+          header: "CATEGORY",
+          enableSorting: false,
+        },
+        {
+          accessorKey: "subcategory_name",
+          header: "SUBCATEGORY",
+          enableSorting: false,
+        },
+        {
+          accessorFn: (row) => `${row.quantity} ${row.unit}`,
+          header: "QUANTITY",
+          enableSorting: false,
+        },
+        {
+          accessorKey: "price",
+          header: "PRICE/UNIT",
+          cell: (info) => formatCurrency(info.getValue<number>()),
+          enableSorting: false,
+        },
+        {
+          accessorKey: "cost",
+          header: () => <span className="whitespace-nowrap">UNIT COST</span>,
+          cell: (info) => formatCurrency(info.getValue<number>()),
+          enableSorting: false,
+        },
+        {
+          id: "total",
+          header: "TOTAL",
+          cell: (info) => {
+            const { price, quantity } = info.row.original;
+            return formatCurrency(price * quantity);
+          },
+          enableSorting: false,
+        },
+      ],
+      [],
+    );
 
   const handleInvoiceDownload = () => {
     downloadInvoicePdfMutation.mutate(params.id, {

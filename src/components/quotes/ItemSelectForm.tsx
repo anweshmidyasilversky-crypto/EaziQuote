@@ -93,7 +93,7 @@ function ItemSelectForm({
     currQuote?.items.forEach((item) => {
       setItemQty((curr) => ({
         ...curr,
-        [item.id]: item,
+        [item.id]: { ...item, is_added: true },
       }));
     });
     presetItems?.forEach((item) => {

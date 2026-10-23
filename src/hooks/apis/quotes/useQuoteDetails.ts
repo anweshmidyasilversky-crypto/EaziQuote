@@ -28,6 +28,7 @@ function useQuoteDetails({
     isFetching,
     refetch,
     isFetched,
+    queryKey: ["quote_details", quote_id],
   };
 }
 
