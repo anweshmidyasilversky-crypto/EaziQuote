@@ -27,6 +27,7 @@ import type {
 import { CustomBtn } from "./CustomBtn";
 import { cn } from "@/lib/utils/helper";
 import { Spinner } from "../ui/spinner";
+import { getPageItems } from "@/lib/utils/pagination";
 
 export interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<TableFeatures, TData>[];
@@ -72,7 +73,6 @@ function CustomTable<TData extends RowData>({
   localFilters,
   showPaginated,
 
-  paginationBtns,
   paginationMeta,
 
   setPageNo,
@@ -88,11 +88,6 @@ function CustomTable<TData extends RowData>({
   bodyCls,
   contentScrollable,
 }: DataTableProps<TData>) {
-  // console.log(renderData);
-  // const currPageNo = paginationMeta?.current_page;
-  // console.log(
-  //   `currPage: ${currPageNo}, nextPage: ${Number(currPageNo ?? 0) + 1}`,
-  // );
   const [rowSelection, setRowSelection] = useState({});
   const data = renderData ?? [];
 
@@ -131,6 +126,11 @@ function CustomTable<TData extends RowData>({
 
     getRowId: rowIdSelector ? rowIdSelector : undefined,
   });
+
+  const btnLabels = getPageItems(
+    paginationMeta?.current_page ?? 0,
+    paginationMeta?.last_page ?? 0,
+  );
 
   useEffect(() => {
     if (withSelectionToggle) {
@@ -252,7 +252,7 @@ function CustomTable<TData extends RowData>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-slate-50/50 transition-colors"
+                    className="hover:bg-placeholder-text/8 transition-colors"
                   >
                     {row.getVisibleCells().map((cell, index) => {
                       const cellRenderer = cell.column.columnDef.cell;
@@ -296,10 +296,7 @@ function CustomTable<TData extends RowData>({
                 </tr>
               )}
               {table.getFooterGroups().map((footerGroup) => (
-                <tr
-                  key={footerGroup.id}
-                  className="hover:bg-slate-50/50 transition-colors"
-                >
+                <tr key={footerGroup.id} className="transition-colors">
                   {footerGroup.headers.map((header) => (
                     <td
                       key={header.id}
@@ -327,55 +324,64 @@ function CustomTable<TData extends RowData>({
           )}
         </div>
 
-        {showPaginated && (
-          <div className="flex justify-between items-center gap-2 px-6 py-5 pt-6">
-            <span className="text-placeholder-text max-h-3.75 font-normal text-[12px] items-center">
-              {" "}
-              Showing <b> {paginationMeta?.from ?? 0} </b> to{" "}
-              <b> {paginationMeta?.to ?? 0} </b> of {paginationMeta?.total ?? 0}{" "}
-              items{" "}
-            </span>
+        {showPaginated && paginationMeta && (
+          <div className="flex justify-end items-center gap-2 px-6 py-5 pt-6">
+            {paginationMeta.from && paginationMeta.to && (
+              <span className="w-full self-stretch text-sm text-placeholder-text flex items-center">
+                {" "}
+                {`Showing ${paginationMeta.to} of ${paginationMeta.total} Results`}{" "}
+              </span>
+            )}
 
             <div className="w-fit flex justify-between gap-2 min-h-8 items-center">
-              {paginationBtns?.map((paginationBtn, index) => {
-                let label = paginationBtn.label;
-                if (index === 0) {
-                  label = "Previous";
-                } else if (index === paginationBtns?.length - 1) {
-                  label = "Next";
-                }
-                return (
+              <CustomBtn
+                buttonLabel="Previous"
+                disabled={paginationMeta.current_page <= 1}
+                onClick={() => {
+                  if ((paginationMeta.current_page ?? 1) > 1) {
+                    setPageNo?.(paginationMeta.current_page - 1);
+                  }
+                }}
+                btncls="table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text"
+              />
+
+              {btnLabels.map((item) =>
+                typeof item === "string" ? (
+                  <span
+                    key={item}
+                    className="px-2 text-placeholder-text select-none"
+                  >
+                    ...
+                  </span>
+                ) : (
                   <CustomBtn
-                    key={label}
-                    buttonLabel={label}
-                    onClick={() => {
-                      if (index === 0) {
-                        setPageNo?.((curr) => Math.max(1, curr - 1));
-                      } else if (index === paginationBtns?.length - 1) {
-                        setPageNo?.((curr) =>
-                          Math.min(
-                            Number(paginationMeta?.last_page ?? 1),
-                            curr + 1,
-                          ),
-                        );
-                      } else {
-                        if (!Number.isNaN(Number(label))) {
-                          setPageNo?.(Number(label));
-                        }
-                      }
-                    }}
+                    key={item}
+                    buttonLabel={String(item)}
+                    onClick={() => setPageNo?.(item)}
                     btncls={cn(
-                      `table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text
-                      ${paginationBtn.active ? `bg-brand-dark! text-white! max-w-8.5!` : ``}
-                       ${
-                         ["Previous", "Next"].includes(label)
-                           ? `table-pagination-btn-common!`
-                           : ``
-                       } `,
+                      "table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text",
+                      item === paginationMeta.current_page &&
+                        "bg-brand-dark! text-white! max-w-8.5!",
                     )}
                   />
-                );
-              })}
+                ),
+              )}
+
+              <CustomBtn
+                buttonLabel="Next"
+                disabled={
+                  paginationMeta.current_page === paginationMeta.last_page
+                }
+                onClick={() => {
+                  if (
+                    (paginationMeta.current_page ?? Number.MAX_SAFE_INTEGER) <
+                    paginationMeta.last_page
+                  ) {
+                    setPageNo?.(paginationMeta.current_page + 1);
+                  }
+                }}
+                btncls="table-pagination-btn-common min-w-fit translate-y-0 table-pagination-btn-inactive hover:bg-transparent hover:text-black-text"
+              />
             </div>
           </div>
         )}

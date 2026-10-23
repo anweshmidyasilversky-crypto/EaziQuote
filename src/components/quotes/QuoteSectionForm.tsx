@@ -155,7 +155,6 @@ function QuoteSectionForm({
           control={control}
           name="content"
           fieldName="content"
-          className="min-h-80"
           inptType="richText"
           placeholder="Enter content"
         />

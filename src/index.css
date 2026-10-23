@@ -190,6 +190,18 @@
   button {
     @apply enabled:cursor-pointer transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
   }
+  p:empty {
+    @apply h-4
+  }
+  ul {
+    @apply list-disc ml-4
+  }
+  li {
+    @apply list-item
+  }
+  ol{
+    @apply list-decimal ml-4
+  }
   a {
     @apply text-brand-dark cursor-pointer;
   }
@@ -199,15 +211,17 @@
   }
 
   .rich-text-editor {
-    @apply w-full overflow-hidden border-input-field-border rounded-[7px] bg-white;
+    @apply w-full overflow-hidden border-input-field-border rounded-[7px] bg-white focus-within:ring-1;
   }
 
+  /* Round the top of the toolbar */
   .rich-text-editor .ql-toolbar.ql-snow {
-    @apply border-0 border-b border-input-field-border;
+    @apply border-0 border-b border-input-field-border rounded-t-[7px] bg-gray-50;
   }
 
+  /* Round the bottom of the container and remove its default border */
   .rich-text-editor .ql-container.ql-snow {
-    @apply border-0 font-sans text-[15px];
+    @apply border-0 rounded-b-[7px];
   }
 
   .rich-text-editor .ql-editor {

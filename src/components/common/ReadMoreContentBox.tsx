@@ -37,7 +37,9 @@ function ReadMoreContentBox({
       } bg-white`}
     >
       <div className="flex flex-col gap-4">
-        {title && <h3 className="font-medium text-base">{title}</h3>}
+        {title && (
+          <h3 className="font-medium text-base text-black-text">{title}</h3>
+        )}
         <p
           ref={textRef}
           className="text-sm"

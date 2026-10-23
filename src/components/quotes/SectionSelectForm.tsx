@@ -105,16 +105,8 @@ function SectionSelectForm({
       accessorKey: "content",
       header: "DESCRIPTION",
       cell: (info) => {
-        const content = info.getValue<string>();
-        return (
-          <span className="max-w-138.5 text-wrap wrap-break-word">
-            {content.trim().length <= 0 ? (
-              <div className="w-full justify-center items-center">{"-"}</div>
-            ) : (
-              content
-            )}
-          </span>
-        );
+        const content = info.getValue<string | null>() ?? ``;
+        return <div dangerouslySetInnerHTML={{ __html: content }} />;
       },
       enableSorting: false,
     },
@@ -228,32 +220,34 @@ function SectionSelectForm({
   return (
     <>
       <div className="flex flex-col gap-5">
-        <CustomDataTable
-          columns={sectionTableColumns}
-          data={sectionList}
-          tableOptionsLeft={
-            <SearchInputGruop
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              searchPlaceHolder="Search section"
-            />
-          }
-          tableOptionsRight={
-            <CustomBtn
-              buttonLabel="New Section"
-              leftIcon={assets.plusIcon}
-              onClick={() => {
-                sectionFormAction.current = "creation";
-                defaultValues.current = undefined;
-                toggleSectionFormOpen((curr) => !curr);
-              }}
-            />
-          }
-          withSelectionToggle={true}
-          onSelectionChange={setSectionPreview}
-          rowIdSelector={(row) => row.id.toString()}
-          isFetching={isFetching}
-        />
+        <div className="w-0 min-w-full flex flex-col gap-5">
+          <CustomDataTable
+            columns={sectionTableColumns}
+            data={sectionList}
+            tableOptionsLeft={
+              <SearchInputGruop
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                searchPlaceHolder="Search section"
+              />
+            }
+            tableOptionsRight={
+              <CustomBtn
+                buttonLabel="New Section"
+                leftIcon={assets.plusIcon}
+                onClick={() => {
+                  sectionFormAction.current = "creation";
+                  defaultValues.current = undefined;
+                  toggleSectionFormOpen((curr) => !curr);
+                }}
+              />
+            }
+            withSelectionToggle={true}
+            onSelectionChange={setSectionPreview}
+            rowIdSelector={(row) => row.id.toString()}
+            isFetching={isFetching}
+          />
+        </div>
 
         <div className="flex px-5">
           <CustomBtn

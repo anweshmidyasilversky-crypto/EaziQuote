@@ -370,7 +370,9 @@ function Preview({
                       {" "}
                       {`${index + 1}. ${quoteSection.title}`}{" "}
                     </span>
-                    <p> {quoteSection.content} </p>
+                    <div
+                      dangerouslySetInnerHTML={{ __html: quoteSection.content }}
+                    />
                   </div>
                 );
               })}

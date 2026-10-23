@@ -108,7 +108,7 @@ export function InvoiceDetailsPage() {
         enableSorting: false,
       },
       {
-        accessorKey: "quantity",
+        accessorFn: (row) => `${row.quantity} ${row.unit}`,
         header: "QUANTITY",
         enableSorting: false,
       },

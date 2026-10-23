@@ -11,6 +11,7 @@ import { ImageInput } from "../auth/imageInput";
 import { assets } from "../../assets/icons";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import { formatLabel } from "@/lib/utils/helper";
 
 export type SelectOptions = {
   value: string;
@@ -40,14 +41,6 @@ export type CustomInputProps<T extends FieldValues> = {
   containerCls?: string;
   allowedFileTypes?: string[];
 };
-
-function formatLabel(fieldName: string) {
-  return fieldName
-    .replace(/(?<![A-Z])([A-Z][a-z])/g, " $1")
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/^./, (char) => char.toUpperCase())
-    .trim();
-}
 
 export function CustomInput<T extends FieldValues>({
   control,
@@ -276,6 +269,7 @@ export function CustomInput<T extends FieldValues>({
                 )}
                 {inptType === "richText" && (
                   <ReactQuill
+                    id={fieldName}
                     value={fieldValue}
                     onChange={(content) => onChange(content)}
                     modules={modules}

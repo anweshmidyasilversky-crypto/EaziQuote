@@ -5,6 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function formatLabel(fieldName: string) {
+  return fieldName
+    .replace(/(?<![A-Z])([A-Z][a-z])/g, " $1")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/^./, (char) => char.toUpperCase())
+    .trim();
+}
+
 export const getInitials = (fullName: string) => {
   if (!fullName) {
     return "user";
@@ -63,4 +71,10 @@ export const saveToDevice = (blob: Blob, fileName: string) => {
   link.click();
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
+};
+
+export const decodeHtml = (html: string) => {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
 };

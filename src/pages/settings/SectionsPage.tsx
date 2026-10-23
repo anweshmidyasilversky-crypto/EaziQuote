@@ -94,12 +94,7 @@ function SectionsPage() {
       enableSorting: false,
       cell: (info) => {
         const desc = info.getValue<string>();
-        return (
-          <div
-            className="max-w-125 [&_ul]:list-disc [&_ul]:ml-4 [&_li]:list-item [&_ol]:list-decimal [&_ol]:ml-4 [&_p:empty]:min-h-4"
-            dangerouslySetInnerHTML={{ __html: desc }}
-          />
-        );
+        return <div dangerouslySetInnerHTML={{ __html: desc }} />;
       },
     },
     {

@@ -135,7 +135,7 @@ export function QuotesDetailsPage() {
         enableSorting: false,
       },
       {
-        accessorKey: "quantity",
+        accessorFn: (row) => `${row.quantity} ${row.unit}`,
         header: "QUANTITY",
         enableSorting: false,
       },

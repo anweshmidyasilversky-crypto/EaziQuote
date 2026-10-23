@@ -4,6 +4,7 @@ import { type QuoteSection } from "@/types/api.responses.type";
 import { CustomDataTable } from "../../components/common/CustomTable";
 import { useParams } from "react-router";
 import useSectionListByQuote from "@/hooks/apis/quotes/sections/useSectionListByQuote";
+import { decodeHtml } from "@/lib/utils/helper";
 
 export function QuoteSectionPage() {
   const params = useParams<{ id: string }>();
@@ -29,6 +30,16 @@ export function QuoteSectionPage() {
       {
         accessorKey: "content",
         header: "DESCRIPTION",
+        cell: (info) => {
+          const rawHtml = info.getValue<string | null>() ?? ``;
+          return (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: decodeHtml(rawHtml),
+              }}
+            />
+          );
+        },
         enableSorting: false,
       },
     ],

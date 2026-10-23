@@ -184,7 +184,7 @@ export function QuotesIndexPage() {
             <CustomActionGroup
               openFn={() => navigate(`/quotes/${quote.id}`)}
               editFn={() => {
-                if (checkCanCreateRecord()) {
+                if (true || checkCanCreateRecord()) {
                   navigate(`/quotes/manage-quotes/${quote.id}`);
                 }
               }}
