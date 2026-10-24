@@ -1,4 +1,4 @@
-import { emptyMsg } from "@/constants/messages";
+import { emptyMsg, maxLengthMsg } from "@/constants/messages";
 import type { InvoiceCreateApiPayload } from "@/types/api.requests.type";
 import {
   DocumentCategories,
@@ -7,15 +7,25 @@ import {
 } from "@/types/api.responses.type";
 import * as yup from "yup";
 import { attachmentsSchema } from "./quote.summary.schema";
+import { NOTES, SERVICE_NOTES } from "@/constants/limits";
 
 export const createInvoiceSchema: yup.ObjectSchema<InvoiceCreateApiPayload> =
   yup.object({
     quote_id: yup.string().required(emptyMsg("Quote")),
     invoice_date: yup.string().trim().required(emptyMsg("Invoice Date")),
     due_date: yup.string().trim().required(emptyMsg("Due date")),
-    message: yup.string().optional(),
+    message: yup
+      .string()
+      .optional()
+      .max(
+        SERVICE_NOTES.maxLength,
+        maxLengthMsg(`Service notes`, SERVICE_NOTES.maxLength),
+      ),
     attachments: attachmentsSchema,
-    notes: yup.string().optional(),
+    notes: yup
+      .string()
+      .optional()
+      .max(NOTES.maxLength, maxLengthMsg("Notes", NOTES.maxLength)),
     template: yup.mixed<DocumentTemplate>().optional(),
     categorised: yup.mixed<keyof typeof DocumentCategories>().optional(),
     is_company_phone_number_show: yup.boolean().optional(),

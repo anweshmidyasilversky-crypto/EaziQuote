@@ -4,10 +4,16 @@ import {
   emptyMsg,
   ExccedFileSizeLimit,
   InvalidType,
+  maxLengthMsg,
   minLengthMsg,
   notSelectedMsg,
 } from "../constants/messages";
-import { ATTACHMENTS } from "../constants/limits";
+import {
+  ATTACHMENTS,
+  JOB_DESCRIPTION,
+  NOTES,
+  QUOTE_TITLE,
+} from "../constants/limits";
 import { ALLOWED_ATTACHMENT_TYPES } from "../constants/types";
 
 export const attachmentsSchema = yup
@@ -40,7 +46,14 @@ export const quoteSummarySchema: yup.ObjectSchema<QuoteSummary> = yup.object({
     .string()
     .trim()
     .required(emptyMsg("Quote title"))
-    .min(1, minLengthMsg("Quote title", 1)),
+    .min(
+      QUOTE_TITLE.minLength,
+      minLengthMsg("Quote title", QUOTE_TITLE.minLength),
+    )
+    .max(
+      QUOTE_TITLE.maxLength,
+      maxLengthMsg("Quote title", QUOTE_TITLE.maxLength),
+    ),
   referenceNumber: yup
     .string()
     .trim()
@@ -50,7 +63,18 @@ export const quoteSummarySchema: yup.ObjectSchema<QuoteSummary> = yup.object({
   expiryDate: yup.string().trim().required(emptyMsg("Expiry Date")),
   hidePhoneNumber: yup.bool().required(),
   clientId: yup.string().trim().required(notSelectedMsg("Client")),
-  jobDescription: yup.string().trim().required(emptyMsg("Job description")),
-  notes: yup.string().trim().optional(),
+  jobDescription: yup
+    .string()
+    .trim()
+    .required(emptyMsg("Job description"))
+    .max(
+      JOB_DESCRIPTION.maxLength,
+      maxLengthMsg("Job description", JOB_DESCRIPTION.maxLength),
+    ),
+  notes: yup
+    .string()
+    .trim()
+    .optional()
+    .max(NOTES.maxLength, maxLengthMsg("Notes", NOTES.maxLength)),
   attachments: attachmentsSchema,
 });

@@ -1,8 +1,8 @@
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
-  "image/webp",
   "image/jpg",
+  "image/gif",
 ];
 
 export const ALLOWED_ATTACHMENT_TYPES = ["application/pdf"].concat(

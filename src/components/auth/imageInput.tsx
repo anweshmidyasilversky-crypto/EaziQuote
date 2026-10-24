@@ -1,3 +1,4 @@
+import { ALLOWED_IMAGE_TYPES } from "@/constants/types";
 import { PencilIcon, PlusIcon } from "lucide-react";
 
 export type ImageInputProps = {
@@ -34,7 +35,7 @@ export function ImageInput({
         <input
           id="avatar-upload"
           type="file"
-          accept="image/*"
+          accept={ALLOWED_IMAGE_TYPES.join(",")}
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0] as File;

@@ -263,7 +263,7 @@ function Preview({
                     </span>
                   </section>
 
-                  <section className="flex flex-col gap-1 [&_span]:text-wrap [&_span]:wrap-anywhere [&_span]:self-end">
+                  <section className="flex flex-col gap-1 [&_span]:text-wrap [&_span]:wrap-anywhere text-right">
                     <span style={{ color: brand_color }}> {`Quote Ref:`} </span>
                     <span> {quoteRefNo} </span>
                     <span> {quoteTitle} </span>
