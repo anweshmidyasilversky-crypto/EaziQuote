@@ -206,7 +206,7 @@ export function CreateQuotePage() {
                       submitAction={() =>
                         changeFormCurrSection(toggleId.Sections)
                       }
-                      presetItems={presetQuote?.items}
+                      presetItems={presetQuoteId ? presetQuote?.items : []}
                       setItemPreview={setItemsPreview}
                       quoteDetailsQueryKey={queryKey}
                     />

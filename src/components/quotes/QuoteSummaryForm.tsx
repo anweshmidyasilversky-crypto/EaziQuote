@@ -32,6 +32,7 @@ import useClients from "@/hooks/apis/clients/useClients";
 import { ALLOWED_ATTACHMENT_TYPES } from "@/constants/types";
 import { maxLengthMsg } from "@/constants/messages";
 import { useQueryClient } from "@tanstack/react-query";
+import type { CreateQuotePageLocationProps } from "@/pages/quotes/CreateQuotePage";
 
 export type QuoteSummaryFormProps = {
   refNo: string;
@@ -274,7 +275,11 @@ function QuoteSummaryForm({
           onSuccess: (response) => {
             dispatch(updateQuoteRedux(response.payload));
             submitAction?.();
-            navigate(`/quotes/manage-quotes/${response.payload.id}`);
+            navigate(`/quotes/manage-quotes/${response.payload.id}`, {
+              state: {
+                presetQuoteId: presetQuote?.id,
+              } as CreateQuotePageLocationProps,
+            });
             toast.success(response.message);
           },
           onError: (error) => {
