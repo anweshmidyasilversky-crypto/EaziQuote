@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/store";
 import type { UserProfilePayload } from "@/types/userProfile.payload.type";
 import { userProfileSchema } from "@/validation/userProfile.payload.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import BusinessInfoPage from "./BusinessInfoPage";
@@ -34,7 +34,9 @@ function ProfilePage() {
   const user = useAppSelector((state) => state.user);
   const [activeId, toggleActiveId] = useState<string>(toggle.personal);
   const [userImg, setUserImg] = useState<File | undefined>(undefined);
-  const profilePicUrl = useRef<string | undefined>(user.avatar ?? undefined);
+  const [profilePic, setProfilePic] = useState<string | undefined>(
+    user.avatar ?? undefined,
+  );
 
   const { profileSetupMutation } = useUserMutations();
 
@@ -81,6 +83,7 @@ function ProfilePage() {
 
   useEffect(() => {
     if (userDetails) {
+      setProfilePic((prev) => userDetails.avatar ?? prev);
       dispatch(
         updateUser({
           ...userDetails,
@@ -117,10 +120,10 @@ function ProfilePage() {
                 <div className="flex flex-col gap-8 p-5">
                   <div className="flex items-start">
                     <ImageInput
-                      imgUrl={profilePicUrl.current}
+                      imgUrl={profilePic}
                       imgFile={userImg}
                       setImgFile={(img) => {
-                        profilePicUrl.current = URL.createObjectURL(img);
+                        setProfilePic(URL.createObjectURL(img));
                         setUserImg(img);
                       }}
                       alt={assets.userIconSvg}
