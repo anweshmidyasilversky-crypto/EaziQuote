@@ -190,7 +190,9 @@ export function CreateQuotePage() {
                     <QuoteSummaryForm
                       refNo={refNo}
                       currQuote={params.id ? quoteRedux : undefined}
-                      submitAction={() => changeFormCurrSection(toggleId.Items)}
+                      submitAction={() => {
+                        changeFormCurrSection(toggleId.Items);
+                      }}
                       prefillClient={isClientFetched}
                       defaultClient={defaultClient}
                       presetQuote={presetQuoteId ? presetQuote : undefined}

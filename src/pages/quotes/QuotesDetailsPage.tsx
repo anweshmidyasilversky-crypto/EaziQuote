@@ -324,7 +324,7 @@ export function QuotesDetailsPage() {
         <div className="flex flex-col gap-6 px-6 pt-6 pb-8.5">
           <CustomHeader
             header={quote?.title ?? ""}
-            headerInfo={quote?.id.toString()}
+            headerInfo={quote?.reference_number}
             btnConfigList={
               quote?.status === QuoteStatus.approved
                 ? btnConfigList

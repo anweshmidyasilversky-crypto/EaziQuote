@@ -17,7 +17,6 @@ import {
   type QuoteDetails,
 } from "@/types/api.responses.type";
 import { useNavigate } from "react-router";
-import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { createInvoiceSchema } from "@/validation/createInvoice.payload.schema";
 import type { InvoiceCreateApiPayload } from "@/types/api.requests.type";
 import useInvoiceMutations from "@/hooks/apis/invoices/useInvoiceMutations";
@@ -67,27 +66,11 @@ function InvoiceSummaryForm({
   const { invoiceCreateMutation, invoiceUpdateMutation } =
     useInvoiceMutations();
 
-  const { attachmentDeleteMutation } = useQuotesMutations();
-
   const initialValue: InvoiceCreateApiPayload = {
     quote_id: prefillQuoteId ?? "",
     invoice_date: new Date().toISOString(),
     due_date: new Date().toISOString(),
-    attachments:
-      mode === "edit"
-        ? currInvoice?.attachments.map((attachment) => {
-            return new File(
-              [],
-              `attachment_${attachment.id.toString()}.${attachment.type}`,
-              {
-                type:
-                  attachment.type === "pdf"
-                    ? `application/pdf`
-                    : `image/${attachment.type}`,
-              },
-            );
-          })
-        : [],
+    attachments: [],
   };
 
   const {
@@ -96,6 +79,7 @@ function InvoiceSummaryForm({
     handleSubmit,
     formState: { errors },
     clearErrors,
+    reset,
   } = useForm<InvoiceCreateApiPayload | Partial<InvoiceCreateApiPayload>>({
     defaultValues: initialValue,
     resolver: yupResolver(
@@ -138,48 +122,19 @@ function InvoiceSummaryForm({
     );
   };
 
-  const handleAttachmentDelete = (
-    quote_id: string | number,
-    fileName: string,
-    attachment_id?: number,
-  ) => {
-    if (!attachment_id) {
-      toast.error(`Please select one attachment to delete`);
-      return;
-    }
-    attachmentDeleteMutation.mutate(
-      {
-        quote_id,
-        attachment_id,
-      },
-      {
-        onSuccess: (response) => {
-          toast.success(response.message);
-          removeAttachment(fileName);
-          {
-            /* Remove the attachment entry from the stale cache */
-          }
-          queryClient.setQueryData(
-            queryKey,
-            (oldData: ApiResponse<QuoteDetails>) => {
-              if (!oldData) return oldData;
-              return {
-                ...oldData,
-                payload: {
-                  ...oldData.payload,
-                  attachments: oldData.payload.attachments.filter(
-                    (attachment) => attachment.id !== attachment_id,
-                  ),
-                },
-              };
-            },
-          );
+  const handleAttachmentDelete = (attachment_id?: number) => {
+    queryClient.setQueryData(queryKey, (oldData: ApiResponse<QuoteDetails>) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        payload: {
+          ...oldData.payload,
+          attachments: oldData.payload.attachments.filter(
+            (attachment) => attachment.id !== attachment_id,
+          ),
         },
-        onError: (error) => {
-          showErrorToast(error);
-        },
-      },
-    );
+      };
+    });
   };
 
   const submitHandler = (
@@ -191,13 +146,15 @@ function InvoiceSummaryForm({
           _method: "put",
           invoice_id: currInvoice?.id ?? "",
           ...data,
-          attachments:
-            data.attachments?.slice(currInvoice?.attachments.length ?? 0) ?? [],
+          attachments: data.attachments ?? [],
         },
         {
           onSuccess: (response) => {
             submitAction?.();
             toast.success(response.message);
+            reset({
+              attachments: [],
+            });
           },
           onError: (error) => {
             showErrorToast(error);
@@ -216,6 +173,9 @@ function InvoiceSummaryForm({
             submitAction?.();
             navigate(`/invoices/manage-invoice/${response.payload.id}`);
             toast.success(response.message);
+            reset({
+              attachments: [],
+            });
           },
           onError: (error) => {
             showErrorToast(error);
@@ -240,18 +200,6 @@ function InvoiceSummaryForm({
     if (!quote) {
       return;
     }
-    setValue(
-      "attachments",
-      quote.attachments.map(
-        (attachment) =>
-          new File([], `${attachment.id}.${attachment.type}`, {
-            type:
-              attachment.type === "pdf"
-                ? `application/pdf`
-                : `image/${attachment.type}`,
-          }),
-      ),
-    );
     setJobDescriptionPreview?.(quote.job_description);
     setRefNoPreview?.(quote.reference_number);
   }, [quote]);
@@ -266,9 +214,11 @@ function InvoiceSummaryForm({
     if (!attachments) {
       return;
     }
-    if (attachments.length > 5) {
-      toast.error(`Only 5 attachments can be added`);
-      setValue("attachments", attachments.slice(0, 5));
+    if (attachments.length + (quote?.attachments.length ?? 0) > 5) {
+      toast.error(
+        `Only 5 attachments can be added including the quote attachments`,
+      );
+      setValue("attachments", []);
     }
   }, [attachments]);
 
@@ -423,27 +373,30 @@ function InvoiceSummaryForm({
             inptType="file"
             allowedFileTypes={ALLOWED_ATTACHMENT_TYPES}
           />
-          {attachments && (
+          {(attachments || quote?.attachments) && (
             <div className="attachment-layout">
-              {attachments.map((attachment, index) => {
-                const noOfQuoteAttachments = quote?.attachments.length ?? 0;
+              {quote?.attachments?.map((attachment) => {
+                const fileName = `attachment_${attachment.id}.${attachment.type}`;
+                return (
+                  <StyledAttachments
+                    key={attachment.id}
+                    quoteId={quote?.id}
+                    attachmentId={attachment.id}
+                    fileName={fileName}
+                    deleteAction={() => handleAttachmentDelete(attachment.id)}
+                    withDownload
+                    withOpen
+                  />
+                );
+              })}
+              {attachments?.map((attachment) => {
                 return (
                   <StyledAttachments
                     key={attachment.name}
                     fileName={attachment.name}
                     deleteAction={() => {
-                      if (quote && index < noOfQuoteAttachments) {
-                        handleAttachmentDelete(
-                          quote?.id,
-                          attachment.name,
-                          quote.attachments.at(index)?.id,
-                        );
-                      } else {
-                        removeAttachment(attachment.name);
-                      }
+                      removeAttachment(attachment.name);
                     }}
-                    attachmentId={quote?.attachments?.at(index)?.id}
-                    withDownload={index < noOfQuoteAttachments}
                     defaultOpenUrl={window.URL.createObjectURL(attachment)}
                     withOpen
                   />

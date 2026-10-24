@@ -68,8 +68,7 @@ function QuoteSummaryForm({
   const [clientFormOpen, toggleClientFormOpen] = useState(false);
   const dispatch = useAppDispatch();
 
-  const { quoteCreateMutation, quoteUpdateMutation, attachmentDeleteMutation } =
-    useQuotesMutations();
+  const { quoteCreateMutation, quoteUpdateMutation } = useQuotesMutations();
 
   const { clientCreatMutation } = useClientMutations();
 
@@ -131,22 +130,6 @@ function QuoteSummaryForm({
         setClientDetails?.(currQuote.client);
       }
       setValue("jobDescription", currQuote.job_description);
-      const attachmentList: File[] = [];
-      currQuote.attachments.forEach((attachment) => {
-        attachmentList.push(
-          new File(
-            [],
-            `attachment_${attachment.id?.toString()}.${attachment.type}`,
-            {
-              type:
-                attachment.type === "pdf"
-                  ? `application/pdf`
-                  : `image/${attachment.type}`,
-            },
-          ),
-        );
-      });
-      setValue("attachments", attachmentList);
     } else {
       reset(initialValue);
     }
@@ -208,46 +191,26 @@ function QuoteSummaryForm({
     );
   };
 
-  const handleAttachmentDelete = (
-    quote_id: string | number,
-    attachment_id: string | number,
-    fileName: string,
-  ) => {
-    attachmentDeleteMutation.mutate(
-      {
-        quote_id,
-        attachment_id,
-      },
-      {
-        onSuccess: (response) => {
-          removeAttachment(fileName);
-          toast.success(response.message);
-          if (!quoteDetailsQueryKey) {
-            toast.error(`Query key is not properly set`);
-            return;
-          }
-          queryClient.setQueryData(
-            quoteDetailsQueryKey,
-            (oldData: ApiResponse<QuoteDetails>) => {
-              const basePayload = oldData?.payload ?? currQuote;
-              if (!basePayload) {
-                return oldData;
-              }
-              return {
-                ...oldData,
-                payload: {
-                  ...basePayload,
-                  attachments: basePayload.attachments.filter(
-                    (attachment) => attachment.id !== attachment_id,
-                  ),
-                },
-              };
-            },
-          );
-        },
-        onError: (error) => {
-          showErrorToast(error);
-        },
+  const handleAttachmentDelete = (attachment_id: string | number) => {
+    if (!quoteDetailsQueryKey) {
+      toast.error(`Provide query key for manual cache updation`);
+      return;
+    }
+    queryClient.setQueryData(
+      quoteDetailsQueryKey,
+      (oldData: ApiResponse<QuoteDetails>) => {
+        if (!oldData) {
+          return oldData;
+        }
+        return {
+          ...oldData,
+          payload: {
+            ...oldData.payload,
+            attachments: oldData.payload.attachments.filter(
+              (attachment) => attachment.id !== attachment_id,
+            ),
+          },
+        };
       },
     );
   };
@@ -266,14 +229,11 @@ function QuoteSummaryForm({
           ...data,
           title: data.quoteTitle,
           description: data.jobDescription,
-          quote_date: data.quoteDate,
-          expiry_date: data.expiryDate,
+          quote_date: dateRange.startDate?.toISOString(),
+          expiry_date: dateRange.endDate?.toISOString(),
           client_id: Number(data.clientId),
           notes: data.notes ?? "",
-          attachments: data.attachments?.toSpliced(
-            0,
-            currQuote?.attachments.length,
-          ),
+          attachments: data.attachments ?? [],
           deposit_payment_method:
             user.stripe_account_status === StripAccountStatus.active
               ? PaymentMethods.stripe
@@ -285,6 +245,9 @@ function QuoteSummaryForm({
             dispatch(updateQuoteRedux(response.payload));
             submitAction?.();
             toast.success(response.message);
+            if (quoteDetailsQueryKey) {
+              queryClient.setQueryData(quoteDetailsQueryKey, () => response);
+            }
           },
           onError: (error) => {
             showErrorToast(error);
@@ -331,9 +294,9 @@ function QuoteSummaryForm({
   }, [defaultClient]);
 
   useEffect(() => {
-    if ((attachments?.length ?? 0) > 5) {
+    if ((attachments?.length ?? 0) + (currQuote?.attachments.length ?? 0) > 5) {
       toast.error(`Max 5 attachments can be added`);
-      setValue("attachments", attachments?.slice(0, 5));
+      setValue("attachments", []);
     }
   }, [attachments]);
 
@@ -477,32 +440,30 @@ function QuoteSummaryForm({
           {(attachments?.length ?? 0) > 5 && (
             <p className="error-text"> {maxLengthMsg("Attachments", 5)} </p>
           )}
-          {attachments && (
+          {(attachments || currQuote?.attachments) && (
             <div className="attachment-layout">
-              {attachments.map((attachment, index) => {
-                const noOfPrefilAttachments =
-                  currQuote?.attachments.length ?? 0;
-
+              {currQuote?.attachments?.map((attachment) => {
+                const fileName = `attachment_${attachment.id}.${attachment.type}`;
+                return (
+                  <StyledAttachments
+                    key={attachment.id}
+                    fileName={fileName}
+                    quoteId={currQuote.id}
+                    attachmentId={attachment.id}
+                    deleteAction={() => handleAttachmentDelete(attachment.id)}
+                    withDownload
+                    withOpen
+                  />
+                );
+              })}
+              {attachments?.map((attachment) => {
                 return (
                   <StyledAttachments
                     key={attachment.name}
                     fileName={attachment.name}
                     deleteAction={() => {
-                      if (
-                        currQuote &&
-                        index < (currQuote.attachments.length ?? 0)
-                      ) {
-                        handleAttachmentDelete(
-                          currQuote.id,
-                          currQuote.attachments[index].id,
-                          attachment.name,
-                        );
-                      } else {
-                        removeAttachment(attachment.name);
-                      }
+                      removeAttachment(attachment.name);
                     }}
-                    withDownload={index < noOfPrefilAttachments}
-                    attachmentId={currQuote?.attachments?.at(index)?.id}
                     withOpen
                     defaultOpenUrl={window.URL.createObjectURL(attachment)}
                   />
