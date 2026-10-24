@@ -330,9 +330,12 @@ function PresetQuoteMutationPage() {
           />
 
           <div className="p-6 flex flex-col gap-6">
-            <CustomHeader header="Add Quote Preset" btnConfigList={[]} />
+            <CustomHeader
+              header={params.id ? `Edit Quote Preset` : `Add Quote Preset`}
+              btnConfigList={[]}
+            />
 
-            <div className="flex flex-col py-5 gap-8 bg-preset-muatation-secondary rounded-[10px]">
+            <div className="flex flex-col py-4 gap-5 bg-preset-muatation-secondary rounded-[10px]">
               <CustomToggleGroup
                 toggleConfig={toggles}
                 activeId={activeToggle}
@@ -346,7 +349,7 @@ function PresetQuoteMutationPage() {
 
               <div>
                 {activeToggle === PageToggle.summary && (
-                  <div className="p-5 flex flex-col gap-6">
+                  <div className="px-5 flex flex-col gap-6">
                     <CustomInput
                       control={control}
                       name="name"

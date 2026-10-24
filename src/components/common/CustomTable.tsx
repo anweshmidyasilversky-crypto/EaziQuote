@@ -190,7 +190,7 @@ function CustomTable<TData extends RowData>({
                     >
                       {header.isPlaceholder ? null : (
                         <div
-                          className={`flex justify-between ${header.column.getCanSort() ? "cursor-pointer" : ""}`}
+                          className={`flex items-center justify-between gap-2 ${header.column.getCanSort() ? "cursor-pointer" : ""}`}
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           <table.FlexRender header={header} />

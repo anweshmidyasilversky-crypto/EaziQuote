@@ -11,7 +11,7 @@ import { ImageInput } from "../auth/imageInput";
 import { assets } from "../../assets/icons";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { formatLabel } from "@/lib/utils/helper";
+import { cn, formatLabel } from "@/lib/utils/helper";
 
 export type SelectOptions = {
   value: string;
@@ -40,6 +40,7 @@ export type CustomInputProps<T extends FieldValues> = {
   labelRightNode?: React.ReactNode;
   containerCls?: string;
   allowedFileTypes?: string[];
+  colorInptWrapperCls?: string;
 };
 
 export function CustomInput<T extends FieldValues>({
@@ -63,6 +64,7 @@ export function CustomInput<T extends FieldValues>({
   labelRightNode,
   containerCls,
   allowedFileTypes,
+  colorInptWrapperCls,
 }: CustomInputProps<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = inptType === "password" || name === "password";
@@ -173,7 +175,9 @@ export function CustomInput<T extends FieldValues>({
                   </div>
                 )}
                 {inptType === "color" && (
-                  <div className="color-input-wrapper">
+                  <div
+                    className={cn("color-input-wrapper", colorInptWrapperCls)}
+                  >
                     <input
                       type="color"
                       disabled={disabled}

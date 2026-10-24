@@ -35,18 +35,22 @@ import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
 import { updateQuote as updateQuoteRedux } from "@/redux/slices/quotes.slice";
 import DeleteDialog from "../common/DeleteDialog";
 import { useSubtotalFields } from "@/context/SubtotalFieldsContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type ItemSelectFormProps = {
   submitAction: () => void;
   presetItems?: ItemDetails[];
   setItemPreview?: React.Dispatch<React.SetStateAction<ItemDetails[]>>;
+  quoteDetailsQueryKey?: any[];
 };
 
 function ItemSelectForm({
   submitAction,
   presetItems,
   setItemPreview,
+  quoteDetailsQueryKey,
 }: ItemSelectFormProps) {
+  const queryClient = useQueryClient();
   const {
     depositAmount,
     setDepositPercentage,
@@ -139,6 +143,18 @@ function ItemSelectForm({
       price: data.pricePerUnit,
       cost: data.unitPrice,
       type: "product",
+    });
+    {
+      /* Add the newly created item to the list */
+    }
+    setItemQty((curr) => {
+      return {
+        ...curr,
+        [response.payload.id]: {
+          ...response.payload,
+          quantity: 1,
+        },
+      };
     });
     toast.success(response.message);
     refetchItemsList();
@@ -329,6 +345,9 @@ function ItemSelectForm({
       onSuccess: (response) => {
         toast.success(response.message);
         dispatch(updateQuoteRedux(response.payload));
+        if (quoteDetailsQueryKey) {
+          queryClient.setQueryData(quoteDetailsQueryKey, () => response);
+        }
         submitAction();
       },
       onError: (error) => {

@@ -117,12 +117,16 @@ function BusinessInfoPage() {
             />
           </div>
 
-          <div className="max-w-52">
+          <div className="flex w-full items-center">
             <CustomInput
               control={control}
               name="brandColor"
               fieldName="Select Brand Colour"
               inptType="color"
+              colorInptWrapperCls={cn(
+                `max-w-[35vw]! md:max-w-[30vw]! lg:max-w-[23vw]!`,
+              )}
+              containerCls={cn(`gap-4`)}
             />
           </div>
         </div>

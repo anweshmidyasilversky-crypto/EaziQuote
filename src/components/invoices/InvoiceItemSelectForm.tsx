@@ -200,6 +200,16 @@ function InvoiceItemSelectForm({
     refetchItemsList();
     setPageNo(1);
     toggleCreateItemModal(false);
+    {
+      /* Add newly added item to the list */
+    }
+    setValue("items", [
+      ...addedItems,
+      {
+        ...response.payload,
+        quantity: 1,
+      },
+    ]);
   };
 
   const itemEditHandler = async (data: ItemEditPayload) => {

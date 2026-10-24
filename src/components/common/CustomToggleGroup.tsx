@@ -31,7 +31,7 @@ export function CustomToggleGroup({
             className={` ${isActive(toggleBtn.btnId) ? "btn-auth btnActive transform transition-all duration-300 delay-200" : "btn-auth bg-transparent hover:bg-transparent text-black-text"} rounded-b-none w-34.5 min-h-4.75 max-md:text-[12px] max-md:w-fit max-md:h-fit ${btnCls}`}
             onClick={() => toggleActive(toggleBtn.btnId)}
             key={toggleBtn.btnId}
-            disabled={toggleBtn.disabled || false}
+            disabled={toggleBtn.disabled}
           >
             {toggleBtn.btnLabel}
           </button>

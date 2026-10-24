@@ -208,6 +208,7 @@ export function CreateQuotePage() {
                       }
                       presetItems={presetQuote?.items}
                       setItemPreview={setItemsPreview}
+                      quoteDetailsQueryKey={queryKey}
                     />
                   )}
 
