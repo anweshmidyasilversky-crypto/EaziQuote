@@ -12,6 +12,7 @@ export type useSectionsListProps = {
 function useSectionsList({ filters }: useSectionsListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const deboucedSearchTerm = useDebounce({ value: searchTerm });
+  const queryKey = ["section_list", deboucedSearchTerm];
   const {
     data: responseData,
     error,
@@ -19,7 +20,7 @@ function useSectionsList({ filters }: useSectionsListProps) {
     refetch,
     isFetched,
   } = useQuery({
-    queryKey: ["section_list", deboucedSearchTerm],
+    queryKey: queryKey,
     queryFn: () =>
       getQuoteSectionList({
         ...filters,
@@ -48,6 +49,7 @@ function useSectionsList({ filters }: useSectionsListProps) {
     isFetching,
     refetch,
     isFetched,
+    queryKey,
   };
 }
 

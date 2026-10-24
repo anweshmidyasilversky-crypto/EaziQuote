@@ -12,7 +12,11 @@ import { assets } from "@/assets/icons";
 import QuoteSectionForm, {
   type QuoteSectionFormProps,
 } from "./QuoteSectionForm";
-import { QuoteStatus, type QuoteSection } from "@/types/api.responses.type";
+import {
+  QuoteStatus,
+  type ApiResponse,
+  type QuoteSection,
+} from "@/types/api.responses.type";
 import { type DefaultValues } from "react-hook-form";
 import { useAppSelector } from "@/redux/store";
 import { toast } from "react-toastify";
@@ -24,6 +28,7 @@ import type {
 import useSectionMutations from "@/hooks/apis/quotes/sections/useSectionMutations";
 import { showErrorToast } from "@/api/axiosInstance";
 import useQuotesMutations from "@/hooks/apis/quotes/useQuotesMutations";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type SectionSelectFormProps = {
   submitAction?: () => void;
@@ -34,6 +39,7 @@ function SectionSelectForm({
   submitAction,
   setSectionPreview,
 }: SectionSelectFormProps) {
+  const queryClient = useQueryClient();
   const currQuote = useAppSelector((state) => state.quote);
   const sectionListFilters = useMemo(
     () => ({
@@ -48,8 +54,8 @@ function SectionSelectForm({
     isFetching,
     searchTerm,
     setSearchTerm,
-    refetch: refetchSectionsList,
     setData: setSectionData,
+    queryKey: sectionListQueryKey,
   } = useSectionsList({
     filters: sectionListFilters,
   });
@@ -201,7 +207,24 @@ function SectionSelectForm({
         toast.success(response.message);
         setSearchTerm("");
         toggleSectionFormOpen(false);
-        refetchSectionsList();
+        queryClient.setQueryData(
+          sectionListQueryKey,
+          (oldData: ApiResponse<{ data: QuoteSection[] }>) => {
+            if (!oldData) {
+              return oldData;
+            }
+            return {
+              ...oldData,
+              payload: {
+                data: [
+                  ...oldData.payload.data,
+                  response.payload,
+                  // { ...response.payload, is_added: true }, {/* This will add the section but if we move back and come back on the section select list it would still be selected */}
+                ],
+              },
+            };
+          },
+        );
       },
       onError: (error) => {
         showErrorToast(error);
