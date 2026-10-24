@@ -211,7 +211,7 @@ function Preview({
         </div>
       </div>
       <div className="relative min-h-screen flex flex-col rounded-sm border border-preview-border  overflow-hidden text-[14px]">
-        <div className="flex flex-1 flex-col gap-6 overflow-hidden">
+        <div className="flex flex-1 flex-col gap-4 overflow-hidden">
           <div className="relative">
             {/* Decoration */}
             {currTemplate === DocumentTemplate.classic && (
@@ -220,7 +220,7 @@ function Preview({
             {currTemplate === DocumentTemplate.modern && (
               <ModernHeader className="absolute top-0 right-0 z-0 w-full h-full" />
             )}
-            <div className="w-full pt-8 [&_span]:text-wrap [&_span]:wrap-anywhere flex flex-col gap-2 [&_span]:z-10 [&_img]:z-10 px-4">
+            <div className="w-full pt-8 [&_span]:text-wrap [&_span]:wrap-anywhere flex flex-col [&_span]:z-10 [&_img]:z-10 px-4 pb-4">
               {/* Header sections */}
               <section className="w-full grid grid-cols-[70%_30%] gap-2 pb-4">
                 <div className="flex gap-2 items-center ">
@@ -273,7 +273,7 @@ function Preview({
             </div>
 
             {currTemplate === DocumentTemplate.elegant ? (
-              <ElegentHeaderSeparator className="w-full mt-4 h-4" />
+              <ElegentHeaderSeparator className="w-full h-4" />
             ) : (
               <Separator
                 className={cn(

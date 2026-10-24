@@ -25,7 +25,7 @@ export function CustomHeader({
       )}
     >
       <div className="flex flex-col gap-2 h-full">
-        <span className="min-h-7.25 font-bold text-xl md:text-2xl self-start">
+        <span className="min-h-7.25 max-w-[35vw] truncate font-bold text-xl md:text-2xl self-start">
           {header}
         </span>
         {headerInfo && (

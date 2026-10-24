@@ -8,7 +8,7 @@ function ModernHeader({ className, ...props }: SVGProps<SVGSVGElement>) {
   } = useAppSelector((state) => state.user);
   return (
     <svg
-      className={cn("h-[49px] w-[176px]", className)}
+      className={cn("h-12.25 w-44", className)}
       viewBox="0 0 176 49"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
